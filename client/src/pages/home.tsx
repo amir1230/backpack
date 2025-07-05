@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import TripCard from "@/components/trip-card";
+import AiChat from "@/components/ai-chat";
 import { Link } from "wouter";
 import { 
   Plus, 
@@ -13,7 +14,8 @@ import {
   Star,
   MessageCircle,
   Calendar,
-  DollarSign
+  DollarSign,
+  Bot
 } from "lucide-react";
 
 export default function Home() {
@@ -259,6 +261,9 @@ export default function Home() {
                 </Link>
               </CardContent>
             </Card>
+
+            {/* AI Travel Assistant */}
+            <AiChat className="mt-6" />
           </div>
         </div>
       </div>

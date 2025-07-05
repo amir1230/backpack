@@ -110,8 +110,31 @@ TripWise is a full-stack web application focused on South American travel planni
 - `REPLIT_DOMAINS`: Allowed authentication domains
 - `ISSUER_URL`: OIDC issuer URL (defaults to Replit)
 
+## AI Integration
+
+### OpenAI Features
+- **Trip Planning**: AI-powered travel suggestions for South American destinations
+- **Itinerary Generation**: Detailed day-by-day trip planning with activities and costs
+- **Budget Analysis**: Smart expense analysis with optimization recommendations  
+- **Travel Assistant**: Interactive chat bot for travel questions and advice
+- **Destination Recommendations**: Community-driven suggestions powered by AI
+
+### API Endpoints
+- `/api/ai/generate-trip` - Enhanced trip generation with real AI
+- `/api/ai/travel-suggestions` - Get personalized destination recommendations
+- `/api/ai/itinerary` - Generate detailed itineraries
+- `/api/ai/budget-analysis` - Analyze expenses and get savings tips
+- `/api/ai/recommendations` - Get destination advice based on reviews
+- `/api/ai/chat` - Interactive travel assistant
+
+### Components
+- `AiChat` - Standalone AI chat component with quick prompts
+- Enhanced trip builder with real OpenAI suggestions
+- Budget tracker with AI-powered optimization tips
+
 ## Changelog
 - July 05, 2025. Initial setup
+- July 05, 2025. Added OpenAI API integration with comprehensive AI features
 
 ## User Preferences
 

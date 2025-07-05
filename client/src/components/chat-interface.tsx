@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   ArrowLeft, 
   Send, 
@@ -16,7 +18,9 @@ import {
   MapPin,
   Loader2,
   Plus,
-  Hash
+  Hash,
+  Bot,
+  Sparkles
 } from "lucide-react";
 
 interface ChatInterfaceProps {

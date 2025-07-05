@@ -10,6 +10,13 @@ import {
   insertChatMessageSchema,
   insertConnectionSchema,
 } from "@shared/schema";
+import {
+  generateTravelSuggestions,
+  generateItinerary,
+  analyzeBudget,
+  generateRecommendations,
+  chatAssistant
+} from "./openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -197,38 +204,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Trip Generation endpoint (mock for now)
+  // AI-powered trip generation
   app.post('/api/ai/generate-trip', isAuthenticated, async (req: any, res) => {
     try {
       const { destination, duration, budget, travelStyle, interests } = req.body;
       
-      // Mock AI response - in production, this would call OpenAI API
-      const mockItinerary = {
-        title: `${destination} Adventure`,
-        description: `A ${duration} trip through ${destination} focusing on ${travelStyle} experiences`,
-        destinations: [
-          {
-            name: destination,
-            days: duration === "1-2 weeks" ? 10 : 21,
-            activities: interests || ["hiking", "culture", "food"],
-            estimatedCost: budget * 0.8
-          }
-        ],
-        totalEstimatedCost: budget,
-        recommendations: [
-          "Book accommodations in advance during peak season",
-          "Try local food markets for budget-friendly meals",
-          "Use public transportation to save money",
-          "Join group tours for better rates"
-        ]
-      };
+      const suggestions = await generateTravelSuggestions({
+        travelStyle,
+        budget,
+        duration,
+        interests: interests || [],
+        preferredCountries: destination ? [destination] : []
+      });
 
-      setTimeout(() => {
-        res.json(mockItinerary);
-      }, 2000); // Simulate AI processing time
+      if (suggestions.length > 0) {
+        const trip = suggestions[0];
+        const response = {
+          title: `${trip.destination} Adventure`,
+          description: trip.description,
+          destinations: [
+            {
+              name: trip.destination,
+              days: duration === "1-2 weeks" ? 10 : 21,
+              activities: trip.highlights,
+              estimatedCost: trip.estimatedBudget.low
+            }
+          ],
+          totalEstimatedCost: trip.estimatedBudget.high,
+          recommendations: trip.highlights
+        };
+        res.json(response);
+      } else {
+        throw new Error("No suggestions generated");
+      }
     } catch (error) {
       console.error("Error generating trip:", error);
-      res.status(500).json({ message: "Failed to generate trip" });
+      res.status(500).json({ message: "Failed to generate trip with AI" });
+    }
+  });
+
+  // AI-powered travel suggestions
+  app.post('/api/ai/travel-suggestions', isAuthenticated, async (req, res) => {
+    try {
+      const { travelStyle, budget, duration, interests, preferredCountries } = req.body;
+      const suggestions = await generateTravelSuggestions({
+        travelStyle,
+        budget,
+        duration,
+        interests,
+        preferredCountries
+      });
+      res.json(suggestions);
+    } catch (error) {
+      console.error("Error generating travel suggestions:", error);
+      res.status(500).json({ message: "Failed to generate travel suggestions" });
+    }
+  });
+
+  // AI-powered itinerary generation
+  app.post('/api/ai/itinerary', isAuthenticated, async (req, res) => {
+    try {
+      const { destination, duration, budget, preferences } = req.body;
+      const itinerary = await generateItinerary(destination, duration, budget, preferences);
+      res.json(itinerary);
+    } catch (error) {
+      console.error("Error generating itinerary:", error);
+      res.status(500).json({ message: "Failed to generate itinerary" });
+    }
+  });
+
+  // AI-powered budget analysis
+  app.post('/api/ai/budget-analysis', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { tripId, totalBudget } = req.body;
+      
+      let expenses;
+      if (tripId) {
+        expenses = await storage.getTripExpenses(tripId);
+      } else {
+        expenses = await storage.getUserExpenses(userId);
+      }
+
+      // Transform expenses to match the expected format
+      const transformedExpenses = expenses.map(expense => ({
+        category: expense.category,
+        amount: parseFloat(expense.amount),
+        description: expense.description,
+        location: expense.location || undefined
+      }));
+
+      const analysis = await analyzeBudget(transformedExpenses, totalBudget);
+      res.json(analysis);
+    } catch (error) {
+      console.error("Error analyzing budget:", error);
+      res.status(500).json({ message: "Failed to analyze budget" });
+    }
+  });
+
+  // AI-powered recommendations
+  app.post('/api/ai/recommendations', async (req, res) => {
+    try {
+      const { destination } = req.body;
+      const reviews = await storage.getReviewsByDestination(destination);
+      // Transform reviews to match the expected format
+      const transformedReviews = reviews.map(review => ({
+        rating: review.rating,
+        comment: review.comment,
+        tags: Array.isArray(review.tags) ? review.tags : []
+      }));
+      const recommendations = await generateRecommendations(destination, transformedReviews);
+      res.json(recommendations);
+    } catch (error) {
+      console.error("Error generating recommendations:", error);
+      res.status(500).json({ message: "Failed to generate recommendations" });
+    }
+  });
+
+  // AI chat assistant
+  app.post('/api/ai/chat', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { message } = req.body;
+      
+      // Get user context
+      const userTrips = await storage.getUserTrips(userId);
+      const context = {
+        userTrips,
+        currentLocation: req.body.currentLocation,
+        travelPreferences: req.body.travelPreferences
+      };
+
+      const response = await chatAssistant(message, context);
+      res.json({ response });
+    } catch (error) {
+      console.error("Error in chat assistant:", error);
+      res.status(500).json({ message: "Failed to get chat response" });
     }
   });
 
