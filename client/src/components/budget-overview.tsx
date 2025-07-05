@@ -37,7 +37,7 @@ interface BudgetOverviewProps {
   }>;
 }
 
-export default function BudgetOverview({ tripData, expenses, categoryTotals }: BudgetOverviewProps) {
+function BudgetOverview({ tripData, expenses, categoryTotals }: BudgetOverviewProps) {
   const budget = parseFloat(tripData.budget || "0");
   const totalSpent = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
   const budgetUsed = budget > 0 ? (totalSpent / budget) * 100 : 0;
@@ -202,3 +202,5 @@ export default function BudgetOverview({ tripData, expenses, categoryTotals }: B
     </div>
   );
 }
+
+export default BudgetOverview;
