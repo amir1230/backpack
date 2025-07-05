@@ -6,6 +6,8 @@ import {
   chatRooms,
   chatMessages,
   connections,
+  achievements,
+  userAchievements,
   type User,
   type UpsertUser,
   type Trip,
@@ -19,6 +21,9 @@ import {
   type InsertChatMessage,
   type Connection,
   type InsertConnection,
+  type Achievement,
+  type UserAchievement,
+  type InsertUserAchievement,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -54,6 +59,13 @@ export interface IStorage {
   createConnection(connection: InsertConnection): Promise<Connection>;
   getUserConnections(userId: string): Promise<Connection[]>;
   updateConnectionStatus(id: number, status: string): Promise<Connection>;
+  
+  // Achievement operations
+  getAllAchievements(): Promise<Achievement[]>;
+  getUserAchievements(userId: string): Promise<UserAchievement[]>;
+  createUserAchievement(userAchievement: InsertUserAchievement): Promise<UserAchievement>;
+  updateAchievementProgress(userId: string, achievementId: number, progress: number): Promise<UserAchievement>;
+  checkAndUnlockAchievements(userId: string): Promise<UserAchievement[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -264,6 +276,135 @@ export class DatabaseStorage implements IStorage {
       .where(eq(connections.id, id))
       .returning();
     return updatedConnection;
+  }
+
+  async getAllAchievements(): Promise<Achievement[]> {
+    return await db
+      .select()
+      .from(achievements)
+      .where(eq(achievements.isActive, true))
+      .orderBy(achievements.category, achievements.points);
+  }
+
+  async getUserAchievements(userId: string): Promise<UserAchievement[]> {
+    return await db
+      .select({
+        id: userAchievements.id,
+        userId: userAchievements.userId,
+        achievementId: userAchievements.achievementId,
+        unlockedAt: userAchievements.unlockedAt,
+        progress: userAchievements.progress,
+        isCompleted: userAchievements.isCompleted,
+        achievement: {
+          id: achievements.id,
+          name: achievements.name,
+          description: achievements.description,
+          category: achievements.category,
+          iconName: achievements.iconName,
+          badgeColor: achievements.badgeColor,
+          points: achievements.points,
+          rarity: achievements.rarity,
+        },
+      })
+      .from(userAchievements)
+      .leftJoin(achievements, eq(userAchievements.achievementId, achievements.id))
+      .where(eq(userAchievements.userId, userId))
+      .orderBy(desc(userAchievements.unlockedAt));
+  }
+
+  async createUserAchievement(userAchievementData: InsertUserAchievement): Promise<UserAchievement> {
+    const [userAchievement] = await db
+      .insert(userAchievements)
+      .values(userAchievementData)
+      .returning();
+    
+    return userAchievement;
+  }
+
+  async updateAchievementProgress(userId: string, achievementId: number, progress: number): Promise<UserAchievement> {
+    const [userAchievement] = await db
+      .update(userAchievements)
+      .set({ progress })
+      .where(
+        and(
+          eq(userAchievements.userId, userId),
+          eq(userAchievements.achievementId, achievementId)
+        )
+      )
+      .returning();
+
+    if (!userAchievement) {
+      return await this.createUserAchievement({
+        userId,
+        achievementId,
+        progress,
+        isCompleted: false
+      });
+    }
+
+    return userAchievement;
+  }
+
+  async checkAndUnlockAchievements(userId: string): Promise<UserAchievement[]> {
+    const user = await this.getUser(userId);
+    if (!user) return [];
+
+    const userTrips = await this.getUserTrips(userId);
+    const userExpenses = await this.getUserExpenses(userId);
+    const userReviews = await db
+      .select()
+      .from(reviews)
+      .where(eq(reviews.userId, userId));
+
+    const newAchievements: UserAchievement[] = [];
+    const totalSpent = userExpenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
+    const countriesVisited = new Set(userTrips.map((trip: any) => trip.destinations?.[0]?.country).filter(Boolean)).size;
+
+    const achievementChecks = [
+      { name: "First Steps", condition: userTrips.length >= 1, progress: userTrips.length },
+      { name: "Trip Explorer", condition: userTrips.length >= 5, progress: userTrips.length },
+      { name: "Country Collector", condition: countriesVisited >= 3, progress: countriesVisited },
+      { name: "Budget Tracker", condition: userExpenses.length >= 10, progress: userExpenses.length },
+      { name: "Review Writer", condition: userReviews.length >= 5, progress: userReviews.length },
+      { name: "Big Spender", condition: totalSpent >= 1000, progress: Math.floor(totalSpent) }
+    ];
+
+    for (const check of achievementChecks) {
+      if (check.condition) {
+        const existingUserAchievement = await db
+          .select()
+          .from(userAchievements)
+          .innerJoin(achievements, eq(userAchievements.achievementId, achievements.id))
+          .where(
+            and(
+              eq(userAchievements.userId, userId),
+              eq(achievements.name, check.name),
+              eq(userAchievements.isCompleted, true)
+            )
+          )
+          .limit(1);
+
+        if (existingUserAchievement.length === 0) {
+          const achievementDef = await db
+            .select()
+            .from(achievements)
+            .where(eq(achievements.name, check.name))
+            .limit(1);
+
+          if (achievementDef.length > 0) {
+            const newUserAchievement = await this.createUserAchievement({
+              userId,
+              achievementId: achievementDef[0].id,
+              progress: check.progress,
+              isCompleted: true
+            });
+            newAchievements.push(newUserAchievement);
+          }
+        }
+      }
+    }
+
+    return newAchievements;
   }
 }
 

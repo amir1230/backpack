@@ -18,6 +18,7 @@ import {
   Calendar, 
   Users, 
   DollarSign,
+  Trophy,
   MessageCircle,
   User,
   LogOut,
@@ -30,6 +31,7 @@ const navigationItems = [
   { href: "/trip-builder", label: "Plan Trip", icon: Calendar },
   { href: "/community", label: "Community", icon: Users },
   { href: "/budget-tracker", label: "Budget", icon: DollarSign },
+  { href: "/achievements", label: "Achievements", icon: Trophy },
 ];
 
 export default function Navigation() {

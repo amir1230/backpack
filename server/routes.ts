@@ -1109,6 +1109,186 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Achievement System API
+  app.get('/api/achievements', async (req, res) => {
+    try {
+      const achievements = await storage.getAllAchievements();
+      res.json(achievements);
+    } catch (error) {
+      console.error("Error fetching achievements:", error);
+      res.status(500).json({ message: "Failed to fetch achievements" });
+    }
+  });
+
+  app.get('/api/achievements/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const userAchievements = await storage.getUserAchievements(userId);
+      
+      // Also check for new unlocked achievements
+      const newAchievements = await storage.checkAndUnlockAchievements(userId);
+      
+      res.json({
+        userAchievements,
+        newlyUnlocked: newAchievements
+      });
+    } catch (error) {
+      console.error("Error fetching user achievements:", error);
+      res.status(500).json({ message: "Failed to fetch user achievements" });
+    }
+  });
+
+  app.post('/api/achievements/check', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const newAchievements = await storage.checkAndUnlockAchievements(userId);
+      
+      res.json({
+        newlyUnlocked: newAchievements,
+        count: newAchievements.length
+      });
+    } catch (error) {
+      console.error("Error checking achievements:", error);
+      res.status(500).json({ message: "Failed to check achievements" });
+    }
+  });
+
+  // Initialize default achievements if they don't exist
+  app.post('/api/achievements/init', async (req, res) => {
+    try {
+      const defaultAchievements = [
+        {
+          name: "First Steps",
+          description: "Plan your first trip to South America",
+          category: "travel",
+          iconName: "MapPin",
+          badgeColor: "bg-blue-500",
+          requirement: JSON.stringify({ type: "trip_count", value: 1 }),
+          points: 10,
+          rarity: "common"
+        },
+        {
+          name: "Trip Explorer",
+          description: "Plan 5 different trips",
+          category: "travel", 
+          iconName: "Navigation",
+          badgeColor: "bg-green-500",
+          requirement: JSON.stringify({ type: "trip_count", value: 5 }),
+          points: 50,
+          rarity: "rare"
+        },
+        {
+          name: "Country Collector",
+          description: "Visit 3 different South American countries",
+          category: "exploration",
+          iconName: "Globe",
+          badgeColor: "bg-purple-500",
+          requirement: JSON.stringify({ type: "country_count", value: 3 }),
+          points: 75,
+          rarity: "epic"
+        },
+        {
+          name: "Budget Tracker",
+          description: "Record 10 travel expenses",
+          category: "budget",
+          iconName: "DollarSign",
+          badgeColor: "bg-orange-500",
+          requirement: JSON.stringify({ type: "expense_count", value: 10 }),
+          points: 30,
+          rarity: "common"
+        },
+        {
+          name: "Review Writer",
+          description: "Write 5 destination reviews",
+          category: "social",
+          iconName: "Star",
+          badgeColor: "bg-yellow-500",
+          requirement: JSON.stringify({ type: "review_count", value: 5 }),
+          points: 40,
+          rarity: "rare"
+        },
+        {
+          name: "Big Spender",
+          description: "Spend over $1000 on travels",
+          category: "budget",
+          iconName: "CreditCard",
+          badgeColor: "bg-red-500",
+          requirement: JSON.stringify({ type: "total_spent", value: 1000 }),
+          points: 100,
+          rarity: "epic"
+        },
+        {
+          name: "Adventure Seeker",
+          description: "Plan an adventure-focused trip",
+          category: "adventure",
+          iconName: "Mountain",
+          badgeColor: "bg-emerald-500",
+          requirement: JSON.stringify({ type: "trip_style", value: "adventure" }),
+          points: 25,
+          rarity: "common"
+        },
+        {
+          name: "Cultural Explorer",
+          description: "Plan a cultural immersion trip",
+          category: "cultural",
+          iconName: "Camera",
+          badgeColor: "bg-indigo-500",
+          requirement: JSON.stringify({ type: "trip_style", value: "cultural" }),
+          points: 25,
+          rarity: "common"
+        },
+        {
+          name: "Social Butterfly",
+          description: "Connect with 10 fellow travelers",
+          category: "social",
+          iconName: "Users",
+          badgeColor: "bg-pink-500",
+          requirement: JSON.stringify({ type: "connection_count", value: 10 }),
+          points: 60,
+          rarity: "rare"
+        },
+        {
+          name: "South America Master",
+          description: "Visit all 13 South American countries",
+          category: "exploration",
+          iconName: "Award",
+          badgeColor: "bg-gradient-to-r from-yellow-400 to-orange-500",
+          requirement: JSON.stringify({ type: "country_count", value: 13 }),
+          points: 500,
+          rarity: "legendary"
+        }
+      ];
+
+      let createdCount = 0;
+      for (const achievement of defaultAchievements) {
+        try {
+          // Check if achievement already exists
+          const existing = await db
+            .select()
+            .from(achievements)
+            .where(eq(achievements.name, achievement.name))
+            .limit(1);
+
+          if (existing.length === 0) {
+            await db.insert(achievements).values(achievement);
+            createdCount++;
+          }
+        } catch (error) {
+          console.error(`Error creating achievement ${achievement.name}:`, error);
+        }
+      }
+
+      res.json({ 
+        message: `Initialized ${createdCount} achievements`,
+        total: defaultAchievements.length,
+        created: createdCount
+      });
+    } catch (error) {
+      console.error("Error initializing achievements:", error);
+      res.status(500).json({ message: "Failed to initialize achievements" });
+    }
+  });
+
   // API Documentation Endpoint
   app.get('/api/docs', async (req, res) => {
     const apiDocs = {

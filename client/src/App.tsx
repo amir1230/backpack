@@ -10,6 +10,7 @@ import Home from "@/pages/home";
 import TripBuilder from "@/pages/trip-builder";
 import Community from "@/pages/community";
 import BudgetTracker from "@/pages/budget-tracker";
+import Achievements from "@/pages/achievements";
 import Navigation from "@/components/navigation";
 
 function Router() {
@@ -37,6 +38,7 @@ function Router() {
           <Route path="/trip-builder" component={TripBuilder} />
           <Route path="/community" component={Community} />
           <Route path="/budget-tracker" component={BudgetTracker} />
+          <Route path="/achievements" component={Achievements} />
         </>
       )}
       <Route component={NotFound} />

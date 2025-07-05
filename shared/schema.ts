@@ -111,6 +111,31 @@ export const connections = pgTable("connections", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Achievement definitions table
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull().unique(),
+  description: text("description").notNull(),
+  category: varchar("category").notNull(), // travel, social, budget, exploration, adventure, cultural
+  iconName: varchar("icon_name").notNull(),
+  badgeColor: varchar("badge_color").notNull(),
+  requirement: text("requirement").notNull(), // JSON string describing requirements
+  points: integer("points").notNull().default(10),
+  rarity: varchar("rarity").notNull().default("common"), // common, rare, epic, legendary
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User achievements progress table
+export const userAchievements = pgTable("user_achievements", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  achievementId: integer("achievement_id").references(() => achievements.id).notNull(),
+  unlockedAt: timestamp("unlocked_at").defaultNow(),
+  progress: integer("progress").default(0), // Current progress towards achievement
+  isCompleted: boolean("is_completed").notNull().default(false),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   trips: many(trips),
@@ -119,6 +144,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   sentConnections: many(connections, { relationName: "requester" }),
   receivedConnections: many(connections, { relationName: "receiver" }),
   chatMessages: many(chatMessages),
+  userAchievements: many(userAchievements),
 }));
 
 export const tripsRelations = relations(trips, ({ one, many }) => ({
@@ -179,6 +205,21 @@ export const connectionsRelations = relations(connections, ({ one }) => ({
   }),
 }));
 
+export const achievementsRelations = relations(achievements, ({ many }) => ({
+  userAchievements: many(userAchievements),
+}));
+
+export const userAchievementsRelations = relations(userAchievements, ({ one }) => ({
+  user: one(users, {
+    fields: [userAchievements.userId],
+    references: [users.id],
+  }),
+  achievement: one(achievements, {
+    fields: [userAchievements.achievementId],
+    references: [achievements.id],
+  }),
+}));
+
 // Insert schemas
 export const insertTripSchema = createInsertSchema(trips).omit({
   id: true,
@@ -208,6 +249,16 @@ export const insertConnectionSchema = createInsertSchema(connections).omit({
   updatedAt: true,
 });
 
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
+  id: true,
+  unlockedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -222,3 +273,7 @@ export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type Connection = typeof connections.$inferSelect;
 export type InsertConnection = z.infer<typeof insertConnectionSchema>;
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
