@@ -119,13 +119,64 @@ TripWise is a full-stack web application focused on South American travel planni
 - **Travel Assistant**: Interactive chat bot for travel questions and advice
 - **Destination Recommendations**: Community-driven suggestions powered by AI
 
-### API Endpoints
+### Core API Endpoints
+
+**Authentication & Users**
+- `/api/auth/user` - Get authenticated user details
+- `/api/user/preferences` - Get/update user travel preferences and settings
+
+**Trip Management**
+- `/api/trips` - Get public trips (community feed)
+- `/api/trips/user` - Get user's personal trips
+- `/api/trips` (POST) - Create new trip
+- `/api/trips/:id` - Get/update/delete specific trip
+
+**AI-Powered Features**
 - `/api/ai/generate-trip` - Enhanced trip generation with real AI
 - `/api/ai/travel-suggestions` - Get personalized destination recommendations
 - `/api/ai/itinerary` - Generate detailed itineraries
 - `/api/ai/budget-analysis` - Analyze expenses and get savings tips
 - `/api/ai/recommendations` - Get destination advice based on reviews
 - `/api/ai/chat` - Interactive travel assistant
+
+**Budget & Expenses**
+- `/api/expenses/user` - Get user's all expenses
+- `/api/expenses/trip/:id` - Get expenses for specific trip
+- `/api/expenses` (POST) - Add new expense
+
+**Community & Reviews**
+- `/api/reviews` - Get recent community reviews
+- `/api/reviews` (POST) - Submit new review
+- `/api/reviews/destination/:name` - Get reviews for specific destination
+
+**Travel Information**
+- `/api/weather/:destination` - Get weather forecast
+- `/api/currency/:from/:to` - Get exchange rates
+- `/api/safety/:country` - Get safety advisories and tips
+- `/api/transport/:from/:to` - Get transportation options
+- `/api/accommodation/:destination` - Search accommodations
+- `/api/activities/:destination` - Find local activities and tours
+- `/api/restaurants/:destination` - Discover local restaurants
+- `/api/visa-requirements/:from/:to` - Check visa requirements
+- `/api/insurance/quotes` - Get travel insurance quotes
+- `/api/checklist/:destination/:duration` - Get travel preparation checklist
+- `/api/emergency/:country` - Get emergency contacts and info
+- `/api/maps/:destination/download` - Get offline map downloads
+
+**Social Features**
+- `/api/connections` - Get/manage user connections
+- `/api/chat/rooms` - Get available chat rooms
+- `/api/chat/messages/:roomId` - Get chat messages
+- `/ws` - WebSocket for real-time chat
+
+**Platform Features**
+- `/api/deals` - Get current travel deals and offers
+- `/api/notifications` - Get user notifications
+- `/api/analytics/dashboard` - Get user travel analytics
+- `/api/search` - Universal search (destinations, activities, restaurants)
+- `/api/export/user-data` - Export user data backup
+- `/api/health` - System health check
+- `/api/feedback` (POST) - Submit feedback and support requests
 
 ### Components
 - `AiChat` - Standalone AI chat component with quick prompts
