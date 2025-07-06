@@ -156,10 +156,26 @@ export async function setupAuth(app: Express) {
     req.logout(() => {
       console.log('Logout request - hostname:', req.hostname, 'NODE_ENV:', process.env.NODE_ENV);
       
-      // For localhost development, just redirect to home
+      // Destroy the session completely
+      if (req.session) {
+        req.session.destroy((err) => {
+          if (err) {
+            console.error('Session destruction error:', err);
+          }
+        });
+      }
+      
+      // Clear all cookies
+      res.clearCookie('connect.sid', { path: '/' });
+      res.clearCookie('session', { path: '/' });
+      
+      // For localhost development, redirect to home with cache busting
       if (req.hostname === 'localhost' || process.env.NODE_ENV === 'development') {
-        console.log('Redirecting to home for development');
-        return res.redirect('/');
+        console.log('Complete logout for development');
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        return res.redirect('/?logout=true&t=' + Date.now());
       }
       
       console.log('Using OIDC logout for production');
@@ -167,7 +183,7 @@ export async function setupAuth(app: Express) {
       res.redirect(
         client.buildEndSessionUrl(config, {
           client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+          post_logout_redirect_uri: `${req.protocol}://${req.hostname}/?logout=true`,
         }).href
       );
     });

@@ -45,15 +45,23 @@ export default function Navigation() {
 
   const handleLogout = async () => {
     try {
-      // Clear the user query cache
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
+      // Clear all React Query cache
+      queryClient.clear();
       
-      // Navigate to logout endpoint
+      // Clear localStorage and sessionStorage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Clear all cookies by setting them to expire
+      document.cookie.split(";").forEach(function(c) { 
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+      });
+      
+      // Navigate to logout endpoint which will destroy server session
       window.location.href = "/api/logout";
     } catch (error) {
       console.error("Logout error:", error);
-      // Fallback: just navigate to logout
+      // Fallback: force reload to clear everything
       window.location.href = "/api/logout";
     }
   };

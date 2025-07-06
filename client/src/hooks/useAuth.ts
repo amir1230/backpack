@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 interface User {
   id: string;
@@ -7,6 +8,7 @@ interface User {
   lastName?: string;
   profileImageUrl?: string;
   onboardingCompleted?: boolean;
+  registrationCompleted?: boolean;
   interests?: string[];
   travelStyles?: string[];
   budgetRange?: string;
@@ -19,15 +21,30 @@ interface User {
 }
 
 export function useAuth() {
+  // Check for logout parameter in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('logout') === 'true') {
+      // Clear URL parameter
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   const { data: user, isLoading, error } = useQuery<User | null>({
     queryKey: ["/api/auth/user"],
     retry: false,
     refetchOnWindowFocus: true,
     staleTime: 0, // Always check for fresh auth status
+    cacheTime: 0, // Don't cache authentication data
     queryFn: async () => {
       try {
         const res = await fetch("/api/auth/user", {
           credentials: "include",
+          cache: "no-cache", // Force fresh request
+          headers: {
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache"
+          }
         });
         
         if (res.status === 401) {

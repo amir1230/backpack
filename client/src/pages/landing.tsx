@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient } from "@/lib/queryClient";
 import { 
@@ -39,6 +39,21 @@ export default function Landing() {
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const { user } = useAuth();
 
+  // Handle logout cleanup on page load
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('logout') === 'true') {
+      // Ensure complete cleanup after logout
+      queryClient.clear();
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Clear URL parameter
+      window.history.replaceState({}, document.title, window.location.pathname);
+      console.log("Logout cleanup completed");
+    }
+  }, []);
+
   const toggleStyle = (style: string) => {
     setSelectedStyles(prev => 
       prev.includes(style) 
@@ -57,15 +72,23 @@ export default function Landing() {
 
   const handleLogout = async () => {
     try {
-      // Clear the user query cache
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
+      // Clear all React Query cache
+      queryClient.clear();
       
-      // Navigate to logout endpoint
+      // Clear localStorage and sessionStorage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Clear all cookies by setting them to expire
+      document.cookie.split(";").forEach(function(c) { 
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+      });
+      
+      // Navigate to logout endpoint which will destroy server session
       window.location.href = "/api/logout";
     } catch (error) {
       console.error("Logout error:", error);
-      // Fallback: just navigate to logout
+      // Fallback: force reload to clear everything
       window.location.href = "/api/logout";
     }
   };

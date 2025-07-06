@@ -8,16 +8,29 @@ async function throwIfResNotOk(res: Response) {
 }
 
 export async function apiRequest(
-  method: string,
   url: string,
-  data?: unknown | undefined,
+  options: RequestInit = {}
 ): Promise<Response> {
   const res = await fetch(url, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-cache",
+      "Pragma": "no-cache",
+      ...options.headers,
+    },
     credentials: "include",
+    cache: "no-cache",
   });
+
+  // If unauthorized, force full logout
+  if (res.status === 401) {
+    console.log("Unauthorized request detected, forcing logout");
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = "/api/logout";
+    throw new Error("401: Unauthorized");
+  }
 
   await throwIfResNotOk(res);
   return res;
@@ -31,10 +44,23 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     const res = await fetch(queryKey[0] as string, {
       credentials: "include",
+      cache: "no-cache",
+      headers: {
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache"
+      }
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
       return null;
+    }
+
+    // If unauthorized and should throw, force logout
+    if (res.status === 401) {
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = "/api/logout";
+      throw new Error("401: Unauthorized");
     }
 
     await throwIfResNotOk(res);
@@ -49,6 +75,7 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       staleTime: Infinity,
       retry: false,
+      cacheTime: 5 * 60 * 1000, // 5 minutes default cache
     },
     mutations: {
       retry: false,
