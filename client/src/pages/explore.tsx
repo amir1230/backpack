@@ -8,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { MapPin, Star, Phone, Globe, Clock, DollarSign, Users, Camera } from "lucide-react";
+import { MapPin, Star, Phone, Globe, Clock, DollarSign, Users, Camera, CloudSun } from "lucide-react";
+import DestinationWeather from "@/components/DestinationWeather";
 
 interface Destination {
   id: number;
@@ -42,6 +43,7 @@ interface LocationItem {
 export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("all");
+  const [weatherFilter, setWeatherFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("destinations");
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -150,7 +152,7 @@ export default function ExplorePage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Explore South America</h1>
         <p className="text-muted-foreground mb-6">
-          Discover amazing destinations, accommodations, attractions, and restaurants across South America.
+          Discover amazing destinations across South America with real-time weather conditions and travel timing recommendations to help plan your perfect trip.
         </p>
 
         {/* Search and Controls */}
@@ -182,6 +184,19 @@ export default function ExplorePage() {
                   {country}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={weatherFilter} onValueChange={setWeatherFilter}>
+            <SelectTrigger className="w-full md:w-40">
+              <SelectValue placeholder="Weather" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Weather</SelectItem>
+              <SelectItem value="sunny">☀️ Sunny</SelectItem>
+              <SelectItem value="mild">🌤️ Mild</SelectItem>
+              <SelectItem value="cool">☁️ Cool</SelectItem>
+              <SelectItem value="best-time">✨ Best Time</SelectItem>
             </SelectContent>
           </Select>
 
@@ -236,6 +251,15 @@ export default function ExplorePage() {
                     <p className="text-sm text-muted-foreground mb-4">
                       {destination.description}
                     </p>
+
+                    {/* Weather Integration */}
+                    <div className="mb-4">
+                      <DestinationWeather 
+                        destination={destination.name}
+                        country={destination.country}
+                        compact={true}
+                      />
+                    </div>
                     
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 text-sm">
