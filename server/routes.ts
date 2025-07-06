@@ -61,7 +61,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         languages: user.languages || [],
         personalityTraits: user.personalityTraits || [],
         bio: user.bio,
-        onboardingCompleted: user.onboardingCompleted || false
+        onboardingCompleted: user.onboardingCompleted || false,
+        registrationCompleted: user.registrationCompleted || false
       });
     } catch (error) {
       console.error("Error fetching user preferences:", error);
@@ -92,6 +93,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating user preferences:", error);
       res.status(500).json({ message: "Failed to update user preferences" });
+    }
+  });
+
+  // Registry completion endpoint
+  app.post('/api/user/registry', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims?.sub || req.user.id;
+      const registryData = req.body;
+      
+      // Mark registration as completed
+      registryData.registrationCompleted = true;
+      
+      const updatedUser = await storage.updateUserPreferences(userId, registryData);
+      
+      res.json({
+        message: "Registration completed successfully",
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error("Error completing registry:", error);
+      res.status(500).json({ message: "Failed to complete registration" });
     }
   });
 

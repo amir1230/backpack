@@ -197,6 +197,7 @@ TripWise is a full-stack web application focused on South American travel planni
 - July 05, 2025. Fixed logout functionality - added proper environment-based redirect logic, cache clearing to prevent stale auth state, and consistent logout handling across all components
 - July 05, 2025. Resolved application loading issues - fixed unhandled promise rejections in authentication, added error boundary component, and improved error handling in query client
 - July 06, 2025. Implemented comprehensive TripAdvisor-style database integration with complete schema, API endpoints, and sample South American travel data including destinations, accommodations, attractions, restaurants, reviews, and ratings
+- July 06, 2025. Added user registry page that appears after registration - collects basic profile information (bio, location, travel style, budget) before proceeding to full onboarding
 
 ## User Preferences
 
@@ -230,10 +231,21 @@ Preferred communication style: Simple, everyday language.
 9. **Social Butterfly** (60 pts) - Connect with 10 travelers
 10. **South America Master** (500 pts) - Visit all 13 SA countries
 
-## User Personalization & Onboarding System
+## User Registration & Onboarding System
 
-### Features Implemented
-- **Multi-Step Onboarding**: 6-step guided setup for new users
+### Registry Page (Post-Registration)
+- **Initial Profile Setup**: Required after user registration/login
+- **Basic Information Collection**:
+  - Personal bio (10-500 characters)
+  - Current location
+  - Primary travel style selection
+  - Preferred trip duration
+  - Budget range preference
+- **User Flow**: Registry → Onboarding → Main Application
+- **Database Field**: `registrationCompleted` boolean tracks completion
+
+### Onboarding System (Post-Registry)
+- **Multi-Step Onboarding**: 6-step guided setup for registered users
 - **Comprehensive Preference Collection**:
   - Travel interests (12 categories: History & Culture, Adventure Sports, Nature & Wildlife, etc.)
   - Travel styles (9 options: Adventure, Cultural, Budget Backpacking, Luxury, etc.)

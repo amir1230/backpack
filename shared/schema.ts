@@ -48,6 +48,7 @@ export const users = pgTable("users", {
   languages: text("languages").array(),
   personalityTraits: text("personality_traits").array(),
   onboardingCompleted: boolean("onboarding_completed").default(false),
+  registrationCompleted: boolean("registration_completed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -14,15 +14,22 @@ import BudgetTracker from "@/pages/budget-tracker";
 import Achievements from "@/pages/achievements";
 import TripAdvisorData from "@/pages/tripadvisor-data";
 import Onboarding from "@/pages/onboarding";
+import Registry from "@/pages/registry";
 import Navigation from "@/components/navigation";
 import { ErrorBoundary } from "@/components/error-boundary";
 
 function AuthenticatedApp() {
-  // Always show onboarding immediately after authentication
   const [currentLocation] = useLocation();
+  const { user } = useAuth();
   
-  // Show onboarding for root path, letting users complete personalization
-  if (currentLocation === '/' || currentLocation === '/onboarding') {
+  // Redirect new users to registry page after login
+  if (!user?.registrationCompleted && currentLocation !== '/registry') {
+    return <Registry />;
+  }
+  
+  // Show onboarding for users who completed registry but not onboarding
+  if (user?.registrationCompleted && !user?.onboardingCompleted && 
+      (currentLocation === '/' || currentLocation === '/onboarding')) {
     return <Onboarding />;
   }
 
@@ -38,6 +45,7 @@ function AuthenticatedApp() {
           <Route path="/achievements" component={Achievements} />
           <Route path="/tripadvisor-data" component={TripAdvisorData} />
           <Route path="/onboarding" component={Onboarding} />
+          <Route path="/registry" component={Registry} />
           <Route component={NotFound} />
         </Switch>
       </main>
