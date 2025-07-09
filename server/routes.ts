@@ -766,15 +766,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Missing required fields: destination, duration, and travel style" });
       }
 
+      console.log("Generating suggestions for:", { destination, dailyBudget, travelStyle, interests, duration });
+
       // Build message for AI based on form inputs
       const interestsText = interests && interests.length > 0 ? ` I enjoy ${interests.join(', ')}.` : '';
       const message = `I want to visit ${destination} for ${duration}. My daily budget is $${dailyBudget}. I'm interested in ${travelStyle.join(', ')} travel style.${interestsText} Please suggest 3 different trip options for me.`;
 
-      const suggestions = await generateConversationalSuggestions(message, []);
+      const chatHistory = [{ role: 'user', content: message }];
+      const suggestions = await generateConversationalSuggestions(chatHistory, []);
 
+      console.log("Generated suggestions:", suggestions);
       res.json({ suggestions: suggestions || [] });
     } catch (error) {
       console.error("Get suggestions error:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
       res.status(500).json({ 
         message: "Failed to generate trip suggestions",
         error: error instanceof Error ? error.message : "Unknown error"

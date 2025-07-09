@@ -71,14 +71,17 @@ export default function MyTripsScreen() {
 
   // Fetch saved trips
   const { data: savedTrips, isLoading: tripsLoading } = useQuery({
-    queryKey: ['/api/my-trips', 'guest'],
+    queryKey: ['/api/my-trips/guest'],
     enabled: activeTab === "saved"
   });
 
   // Generate trip suggestions mutation
   const generateTripMutation = useMutation({
     mutationFn: async (data: TripFormData) => {
-      const response = await apiRequest('POST', '/api/get-suggestions', data);
+      const response = await apiRequest('/api/get-suggestions', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
       return response.json();
     },
     onSuccess: (data) => {
@@ -103,20 +106,23 @@ export default function MyTripsScreen() {
   const saveTrip = useMutation({
     mutationFn: async (suggestion: TripSuggestion) => {
       const tripData = {
-        destination: `${suggestion.destination}, ${suggestion.country}`,
+        title: `${suggestion.destination}, ${suggestion.country}`,
         description: suggestion.description,
-        estimatedBudget: suggestion.estimatedBudget.high,
+        destinations: suggestion.destination,
+        budget: suggestion.estimatedBudget.high.toString(),
         duration: suggestion.duration,
         isPublic: false,
-        highlights: suggestion.highlights,
-        travelStyle: suggestion.travelStyle
+        travelStyle: suggestion.travelStyle.join(', ')
       };
       
-      const response = await apiRequest('POST', '/api/trips', tripData);
+      const response = await apiRequest('/api/trips', {
+        method: 'POST',
+        body: JSON.stringify(tripData)
+      });
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/my-trips', 'guest'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/my-trips/guest'] });
       toast({
         title: "Trip Saved!",
         description: "Your trip has been saved to My Trips.",
