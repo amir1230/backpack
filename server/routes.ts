@@ -672,6 +672,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate trip suggestions from form data (MyTripsScreen)
+  app.post('/api/get-suggestions', async (req, res) => {
+    try {
+      const { destination, dailyBudget, travelStyle, interests, duration } = req.body;
+      
+      if (!destination || !duration || !travelStyle || travelStyle.length === 0) {
+        return res.status(400).json({ message: "Missing required fields: destination, duration, and travel style" });
+      }
+
+      // Build message for AI based on form inputs
+      const interestsText = interests && interests.length > 0 ? ` I enjoy ${interests.join(', ')}.` : '';
+      const message = `I want to visit ${destination} for ${duration}. My daily budget is $${dailyBudget}. I'm interested in ${travelStyle.join(', ')} travel style.${interestsText} Please suggest 3 different trip options for me.`;
+
+      const suggestions = await generateConversationalSuggestions(message, []);
+
+      res.json({ suggestions: suggestions || [] });
+    } catch (error) {
+      console.error("Get suggestions error:", error);
+      res.status(500).json({ 
+        message: "Failed to generate trip suggestions",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Get user's saved trips (simplified for guest user)
+  app.get('/api/my-trips/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      
+      // For guest user, get recent public trips as placeholder
+      if (userId === 'guest') {
+        const publicTrips = await storage.getPublicTrips();
+        return res.json(publicTrips.slice(0, 6)); // Limit to 6 recent trips
+      }
+
+      // For authenticated users, get their actual trips
+      try {
+        const trips = await storage.getUserTrips(userId);
+        res.json(trips);
+      } catch (authError) {
+        // Fallback to public trips if user not found
+        const publicTrips = await storage.getPublicTrips();
+        res.json(publicTrips.slice(0, 6));
+      }
+    } catch (error) {
+      console.error("Get user trips error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch user trips",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Legacy AI chat assistant for backward compatibility
   app.post('/api/ai/chat-legacy', isAuthenticated, async (req: any, res) => {
     try {

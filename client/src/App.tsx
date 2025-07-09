@@ -15,6 +15,7 @@ import Achievements from "@/pages/achievements";
 import TripAdvisorData from "@/pages/tripadvisor-data";
 import Explore from "@/pages/explore";
 import Weather from "@/pages/weather";
+import MyTripsScreen from "@/pages/my-trips";
 import Onboarding from "@/pages/onboarding";
 import Registry from "@/pages/registry";
 import Navigation from "@/components/navigation";
@@ -48,6 +49,7 @@ function AuthenticatedApp() {
           <Route path="/tripadvisor-data" component={TripAdvisorData} />
           <Route path="/explore" component={Explore} />
           <Route path="/weather" component={Weather} />
+          <Route path="/my-trips" component={MyTripsScreen} />
           <Route path="/onboarding" component={Onboarding} />
           <Route path="/registry" component={Registry} />
           <Route component={NotFound} />
