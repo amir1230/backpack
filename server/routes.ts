@@ -532,10 +532,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         interests,
         preferredCountries
       });
-      res.json(suggestions);
+      res.json({ suggestions });
     } catch (error) {
       console.error("Error generating travel suggestions:", error);
-      res.status(500).json({ message: "Failed to generate travel suggestions" });
+      res.status(500).json({ error: "Failed to generate travel suggestions" });
     }
   });
 

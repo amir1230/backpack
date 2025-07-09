@@ -33,37 +33,50 @@ import {
 } from "lucide-react";
 
 const tripFormSchema = z.object({
-  destination: z.string().min(1, "Destination is required"),
-  duration: z.string().min(1, "Duration is required"),
-  budget: z.number().min(100, "Budget must be at least $100"),
   travelStyle: z.array(z.string()).min(1, "Select at least one travel style"),
-  description: z.string().optional(),
+  budget: z.number().min(100, "Budget must be at least $100"),
+  duration: z.string().min(1, "Duration is required"),
+  interests: z.array(z.string()).min(1, "Select at least one interest"),
+  preferredCountries: z.array(z.string()).optional(),
 });
 
 type TripFormData = z.infer<typeof tripFormSchema>;
 
-const DESTINATIONS = [
-  "Peru", "Colombia", "Bolivia", "Chile", "Argentina", "Brazil", "Ecuador", "Uruguay", "Paraguay", "Venezuela"
+const SOUTH_AMERICAN_COUNTRIES = [
+  "Peru", "Colombia", "Bolivia", "Chile", "Argentina", "Brazil", "Ecuador", "Uruguay", "Paraguay", "Venezuela", "Guyana", "Suriname", "French Guiana"
 ];
 
 const DURATIONS = [
-  { value: "1-2-weeks", label: "1-2 weeks" },
-  { value: "2-4-weeks", label: "2-4 weeks" },
-  { value: "1-2-months", label: "1-2 months" },
-  { value: "3-months", label: "3+ months" },
+  { value: "1-2 weeks", label: "1-2 weeks" },
+  { value: "2-4 weeks", label: "2-4 weeks" },
+  { value: "1-2 months", label: "1-2 months" },
+  { value: "3+ months", label: "3+ months" },
 ];
 
 const TRAVEL_STYLES = [
-  { id: 'adventure', icon: Mountain, label: 'Adventure', description: 'Mountain, outdoor activities' },
-  { id: 'culture', icon: Camera, label: 'Culture', description: 'Museums, historical sites' },
-  { id: 'food', icon: Utensils, label: 'Food', description: 'Local cuisine, food tours' },
-  { id: 'nightlife', icon: GlassWater, label: 'Nightlife', description: 'Bars, clubs, social events' }
+  { id: 'adventure', icon: Mountain, label: 'Adventure', description: 'Hiking, trekking, extreme sports' },
+  { id: 'cultural', icon: Camera, label: 'Cultural', description: 'Museums, history, local traditions' },
+  { id: 'budget', icon: DollarSign, label: 'Budget', description: 'Backpacking, hostels, local transport' },
+  { id: 'luxury', icon: Sparkles, label: 'Luxury', description: 'Premium accommodations, fine dining' },
+  { id: 'nature', icon: Mountain, label: 'Nature', description: 'Wildlife, national parks, eco-tours' },
+  { id: 'food', icon: Utensils, label: 'Food', description: 'Local cuisine, food tours, cooking classes' },
+  { id: 'nightlife', icon: GlassWater, label: 'Nightlife', description: 'Bars, clubs, social events' },
+  { id: 'relaxation', icon: Clock, label: 'Relaxation', description: 'Beaches, wellness, slow travel' }
+];
+
+const INTERESTS = [
+  'History & Culture', 'Adventure Sports', 'Nature & Wildlife', 'Food & Cuisine', 
+  'Nightlife & Entertainment', 'Photography', 'Architecture', 'Local Markets',
+  'Beaches & Coastlines', 'Mountains & Hiking', 'Art & Museums', 'Music & Festivals',
+  'Shopping', 'Wellness & Relaxation', 'Language Learning', 'Volunteering'
 ];
 
 export default function TripBuilder() {
   const [budget, setBudget] = useState([2500]);
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
-  const [aiSuggestion, setAiSuggestion] = useState<any>(null);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -71,28 +84,28 @@ export default function TripBuilder() {
   const form = useForm<TripFormData>({
     resolver: zodResolver(tripFormSchema),
     defaultValues: {
-      destination: "",
-      duration: "",
-      budget: 2500,
       travelStyle: [],
-      description: "",
+      budget: 2500,
+      duration: "",
+      interests: [],
+      preferredCountries: [],
     },
   });
 
   const generateTripMutation = useMutation({
-    mutationFn: async (data: any) => {
-      return await apiRequest("/api/ai/generate-trip", {
+    mutationFn: async (preferences: any) => {
+      return await apiRequest("/api/ai/travel-suggestions", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify(preferences),
       });
     },
     onSuccess: async (response) => {
-      const suggestion = await response.json();
-      setAiSuggestion(suggestion);
+      const data = await response.json();
+      setAiSuggestions(data.suggestions || []);
       setIsGenerating(false);
       toast({
-        title: "Trip Generated!",
-        description: "Your personalized itinerary is ready.",
+        title: "Trip Suggestions Generated!",
+        description: "Your personalized South American trip suggestions are ready.",
       });
     },
     onError: async (error) => {
@@ -144,9 +157,11 @@ export default function TripBuilder() {
         title: "Trip Created!",
         description: "Your trip has been saved successfully.",
       });
-      setAiSuggestion(null);
+      setAiSuggestions([]);
       form.reset();
       setSelectedStyles([]);
+      setSelectedInterests([]);
+      setSelectedCountries([]);
       setBudget([2500]);
     },
     onError: (error) => {
@@ -169,6 +184,19 @@ export default function TripBuilder() {
     },
   });
 
+  const handleGenerateAITrips = () => {
+    setIsGenerating(true);
+    const preferences = {
+      travelStyle: selectedStyles,
+      budget: budget[0],
+      duration: form.getValues("duration"),
+      interests: selectedInterests,
+      preferredCountries: selectedCountries.length > 0 ? selectedCountries : undefined,
+    };
+    
+    generateTripMutation.mutate(preferences);
+  };
+
   const toggleStyle = (style: string) => {
     const newStyles = selectedStyles.includes(style) 
       ? selectedStyles.filter(s => s !== style)
@@ -177,36 +205,29 @@ export default function TripBuilder() {
     form.setValue('travelStyle', newStyles);
   };
 
-  const handleGenerateTrip = () => {
-    const values = form.getValues();
-    if (!values.destination || !values.duration || selectedStyles.length === 0) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in destination, duration, and select at least one travel style.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsGenerating(true);
-    generateTripMutation.mutate({
-      destination: values.destination,
-      duration: values.duration,
-      budget: budget[0],
-      travelStyle: selectedStyles,
-      interests: selectedStyles,
-    });
+  const toggleInterest = (interest: string) => {
+    const newInterests = selectedInterests.includes(interest) 
+      ? selectedInterests.filter(i => i !== interest)
+      : [...selectedInterests, interest];
+    setSelectedInterests(newInterests);
+    form.setValue('interests', newInterests);
   };
 
-  const handleSaveTrip = () => {
-    if (!aiSuggestion) return;
+  const toggleCountry = (country: string) => {
+    const newCountries = selectedCountries.includes(country) 
+      ? selectedCountries.filter(c => c !== country)
+      : [...selectedCountries, country];
+    setSelectedCountries(newCountries);
+    form.setValue('preferredCountries', newCountries);
+  };
 
+  const handleSaveTrip = (suggestion: any) => {
     const tripData = {
-      title: aiSuggestion.title,
-      description: aiSuggestion.description,
-      destinations: aiSuggestion.destinations,
-      budget: aiSuggestion.totalEstimatedCost.toString(),
-      travelStyle: selectedStyles.join(', '),
+      title: `${suggestion.destination}, ${suggestion.country}`,
+      description: suggestion.description,
+      destinations: suggestion.destination,
+      budget: suggestion.estimatedBudget.high.toString(),
+      travelStyle: suggestion.travelStyle.join(', '),
       isPublic: true,
     };
 
@@ -218,7 +239,7 @@ export default function TripBuilder() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4">AI Trip Builder</h1>
-          <p className="text-lg text-gray-600">Tell us your preferences and let our AI create the perfect itinerary</p>
+          <p className="text-lg text-gray-600">Tell us your preferences and let our AI create personalized South American trip suggestions</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -226,28 +247,11 @@ export default function TripBuilder() {
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Sparkles className="w-6 h-6 mr-2 text-primary" />
-                Trip Preferences
+                <Bot className="w-6 h-6 mr-2 text-primary" />
+                AI Trip Builder
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Destination */}
-              <div>
-                <Label htmlFor="destination" className="text-sm font-medium text-slate-700 mb-2 block">
-                  Where do you want to go?
-                </Label>
-                <Select onValueChange={(value) => form.setValue('destination', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a destination" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DESTINATIONS.map((dest) => (
-                      <SelectItem key={dest} value={dest}>{dest}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Duration */}
               <div>
                 <Label htmlFor="duration" className="text-sm font-medium text-slate-700 mb-2 block">
@@ -255,7 +259,7 @@ export default function TripBuilder() {
                 </Label>
                 <Select onValueChange={(value) => form.setValue('duration', value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select duration" />
+                    <SelectValue placeholder="How long do you want to travel?" />
                   </SelectTrigger>
                   <SelectContent>
                     {DURATIONS.map((duration) => (
@@ -295,16 +299,16 @@ export default function TripBuilder() {
               {/* Travel Style */}
               <div>
                 <Label className="text-sm font-medium text-slate-700 mb-2 block">
-                  Travel Style
+                  Travel Style <span className="text-xs text-gray-500">(select multiple)</span>
                 </Label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2">
                   {TRAVEL_STYLES.map((style) => (
                     <Button
                       key={style.id}
                       type="button"
                       variant={selectedStyles.includes(style.id) ? "default" : "outline"}
                       onClick={() => toggleStyle(style.id)}
-                      className="justify-start h-auto p-3"
+                      className="justify-start h-auto p-3 text-left"
                     >
                       <style.icon className="w-5 h-5 mr-3" />
                       <div className="text-left">
@@ -316,168 +320,185 @@ export default function TripBuilder() {
                 </div>
               </div>
 
-              {/* Additional Notes */}
+              {/* Interests */}
               <div>
-                <Label htmlFor="description" className="text-sm font-medium text-slate-700 mb-2 block">
-                  Additional Notes (Optional)
+                <Label className="text-sm font-medium text-slate-700 mb-2 block">
+                  Interests <span className="text-xs text-gray-500">(select multiple)</span>
                 </Label>
-                <Textarea
-                  placeholder="Any specific interests or requirements?"
-                  {...form.register('description')}
-                  className="min-h-[80px]"
-                />
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+                  {INTERESTS.map((interest) => (
+                    <Button
+                      key={interest}
+                      type="button"
+                      variant={selectedInterests.includes(interest) ? "default" : "outline"}
+                      onClick={() => toggleInterest(interest)}
+                      className="justify-start h-8 text-xs"
+                    >
+                      {interest}
+                    </Button>
+                  ))}
+                </div>
               </div>
 
-              {/* Generate Button */}
+              {/* Preferred Countries */}
+              <div>
+                <Label className="text-sm font-medium text-slate-700 mb-2 block">
+                  Preferred Countries <span className="text-xs text-gray-500">(optional)</span>
+                </Label>
+                <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                  {SOUTH_AMERICAN_COUNTRIES.map((country) => (
+                    <Button
+                      key={country}
+                      type="button"
+                      variant={selectedCountries.includes(country) ? "default" : "outline"}
+                      onClick={() => toggleCountry(country)}
+                      className="justify-start h-8 text-xs"
+                    >
+                      {country}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Generate AI Trip Button */}
               <Button 
-                onClick={handleGenerateTrip}
-                disabled={isGenerating}
-                className="w-full bg-primary hover:bg-orange-600 py-3"
+                onClick={handleGenerateAITrips}
+                disabled={isGenerating || selectedStyles.length === 0 || selectedInterests.length === 0 || !form.getValues("duration")}
+                className="w-full h-12 text-lg font-semibold"
               >
                 {isGenerating ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Generating Your Trip...
+                    Generating Your Perfect Trip...
                   </>
                 ) : (
                   <>
                     <Bot className="w-5 h-5 mr-2" />
-                    Generate My Trip
+                    Generate AI Trip Suggestions
                   </>
                 )}
               </Button>
             </CardContent>
           </Card>
 
-          {/* AI Suggestion */}
+          {/* AI Trip Suggestions Display */}
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Bot className="w-6 h-6 mr-2 text-secondary" />
-                AI Generated Itinerary
+                <Sparkles className="w-6 h-6 mr-2 text-primary" />
+                AI Trip Suggestions
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {isGenerating ? (
-                <div className="text-center py-12">
-                  <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-slate-700 mb-2">Crafting Your Perfect Trip</h3>
-                  <p className="text-gray-600">Our AI is analyzing your preferences...</p>
+              {isGenerating && (
+                <div className="text-center py-8">
+                  <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin text-primary" />
+                  <p className="text-lg font-medium text-gray-700">Creating your perfect trip suggestions...</p>
+                  <p className="text-sm text-gray-500 mt-2">This may take a few moments</p>
                 </div>
-              ) : aiSuggestion ? (
+              )}
+
+              {aiSuggestions.length > 0 && !isGenerating && (
                 <div className="space-y-6">
-                  {/* Trip Overview */}
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-700 mb-2">{aiSuggestion.title}</h3>
-                    <p className="text-gray-600 mb-4">{aiSuggestion.description}</p>
-                    
-                    <div className="flex flex-wrap gap-4 text-sm">
-                      <div className="flex items-center">
-                        <DollarSign className="w-4 h-4 text-green-600 mr-1" />
-                        <span>Budget: ${aiSuggestion.totalEstimatedCost}</span>
+                  {aiSuggestions.map((suggestion, index) => (
+                    <div key={index} className="border rounded-lg p-4 space-y-4">
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-700 mb-1">
+                          {suggestion.destination}, {suggestion.country}
+                        </h3>
+                        <p className="text-gray-600 leading-relaxed">
+                          {suggestion.description}
+                        </p>
                       </div>
-                      <div className="flex items-center">
-                        <MapPin className="w-4 h-4 text-blue-600 mr-1" />
-                        <span>{aiSuggestion.destinations?.length || 0} destinations</span>
-                      </div>
-                    </div>
-                  </div>
 
-                  <Separator />
-
-                  {/* Destinations */}
-                  <div>
-                    <h4 className="font-semibold text-slate-700 mb-3">Destinations</h4>
-                    <div className="space-y-3">
-                      {aiSuggestion.destinations?.map((dest: any, index: number) => (
-                        <div key={index} className="bg-gray-50 rounded-lg p-4">
-                          <h5 className="font-medium text-slate-700 mb-2">{dest.name}</h5>
-                          <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-                            <div className="flex items-center">
-                              <Clock className="w-4 h-4 mr-1" />
-                              {dest.days} days
-                            </div>
-                            <div className="flex items-center">
-                              <DollarSign className="w-4 h-4 mr-1" />
-                              ${dest.estimatedCost}
-                            </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <div className="flex items-center mb-1">
+                            <Calendar className="w-4 h-4 mr-2 text-blue-600" />
+                            <span className="font-semibold text-blue-800 text-sm">Duration</span>
                           </div>
-                          <div className="flex flex-wrap gap-1">
-                            {dest.activities?.map((activity: string, i: number) => (
-                              <Badge key={i} variant="secondary" className="text-xs">
-                                {activity}
-                              </Badge>
-                            ))}
-                          </div>
+                          <p className="text-blue-700 text-sm">{suggestion.duration}</p>
                         </div>
-                      ))}
+
+                        <div className="bg-green-50 p-3 rounded-lg">
+                          <div className="flex items-center mb-1">
+                            <DollarSign className="w-4 h-4 mr-2 text-green-600" />
+                            <span className="font-semibold text-green-800 text-sm">Budget</span>
+                          </div>
+                          <p className="text-green-700 text-sm font-bold">
+                            ${suggestion.estimatedBudget.low} - ${suggestion.estimatedBudget.high}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold text-slate-700 mb-2 text-sm">Best Time to Visit</h4>
+                        <p className="text-sm text-gray-600">{suggestion.bestTimeToVisit}</p>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold text-slate-700 mb-2 text-sm">Highlights</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {suggestion.highlights?.map((highlight: string, idx: number) => (
+                            <Badge key={idx} variant="secondary" className="text-xs">
+                              {highlight}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold text-slate-700 mb-2 text-sm">Travel Style</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {suggestion.travelStyle?.map((style: string, idx: number) => (
+                            <Badge key={idx} variant="outline" className="text-xs">
+                              {style}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-2">
+                        <Button 
+                          onClick={() => handleSaveTrip(suggestion)}
+                          disabled={createTripMutation.isPending}
+                          className="w-full"
+                        >
+                          {createTripMutation.isPending ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Saving...
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              Save This Trip
+                            </>
+                          )}
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  ))}
 
-                  <Separator />
-
-                  {/* Recommendations */}
-                  <div>
-                    <h4 className="font-semibold text-slate-700 mb-3">AI Recommendations</h4>
-                    <ul className="space-y-2">
-                      {aiSuggestion.recommendations?.map((rec: string, index: number) => (
-                        <li key={index} className="flex items-start">
-                          <CheckCircle className="w-4 h-4 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-600">{rec}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <Separator />
-
-                  {/* Weather Information */}
-                  {aiSuggestion.destinations?.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold text-slate-700 mb-3">Weather & Travel Conditions</h4>
-                      <WeatherWidget 
-                        destination={aiSuggestion.destinations[0].name}
-                        country={form.getValues('destination')}
-                        showRecommendations={true}
-                      />
-                    </div>
-                  )}
-
-                  <Separator />
-
-                  {/* Save Trip */}
-                  <div className="flex gap-3">
+                  <div className="text-center pt-4">
                     <Button 
-                      onClick={handleSaveTrip}
-                      disabled={createTripMutation.isPending}
-                      className="flex-1 bg-success hover:bg-green-700"
+                      variant="outline"
+                      onClick={handleGenerateAITrips}
+                      disabled={isGenerating}
                     >
-                      {createTripMutation.isPending ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle className="w-4 h-4 mr-2" />
-                          Save Trip
-                        </>
-                      )}
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setAiSuggestion(null)}
-                      className="flex-1"
-                    >
-                      Start Over
+                      Generate New Suggestions
                     </Button>
                   </div>
                 </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Bot className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-600 mb-2">Ready to Plan?</h3>
-                  <p className="text-gray-500">Fill in your preferences and click "Generate My Trip" to get started.</p>
+              )}
+
+              {aiSuggestions.length === 0 && !isGenerating && (
+                <div className="text-center py-8">
+                  <Bot className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                  <p className="text-lg font-medium text-gray-700 mb-2">Ready to plan your South American adventure?</p>
+                  <p className="text-sm text-gray-500">
+                    Fill in your preferences and click "Generate AI Trip Suggestions" to get personalized recommendations
+                  </p>
                 </div>
               )}
             </CardContent>

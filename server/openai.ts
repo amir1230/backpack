@@ -33,10 +33,10 @@ export interface BudgetOptimization {
   potentialSavings: number;
 }
 
-// Generate travel suggestions for South America based on preferences
+// Generate personalized travel suggestions for South America based on user preferences
 export async function generateTravelSuggestions(
   preferences: {
-    travelStyle?: string;
+    travelStyle?: string[];
     budget?: number;
     duration?: string;
     interests?: string[];
@@ -51,36 +51,50 @@ export async function generateTravelSuggestions(
     
     console.log('OpenAI API Key exists:', !!process.env.OPENAI_API_KEY);
     console.log('Generating suggestions with preferences:', preferences);
-    const prompt = `Generate travel suggestions for South America based on these preferences:
+    
+    const travelStylesStr = preferences.travelStyle?.join(', ') || 'Flexible';
+    const budgetStr = preferences.budget ? `$${preferences.budget}` : 'Flexible';
+    const durationStr = preferences.duration || 'Flexible';
+    const interestsStr = preferences.interests?.join(', ') || 'General exploration';
+    const countriesStr = preferences.preferredCountries?.join(', ') || 'Any South American country';
 
-Travel Style: ${preferences.travelStyle || 'Any'}
-Budget: $${preferences.budget || 'Flexible'}
-Duration: ${preferences.duration || 'Flexible'}
-Interests: ${preferences.interests?.join(', ') || 'General sightseeing'}
-Preferred Countries: ${preferences.preferredCountries?.join(', ') || 'Any South American country'}
+    const prompt = `You are TripWise – a smart, friendly, and social travel planner built for Gen Z and solo travelers.  
+Your mission is to help travelers discover personalized, exciting, and budget-conscious trips across South America.
 
-Return a JSON object with a "suggestions" array containing 3 trip suggestions. Each suggestion must have:
-- destination (string): City or region name
-- country (string): South American country
-- description (string): Brief overview of the trip
-- bestTimeToVisit (string): Best months to visit
-- estimatedBudget (object): {low: number, high: number} in USD
-- highlights (array): List of 3-5 main activities/attractions
-- travelStyle (array): List of applicable travel styles
-- duration (string): Recommended trip length
+Using the following preferences:
+- Travel Style: ${travelStylesStr}
+- Budget: ${budgetStr}
+- Duration: ${durationStr}
+- Interests: ${interestsStr}
+- Preferred Countries: ${countriesStr}
 
-Example response format:
+Provide 3 trip suggestions in a JSON format.  
+Each suggestion should feel exciting and tailored, not generic.
+
+For each suggestion, include:
+- destination (city or region name)
+- country
+- description: 2–3 sentence overview (inspiring and clear)
+- bestTimeToVisit: e.g., "April to June"
+- estimatedBudget: {low, high} in USD
+- highlights: 3–5 key attractions or activities
+- travelStyle: relevant styles (e.g., adventure, culture, relax)
+- duration: how long to stay (e.g., "7–10 days")
+
+Make sure the suggestions are diverse — different vibes, locations and experiences. Speak like a local travel buddy, not a formal guide.
+
+Return ONLY a JSON object with this exact structure:
 {
   "suggestions": [
     {
-      "destination": "Cusco",
-      "country": "Peru", 
-      "description": "Ancient Inca capital with stunning architecture",
-      "bestTimeToVisit": "May to September",
-      "estimatedBudget": {"low": 800, "high": 1500},
-      "highlights": ["Machu Picchu", "Sacred Valley", "Local markets"],
-      "travelStyle": ["adventure", "cultural"],
-      "duration": "7-10 days"
+      "destination": "string",
+      "country": "string",
+      "description": "string",
+      "bestTimeToVisit": "string",
+      "estimatedBudget": {"low": number, "high": number},
+      "highlights": ["string", "string", "string"],
+      "travelStyle": ["string", "string"],
+      "duration": "string"
     }
   ]
 }`;
@@ -90,7 +104,7 @@ Example response format:
       messages: [
         {
           role: "system",
-          content: "You are an expert South American travel planner. Provide detailed, practical travel suggestions in JSON format with the structure: [{destination, country, description, bestTimeToVisit, estimatedBudget: {low, high}, highlights: [], travelStyle: [], duration}]"
+          content: "You are TripWise, a smart and friendly travel planner for Gen Z and solo travelers exploring South America. Provide exciting, personalized trip suggestions in JSON format. Be authentic, inspiring, and speak like a travel buddy, not a formal guide."
         },
         {
           role: "user",
