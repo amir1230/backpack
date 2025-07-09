@@ -26,6 +26,7 @@ import {
   conversationalTripAssistant,
   generateConversationalSuggestions
 } from "./openai";
+import { generateItinerary as generateDetailedItinerary } from "./generateItinerary";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -721,6 +722,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Get user trips error:", error);
       res.status(500).json({ 
         message: "Failed to fetch user trips",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Generate detailed day-by-day itinerary
+  app.post('/api/generate-itinerary', async (req, res) => {
+    try {
+      const { userId, destination, duration, interests, travelStyle, budget } = req.body;
+      
+      if (!destination || !duration || !budget) {
+        return res.status(400).json({ message: "Missing required fields: destination, duration, budget" });
+      }
+
+      const itineraryRequest = {
+        userId: userId || 'guest',
+        destination,
+        duration: parseInt(duration) || 7,
+        interests: interests || [],
+        travelStyle: travelStyle || [],
+        budget: parseInt(budget) || 50
+      };
+
+      const itinerary = await generateDetailedItinerary(itineraryRequest);
+      res.json({ itinerary });
+    } catch (error) {
+      console.error("Generate itinerary error:", error);
+      res.status(500).json({ 
+        message: "Failed to generate itinerary",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }
