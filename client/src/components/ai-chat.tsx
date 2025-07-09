@@ -34,7 +34,7 @@ export default function AiChat({ className }: AiChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hi! I'm TripWise AI, your South American travel assistant. I can help you with trip planning, budget advice, destination recommendations, and practical travel tips. What would you like to know?",
+      content: "Hi! I'm TripWise – your smart travel assistant for South American adventures! 🌎\n\nJust tell me what you're thinking (even incomplete ideas like 'I want to go to Peru') and I'll help you build the perfect trip by asking the right questions about budget, timing, and what you love to do!\n\nTry one of the prompts below or just start chatting:",
       sender: 'ai',
       timestamp: new Date()
     }
@@ -92,10 +92,10 @@ export default function AiChat({ className }: AiChatProps) {
   };
 
   const quickPrompts = [
-    { text: "Plan a 2-week trip to Peru", icon: MapPin },
-    { text: "Budget advice for backpacking", icon: DollarSign },
-    { text: "Best time to visit Colombia", icon: Calendar },
-    { text: "Safety tips for solo travel", icon: User }
+    { text: "I want to go to Peru", icon: MapPin },
+    { text: "Help me plan a backpacking trip", icon: DollarSign },
+    { text: "I love hiking and nature", icon: Calendar },
+    { text: "Solo travel in South America", icon: User }
   ];
 
   const handleQuickPrompt = (prompt: string) => {
