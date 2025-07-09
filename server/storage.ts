@@ -219,20 +219,36 @@ export class DatabaseStorage implements IStorage {
   // Simple trip saving for suggestions (creates a new trip)
   async saveUserTrip(userId: string, trip: any): Promise<void> {
     try {
+      // Format destinations as a proper JSONB array or object
+      let destinationsData;
+      
+      if (typeof trip.destinations === 'string') {
+        // If it's a string, wrap it in an array
+        destinationsData = [trip.destinations];
+      } else if (Array.isArray(trip.destinations)) {
+        // If it's already an array, use it as is
+        destinationsData = trip.destinations;
+      } else {
+        // Otherwise, create from the destination field
+        destinationsData = [trip.destination || 'Unknown destination'];
+      }
+
       const tripData: InsertTrip = {
         userId: userId,
         title: trip.destination || trip.title || 'Saved Trip',
         description: trip.description || `Trip to ${trip.destination}`,
-        destinations: trip.destination || trip.destinations || '',
-        duration: trip.duration || '7 days',
+        destinations: destinationsData, // Simple JSONB array
         budget: trip.budget || trip.estimatedBudget?.high?.toString() || '1000',
         travelStyle: Array.isArray(trip.travelStyle) ? trip.travelStyle.join(', ') : (trip.travelStyle || 'Adventure'),
         isPublic: false
       };
 
+      console.log('Saving trip data:', JSON.stringify(tripData, null, 2));
       await db.insert(trips).values(tripData);
+      console.log('Trip saved successfully');
     } catch (error) {
       console.error('Error saving user trip:', error);
+      console.error('Error details:', error);
       throw new Error('Failed to save trip to database');
     }
   }

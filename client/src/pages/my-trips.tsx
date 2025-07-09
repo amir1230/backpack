@@ -29,12 +29,12 @@ interface TripSuggestion {
 
 interface SavedTrip {
   id: number;
-  destination: string;
+  title: string;
+  destinations: any; // JSONB object with structured destination data
   description: string;
-  estimatedBudget: number;
+  budget: string;
   duration: string;
-  highlights: string[];
-  travelStyle: string[];
+  travelStyle: string; // This is stored as a string in the database
   createdAt: string;
 }
 
@@ -401,7 +401,7 @@ export default function MyTripsScreen() {
                 {savedTrips.map((trip: SavedTrip) => (
                   <Card key={trip.id} className="h-fit">
                     <CardHeader>
-                      <CardTitle className="text-lg">{trip.destination}</CardTitle>
+                      <CardTitle className="text-lg">{trip.title || trip.destinations}</CardTitle>
                       <CardDescription>
                         Saved on {new Date(trip.createdAt).toLocaleDateString()}
                       </CardDescription>
@@ -412,7 +412,7 @@ export default function MyTripsScreen() {
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="flex items-center gap-2">
                           <DollarSign className="w-4 h-4 text-green-600" />
-                          <span>${trip.estimatedBudget}</span>
+                          <span>${trip.budget}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-blue-600" />
@@ -420,26 +420,29 @@ export default function MyTripsScreen() {
                         </div>
                       </div>
 
-                      {trip.highlights && trip.highlights.length > 0 && (
+                      {trip.destinations && (
                         <div>
-                          <Label className="text-sm font-medium">Highlights</Label>
+                          <Label className="text-sm font-medium">Destination</Label>
                           <div className="flex flex-wrap gap-1 mt-1">
-                            {trip.highlights.slice(0, 3).map((highlight, idx) => (
-                              <Badge key={idx} variant="secondary" className="text-xs">
-                                {highlight}
-                              </Badge>
-                            ))}
+                            <Badge variant="secondary" className="text-xs">
+                              <MapPin className="w-3 h-3 mr-1" />
+                              {Array.isArray(trip.destinations) 
+                                ? trip.destinations.join(', ') 
+                                : typeof trip.destinations === 'string'
+                                  ? trip.destinations
+                                  : 'Unknown destination'}
+                            </Badge>
                           </div>
                         </div>
                       )}
 
-                      {trip.travelStyle && trip.travelStyle.length > 0 && (
+                      {trip.travelStyle && (
                         <div>
                           <Label className="text-sm font-medium">Travel Style</Label>
                           <div className="flex flex-wrap gap-1 mt-1">
-                            {trip.travelStyle.map((style, idx) => (
+                            {trip.travelStyle.split(', ').map((style, idx) => (
                               <Badge key={idx} variant="outline" className="text-xs">
-                                {style}
+                                {style.trim()}
                               </Badge>
                             ))}
                           </div>
