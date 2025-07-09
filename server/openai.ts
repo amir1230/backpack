@@ -33,6 +33,26 @@ export interface BudgetOptimization {
   potentialSavings: number;
 }
 
+export interface ChatContext {
+  userTrips?: any[];
+  currentLocation?: string;
+  travelPreferences?: any;
+  previousSuggestions?: TripSuggestion[];
+  chatHistory?: Array<{
+    role: 'user' | 'assistant';
+    content: string;
+    timestamp: Date;
+  }>;
+}
+
+export interface ConversationalResponse {
+  type: 'question' | 'suggestions' | 'general';
+  message: string;
+  suggestions?: TripSuggestion[];
+  missingInfo?: string[];
+  nextActions?: string[];
+}
+
 // Generate personalized travel suggestions for South America based on user preferences
 export async function generateTravelSuggestions(
   preferences: {
@@ -276,7 +296,167 @@ Focus on practical tips, hidden gems, and advice that addresses common concerns 
   }
 }
 
-// Chat assistant for travel questions with conversational guidance
+// Enhanced conversational AI that maintains chat history and generates trip suggestions
+export async function conversationalTripAssistant(
+  message: string,
+  context: ChatContext = {}
+): Promise<ConversationalResponse> {
+  try {
+    const { userTrips = [], travelPreferences, previousSuggestions = [], chatHistory = [] } = context;
+    
+    // Extract information from chat history
+    const chatText = chatHistory.map(h => `${h.role}: ${h.content}`).join('\n');
+    const previousDestinations = previousSuggestions.map(s => s.destination).join(', ');
+    
+    const contextInfo = `
+Current context:
+- User trips: ${userTrips.length} trips planned
+- Previous suggestions: ${previousDestinations || 'None'}
+- Travel style: ${travelPreferences?.style || 'Not specified'}
+- Chat history length: ${chatHistory.length} messages
+
+Previous conversation:
+${chatText}
+`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `You are TripWise – a smart, friendly, and social travel planner built for Gen Z and solo travelers.
+
+Your role is to:
+1. Provide personalized travel suggestions based on the user's preferences.
+2. Maintain conversation continuity and remember what has been discussed.
+3. Generate trip suggestions when you have enough information.
+
+When receiving new input, do the following:
+- Check if the user has provided a destination, interests, duration, travel style, and daily budget.
+- If anything is missing, ask follow-up questions in a casual, helpful tone (use emojis if you want).
+- Once you have all the info, indicate that you're ready to generate suggestions.
+- Do not repeat destinations from previous suggestions: ${previousDestinations}
+
+If you have enough information to generate suggestions, respond with:
+"GENERATE_SUGGESTIONS" followed by your response.
+
+Style:
+- Write like a friendly, adventurous local friend – not like a travel agent.
+- Be energetic, positive, and clear.
+- Ask one question at a time to avoid overwhelming the user.
+
+Focus on South American travel experiences.${contextInfo}`
+        },
+        {
+          role: "user",
+          content: message
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 600
+    });
+
+    const aiResponse = response.choices[0].message.content || '';
+    
+    // Check if AI wants to generate suggestions
+    if (aiResponse.includes('GENERATE_SUGGESTIONS')) {
+      return {
+        type: 'suggestions',
+        message: aiResponse.replace('GENERATE_SUGGESTIONS', '').trim(),
+        suggestions: [],
+        nextActions: ['generate', 'modify', 'save']
+      };
+    }
+    
+    return {
+      type: 'question',
+      message: aiResponse,
+      missingInfo: []
+    };
+    
+  } catch (error) {
+    console.error('Error in conversational trip assistant:', error);
+    throw new Error('Failed to get response from travel assistant');
+  }
+}
+
+// Generate suggestions with conversation context
+export async function generateConversationalSuggestions(
+  chatHistory: Array<{role: 'user' | 'assistant'; content: string;}>,
+  previousSuggestions: TripSuggestion[] = []
+): Promise<TripSuggestion[]> {
+  try {
+    const conversationText = chatHistory.map(h => `${h.role}: ${h.content}`).join('\n');
+    const previousDestinations = previousSuggestions.map(s => `${s.destination}, ${s.country}`).join('; ');
+    
+    const prompt = `You are TripWise – a smart, friendly, and social travel planner built for Gen Z and solo travelers.
+
+Based on this conversation, generate 3 exciting, personalized trip suggestions for South America:
+
+Conversation:
+${conversationText}
+
+IMPORTANT: Do not suggest these previously mentioned destinations: ${previousDestinations}
+
+Generate 3 trip suggestions in JSON format. Each suggestion should include:
+- destination: city or region
+- country: South American country  
+- description: 2–3 engaging sentences
+- bestTimeToVisit: e.g., "April to June"
+- estimatedBudget: {low, high} in USD
+- highlights: 3–5 key places or experiences
+- travelStyle: ["adventure", "chill", etc.]
+- duration: how long to stay (e.g., "7–10 days")
+
+Make sure the suggestions are diverse — different vibes, locations and experiences. Speak like a local travel buddy, not a formal guide.
+
+Return ONLY a JSON object with this exact structure:
+{
+  "suggestions": [
+    {
+      "destination": "string",
+      "country": "string", 
+      "description": "string",
+      "bestTimeToVisit": "string",
+      "estimatedBudget": {"low": number, "high": number},
+      "highlights": ["string"],
+      "travelStyle": ["string"],
+      "duration": "string"
+    }
+  ]
+}`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are TripWise, a smart and friendly travel planner for Gen Z and solo travelers exploring South America. Generate exciting, personalized trip suggestions in JSON format. Be authentic, inspiring, and speak like a travel buddy."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error('No content received from OpenAI');
+    }
+    
+    const result = JSON.parse(content);
+    return result.suggestions || [];
+    
+  } catch (error) {
+    console.error('Error generating conversational suggestions:', error);
+    throw new Error('Failed to generate trip suggestions');
+  }
+}
+
+// Legacy chat assistant for backward compatibility  
 export async function chatAssistant(
   message: string,
   context?: {
@@ -286,44 +466,14 @@ export async function chatAssistant(
   }
 ): Promise<string> {
   try {
-    const contextInfo = context ? `
-Current context:
-- User trips: ${context.userTrips?.length || 0} trips planned
-- Current location: ${context.currentLocation || 'Not specified'}
-- Travel style: ${context.travelPreferences?.style || 'Not specified'}
-` : '';
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: `You are TripWise – a smart travel assistant that helps build trip plans for young, independent travelers.
-
-When a user gives you incomplete input (like "I want to go to Peru"), respond in a friendly, helpful way to collect missing info.
-
-Ask questions like:
-- What's your travel budget per day?
-- How long is your trip?
-- What do you enjoy most when you travel? (e.g., nature, parties, local food, hiking, yoga)
-- Do you prefer to travel solo or with others?
-- Are there any countries you definitely want (or don't want) to visit?
-
-Make it short and warm. Use emojis if needed.
-Once you have all info – trigger the itinerary or suggestion generator.
-
-Focus on South American travel experiences. Be conversational, helpful, and guide users step-by-step through trip planning.${contextInfo}`
-        },
-        {
-          role: "user",
-          content: message
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 500
-    });
-
-    return response.choices[0].message.content || 'I apologize, but I couldn\'t process your request. Please try again.';
+    const chatContext: ChatContext = {
+      userTrips: context?.userTrips,
+      currentLocation: context?.currentLocation,
+      travelPreferences: context?.travelPreferences
+    };
+    
+    const response = await conversationalTripAssistant(message, chatContext);
+    return response.message;
   } catch (error) {
     console.error('Error in chat assistant:', error);
     throw new Error('Failed to get response from travel assistant');

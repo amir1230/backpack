@@ -16,7 +16,10 @@ import {
   MapPin,
   DollarSign,
   Calendar,
-  User
+  User,
+  Save,
+  RefreshCw,
+  Clock
 } from "lucide-react";
 
 interface Message {
@@ -24,6 +27,22 @@ interface Message {
   content: string;
   sender: 'user' | 'ai';
   timestamp: Date;
+  suggestions?: TripSuggestion[];
+  type?: 'question' | 'suggestions' | 'general';
+}
+
+interface TripSuggestion {
+  destination: string;
+  country: string;
+  description: string;
+  bestTimeToVisit: string;
+  estimatedBudget: {
+    low: number;
+    high: number;
+  };
+  highlights: string[];
+  travelStyle: string[];
+  duration: string;
 }
 
 interface AiChatProps {
@@ -40,6 +59,7 @@ export default function AiChat({ className }: AiChatProps) {
     }
   ]);
   const [newMessage, setNewMessage] = useState("");
+  const [allSuggestions, setAllSuggestions] = useState<TripSuggestion[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -53,16 +73,35 @@ export default function AiChat({ className }: AiChatProps) {
 
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
-      const response = await apiRequest('POST', '/api/ai/chat', { message });
+      // Prepare chat history for API call
+      const chatHistory = messages.slice(1).map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'assistant',
+        content: msg.content
+      }));
+      
+      const response = await apiRequest('POST', '/api/ai/chat', { 
+        message,
+        chatHistory,
+        previousSuggestions: allSuggestions
+      });
       return response.json();
     },
     onSuccess: (data) => {
-      setMessages(prev => [...prev, {
+      const newMessage: Message = {
         id: Date.now().toString(),
-        content: data.response,
+        content: data.message || data.response,
         sender: 'ai',
-        timestamp: new Date()
-      }]);
+        timestamp: new Date(),
+        type: data.type,
+        suggestions: data.suggestions
+      };
+      
+      setMessages(prev => [...prev, newMessage]);
+      
+      // Add new suggestions to the collection
+      if (data.suggestions && data.suggestions.length > 0) {
+        setAllSuggestions(prev => [...prev, ...data.suggestions]);
+      }
     },
     onError: (error) => {
       console.error('Chat error:', error);
@@ -101,6 +140,91 @@ export default function AiChat({ className }: AiChatProps) {
   const handleQuickPrompt = (prompt: string) => {
     setNewMessage(prompt);
   };
+
+  const saveTripMutation = useMutation({
+    mutationFn: async (suggestion: TripSuggestion) => {
+      const tripData = {
+        destination: `${suggestion.destination}, ${suggestion.country}`,
+        description: suggestion.description,
+        estimatedBudget: suggestion.estimatedBudget.high,
+        duration: suggestion.duration,
+        isPublic: false,
+        highlights: suggestion.highlights,
+        travelStyle: suggestion.travelStyle
+      };
+      
+      const response = await apiRequest('POST', '/api/trips', tripData);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Trip Saved!",
+        description: "Your trip has been saved to My Trips.",
+      });
+    },
+    onError: (error) => {
+      console.error('Save trip error:', error);
+      toast({
+        title: "Save Error",
+        description: "Failed to save trip. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const generateMoreSuggestions = () => {
+    if (messages.length > 1) {
+      chatMutation.mutate("Can you give me 3 more different trip suggestions?");
+    }
+  };
+
+  const SuggestionCard = ({ suggestion }: { suggestion: TripSuggestion }) => (
+    <div className="bg-card border rounded-lg p-4 mb-3 space-y-3">
+      <div className="flex justify-between items-start">
+        <div>
+          <h4 className="font-semibold text-lg">{suggestion.destination}</h4>
+          <p className="text-sm text-muted-foreground">{suggestion.country}</p>
+        </div>
+        <Badge variant="outline" className="text-xs">
+          {suggestion.duration}
+        </Badge>
+      </div>
+      
+      <p className="text-sm">{suggestion.description}</p>
+      
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <div>
+          <span className="font-medium">Budget:</span> ${suggestion.estimatedBudget.low}-${suggestion.estimatedBudget.high}
+        </div>
+        <div>
+          <span className="font-medium">Best Time:</span> {suggestion.bestTimeToVisit}
+        </div>
+      </div>
+      
+      <div>
+        <span className="font-medium text-xs">Highlights:</span>
+        <div className="flex flex-wrap gap-1 mt-1">
+          {suggestion.highlights.slice(0, 3).map((highlight, idx) => (
+            <Badge key={idx} variant="secondary" className="text-xs">
+              {highlight}
+            </Badge>
+          ))}
+        </div>
+      </div>
+      
+      <div className="flex gap-2">
+        <Button 
+          size="sm" 
+          onClick={() => saveTripMutation.mutate(suggestion)}
+          disabled={saveTripMutation.isPending}
+          className="flex-1"
+        >
+          <Save className="w-3 h-3 mr-1" />
+          Save Trip
+        </Button>
+      </div>
+    </div>
+  );
 
   return (
     <Card className={className}>
@@ -142,6 +266,30 @@ export default function AiChat({ className }: AiChatProps) {
                   }`}
                 >
                   <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  
+                  {/* Display trip suggestions if included */}
+                  {message.suggestions && message.suggestions.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-sm">🌎 Trip Suggestions</h4>
+                        {allSuggestions.length > 0 && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={generateMoreSuggestions}
+                            disabled={chatMutation.isPending}
+                          >
+                            <RefreshCw className="w-3 h-3 mr-1" />
+                            More Ideas
+                          </Button>
+                        )}
+                      </div>
+                      {message.suggestions.map((suggestion, idx) => (
+                        <SuggestionCard key={idx} suggestion={suggestion} />
+                      ))}
+                    </div>
+                  )}
+                  
                   <span className="text-xs opacity-70 mt-1 block">
                     {message.timestamp.toLocaleTimeString([], { 
                       hour: '2-digit', 

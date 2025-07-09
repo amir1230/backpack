@@ -22,7 +22,9 @@ import {
   generateItinerary,
   analyzeBudget,
   generateRecommendations,
-  chatAssistant
+  chatAssistant,
+  conversationalTripAssistant,
+  generateConversationalSuggestions
 } from "./openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -622,8 +624,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI chat assistant
+  // Enhanced AI chat assistant with conversation history
   app.post('/api/ai/chat', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { message, chatHistory = [], previousSuggestions = [] } = req.body;
+      
+      // Get user context
+      const userTrips = await storage.getUserTrips(userId);
+      const user = await storage.getUser(userId);
+      
+      const context = {
+        userTrips,
+        travelPreferences: user,
+        chatHistory,
+        previousSuggestions
+      };
+
+      const response = await conversationalTripAssistant(message, context);
+      
+      // If AI indicates it's ready to generate suggestions, generate them
+      if (response.type === 'suggestions') {
+        const suggestions = await generateConversationalSuggestions(chatHistory, previousSuggestions);
+        response.suggestions = suggestions;
+        
+        // Store suggestions for this user session (could be expanded to database storage)
+        // For now, we'll return them in the response for client-side management
+      }
+      
+      res.json(response);
+    } catch (error) {
+      console.error("Error in chat assistant:", error);
+      res.status(500).json({ message: "Failed to get chat response" });
+    }
+  });
+
+  // Generate trip suggestions based on conversation
+  app.post('/api/ai/conversational-suggestions', isAuthenticated, async (req: any, res) => {
+    try {
+      const { chatHistory = [], previousSuggestions = [] } = req.body;
+      
+      const suggestions = await generateConversationalSuggestions(chatHistory, previousSuggestions);
+      res.json({ suggestions });
+    } catch (error) {
+      console.error("Error generating conversational suggestions:", error);
+      res.status(500).json({ message: "Failed to generate suggestions from conversation" });
+    }
+  });
+
+  // Legacy AI chat assistant for backward compatibility
+  app.post('/api/ai/chat-legacy', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { message } = req.body;
