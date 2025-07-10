@@ -21,6 +21,7 @@ import {
   RefreshCw,
   Clock
 } from "lucide-react";
+import { RealPlaceLinks } from "@/components/RealPlaceLinks";
 
 interface Message {
   id: string;
@@ -29,6 +30,16 @@ interface Message {
   timestamp: Date;
   suggestions?: TripSuggestion[];
   type?: 'question' | 'suggestions' | 'general';
+}
+
+interface RealPlace {
+  title: string;
+  link?: string;
+  source?: "Google" | "GetYourGuide" | "TripAdvisor";
+  placeId?: string;
+  rating?: number;
+  address?: string;
+  photoUrl?: string;
 }
 
 interface TripSuggestion {
@@ -43,6 +54,7 @@ interface TripSuggestion {
   highlights: string[];
   travelStyle: string[];
   duration: string;
+  realPlaces?: RealPlace[];
 }
 
 interface AiChatProps {
@@ -211,6 +223,9 @@ export default function AiChat({ className }: AiChatProps) {
           ))}
         </div>
       </div>
+      
+      {/* Real Places Links Component */}
+      <RealPlaceLinks suggestion={suggestion} />
       
       <div className="flex gap-2">
         <Button 

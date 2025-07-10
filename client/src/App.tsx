@@ -18,6 +18,7 @@ import Weather from "@/pages/weather";
 import MyTripsScreen from "@/pages/my-trips";
 import Onboarding from "@/pages/onboarding";
 import Registry from "@/pages/registry";
+import DemoRealPlaces from "@/pages/demo-real-places";
 import Navigation from "@/components/navigation";
 import { ErrorBoundary } from "@/components/error-boundary";
 
@@ -52,6 +53,7 @@ function AuthenticatedApp() {
           <Route path="/my-trips" component={MyTripsScreen} />
           <Route path="/onboarding" component={Onboarding} />
           <Route path="/registry" component={Registry} />
+          <Route path="/demo-real-places" component={DemoRealPlaces} />
           <Route component={NotFound} />
         </Switch>
       </main>

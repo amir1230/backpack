@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { WeatherWidget } from "@/components/WeatherWidget";
+import { RealPlaceLinks } from "@/components/RealPlaceLinks";
 import { 
   Bot, 
   MapPin, 
@@ -45,6 +46,31 @@ const tripFormSchema = z.object({
 });
 
 type TripFormData = z.infer<typeof tripFormSchema>;
+
+interface RealPlace {
+  title: string;
+  link?: string;
+  source?: "Google" | "GetYourGuide" | "TripAdvisor";
+  placeId?: string;
+  rating?: number;
+  address?: string;
+  photoUrl?: string;
+}
+
+interface TripSuggestion {
+  destination: string;
+  country: string;
+  description: string;
+  bestTimeToVisit: string;
+  estimatedBudget: {
+    low: number;
+    high: number;
+  };
+  highlights: string[];
+  travelStyle: string[];
+  duration: string;
+  realPlaces?: RealPlace[];
+}
 
 interface ItineraryDay {
   day: number;
@@ -190,7 +216,7 @@ export default function TripBuilder() {
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
-  const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
+  const [aiSuggestions, setAiSuggestions] = useState<TripSuggestion[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [itinerary, setItinerary] = useState<ItineraryDay[]>([]);
   const [isGeneratingItinerary, setIsGeneratingItinerary] = useState(false);
@@ -675,6 +701,9 @@ export default function TripBuilder() {
                           ))}
                         </div>
                       </div>
+
+                      {/* Real Places Links Component */}
+                      <RealPlaceLinks suggestion={suggestion} />
 
                       <div className="pt-2 space-y-2">
                         <Button 
