@@ -11,6 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { MapPin, Star, Phone, Globe, Clock, DollarSign, Users, Camera, CloudSun } from "lucide-react";
 import DestinationWeather from "@/components/DestinationWeather";
 import { BestTimeInfo } from "@/components/BestTimeInfo";
+import { useTranslation } from 'react-i18next';
 
 interface Destination {
   id: number;
@@ -48,6 +49,7 @@ export default function ExplorePage() {
   const [activeTab, setActiveTab] = useState("destinations");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   // Fetch destinations
   const { data: destinations = [], isLoading: destinationsLoading } = useQuery({
@@ -151,16 +153,16 @@ export default function ExplorePage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Explore South America</h1>
+        <h1 className="text-3xl font-bold mb-4">{t('explore.title')}</h1>
         <p className="text-muted-foreground mb-6">
-          Discover amazing destinations across South America with real-time weather conditions and travel timing recommendations to help plan your perfect trip.
+          {t('explore.subtitle')}
         </p>
 
         {/* Search and Controls */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex flex-1 gap-2">
             <Input
-              placeholder="Search destinations, places..."
+              placeholder={t('explore.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1"
@@ -170,16 +172,16 @@ export default function ExplorePage() {
               disabled={googleSearchMutation.isPending}
               variant="outline"
             >
-              {googleSearchMutation.isPending ? "Searching..." : "Google Search"}
+              {googleSearchMutation.isPending ? t('explore.searching') : t('explore.googleSearch')}
             </Button>
           </div>
           
           <Select value={selectedCountry} onValueChange={setSelectedCountry}>
             <SelectTrigger className="w-full md:w-48">
-              <SelectValue placeholder="Select country" />
+              <SelectValue placeholder={t('explore.selectCountry')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Countries</SelectItem>
+              <SelectItem value="all">{t('explore.allCountries')}</SelectItem>
               {countries.map((country) => (
                 <SelectItem key={country} value={country}>
                   {country}
@@ -190,14 +192,14 @@ export default function ExplorePage() {
 
           <Select value={weatherFilter} onValueChange={setWeatherFilter}>
             <SelectTrigger className="w-full md:w-40">
-              <SelectValue placeholder="Weather" />
+              <SelectValue placeholder={t('explore.weather')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Weather</SelectItem>
-              <SelectItem value="sunny">☀️ Sunny</SelectItem>
-              <SelectItem value="mild">🌤️ Mild</SelectItem>
-              <SelectItem value="cool">☁️ Cool</SelectItem>
-              <SelectItem value="best-time">✨ Best Time</SelectItem>
+              <SelectItem value="all">{t('explore.allWeather')}</SelectItem>
+              <SelectItem value="sunny">{t('explore.sunny')}</SelectItem>
+              <SelectItem value="mild">{t('explore.mild')}</SelectItem>
+              <SelectItem value="cool">{t('explore.cool')}</SelectItem>
+              <SelectItem value="best-time">{t('explore.bestTime')}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -206,17 +208,17 @@ export default function ExplorePage() {
             disabled={seedDataMutation.isPending}
             variant="secondary"
           >
-            {seedDataMutation.isPending ? "Loading..." : "Load Sample Data"}
+            {seedDataMutation.isPending ? t('explore.loading') : t('explore.loadSampleData')}
           </Button>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="destinations">Destinations</TabsTrigger>
-          <TabsTrigger value="accommodations">Hotels</TabsTrigger>
-          <TabsTrigger value="attractions">Attractions</TabsTrigger>
-          <TabsTrigger value="restaurants">Restaurants</TabsTrigger>
+          <TabsTrigger value="destinations">{t('explore.destinations')}</TabsTrigger>
+          <TabsTrigger value="accommodations">{t('explore.hotels')}</TabsTrigger>
+          <TabsTrigger value="attractions">{t('explore.attractions')}</TabsTrigger>
+          <TabsTrigger value="restaurants">{t('explore.restaurants')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="destinations" className="mt-6">
@@ -237,7 +239,7 @@ export default function ExplorePage() {
               ))
             ) : filteredDestinations.length === 0 ? (
               <div className="col-span-full text-center py-12">
-                <p className="text-muted-foreground">No destinations found. Try adjusting your search or load sample data.</p>
+                <p className="text-muted-foreground">{t('explore.noDestinations')}</p>
               </div>
             ) : (
               filteredDestinations.map((destination: Destination) => (
@@ -281,7 +283,7 @@ export default function ExplorePage() {
                       </div>
                       
                       <div>
-                        <p className="text-sm font-medium mb-1">Top Attractions:</p>
+                        <p className="text-sm font-medium mb-1">{t('explore.topAttractions')}:</p>
                         <p className="text-xs text-muted-foreground">
                           {destination.attractions?.slice(0, 3).join(", ")}
                         </p>
@@ -318,7 +320,7 @@ export default function ExplorePage() {
                     <div className="flex items-center gap-2">
                       <div className="flex">{renderStars(hotel.rating)}</div>
                       <span className="text-sm text-muted-foreground">
-                        ({hotel.numReviews} reviews)
+                        ({hotel.numReviews} {t('explore.reviews')})
                       </span>
                       {hotel.priceLevel && (
                         <Badge variant="outline">{hotel.priceLevel}</Badge>
@@ -352,7 +354,7 @@ export default function ExplorePage() {
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:underline"
                           >
-                            Visit Website
+                            {t('explore.visitWebsite')}
                           </a>
                         </div>
                       )}
@@ -477,7 +479,7 @@ export default function ExplorePage() {
       {/* Google Places Search Results */}
       {googleSearchMutation.data && (
         <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Google Places Search Results</h2>
+          <h2 className="text-2xl font-bold mb-4">{t('explore.googlePlacesResults')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {googleSearchMutation.data.results.map((place: any) => (
               <Card key={place.place_id} className="border-blue-200">

@@ -18,6 +18,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { RealPlaceLinks } from "@/components/RealPlaceLinks";
+import { useTranslation } from 'react-i18next';
 import { 
   Bot, 
   MapPin, 
@@ -121,8 +122,8 @@ function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: Tri
     return (
       <div className="text-center py-8">
         <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin text-primary" />
-        <p className="text-lg font-medium text-gray-700">Creating your detailed itinerary...</p>
-        <p className="text-sm text-gray-500 mt-2">This may take a few moments</p>
+        <p className="text-lg font-medium text-gray-700">{t('tripBuilder.generatingDesc')}</p>
+        <p className="text-sm text-gray-500 mt-2">{t('common.fewMoments')}</p>
       </div>
     );
   }
@@ -131,13 +132,13 @@ function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: Tri
     return (
       <div className="text-center py-8">
         <Route className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-        <p className="text-lg font-medium text-gray-700 mb-2">No itinerary generated yet</p>
+        <p className="text-lg font-medium text-gray-700 mb-2">{t('tripBuilder.noItinerary')}</p>
         <p className="text-sm text-gray-500 mb-4">
-          Generate trip suggestions first, then create a detailed day-by-day itinerary
+          {t('tripBuilder.generateSuggestionsFirst')}
         </p>
         <Button onClick={onGenerateItinerary} variant="outline">
           <Route className="w-4 h-4 mr-2" />
-          Generate Sample Itinerary
+          {t('tripBuilder.generateSample')}
         </Button>
       </div>
     );
@@ -146,10 +147,10 @@ function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: Tri
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-bold text-slate-700">Your Day-by-Day Itinerary</h3>
+        <h3 className="text-xl font-bold text-slate-700">{t('tripBuilder.dayByDayItinerary')}</h3>
         <Button onClick={onGenerateItinerary} variant="outline" size="sm">
           <Route className="w-4 h-4 mr-2" />
-          Generate New
+          {t('tripBuilder.generateNew')}
         </Button>
       </div>
       
@@ -158,7 +159,7 @@ function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: Tri
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center text-lg">
               <Calendar className="w-5 h-5 mr-2 text-primary" />
-              Day {day.day} – {day.location}
+              {t('tripBuilder.day')} {day.day} – {day.location}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -166,7 +167,7 @@ function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: Tri
             <div>
               <div className="flex items-center mb-2">
                 <ListChecks className="w-4 h-4 mr-2 text-blue-600" />
-                <span className="font-semibold text-blue-800 text-sm">Activities</span>
+                <span className="font-semibold text-blue-800 text-sm">{t('tripBuilder.activities')}</span>
               </div>
               <ul className="space-y-1">
                 {day.activities.map((activity, idx) => (
@@ -182,7 +183,7 @@ function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: Tri
             <div className="bg-green-50 p-3 rounded-lg">
               <div className="flex items-center mb-1">
                 <DollarSign className="w-4 h-4 mr-2 text-green-600" />
-                <span className="font-semibold text-green-800 text-sm">Estimated Cost</span>
+                <span className="font-semibold text-green-800 text-sm">{t('tripBuilder.estimatedCost')}</span>
               </div>
               <p className="text-green-700 text-lg font-bold">${day.estimatedCost}</p>
             </div>
@@ -192,7 +193,7 @@ function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: Tri
               <div className="bg-yellow-50 p-3 rounded-lg">
                 <div className="flex items-center mb-2">
                   <Lightbulb className="w-4 h-4 mr-2 text-yellow-600" />
-                  <span className="font-semibold text-yellow-800 text-sm">Daily Tips</span>
+                  <span className="font-semibold text-yellow-800 text-sm">{t('tripBuilder.dailyTips')}</span>
                 </div>
                 <ul className="space-y-1">
                   {day.tips.map((tip, idx) => (
@@ -223,6 +224,7 @@ export default function TripBuilder() {
   const [activeTab, setActiveTab] = useState("preferences");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const form = useForm<TripFormData>({
     resolver: zodResolver(tripFormSchema),
@@ -465,23 +467,23 @@ export default function TripBuilder() {
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 pb-20 md:pb-8">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4">AI Trip Builder</h1>
-          <p className="text-lg text-gray-600">Tell us your preferences and let our AI create personalized South American trip suggestions</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4">{t('tripBuilder.title')}</h1>
+          <p className="text-lg text-gray-600">{t('tripBuilder.subtitle')}</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="preferences" className="flex items-center">
               <Bot className="w-4 h-4 mr-2" />
-              Preferences
+              {t('tripBuilder.preferences')}
             </TabsTrigger>
             <TabsTrigger value="suggestions" className="flex items-center">
               <Sparkles className="w-4 h-4 mr-2" />
-              Suggestions
+              {t('tripBuilder.suggestions')}
             </TabsTrigger>
             <TabsTrigger value="itinerary" className="flex items-center">
               <Route className="w-4 h-4 mr-2" />
-              Itinerary
+              {t('tripBuilder.itinerary')}
             </TabsTrigger>
           </TabsList>
 
@@ -492,7 +494,7 @@ export default function TripBuilder() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Bot className="w-6 h-6 mr-2 text-primary" />
-                AI Trip Builder
+                {t('tripBuilder.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">

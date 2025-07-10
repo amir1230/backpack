@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Loader2, MapPin, DollarSign, Calendar, Star, Users, ExternalLink, Camera } from "lucide-react";
 import { RealPlaceLinks } from "@/components/RealPlaceLinks";
-import { t, formatCurrencyHe, formatDateHe } from "@/lib/hebrew";
+import { useTranslation } from 'react-i18next';
 
 interface RealPlace {
   title: string;
@@ -72,6 +72,7 @@ const interests = [
 
 export default function MyTripsScreen() {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("generate");
   const [formData, setFormData] = useState<TripFormData>({
     destination: "",
