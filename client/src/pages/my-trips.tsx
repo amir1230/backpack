@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Loader2, MapPin, DollarSign, Calendar, Star, Users, ExternalLink, Camera } from "lucide-react";
 import { RealPlaceLinks } from "@/components/RealPlaceLinks";
+import { t, formatCurrencyHe, formatDateHe } from "@/lib/hebrew";
 
 interface RealPlace {
   title: string;
@@ -136,15 +137,15 @@ export default function MyTripsScreen() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/my-trips/guest'] });
       toast({
-        title: "Trip Saved!",
-        description: "Your trip has been saved to My Trips.",
+        title: t("messages.tripSaved"),
+        description: "הטיול שלך נשמר בטיולים שלי.",
       });
     },
     onError: (error) => {
       console.error('Save trip error:', error);
       toast({
-        title: "Save Error",
-        description: "Failed to save trip. Please try again.",
+        title: t("messages.errorSavingTrip"),
+        description: "נכשל בשמירת הטיול. אנא נסה שנית.",
         variant: "destructive"
       });
     }
@@ -155,8 +156,8 @@ export default function MyTripsScreen() {
     
     if (!formData.destination || !formData.duration || formData.travelStyle.length === 0) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in destination, duration, and select at least one travel style.",
+        title: "מידע חסר",
+        description: "אנא מלא יעד, משך זמן ובחר לפחות סגנון נסיעה אחד.",
         variant: "destructive"
       });
       return;
@@ -184,61 +185,61 @@ export default function MyTripsScreen() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-4" dir="rtl">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">My Trips</h1>
-          <p className="text-muted-foreground mt-2">Plan, discover, and manage your South American adventures</p>
+          <h1 className="text-3xl font-bold">{t("myTrips.title")}</h1>
+          <p className="text-muted-foreground mt-2">תכנן, גלה ונהל את ההרפתקאות הדרום אמריקאיות שלך</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="generate">Generate Trip</TabsTrigger>
-            <TabsTrigger value="suggestions">Suggestions</TabsTrigger>
-            <TabsTrigger value="saved">My Trips</TabsTrigger>
+            <TabsTrigger value="generate">{t("myTrips.generateTrip")}</TabsTrigger>
+            <TabsTrigger value="suggestions">{t("myTrips.suggestions")}</TabsTrigger>
+            <TabsTrigger value="saved">{t("myTrips.title")}</TabsTrigger>
           </TabsList>
 
           {/* Tab 1: Trip Generation Form */}
           <TabsContent value="generate" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Plan Your Next Adventure</CardTitle>
+                <CardTitle>תכנן את ההרפתקה הבאה שלך</CardTitle>
                 <CardDescription>
-                  Tell us about your dream trip and we'll create personalized suggestions for you
+                  ספר לנו על הטיול של החלומות שלך ואנחנו ניצור בשבילך הצעות מותאמות אישית
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleGenerateTrip} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="destination">Destination</Label>
+                      <Label htmlFor="destination">{t("myTrips.destination")}</Label>
                       <Input
                         id="destination"
-                        placeholder="e.g., Peru, Colombia, Argentina"
+                        placeholder="למשל: פרו, קולומביה, ארגנטינה"
                         value={formData.destination}
                         onChange={(e) => setFormData(prev => ({ ...prev, destination: e.target.value }))}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="duration">Trip Duration</Label>
+                      <Label htmlFor="duration">{t("common.duration")}</Label>
                       <Select value={formData.duration} onValueChange={(value) => setFormData(prev => ({ ...prev, duration: value }))}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select duration" />
+                          <SelectValue placeholder="בחר משך זמן" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="1-3 days">1-3 days</SelectItem>
-                          <SelectItem value="4-7 days">4-7 days</SelectItem>
-                          <SelectItem value="1-2 weeks">1-2 weeks</SelectItem>
-                          <SelectItem value="2-3 weeks">2-3 weeks</SelectItem>
-                          <SelectItem value="1 month">1 month</SelectItem>
-                          <SelectItem value="2+ months">2+ months</SelectItem>
+                          <SelectItem value="1-3 days">1-3 ימים</SelectItem>
+                          <SelectItem value="4-7 days">4-7 ימים</SelectItem>
+                          <SelectItem value="1-2 weeks">1-2 שבועות</SelectItem>
+                          <SelectItem value="2-3 weeks">2-3 שבועות</SelectItem>
+                          <SelectItem value="1 month">חודש אחד</SelectItem>
+                          <SelectItem value="2+ months">2+ חודשים</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="dailyBudget">Daily Budget (USD)</Label>
+                      <Label htmlFor="dailyBudget">{t("forms.dailyBudget")} (USD)</Label>
                       <Input
                         id="dailyBudget"
                         type="number"
@@ -251,7 +252,7 @@ export default function MyTripsScreen() {
                   </div>
 
                   <div className="space-y-3">
-                    <Label>Travel Style (Select all that apply)</Label>
+                    <Label>סגנון נסיעה (בחר כל הרלוונטיים)</Label>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                       {travelStyles.map((style) => (
                         <div key={style} className="flex items-center space-x-2">
@@ -260,14 +261,14 @@ export default function MyTripsScreen() {
                             checked={formData.travelStyle.includes(style)}
                             onCheckedChange={(checked) => handleStyleChange(style, !!checked)}
                           />
-                          <Label htmlFor={style} className="text-sm">{style}</Label>
+                          <Label htmlFor={style} className="text-sm">{t(`tripBuilder.styles.${style.toLowerCase()}`) || style}</Label>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <Label>Interests (Optional)</Label>
+                    <Label>תחומי עניין (אופציונלי)</Label>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                       {interests.map((interest) => (
                         <div key={interest} className="flex items-center space-x-2">
@@ -285,11 +286,11 @@ export default function MyTripsScreen() {
                   <Button type="submit" disabled={generateTripMutation.isPending} className="w-full">
                     {generateTripMutation.isPending ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Generating Suggestions...
+                        <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                        {t("tripBuilder.generating")}
                       </>
                     ) : (
-                      "Generate Trip Suggestions"
+                      t("tripBuilder.generateTrip")
                     )}
                   </Button>
                 </form>
@@ -300,9 +301,9 @@ export default function MyTripsScreen() {
           {/* Tab 2: Trip Suggestions */}
           <TabsContent value="suggestions" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-semibold">Trip Suggestions</h2>
+              <h2 className="text-2xl font-semibold">{t("myTrips.suggestions")}</h2>
               {suggestions.length > 0 && (
-                <Badge variant="secondary">{suggestions.length} suggestions</Badge>
+                <Badge variant="secondary">{suggestions.length} הצעות</Badge>
               )}
             </div>
 
@@ -310,9 +311,9 @@ export default function MyTripsScreen() {
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <MapPin className="w-12 h-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Suggestions Yet</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t("myTrips.noSuggestions")}</h3>
                   <p className="text-muted-foreground text-center">
-                    Generate your first trip suggestion using the form in the "Generate Trip" tab
+                    {t("myTrips.noSuggestionsDesc")}
                   </p>
                 </CardContent>
               </Card>
@@ -344,7 +345,7 @@ export default function MyTripsScreen() {
                       </div>
 
                       <div>
-                        <Label className="text-sm font-medium">Highlights</Label>
+                        <Label className="text-sm font-medium">{t("myTrips.highlights")}</Label>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {suggestion.highlights.slice(0, 3).map((highlight, idx) => (
                             <Badge key={idx} variant="secondary" className="text-xs">
@@ -355,7 +356,7 @@ export default function MyTripsScreen() {
                       </div>
 
                       <div>
-                        <Label className="text-sm font-medium">Travel Style</Label>
+                        <Label className="text-sm font-medium">סגנון נסיעה</Label>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {suggestion.travelStyle.map((style, idx) => (
                             <Badge key={idx} variant="outline" className="text-xs">
@@ -375,11 +376,11 @@ export default function MyTripsScreen() {
                         size="sm"
                       >
                         {saveTrip.isPending ? (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          <Loader2 className="w-4 h-4 ml-2 animate-spin" />
                         ) : (
-                          <Star className="w-4 h-4 mr-2" />
+                          <Star className="w-4 h-4 ml-2" />
                         )}
-                        Save Trip
+                        {t("myTrips.saveTrip")}
                       </Button>
                     </CardContent>
                   </Card>
@@ -391,9 +392,9 @@ export default function MyTripsScreen() {
           {/* Tab 3: Saved Trips */}
           <TabsContent value="saved" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-semibold">My Saved Trips</h2>
+              <h2 className="text-2xl font-semibold">{t("myTrips.savedTrips")}</h2>
               {savedTrips && (
-                <Badge variant="secondary">{savedTrips.length} saved trips</Badge>
+                <Badge variant="secondary">{savedTrips.length} טיולים שמורים</Badge>
               )}
             </div>
 
@@ -405,9 +406,9 @@ export default function MyTripsScreen() {
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Users className="w-12 h-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Saved Trips</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t("myTrips.noSavedTrips")}</h3>
                   <p className="text-muted-foreground text-center">
-                    Save trip suggestions to build your personal travel collection
+                    {t("myTrips.noSavedTripsDesc")}
                   </p>
                 </CardContent>
               </Card>
@@ -418,7 +419,7 @@ export default function MyTripsScreen() {
                     <CardHeader>
                       <CardTitle className="text-lg">{trip.title || trip.destinations}</CardTitle>
                       <CardDescription>
-                        Saved on {new Date(trip.createdAt).toLocaleDateString()}
+                        {t("myTrips.savedOn")} {formatDateHe(trip.createdAt)}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">

@@ -22,6 +22,7 @@ import {
   Clock
 } from "lucide-react";
 import { RealPlaceLinks } from "@/components/RealPlaceLinks";
+import { t } from "@/lib/hebrew";
 
 interface Message {
   id: string;
@@ -65,7 +66,7 @@ export default function AiChat({ className }: AiChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hi! I'm TripWise – your smart travel assistant for South American adventures! 🌎\n\nJust tell me what you're thinking (even incomplete ideas like 'I want to go to Peru') and I'll help you build the perfect trip by asking the right questions about budget, timing, and what you love to do!\n\nTry one of the prompts below or just start chatting:",
+      content: "שלום! אני TripWise – העוזר החכם שלך לטיולים בדרום אמריקה!\n\nפשוט ספר לי מה אתה חושב (אפילו רעיונות לא שלמים כמו 'אני רוצה לנסוע לפרו') ואני אעזור לך לבנות את הטיול המושלם על ידי שאילת השאלות הנכונות על תקציב, זמנים ומה שאתה אוהב לעשות!\n\nנסה אחת מההצעות למטה או פשוט התחל לצ'טט:",
       sender: 'ai',
       timestamp: new Date()
     }
@@ -143,10 +144,10 @@ export default function AiChat({ className }: AiChatProps) {
   };
 
   const quickPrompts = [
-    { text: "I want to go to Peru", icon: MapPin },
-    { text: "Help me plan a backpacking trip", icon: DollarSign },
-    { text: "I love hiking and nature", icon: Calendar },
-    { text: "Solo travel in South America", icon: User }
+    { text: t("aiChat.quickPrompts.peru"), icon: MapPin },
+    { text: t("aiChat.quickPrompts.budget"), icon: DollarSign },
+    { text: t("aiChat.quickPrompts.colombia"), icon: Calendar },
+    { text: t("aiChat.quickPrompts.planning"), icon: User }
   ];
 
   const handleQuickPrompt = (prompt: string) => {
@@ -170,15 +171,15 @@ export default function AiChat({ className }: AiChatProps) {
     },
     onSuccess: () => {
       toast({
-        title: "Trip Saved!",
-        description: "Your trip has been saved to My Trips.",
+        title: t("messages.tripSaved"),
+        description: "הטיול שלך נשמר בטיולים שלי.",
       });
     },
     onError: (error) => {
       console.error('Save trip error:', error);
       toast({
-        title: "Save Error",
-        description: "Failed to save trip. Please try again.",
+        title: t("messages.errorSavingTrip"),
+        description: "נכשל בשמירת הטיול. אנא נסה שנית.",
         variant: "destructive"
       });
     }
@@ -186,7 +187,7 @@ export default function AiChat({ className }: AiChatProps) {
 
   const generateMoreSuggestions = () => {
     if (messages.length > 1) {
-      chatMutation.mutate("Can you give me 3 more different trip suggestions?");
+      chatMutation.mutate("תוכל לתת לי 3 הצעות טיול שונות נוספות?");
     }
   };
 
@@ -206,15 +207,15 @@ export default function AiChat({ className }: AiChatProps) {
       
       <div className="grid grid-cols-2 gap-2 text-xs">
         <div>
-          <span className="font-medium">Budget:</span> ${suggestion.estimatedBudget.low}-${suggestion.estimatedBudget.high}
+          <span className="font-medium">{t("common.budget")}:</span> ${suggestion.estimatedBudget.low}-${suggestion.estimatedBudget.high}
         </div>
         <div>
-          <span className="font-medium">Best Time:</span> {suggestion.bestTimeToVisit}
+          <span className="font-medium">{t("myTrips.bestTimeToVisit")}:</span> {suggestion.bestTimeToVisit}
         </div>
       </div>
       
       <div>
-        <span className="font-medium text-xs">Highlights:</span>
+        <span className="font-medium text-xs">{t("myTrips.highlights")}:</span>
         <div className="flex flex-wrap gap-1 mt-1">
           {suggestion.highlights.slice(0, 3).map((highlight, idx) => (
             <Badge key={idx} variant="secondary" className="text-xs">
@@ -234,24 +235,24 @@ export default function AiChat({ className }: AiChatProps) {
           disabled={saveTripMutation.isPending}
           className="flex-1"
         >
-          <Save className="w-3 h-3 mr-1" />
-          Save Trip
+          <Save className="w-3 h-3 ml-1" />
+          {t("aiChat.saveTrip")}
         </Button>
       </div>
     </div>
   );
 
   return (
-    <Card className={className}>
+    <Card className={className} dir="rtl">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <div className="p-2 bg-primary/10 rounded-lg">
             <Bot className="w-5 h-5 text-primary" />
           </div>
-          <span>TripWise AI Assistant</span>
-          <Badge variant="secondary" className="ml-auto">
-            <Sparkles className="w-3 h-3 mr-1" />
-            AI-Powered
+          <span>{t("aiChat.title")}</span>
+          <Badge variant="secondary" className="mr-auto">
+            <Sparkles className="w-3 h-3 ml-1" />
+            מונע בינה מלאכותית
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -286,7 +287,7 @@ export default function AiChat({ className }: AiChatProps) {
                   {message.suggestions && message.suggestions.length > 0 && (
                     <div className="mt-3 space-y-2">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-sm">🌎 Trip Suggestions</h4>
+                        <h4 className="font-semibold text-sm">🌎 הצעות טיול</h4>
                         {allSuggestions.length > 0 && (
                           <Button
                             size="sm"
@@ -294,8 +295,8 @@ export default function AiChat({ className }: AiChatProps) {
                             onClick={generateMoreSuggestions}
                             disabled={chatMutation.isPending}
                           >
-                            <RefreshCw className="w-3 h-3 mr-1" />
-                            More Ideas
+                            <RefreshCw className="w-3 h-3 ml-1" />
+                            רעיונות נוספים
                           </Button>
                         )}
                       </div>
@@ -333,7 +334,7 @@ export default function AiChat({ className }: AiChatProps) {
                 <div className="bg-muted rounded-lg px-3 py-2">
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="text-sm text-muted-foreground">AI is thinking...</span>
+                    <span className="text-sm text-muted-foreground">הבינה המלאכותית חושבת...</span>
                   </div>
                 </div>
               </div>
@@ -346,7 +347,7 @@ export default function AiChat({ className }: AiChatProps) {
         {/* Quick Prompts */}
         {messages.length === 1 && (
           <div className="px-4 py-3 border-t">
-            <p className="text-sm text-muted-foreground mb-3">Quick questions to get started:</p>
+            <p className="text-sm text-muted-foreground mb-3">{t("aiChat.quickPrompts.title")}</p>
             <div className="grid grid-cols-2 gap-2">
               {quickPrompts.map((prompt, index) => {
                 const IconComponent = prompt.icon;
@@ -356,9 +357,9 @@ export default function AiChat({ className }: AiChatProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => handleQuickPrompt(prompt.text)}
-                    className="justify-start text-left h-auto py-2"
+                    className="justify-start text-right h-auto py-2"
                   >
-                    <IconComponent className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <IconComponent className="w-4 h-4 ml-2 flex-shrink-0" />
                     <span className="text-xs">{prompt.text}</span>
                   </Button>
                 );
@@ -373,7 +374,7 @@ export default function AiChat({ className }: AiChatProps) {
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Ask me anything about South American travel..."
+              placeholder={t("aiChat.placeholder")}
               className="flex-1"
               disabled={chatMutation.isPending}
             />
