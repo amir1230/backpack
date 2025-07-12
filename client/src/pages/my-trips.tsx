@@ -431,6 +431,8 @@ export default function MyTripsScreen() {
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Tab 3: Saved Trips */}
