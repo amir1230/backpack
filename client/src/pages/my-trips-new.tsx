@@ -385,19 +385,19 @@ export default function MyTripsNew() {
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="preferences" className="flex items-center">
               <Bot className="w-4 h-4 mr-2" />
-              🧠 Preferences
+              Preferences
             </TabsTrigger>
             <TabsTrigger value="suggestions" className="flex items-center">
               <Sparkles className="w-4 h-4 mr-2" />
-              ✨ Suggestions
+              Suggestions
             </TabsTrigger>
             <TabsTrigger value="itinerary" className="flex items-center">
               <Route className="w-4 h-4 mr-2" />
-              📅 Itinerary
+              Itinerary
             </TabsTrigger>
             <TabsTrigger value="saved" className="flex items-center">
               <FolderOpen className="w-4 h-4 mr-2" />
-              📁 My Trips
+              My Trips
             </TabsTrigger>
           </TabsList>
 
