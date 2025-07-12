@@ -631,12 +631,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI-powered itinerary generation
   app.post('/api/ai/itinerary', isAuthenticated, async (req, res) => {
     try {
-      const { destination, duration, budget, preferences } = req.body;
-      const itinerary = await generateItinerary(destination, duration, budget, preferences);
+      const { destination, duration, interests, travelStyle, budget } = req.body;
+      
+      console.log('Generating itinerary with data:', {
+        destination, duration, interests, travelStyle, budget
+      });
+      
+      // Convert duration string to number of days
+      let durationDays = 7; // default
+      if (typeof duration === 'string') {
+        const match = duration.match(/(\d+)/);
+        if (match) {
+          durationDays = parseInt(match[1]);
+        }
+      } else if (typeof duration === 'number') {
+        durationDays = duration;
+      }
+      
+      // Use the generateDetailedItinerary function for better results
+      const itinerary = await generateDetailedItinerary({
+        userId: req.user.claims?.sub || req.user.id,
+        destination: destination,
+        duration: durationDays,
+        interests: interests || [],
+        travelStyle: travelStyle || [],
+        budget: budget || 1000
+      });
+      
+      console.log('Generated itinerary:', itinerary);
       res.json(itinerary);
     } catch (error) {
       console.error("Error generating itinerary:", error);
-      res.status(500).json({ message: "Failed to generate itinerary" });
+      console.error("Error details:", error instanceof Error ? error.message : error);
+      res.status(500).json({ 
+        message: "Failed to generate itinerary",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 

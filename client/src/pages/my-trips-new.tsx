@@ -229,9 +229,9 @@ export default function MyTripsNew() {
         body: JSON.stringify({
           destination: formData.destination,
           duration: formData.duration,
-          interests: formData.interests,
-          travelStyle: formData.travelStyle,
-          budget: formData.budget,
+          interests: selectedInterests,
+          travelStyle: selectedStyles,
+          budget: budget[0],
         }),
       });
       const jsonData = await response.json();
@@ -249,7 +249,41 @@ export default function MyTripsNew() {
       console.error('Error generating itinerary:', error);
       toast({
         title: "Error",
-        description: "Failed to generate itinerary. Please try again.",
+        description: error?.message || "Failed to generate itinerary. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Save trip suggestion mutation
+  const saveTripMutation = useMutation({
+    mutationFn: async (suggestion: TripSuggestion) => {
+      const response = await apiRequest('/api/trips', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: `${suggestion.destination}, ${suggestion.country}`,
+          destinations: [suggestion.destination],
+          description: suggestion.description,
+          budget: `$${suggestion.estimatedBudget.low}-${suggestion.estimatedBudget.high}`,
+          duration: suggestion.duration,
+          travelStyle: suggestion.travelStyle.join(', '),
+        }),
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Trip Saved!",
+        description: "Trip suggestion saved to My Trips",
+      });
+      // Refresh saved trips
+      queryClient.invalidateQueries({ queryKey: ['/api/trips/user'] });
+    },
+    onError: (error) => {
+      console.error('Error saving trip:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save trip. Please try again.",
         variant: "destructive",
       });
     },
@@ -634,12 +668,28 @@ export default function MyTripsNew() {
                         )}
                         */}
 
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 mb-4">
                           {suggestion.travelStyle.map((style) => (
                             <Badge key={style} variant="secondary" className="text-xs">
                               {style}
                             </Badge>
                           ))}
+                        </div>
+
+                        <div className="flex justify-end pt-4 border-t">
+                          <Button 
+                            onClick={() => saveTripMutation.mutate(suggestion)}
+                            disabled={saveTripMutation.isPending}
+                            variant="default"
+                            size="sm"
+                          >
+                            {saveTripMutation.isPending ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <Heart className="w-4 h-4 mr-2" />
+                            )}
+                            Save Trip
+                          </Button>
                         </div>
                       </div>
                     ))}
