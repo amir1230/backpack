@@ -146,7 +146,7 @@ export default function PersonalizedRecommendations({ className }: PersonalizedR
               </div>
 
               <Button 
-                onClick={() => setLocation('/trip-builder')} 
+                onClick={() => setLocation('/my-trips')} 
                 className="w-full"
                 size="sm"
               >

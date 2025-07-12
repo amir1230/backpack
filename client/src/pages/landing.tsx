@@ -78,8 +78,8 @@ export default function Landing() {
 
   const handleStartPlanning = () => {
     if (user) {
-      // User is authenticated, go directly to trip builder
-      setLocation("/trip-builder");
+      // User is authenticated, go directly to trip planner
+      setLocation("/my-trips");
     } else {
       // User not authenticated, redirect to login first
       window.location.href = "/api/login";

@@ -33,8 +33,7 @@ import {
 
 const navigationItems = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/trip-builder", label: "Plan Trip", icon: Calendar },
-  { href: "/my-trips", label: "My Trips", icon: Compass },
+  { href: "/my-trips", label: "Plan Trip", icon: Calendar },
   { href: "/explore", label: "Explore", icon: MapPin },
   { href: "/weather", label: "Weather", icon: Cloud },
   { href: "/community", label: "Community", icon: Users },
