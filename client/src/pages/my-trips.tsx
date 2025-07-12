@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Loader2, MapPin, DollarSign, Calendar, Star, Users, ExternalLink, Camera, Mountain, Utensils } from "lucide-react";
 import { RealPlaceLinks } from "@/components/RealPlaceLinks";
+import { SOUTH_AMERICAN_COUNTRIES } from "@/lib/constants";
 
 interface RealPlace {
   title: string;
@@ -67,11 +68,6 @@ const interests = [
   "History & Culture", "Adventure Sports", "Nature & Wildlife", "Food & Cuisine",
   "Art & Museums", "Music & Nightlife", "Photography", "Local Markets",
   "Spiritual & Wellness", "Architecture", "Festivals & Events", "Beaches"
-];
-
-const southAmericanDestinations = [
-  "Colombia", "Peru", "Bolivia", "Chile", "Argentina", "Brazil", 
-  "Ecuador", "Venezuela", "Uruguay", "Paraguay", "Guyana", "Suriname", "French Guiana"
 ];
 
 export default function MyTripsScreen() {
@@ -228,7 +224,7 @@ export default function MyTripsScreen() {
                             <SelectValue placeholder="Select destination" />
                           </SelectTrigger>
                           <SelectContent>
-                            {southAmericanDestinations.map((destination) => (
+                            {SOUTH_AMERICAN_COUNTRIES.map((destination) => (
                               <SelectItem key={destination} value={destination}>
                                 {destination}
                               </SelectItem>

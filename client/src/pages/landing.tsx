@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 import { queryClient } from "@/lib/queryClient";
+import { SOUTH_AMERICAN_COUNTRIES } from "@/lib/constants";
 import logo from "@/assets/tripwise-logo.svg";
 import { 
   Compass, 
@@ -40,6 +41,7 @@ import {
 export default function Landing() {
   const [budget, setBudget] = useState([2500]);
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
+  const [destination, setDestination] = useState<string>("");
   const { user } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -213,10 +215,18 @@ export default function Landing() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div>
                   <Label className="block text-sm font-medium text-slate-700 mb-2">Where do you want to go?</Label>
-                  <div className="relative">
-                    <Input placeholder="e.g., Colombia, Peru, Bolivia" className="pr-10" />
-                    <Search className="absolute right-3 top-3 w-4 h-4 text-gray-400" />
-                  </div>
+                  <Select onValueChange={(value) => setDestination(value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SOUTH_AMERICAN_COUNTRIES.map((country) => (
+                        <SelectItem key={country} value={country}>
+                          {country}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label className="block text-sm font-medium text-slate-700 mb-2">Trip Duration</Label>

@@ -216,6 +216,7 @@ TripWise is a full-stack web application focused on South American travel planni
 - July 10, 2025. Implemented Hebrew RealPlaceLinks component with comprehensive integration - created "המלצות להזמנה לפי הטיול שלך" component with smart highlight grouping, source-specific styling (Google/GetYourGuide/TripAdvisor), ratings/addresses/photos display, integrated across my-trips/ai-chat/trip-builder pages, added demo page for testing
 - July 12, 2025. Fixed JSX syntax errors in my-trips.tsx - resolved mismatched HTML/React component tags preventing deployment build failures, ensured proper CardContent/Card/TabsContent nesting structure
 - July 12, 2025. Enhanced destination selection with dropdown interface - replaced free text input with predefined South American destinations dropdown (13 countries), improved user experience with structured selection options per Hebrew user preference
+- July 12, 2025. Standardized destination selection across all pages - created shared constants file with 12 South American countries (Argentina, Bolivia, Brazil, Chile, Colombia, Ecuador, Guyana, Paraguay, Peru, Suriname, Uruguay, Venezuela), replaced all destination text inputs with Select dropdowns in landing page, weather page, registry page, and my-trips page, ensuring consistent UX throughout application
 
 ## User Preferences
 

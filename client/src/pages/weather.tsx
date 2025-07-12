@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { Search, MapPin, Calendar, Thermometer, Info } from 'lucide-react';
+import { SOUTH_AMERICAN_COUNTRIES } from "@/lib/constants";
 
 const SOUTH_AMERICAN_DESTINATIONS = [
   { name: 'Lima', country: 'Peru', description: 'Coastal capital with year-round mild weather' },
@@ -120,19 +121,14 @@ export default function WeatherPage() {
                 />
                 <Select value={selectedCountry} onValueChange={setSelectedCountry}>
                   <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Country" />
+                    <SelectValue placeholder="Select a country" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Peru">Peru</SelectItem>
-                    <SelectItem value="Colombia">Colombia</SelectItem>
-                    <SelectItem value="Argentina">Argentina</SelectItem>
-                    <SelectItem value="Brazil">Brazil</SelectItem>
-                    <SelectItem value="Chile">Chile</SelectItem>
-                    <SelectItem value="Bolivia">Bolivia</SelectItem>
-                    <SelectItem value="Ecuador">Ecuador</SelectItem>
-                    <SelectItem value="Uruguay">Uruguay</SelectItem>
-                    <SelectItem value="Paraguay">Paraguay</SelectItem>
-                    <SelectItem value="Venezuela">Venezuela</SelectItem>
+                    {SOUTH_AMERICAN_COUNTRIES.map((country) => (
+                      <SelectItem key={country} value={country}>
+                        {country}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <Button onClick={handleCustomSearch}>

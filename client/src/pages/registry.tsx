@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { User, MapPin, Calendar, Heart, Users, DollarSign } from "lucide-react";
+import { SOUTH_AMERICAN_COUNTRIES } from "@/lib/constants";
 
 const registrySchema = z.object({
   bio: z.string().min(10, "Bio must be at least 10 characters").max(500, "Bio must be less than 500 characters"),
@@ -153,9 +154,20 @@ export default function Registry() {
                       <MapPin className="h-4 w-4" />
                       Current Location
                     </FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., New York, USA or London, UK" {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a country" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {SOUTH_AMERICAN_COUNTRIES.map((country) => (
+                          <SelectItem key={country} value={country}>
+                            {country}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
