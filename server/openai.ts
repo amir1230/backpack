@@ -169,11 +169,10 @@ Return ONLY a JSON object with this exact structure:
       throw new Error('Invalid response format from OpenAI');
     }
     
-    // Enrich suggestions with real places from Google Places API
-    console.log('Enriching suggestions with real places...');
-    const enrichedSuggestions = await enrichSuggestionsWithRealPlaces(baseSuggestions);
+    // Temporarily disable real places enrichment to fix timeout issues
+    console.log('Skipping real places enrichment for now...');
     
-    return enrichedSuggestions;
+    return baseSuggestions;
   } catch (error) {
     console.error('Error generating travel suggestions:', error);
     console.error('Error details:', error instanceof Error ? error.message : error);
@@ -514,40 +513,45 @@ export async function enrichSuggestionsWithRealPlaces(suggestions: TripSuggestio
   try {
     console.log('Enriching suggestions with real places...');
     
-    const enrichedSuggestions = await Promise.all(
+    // Add timeout wrapper for the entire enrichment process
+    const enrichmentPromise = Promise.all(
       suggestions.map(async (suggestion) => {
         const realPlaces: RealPlace[] = [];
         
+        // Limit to first 2 highlights to avoid timeout
+        const limitedHighlights = suggestion.highlights.slice(0, 2);
+        
         // Search for real places for each highlight
-        for (const highlight of suggestion.highlights) {
+        for (const highlight of limitedHighlights) {
           try {
             console.log(`Searching for: ${highlight} in ${suggestion.destination}, ${suggestion.country}`);
             
-            // Search for places using Google Places API
+            // Search for places using Google Places API with timeout
             const searchQuery = `${highlight} ${suggestion.destination} ${suggestion.country}`;
-            const places = await googlePlaces.searchPlaces(searchQuery, 'tourist_attraction', `${suggestion.destination}, ${suggestion.country}`);
+            const searchPromise = googlePlaces.searchPlaces(searchQuery, 'tourist_attraction', `${suggestion.destination}, ${suggestion.country}`);
             
-            // Get the top 2-3 most relevant places for this highlight
-            const topPlaces = places.slice(0, 3);
+            // Add 5 second timeout for each search
+            const timeoutPromise = new Promise<any[]>((_, reject) => 
+              setTimeout(() => reject(new Error('Search timeout')), 5000)
+            );
             
-            for (const place of topPlaces) {
+            const places = await Promise.race([searchPromise, timeoutPromise]);
+            
+            // Get only the top place for this highlight
+            const topPlace = places[0];
+            
+            if (topPlace) {
               // Generate Google Maps link
-              const googleMapsLink = `https://www.google.com/maps/place/?q=place_id:${place.place_id}`;
-              
-              // Get photo URL if available
-              let photoUrl: string | undefined;
-              if (place.photos && place.photos.length > 0) {
-                photoUrl = await googlePlaces.getPhotoUrl(place.photos[0].photo_reference, 400);
-              }
+              const googleMapsLink = `https://www.google.com/maps/place/?q=place_id:${topPlace.place_id}`;
               
               realPlaces.push({
-                title: place.name,
+                title: topPlace.name,
                 link: googleMapsLink,
                 source: "Google",
-                placeId: place.place_id,
-                rating: place.rating,
-                address: place.formatted_address,
-                photoUrl
+                placeId: topPlace.place_id,
+                rating: topPlace.rating,
+                address: topPlace.formatted_address,
+                photoUrl: undefined // Skip photo fetching to avoid additional delays
               });
             }
           } catch (error) {
@@ -562,6 +566,13 @@ export async function enrichSuggestionsWithRealPlaces(suggestions: TripSuggestio
         };
       })
     );
+    
+    // Add 15 second timeout for the entire enrichment process
+    const timeoutPromise = new Promise<TripSuggestion[]>((_, reject) => 
+      setTimeout(() => reject(new Error('Enrichment timeout')), 15000)
+    );
+    
+    const enrichedSuggestions = await Promise.race([enrichmentPromise, timeoutPromise]);
     
     console.log('Successfully enriched suggestions with real places');
     return enrichedSuggestions;
