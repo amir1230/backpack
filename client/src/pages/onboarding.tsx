@@ -149,15 +149,16 @@ export default function Onboarding() {
             <CardContent>
               <div className="grid grid-cols-2 gap-3">
                 {interests.map((interest) => (
-                  <div key={interest} className="flex items-center space-x-2">
+                  <div key={interest} className="flex items-center space-x-2 p-3 min-h-[3rem] border rounded-lg hover:bg-gray-50 transition-colors">
                     <Checkbox
                       id={interest}
                       checked={preferences.interests.includes(interest)}
                       onCheckedChange={(checked) => 
                         handleArrayChange('interests', interest, checked as boolean)
                       }
+                      className="flex-shrink-0"
                     />
-                    <Label htmlFor={interest} className="text-sm font-medium cursor-pointer">
+                    <Label htmlFor={interest} className="text-sm font-medium cursor-pointer break-words whitespace-normal leading-tight text-balance flex-1">
                       {interest}
                     </Label>
                   </div>
@@ -182,15 +183,16 @@ export default function Onboarding() {
             <CardContent>
               <div className="grid grid-cols-1 gap-3">
                 {travelStyles.map((style) => (
-                  <div key={style} className="flex items-center space-x-2">
+                  <div key={style} className="flex items-center space-x-2 p-3 min-h-[3rem] border rounded-lg hover:bg-gray-50 transition-colors">
                     <Checkbox
                       id={style}
                       checked={preferences.travelStyle.includes(style)}
                       onCheckedChange={(checked) => 
                         handleArrayChange('travelStyle', style, checked as boolean)
                       }
+                      className="flex-shrink-0"
                     />
-                    <Label htmlFor={style} className="text-sm font-medium cursor-pointer">
+                    <Label htmlFor={style} className="text-sm font-medium cursor-pointer break-words whitespace-normal leading-tight text-balance flex-1">
                       {style}
                     </Label>
                   </div>

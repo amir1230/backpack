@@ -273,10 +273,10 @@ export default function Landing() {
                         key={style.id}
                         variant={selectedStyles.includes(style.id) ? "default" : "outline"}
                         onClick={() => toggleStyle(style.id)}
-                        className="justify-start"
+                        className="justify-start h-12 min-h-[3rem] w-full"
                       >
-                        <style.icon className="w-4 h-4 mr-2" />
-                        {style.label}
+                        <style.icon className="w-4 h-4 mr-2 flex-shrink-0" />
+                        <span className="break-words whitespace-normal text-sm leading-tight text-balance">{style.label}</span>
                       </Button>
                     ))}
                   </div>

@@ -287,18 +287,18 @@ export default function MyTripsScreen() {
                             key={style}
                             type="button"
                             onClick={() => handleStyleChange(style, !formData.travelStyle.includes(style))}
-                            className={`p-4 rounded-lg border-2 text-left transition-all ${
+                            className={`p-4 rounded-lg border-2 text-left transition-all w-full h-20 min-h-[5rem] ${
                               formData.travelStyle.includes(style)
                                 ? 'border-primary bg-primary/10 text-primary'
                                 : 'border-gray-200 hover:border-gray-300'
                             }`}
                           >
-                            <div className="flex items-center space-x-2">
-                              {style === 'Adventure' && <Mountain className="w-5 h-5" />}
-                              {style === 'Cultural' && <Camera className="w-5 h-5" />}
-                              {style === 'Food & Cuisine' && <Utensils className="w-5 h-5" />}
-                              {style === 'Nightlife' && <Users className="w-5 h-5" />}
-                              <span className="font-medium">{style}</span>
+                            <div className="flex items-center space-x-2 h-full">
+                              {style === 'Adventure' && <Mountain className="w-5 h-5 flex-shrink-0" />}
+                              {style === 'Cultural' && <Camera className="w-5 h-5 flex-shrink-0" />}
+                              {style === 'Food & Cuisine' && <Utensils className="w-5 h-5 flex-shrink-0" />}
+                              {style === 'Nightlife' && <Users className="w-5 h-5 flex-shrink-0" />}
+                              <span className="font-medium break-words whitespace-normal text-sm leading-tight text-balance">{style}</span>
                             </div>
                           </button>
                         ))}

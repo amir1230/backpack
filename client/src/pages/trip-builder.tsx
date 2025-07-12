@@ -552,12 +552,12 @@ export default function TripBuilder() {
                       type="button"
                       variant={selectedStyles.includes(style.id) ? "default" : "outline"}
                       onClick={() => toggleStyle(style.id)}
-                      className="justify-start h-auto p-3 text-left"
+                      className="justify-start h-24 min-h-[6rem] w-full p-3 text-left"
                     >
-                      <style.icon className="w-5 h-5 mr-3" />
-                      <div className="text-left">
-                        <div className="font-medium">{style.label}</div>
-                        <div className="text-xs opacity-70">{style.description}</div>
+                      <style.icon className="w-5 h-5 mr-3 flex-shrink-0" />
+                      <div className="text-left flex-1">
+                        <div className="font-medium break-words whitespace-normal text-sm leading-tight text-balance">{style.label}</div>
+                        <div className="text-xs opacity-70 break-words whitespace-normal leading-tight text-balance">{style.description}</div>
                       </div>
                     </Button>
                   ))}
