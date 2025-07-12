@@ -226,17 +226,43 @@ export default function MyTripsNew() {
   const generateItineraryMutation = useMutation({
     mutationFn: async () => {
       const formData = form.getValues();
+      
+      // Validate data before sending
+      if (!formData.destination) {
+        throw new Error("Please select a destination first");
+      }
+      
+      if (selectedInterests.length === 0) {
+        throw new Error("Please select at least one interest");
+      }
+      
+      if (selectedStyles.length === 0) {
+        throw new Error("Please select at least one travel style");
+      }
+      
+      const requestData = {
+        destination: formData.destination,
+        duration: formData.duration || "1 week",
+        interests: selectedInterests,
+        travelStyle: selectedStyles,
+        budget: budget[0] || 1000,
+      };
+      
+      console.log('Sending itinerary request with data:', requestData);
+      
       const response = await apiRequest('/api/ai/itinerary', {
         method: 'POST',
-        body: JSON.stringify({
-          destination: formData.destination,
-          duration: formData.duration,
-          interests: selectedInterests,
-          travelStyle: selectedStyles,
-          budget: budget[0],
-        }),
+        body: JSON.stringify(requestData),
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Itinerary API error:', errorData);
+        throw new Error(errorData.message || `API Error: ${response.status}`);
+      }
+      
       const jsonData = await response.json();
+      console.log('Received itinerary response:', jsonData);
       return jsonData as ItineraryDay[];
     },
     onSuccess: (data) => {

@@ -4,6 +4,8 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
+console.log('OpenAI API Key exists:', !!process.env.OPENAI_API_KEY);
+
 export interface ItineraryDay {
   day: number;
   location: string;
@@ -22,7 +24,20 @@ export interface ItineraryRequest {
 }
 
 export async function generateItinerary(request: ItineraryRequest): Promise<ItineraryDay[]> {
+  console.log('generateItinerary called with request:', request);
+  
   const { destination, duration, interests, travelStyle, budget } = request;
+  
+  // Validate inputs
+  if (!destination) {
+    throw new Error("Destination is required");
+  }
+  
+  if (!duration || duration < 1) {
+    throw new Error("Duration must be at least 1 day");
+  }
+  
+  console.log('Input validation passed. Creating prompt...');
   
   const prompt = `You are TripWise – an AI travel planner helping solo travelers build day-by-day itineraries.
 
@@ -52,6 +67,7 @@ Return the itinerary as a JSON array, like this:
 ]`;
 
   try {
+    console.log('Calling OpenAI API...');
     const response = await openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       messages: [
@@ -69,10 +85,14 @@ Return the itinerary as a JSON array, like this:
       max_tokens: 2000
     });
 
+    console.log('OpenAI API call successful');
+    
     const content = response.choices[0].message.content;
     if (!content) {
       throw new Error("No content received from OpenAI");
     }
+    
+    console.log('OpenAI response content length:', content.length);
 
     // Parse the JSON response
     let itinerary: ItineraryDay[];
@@ -103,20 +123,10 @@ Return the itinerary as a JSON array, like this:
 
   } catch (error) {
     console.error("Error generating itinerary:", error);
+    console.error("Error type:", error instanceof Error ? error.constructor.name : typeof error);
+    console.error("Error message:", error instanceof Error ? error.message : String(error));
     
-    // Provide a fallback itinerary structure if OpenAI fails
-    const fallbackItinerary: ItineraryDay[] = Array.from({ length: duration }, (_, index) => ({
-      day: index + 1,
-      location: destination,
-      activities: [
-        "Explore local attractions",
-        "Try traditional cuisine", 
-        "Visit cultural sites"
-      ],
-      estimatedCost: budget,
-      tips: ["Plan ahead and book activities in advance"]
-    }));
-
-    return fallbackItinerary;
+    // Re-throw the error instead of using fallback, so we can see what's wrong
+    throw error;
   }
 }

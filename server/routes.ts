@@ -637,6 +637,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         destination, duration, interests, travelStyle, budget
       });
       
+      // Validate required fields
+      if (!destination) {
+        return res.status(400).json({ 
+          message: "Destination is required" 
+        });
+      }
+      
       // Convert duration string to number of days
       let durationDays = 7; // default
       if (typeof duration === 'string') {
@@ -648,25 +655,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         durationDays = duration;
       }
       
+      // Ensure arrays are properly formatted
+      const cleanInterests = Array.isArray(interests) ? interests : [];
+      const cleanTravelStyle = Array.isArray(travelStyle) ? travelStyle : [];
+      const cleanBudget = typeof budget === 'number' ? budget : 1000;
+      
       // Use the generateDetailedItinerary function for better results
       const itinerary = await generateDetailedItinerary({
-        userId: req.user.claims?.sub || req.user.id,
+        userId: req.user.claims?.sub || req.user.id || 'guest',
         destination: destination,
         duration: durationDays,
-        interests: interests || [],
-        travelStyle: travelStyle || [],
-        budget: budget || 1000
+        interests: cleanInterests,
+        travelStyle: cleanTravelStyle,
+        budget: cleanBudget
       });
       
-      console.log('Generated itinerary:', itinerary);
+      console.log('Generated itinerary successfully:', itinerary.length, 'days');
       res.json(itinerary);
     } catch (error) {
       console.error("Error generating itinerary:", error);
-      console.error("Error details:", error instanceof Error ? error.message : error);
-      res.status(500).json({ 
-        message: "Failed to generate itinerary",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
+      console.error("Error stack:", error instanceof Error ? error.stack : "No stack");
+      
+      // More detailed error handling
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      
+      if (errorMessage.includes("API key")) {
+        res.status(500).json({ 
+          message: "OpenAI API configuration issue",
+          error: "API key problem"
+        });
+      } else if (errorMessage.includes("rate limit")) {
+        res.status(500).json({ 
+          message: "OpenAI rate limit reached. Please try again in a few minutes.",
+          error: "Rate limit exceeded"
+        });
+      } else {
+        res.status(500).json({ 
+          message: "Failed to generate itinerary",
+          error: errorMessage
+        });
+      }
     }
   });
 
