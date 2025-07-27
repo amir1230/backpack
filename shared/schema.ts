@@ -64,6 +64,7 @@ export const trips = pgTable("trips", {
   endDate: timestamp("end_date"),
   budget: decimal("budget", { precision: 10, scale: 2 }),
   travelStyle: varchar("travel_style"),
+  itinerary: jsonb("itinerary"), // Daily itinerary data
   isPublic: boolean("is_public").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
