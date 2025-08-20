@@ -72,13 +72,13 @@ export default function Navigation() {
     }
   };
 
-  const userInitials = user?.firstName && user?.lastName 
-    ? `${user.firstName[0]}${user.lastName[0]}`
-    : user?.email?.[0]?.toUpperCase() || "U";
+  const userInitials = (user as any)?.firstName && (user as any)?.lastName 
+    ? `${(user as any).firstName[0]}${(user as any).lastName[0]}`
+    : (user as any)?.email?.[0]?.toUpperCase() || "U";
 
-  const userName = user?.firstName && user?.lastName
-    ? `${user.firstName} ${user.lastName}`
-    : user?.email || "User";
+  const userName = (user as any)?.firstName && (user as any)?.lastName
+    ? `${(user as any).firstName} ${(user as any).lastName}`
+    : (user as any)?.email || "User";
 
   if (isMobile) {
     return (
@@ -126,12 +126,12 @@ export default function Navigation() {
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex items-center px-3 py-2 mb-4">
                     <Avatar className="w-8 h-8 mr-3">
-                      <AvatarImage src={user?.profileImageUrl} />
+                      <AvatarImage src={(user as any)?.profileImageUrl} />
                       <AvatarFallback>{userInitials}</AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="text-sm font-medium text-slate-700">{userName}</p>
-                      <p className="text-xs text-gray-500">{user?.email}</p>
+                      <p className="text-xs text-gray-500">{(user as any)?.email}</p>
                     </div>
                   </div>
                   
@@ -204,7 +204,7 @@ export default function Navigation() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.profileImageUrl} alt={userName} />
+                    <AvatarImage src={(user as any)?.profileImageUrl} alt={userName} />
                     <AvatarFallback>{userInitials}</AvatarFallback>
                   </Avatar>
                 </Button>
@@ -214,7 +214,7 @@ export default function Navigation() {
                   <div className="flex flex-col space-y-1 leading-none">
                     <p className="font-medium">{userName}</p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {user?.email}
+                      {(user as any)?.email}
                     </p>
                   </div>
                 </div>

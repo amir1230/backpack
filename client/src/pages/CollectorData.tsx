@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Star, Users, Search, Globe } from 'lucide-react';
+import { MobileContainer, MobileGrid } from '@/components/MobileOptimized';
 
 interface CollectorPlace {
   place_id: string;
@@ -53,59 +54,59 @@ export default function CollectorData() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">נתונים שנאספו מדרום אמריקה</h1>
-        <p className="text-muted-foreground mb-6">
+    <div className="container mx-auto px-3 py-4 sm:px-4 sm:py-8">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">נתונים שנאספו מדרום אמריקה</h1>
+        <p className="text-muted-foreground mb-4 sm:mb-6 text-sm sm:text-base">
           מקומות לינה, אטרקציות ומסעדות מכל דרום אמריקה שנאספו מ-Google Places API
         </p>
 
         {/* Statistics Cards */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-blue-500" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">מקומות</p>
-                    <p className="text-2xl font-bold">{stats.places}</p>
+                  <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-muted-foreground">מקומות</p>
+                    <p className="text-lg sm:text-2xl font-bold">{stats.places}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-green-500" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">ביקורות</p>
-                    <p className="text-2xl font-bold">{stats.reviews}</p>
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-muted-foreground">ביקורות</p>
+                    <p className="text-lg sm:text-2xl font-bold">{stats.reviews}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-yellow-500" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">דירוג ממוצע</p>
-                    <p className="text-2xl font-bold">{stats.averageRating?.toFixed(1) || 'N/A'}</p>
+                  <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-muted-foreground">דירוג ממוצע</p>
+                    <p className="text-lg sm:text-2xl font-bold">{stats.averageRating?.toFixed(1) || 'N/A'}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center gap-2">
-                  <Globe className="h-5 w-5 text-purple-500" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">מדינות</p>
-                    <p className="text-2xl font-bold">{stats.countries?.length || 0}</p>
+                  <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-muted-foreground">מדינות</p>
+                    <p className="text-lg sm:text-2xl font-bold">{stats.countries?.length || 0}</p>
                   </div>
                 </div>
               </CardContent>
@@ -114,28 +115,29 @@ export default function CollectorData() {
         )}
 
         {/* Search and Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="flex-1">
+        <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="w-full">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="חפש מקומות..."
                 value={search}
                 onChange={handleSearchChange}
-                className="pl-10"
+                className="pl-10 h-11 sm:h-10"
               />
             </div>
           </div>
           
           {/* Country filter buttons */}
           {stats?.countries && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 sm:gap-2">
               {stats.countries.slice(0, 5).map((country) => (
                 <Button
                   key={country.country}
                   variant={selectedCountry.includes(country.country) ? "default" : "outline"}
                   size="sm"
                   onClick={() => handleCountryFilter(country.country)}
+                  className="text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                 >
                   {country.country} ({country.count})
                 </Button>
@@ -157,38 +159,38 @@ export default function CollectorData() {
           <p>טוען נתונים...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {placesData?.places?.map((place) => (
             <Card key={place.place_id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="line-clamp-2">{place.name}</CardTitle>
-                <CardDescription className="line-clamp-2">
-                  <MapPin className="inline h-4 w-4 mr-1" />
+              <CardHeader className="pb-3 sm:pb-4">
+                <CardTitle className="line-clamp-2 text-base sm:text-lg">{place.name}</CardTitle>
+                <CardDescription className="line-clamp-2 text-xs sm:text-sm">
+                  <MapPin className="inline h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                   {place.address}
                 </CardDescription>
               </CardHeader>
               
-              <CardContent>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Star className="h-4 w-4 text-yellow-500" />
-                    <span className="font-medium">{place.rating}</span>
-                    <span className="text-sm text-muted-foreground">
+              <CardContent className="pt-0">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <Star className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500" />
+                    <span className="font-medium text-sm sm:text-base">{place.rating}</span>
+                    <span className="text-xs sm:text-sm text-muted-foreground">
                       ({place.reviews_count} ביקורות)
                     </span>
                   </div>
                 </div>
 
                 {place.summary && (
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3">
                     {place.summary}
                   </p>
                 )}
 
                 {/* Type badges */}
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {place.types.slice(0, 3).map((type, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
+                <div className="flex flex-wrap gap-1 mb-3 sm:mb-4">
+                  {place.types.slice(0, 2).map((type, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs py-0 px-2 h-5">
                       {type.replace(/_/g, ' ')}
                     </Badge>
                   ))}
@@ -196,14 +198,14 @@ export default function CollectorData() {
 
                 <div className="flex gap-2">
                   {place.website && (
-                    <Button variant="outline" size="sm" className="flex-1" asChild>
+                    <Button variant="outline" size="sm" className="flex-1 text-xs sm:text-sm h-8 sm:h-9" asChild>
                       <a href={place.website} target="_blank" rel="noopener noreferrer">
                         אתר
                       </a>
                     </Button>
                   )}
                   
-                  <Button variant="outline" size="sm" className="flex-1" asChild>
+                  <Button variant="outline" size="sm" className="flex-1 text-xs sm:text-sm h-8 sm:h-9" asChild>
                     <a
                       href={`https://www.google.com/maps/place/?q=place_id:${place.place_id}`}
                       target="_blank"

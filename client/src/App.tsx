@@ -28,12 +28,12 @@ function AuthenticatedApp() {
   const { user } = useAuth();
   
   // Redirect new users to registry page after login
-  if (!user?.registrationCompleted && currentLocation !== '/registry') {
+  if (!(user as any)?.registrationCompleted && currentLocation !== '/registry') {
     return <Registry />;
   }
   
   // Show onboarding for users who completed registry but not onboarding
-  if (user?.registrationCompleted && !user?.onboardingCompleted && 
+  if ((user as any)?.registrationCompleted && !(user as any)?.onboardingCompleted && 
       (currentLocation === '/' || currentLocation === '/onboarding')) {
     return <Onboarding />;
   }
