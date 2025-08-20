@@ -23,6 +23,13 @@ Preferred communication style: Simple, everyday language.
 - **Session Management**: Express sessions with PostgreSQL store
 - **Real-time Communication**: WebSocket support
 
+### Python Microservice (TripWise Collector)
+- **Framework**: FastAPI with Python 3.11
+- **Purpose**: Google Places API data collection and processing
+- **Location**: `/tripwise/` directory
+- **Features**: Interactive Google Maps, place search, data export
+- **APIs**: Google Places API integration, place details retrieval
+
 ### Database Design
 - **ORM**: Drizzle with PostgreSQL
 - **Key Tables**: Users, Sessions, Trips, Reviews, Expenses, Chat (rooms & messages), User Connections.
@@ -54,3 +61,11 @@ Preferred communication style: Simple, everyday language.
 - **openid-client**: OpenID Connect implementation.
 - **passport**: Authentication middleware.
 - **connect-pg-simple**: PostgreSQL session store.
+
+## Python Collector Service
+- **FastAPI**: Modern Python web framework
+- **Uvicorn**: ASGI server for FastAPI
+- **Requests**: HTTP library for API calls
+- **Jinja2**: Template engine for HTML rendering
+- **Google Maps JavaScript API**: For interactive maps
+- **Google Places API**: For detailed place information
