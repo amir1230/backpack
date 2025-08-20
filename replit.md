@@ -53,6 +53,7 @@ Preferred communication style: Simple, everyday language.
 - **OpenAI API**: For AI-powered trip planning, itinerary generation, and conversational AI.
 - **Google Places API**: For real-world location data, booking suggestions, and enriching AI outputs.
 - **OpenWeather API**: For real-time weather data and forecasts.
+- **Facebook Graph API**: For social media content collection with FB_PAGE_TOKEN.
 - **@neondatabase/serverless**: PostgreSQL connection.
 - **drizzle-orm**: ORM.
 - **@tanstack/react-query**: Server state management.
@@ -63,9 +64,17 @@ Preferred communication style: Simple, everyday language.
 - **connect-pg-simple**: PostgreSQL session store.
 
 ## Python Collector Service
-- **FastAPI**: Modern Python web framework
+- **FastAPI**: Modern Python web framework with SQLAlchemy ORM
 - **Uvicorn**: ASGI server for FastAPI
 - **Requests**: HTTP library for API calls
 - **Jinja2**: Template engine for HTML rendering
+- **SQLAlchemy**: Database ORM with SQLite backend
 - **Google Maps JavaScript API**: For interactive maps
-- **Google Places API**: For detailed place information
+- **Google Places API**: For detailed place information and automated collection
+- **Facebook Graph API**: For social media content extraction
+
+## Recent Data Collection (Jan 2025)
+- **Automated South America collection**: 200+ hostels and accommodations
+- **Coverage**: Peru, Colombia, Ecuador, Bolivia, Chile, Argentina, Brazil, Uruguay, Paraguay
+- **Database**: SQLite with Places, Reviews, and SocialPost tables
+- **Collection methods**: Interactive UI, bulk API collection, social media integration
