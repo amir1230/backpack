@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Star, Users, Search, Globe } from 'lucide-react';
+import { MapPin, Star, Users, Search, Globe, Filter, SortAsc } from 'lucide-react';
 import { MobileContainer, MobileGrid } from '@/components/MobileOptimized';
+import { FloatingActionButton, QuickActionsMenu } from '@/components/FloatingActionButton';
 
 interface CollectorPlace {
   place_id: string;
@@ -226,6 +227,30 @@ export default function CollectorData() {
           <p className="text-muted-foreground">לא נמצאו מקומות התואמים לחיפוש שלך</p>
         </div>
       )}
+
+      {/* Floating Action Button for Mobile */}
+      <QuickActionsMenu
+        actions={[
+          {
+            icon: <Filter className="w-4 h-4" />,
+            label: "סינון",
+            onClick: () => setSelectedCountry('')
+          },
+          {
+            icon: <SortAsc className="w-4 h-4" />,
+            label: "מיון",
+            onClick: () => setSearch('')
+          },
+          {
+            icon: <Search className="w-4 h-4" />,
+            label: "חיפוש",
+            onClick: () => document.querySelector('input')?.focus()
+          }
+        ]}
+      />
+
+      {/* Scroll to top button */}
+      <FloatingActionButton variant="scroll-to-top" />
     </div>
   );
 }

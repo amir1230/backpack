@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 import logoCompact from "@/assets/tripwise-logo-compact.svg";
 import { 
   Compass, 
@@ -48,6 +49,7 @@ export default function Navigation() {
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isVisible } = useScrollDirection();
 
   const handleLogout = async () => {
     try {
@@ -148,20 +150,27 @@ export default function Navigation() {
           )}
         </nav>
 
-        {/* Mobile Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-50">
-          <div className="flex justify-around items-center py-2">
-            {navigationItems.map((item) => (
+        {/* Mobile Bottom Navigation - Sliding */}
+        <div 
+          className={`fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 md:hidden z-50 transition-transform duration-300 ease-in-out ${
+            isVisible ? 'translate-y-0' : 'translate-y-full'
+          }`}
+          style={{
+            paddingBottom: 'env(safe-area-inset-bottom, 8px)'
+          }}
+        >
+          <div className="flex justify-around items-center py-2 px-2">
+            {navigationItems.slice(0, 5).map((item) => (
               <Link key={item.href} href={item.href}>
                 <button
-                  className={`flex flex-col items-center py-2 px-3 ${
+                  className={`flex flex-col items-center py-2 px-2 rounded-lg transition-colors min-w-[60px] ${
                     location === item.href
-                      ? "text-primary"
-                      : "text-gray-600"
+                      ? "text-primary bg-primary/10"
+                      : "text-gray-600 hover:text-primary hover:bg-gray-50"
                   }`}
                 >
                   <item.icon className="w-5 h-5 mb-1" />
-                  <span className="text-xs">{item.label}</span>
+                  <span className="text-xs font-medium truncate">{item.label}</span>
                 </button>
               </Link>
             ))}
