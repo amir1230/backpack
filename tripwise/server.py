@@ -174,21 +174,30 @@ def save_places(payload: List[dict] = Body(...)):
                 ses.add(place)
 
             # עדכון שדות
-            place.name = item.get("name") or place.name
-            place.address = item.get("address") or place.address
-            place.lat = item.get("lat") or place.lat
-            place.lng = item.get("lng") or place.lng
-            place.rating = item.get("rating") if item.get("rating") is not None else place.rating
-            place.reviews_count = item.get("reviews_count") or place.reviews_count
-            place.website = item.get("website") or place.website
-            place.phone = item.get("phone") or place.phone
+            if item.get("name"):
+                place.name = item.get("name")
+            if item.get("address"):
+                place.address = item.get("address")
+            if item.get("lat") is not None:
+                place.lat = item.get("lat")
+            if item.get("lng") is not None:
+                place.lng = item.get("lng")
+            if item.get("rating") is not None:
+                place.rating = item.get("rating")
+            if item.get("reviews_count"):
+                place.reviews_count = item.get("reviews_count")
+            if item.get("website"):
+                place.website = item.get("website")
+            if item.get("phone"):
+                place.phone = item.get("phone")
             # types יכול להגיע כ-list או כ-string JSON
             types_val = item.get("types")
             if isinstance(types_val, list):
                 place.types = json.dumps(types_val, ensure_ascii=False)
             elif isinstance(types_val, str):
                 place.types = types_val
-            place.summary = item.get("summary") or place.summary
+            if item.get("summary"):
+                place.summary = item.get("summary")
             place.updated_at = datetime.utcnow()
 
             # שמירת ביקורות אם צורפו בבקשה
@@ -257,9 +266,9 @@ def list_places(
                 "reviews_count": p.reviews_count,
                 "website": p.website,
                 "phone": p.phone,
-                "types": json.loads(p.types) if p.types else [],
+                "types": json.loads(p.types) if p.types and isinstance(p.types, str) else [],
                 "summary": p.summary,
-                "updated_at": p.updated_at.isoformat() if p.updated_at else None
+                "updated_at": p.updated_at.isoformat() if p.updated_at and hasattr(p.updated_at, 'isoformat') else None
             })
         return {"total": total, "items": out}
     finally:
@@ -357,20 +366,29 @@ def collect_google(
                 place = Place(place_id=place_id, created_at=datetime.utcnow())
                 ses.add(place)
 
-            place.name = item.get("name") or place.name
-            place.address = item.get("address") or place.address
-            place.lat = item.get("lat") or place.lat
-            place.lng = item.get("lng") or place.lng
-            place.rating = item.get("rating") if item.get("rating") is not None else place.rating
-            place.reviews_count = item.get("reviews_count") or place.reviews_count
-            place.website = item.get("website") or place.website
-            place.phone = item.get("phone") or place.phone
+            if item.get("name"):
+                place.name = item.get("name")
+            if item.get("address"):
+                place.address = item.get("address")
+            if item.get("lat") is not None:
+                place.lat = item.get("lat")
+            if item.get("lng") is not None:
+                place.lng = item.get("lng")
+            if item.get("rating") is not None:
+                place.rating = item.get("rating")
+            if item.get("reviews_count"):
+                place.reviews_count = item.get("reviews_count")
+            if item.get("website"):
+                place.website = item.get("website")
+            if item.get("phone"):
+                place.phone = item.get("phone")
             types_val = item.get("types")
             if isinstance(types_val, list):
                 place.types = json.dumps(types_val, ensure_ascii=False)
             elif isinstance(types_val, str):
                 place.types = types_val
-            place.summary = item.get("summary") or place.summary
+            if item.get("summary"):
+                place.summary = item.get("summary")
             place.updated_at = datetime.utcnow()
 
             for rv in item.get("reviews", []) or []:
