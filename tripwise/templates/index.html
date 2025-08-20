@@ -26,6 +26,7 @@
     <span class="pill">TripWise</span>
     <input id="search" placeholder="חפש מקום: 'hostel cusco' / 'surf camp lima'..." />
     <button id="export">ייצוא JSON</button>
+    <button id="save">שמור ל-DB</button>
   </div>
   <div id="map"></div>
 
@@ -89,6 +90,32 @@
         const a = Object.assign(document.createElement("a"), { href: url, download: "places_export.json" });
         a.click();
         URL.revokeObjectURL(url);
+      });
+
+      document.getElementById("save").addEventListener("click", async () => {
+        const data = Array.from(collectedPlaces.values());
+        if (data.length === 0) {
+          alert("אין מקומות לשמירה!");
+          return;
+        }
+        
+        try {
+          const response = await fetch("/api/save-places", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            alert(`נשמרו ${result.saved_places} מקומות בבסיס הנתונים!`);
+          } else {
+            const error = await response.text();
+            alert(`שגיאה בשמירה: ${error}`);
+          }
+        } catch (e) {
+          alert(`שגיאה בחיבור: ${e.message}`);
+        }
       });
     };
   </script>
