@@ -341,13 +341,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Basic places endpoint - returns places from database
   app.get('/api/places', async (req, res) => {
     try {
+      console.log('Fetching places data...');
+      
+      // Check if any tables exist by attempting simple queries
+      try {
+        await storage.getDestinations().catch(() => { throw new Error('Tables may not be created yet'); });
+      } catch (error) {
+        return res.json({ 
+          total: 0, 
+          items: [], 
+          message: 'Database tables are being initialized. Please push schema first with: npm run db:push --force',
+          error: (error as Error).message
+        });
+      }
+      
       // Get all destinations, accommodations, attractions, and restaurants
       const [destinationsData, accommodationsData, attractionsData, restaurantsData] = await Promise.all([
-        storage.getDestinations(),
-        storage.getAccommodations(),
-        storage.getAttractions(),
-        storage.getRestaurants()
+        storage.getDestinations().catch(() => []),
+        storage.getAccommodations().catch(() => []),
+        storage.getAttractions().catch(() => []),
+        storage.getRestaurants().catch(() => [])
       ]);
+      
+      console.log(`Retrieved: ${destinationsData.length} destinations, ${accommodationsData.length} accommodations, ${attractionsData.length} attractions, ${restaurantsData.length} restaurants`);
       
       // Combine all places into a unified format
       const allPlaces = [
@@ -2529,18 +2545,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { placeId, location, placeType, limit = '10' } = req.query;
       
-      if (placeId) {
-        const reviews = await storage.getPlaceReviews(placeId as string);
-        return res.json(reviews);
+      // Check if tables exist by attempting simple queries
+      try {
+        if (placeId) {
+          const reviews = await storage.getPlaceReviews(placeId as string);
+          return res.json(reviews);
+        }
+        
+        if (location) {
+          const reviews = await storage.searchPlaceReviews(location as string, placeType as string);
+          return res.json(reviews.slice(0, parseInt(limit as string)));
+        }
+        
+        const recentReviews = await storage.getRecentPlaceReviews(parseInt(limit as string));
+        res.json(recentReviews);
+      } catch (error) {
+        // Database tables likely don't exist yet
+        return res.json({ 
+          message: 'Database tables are being initialized. Please push schema first.',
+          total: 0,
+          items: []
+        });
       }
-      
-      if (location) {
-        const reviews = await storage.searchPlaceReviews(location as string, placeType as string);
-        return res.json(reviews.slice(0, parseInt(limit as string)));
-      }
-      
-      const recentReviews = await storage.getRecentPlaceReviews(parseInt(limit as string));
-      res.json(recentReviews);
     } catch (error) {
       console.error("Error fetching place reviews:", error);
       res.status(500).json({ message: "Failed to fetch place reviews" });

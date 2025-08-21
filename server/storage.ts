@@ -393,7 +393,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(chatRooms.createdAt));
   }
 
-  async getChatMessages(roomId: number): Promise<ChatMessage[]> {
+  async getChatMessages(roomId: number): Promise<any[]> {
     return await db
       .select({
         id: chatMessages.id,
@@ -1128,28 +1128,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchChatRooms(query: string, filters?: { type?: string; destination?: string }): Promise<ChatRoom[]> {
-    let queryBuilder = db
-      .select()
-      .from(chatRooms)
-      .where(
-        and(
-          eq(chatRooms.isActive, true),
-          or(
-            sql`LOWER(${chatRooms.name}) LIKE LOWER(${'%' + query + '%'})`,
-            sql`LOWER(${chatRooms.description}) LIKE LOWER(${'%' + query + '%'})`
-          )
-        )
-      );
+    const conditions = [
+      eq(chatRooms.isActive, true),
+      or(
+        sql`LOWER(${chatRooms.name}) LIKE LOWER(${'%' + query + '%'})`,
+        sql`LOWER(${chatRooms.description}) LIKE LOWER(${'%' + query + '%'})`
+      )
+    ];
 
     if (filters?.type) {
-      queryBuilder = queryBuilder.where(eq(chatRooms.type, filters.type));
+      conditions.push(eq(chatRooms.type, filters.type));
     }
 
     if (filters?.destination) {
-      queryBuilder = queryBuilder.where(eq(chatRooms.destination, filters.destination));
+      conditions.push(eq(chatRooms.destination, filters.destination));
     }
 
-    return await queryBuilder
+    return await db
+      .select()
+      .from(chatRooms)
+      .where(and(...conditions))
       .orderBy(desc(chatRooms.lastActivity))
       .limit(50);
   }
@@ -1168,24 +1166,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTravelBuddyPosts(filters?: { destination?: string; startDate?: Date; endDate?: Date }): Promise<TravelBuddyPost[]> {
-    let query = db
-      .select()
-      .from(travelBuddyPosts)
-      .where(and(eq(travelBuddyPosts.isActive, true), sql`${travelBuddyPosts.expiresAt} > NOW()`));
+    const conditions = [
+      eq(travelBuddyPosts.isActive, true), 
+      sql`${travelBuddyPosts.expiresAt} > NOW()`
+    ];
 
     if (filters?.destination) {
-      query = query.where(sql`LOWER(${travelBuddyPosts.destination}) LIKE LOWER(${'%' + filters.destination + '%'})`);
+      conditions.push(sql`LOWER(${travelBuddyPosts.destination}) LIKE LOWER(${'%' + filters.destination + '%'})`);
     }
 
     if (filters?.startDate) {
-      query = query.where(sql`${travelBuddyPosts.startDate} >= ${filters.startDate}`);
+      conditions.push(sql`${travelBuddyPosts.startDate} >= ${filters.startDate}`);
     }
 
     if (filters?.endDate) {
-      query = query.where(sql`${travelBuddyPosts.endDate} <= ${filters.endDate}`);
+      conditions.push(sql`${travelBuddyPosts.endDate} <= ${filters.endDate}`);
     }
 
-    return await query.orderBy(desc(travelBuddyPosts.createdAt));
+    return await db
+      .select()
+      .from(travelBuddyPosts)
+      .where(and(...conditions))
+      .orderBy(desc(travelBuddyPosts.createdAt));
   }
 
   async getUserTravelBuddyPosts(userId: string): Promise<TravelBuddyPost[]> {

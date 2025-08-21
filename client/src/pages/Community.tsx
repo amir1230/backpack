@@ -36,8 +36,10 @@ export default function Community() {
     enabled: true
   });
 
-  // Ensure placeReviews is always an array, even if API fails
+  // Handle API response - check if it's database initialization message
   const placeReviews = Array.isArray(reviewsData) ? reviewsData : [];
+  const isDatabaseInitializing = reviewsData && typeof reviewsData === 'object' && 'message' in reviewsData && 
+    typeof (reviewsData as any).message === 'string' && (reviewsData as any).message.includes('tables are being initialized');
   
   // Show error message if API fails but continue with empty array
   if (reviewsError && !reviewsLoading) {
@@ -117,6 +119,18 @@ export default function Community() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          ) : isDatabaseInitializing ? (
+            <div className="text-center py-12">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-2xl mx-auto">
+                <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                  Setting up the database...
+                </h3>
+                <p className="text-blue-700">
+                  The community features are being initialized. This happens when the database is first set up.
+                  Your data will appear here once the setup is complete.
+                </p>
+              </div>
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
