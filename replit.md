@@ -83,6 +83,7 @@ Preferred communication style: Simple, everyday language.
 - **Network Challenge**: Replit → Supabase direct connection blocked, requires Connection Pooler or Vercel deployment
 - **Schema Compatibility**: Maintained all existing table structures and relationships for seamless migration
 - **Migration Completed**: Successfully migrated to Supabase PostgreSQL via Transaction Pooler
-- **Connection Fixed**: Resolved "getaddrinfo ENOTFOUND" error by updating DATABASE_URL secret with correct Transaction Pooler address (aws-1-sa-east-1.pooler.supabase.com:6543)
-- **Database API**: Added basic /api/places endpoint that combines destinations, accommodations, attractions, and restaurants
-- **Current Status**: Server running successfully with Supabase connection and OpenAI API integration. All core functionality operational.
+- **Connection Fixed**: Resolved "getaddrinfo ENOTFOUND" error by updating server/db.ts to use Transaction Pooler address (aws-1-sa-east-1.pooler.supabase.com:6543)
+- **Database API**: Added basic /api/places endpoint that combines destinations, accommodations, attractions, and restaurants  
+- **Replit Secrets Issue**: Bypassed Replit Secrets refresh problem by hardcoding Transaction Pooler URL in db.ts with fallback logic
+- **Current Status**: Server running successfully with Supabase Transaction Pooler connection and OpenAI API integration. Supabase connectivity issue fully resolved.
