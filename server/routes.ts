@@ -337,6 +337,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Basic places endpoint - returns places from database
+  app.get('/api/places', async (req, res) => {
+    try {
+      // Get all destinations, accommodations, attractions, and restaurants
+      const [destinationsData, accommodationsData, attractionsData, restaurantsData] = await Promise.all([
+        storage.getDestinations(),
+        storage.getAccommodations(),
+        storage.getAttractions(),
+        storage.getRestaurants()
+      ]);
+      
+      // Combine all places into a unified format
+      const allPlaces = [
+        ...destinationsData.map(d => ({ ...d, type: 'destination' })),
+        ...accommodationsData.map(a => ({ ...a, type: 'accommodation' })),
+        ...attractionsData.map(a => ({ ...a, type: 'attraction' })),
+        ...restaurantsData.map(r => ({ ...r, type: 'restaurant' }))
+      ];
+      
+      res.json({ total: allPlaces.length, items: allPlaces });
+    } catch (error) {
+      console.error('Error fetching places:', error);
+      res.status(500).json({ error: 'Failed to fetch places' });
+    }
+  });
+
   // ===== GOOGLE PLACES API INTEGRATION =====
   
   // Search places using Google Places API
