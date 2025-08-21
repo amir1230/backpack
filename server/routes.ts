@@ -606,7 +606,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         budget,
         duration,
         interests,
-        preferredCountries: destination ? [destination] : preferredCountries
+        preferredCountries: Array.isArray(destination) ? destination : [destination]
       });
       
       console.log("Generated suggestions:", suggestions);
