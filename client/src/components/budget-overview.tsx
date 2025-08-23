@@ -224,7 +224,7 @@ export default function BudgetOverview({
                         ${expense.amount.toFixed(2)}
                       </div>
                     </div>
-                    {index < recentExpenses.length - 1 && <Separator className="mt-2" />}
+                    {index < (recentExpenses || []).length - 1 && <Separator className="mt-2" />}
                   </div>
                 );
               })}
@@ -234,7 +234,7 @@ export default function BudgetOverview({
       )}
 
       {/* Empty State */}
-      {expenses.length === 0 && (
+      {(expenses || []).length === 0 && (
         <Card>
           <CardContent className="text-center py-8">
             <PieChart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
