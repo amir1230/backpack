@@ -66,28 +66,31 @@ function AuthenticatedApp() {
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <Switch>
-      {isAuthenticated ? (
+      {isAuthenticated && !isLoading ? (
         <Route path="*" component={AuthenticatedApp} />
       ) : (
         <>
-          <Route path="/" component={Landing} />
-          <Route path="/my-trips" component={MyTripsNew} />
-          <Route path="/community" component={Community} />
-          <Route path="/explore" component={Explore} />
-          <Route component={NotFound} />
+          {isLoading && (
+            <Route path="*">
+              <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
+                <div className="text-center">
+                  <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading...</p>
+                </div>
+              </div>
+            </Route>
+          )}
+          {!isLoading && (
+            <>
+              <Route path="/" component={Landing} />
+              <Route path="/my-trips" component={MyTripsNew} />
+              <Route path="/community" component={Community} />
+              <Route path="/explore" component={Explore} />
+              <Route component={NotFound} />
+            </>
+          )}
         </>
       )}
     </Switch>
