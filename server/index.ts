@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer } from 'http';
 import { registerRoutes } from './routes';
+import { setupVite } from './vite';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,8 +17,8 @@ async function startServer() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  /* ודאו שיש בריאות בשורש (בנוסף ל-/api/health) */
-  app.get('/', (_req, res) => res.send('OK'));
+  // Health check endpoint for monitoring
+  app.get('/health-check', (_req, res) => res.send('OK'));
 
   await registerRoutes(app);
 
@@ -35,6 +36,11 @@ async function startServer() {
   server.keepAliveTimeout = 61000;
   server.headersTimeout = 65000;
   server.requestTimeout = 60000;
+
+  // Setup Vite in development mode
+  if (process.env.NODE_ENV === 'development') {
+    await setupVite(app, server);
+  }
 
   server.listen(PORT, HOST, () => {
     console.log(`[server] listening on http://${HOST}:${PORT}`);
