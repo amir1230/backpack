@@ -35,7 +35,7 @@ export function useAuth() {
     retry: false,
     refetchOnWindowFocus: true,
     staleTime: 0, // Always check for fresh auth status
-    cacheTime: 0, // Don't cache authentication data
+    gcTime: 0, // Don't cache authentication data
     queryFn: async () => {
       try {
         const res = await fetch("/api/auth/user", {

@@ -220,7 +220,7 @@ app.post('/api/trips', express.json(), async (req, res) => {
       // Return success for demo purposes
       res.json({ 
         id: Date.now(), 
-        destination, 
+        destination: req.body.destination || 'South America', 
         message: 'Trip saved successfully (demo mode)' 
       });
     } finally {
