@@ -146,7 +146,7 @@ export default function BudgetTracker() {
     : (currentTripExpenses || []).filter((expense: any) => expense.category === selectedCategory);
 
   const totalSpent = (currentTripExpenses || []).reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
-  const categoryTotals = EXPENSE_CATEGORIES.map(category => ({
+  const categoryTotals = (EXPENSE_CATEGORIES || []).map(category => ({
     ...category,
     total: (currentTripExpenses || [])
       .filter((expense: any) => expense.category === category.id)
@@ -192,7 +192,7 @@ export default function BudgetTracker() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {EXPENSE_CATEGORIES.map((category) => (
+                {(EXPENSE_CATEGORIES || []).map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.label}
                   </SelectItem>
@@ -239,7 +239,7 @@ export default function BudgetTracker() {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {EXPENSE_CATEGORIES.map((category) => {
+                      {(EXPENSE_CATEGORIES || []).map((category) => {
                         const IconComponent = category.icon;
                         return (
                           <SelectItem key={category.id} value={category.id}>
@@ -410,7 +410,7 @@ export default function BudgetTracker() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {categoryTotals.map((category) => {
+                    {(categoryTotals || []).map((category) => {
                       const IconComponent = category.icon;
                       const percentage = totalSpent > 0 ? (category.total / totalSpent) * 100 : 0;
                       
