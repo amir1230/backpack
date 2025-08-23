@@ -1,0 +1,188 @@
+בצעו את השינויים הבאים בפרויקט BackpackBuddy.
+
+========================
+A) תיקון קינון Link+Button ב‑home.tsx
+========================
+קובץ: client/src/pages/home.tsx
+
+1) ודאו בראש הקובץ שיש:
+   import { Link } from "wouter";
+   import { Button } from "@/components/ui/button";
+
+2) החליפו בכל מקום שבו יש מבנה כזה:
+   <Link href="/SOME_PATH">
+     <Button className="...">
+       ...תוכן...
+     </Button>
+   </Link>
+
+   ל‑מבנה תקין עם Radix Slot:
+   <Button asChild className="...">
+     <Link href="/SOME_PATH">
+       ...תוכן...
+     </Link>
+   </Button>
+
+החלפות ספציפיות שבפועל קיימות בקובץ (נא להחליף כל אחת מהן):
+
+- ה‑Hero (סביב השורה ~48):
+  היה:
+  <Link href="/my-trips">
+    <Button className="bg-white text-primary hover:bg-gray-100 px-6 py-3">
+      <Plus className="w-5 h-5 mr-2" />
+      Plan New Trip
+    </Button>
+  </Link>
+  יהיה:
+  <Button asChild className="bg-white text-primary hover:bg-gray-100 px-6 py-3">
+    <Link href="/my-trips">
+      <Plus className="w-5 h-5 mr-2" />
+      Plan New Trip
+    </Link>
+  </Button>
+
+- ה‑Hero – “Join Community” (מיד אחרי זה):
+  <Link href="/community">
+    <Button variant="outline" className="border-white text-white hover:bg-white hover:text-primary px-6 py-3">
+      <Users className="w-5 h-5 mr-2" />
+      Join Community
+    </Button>
+  </Link>
+  → 
+  <Button asChild variant="outline" className="border-white text-white hover:bg-white hover:text-primary px-6 py-3">
+    <Link href="/community">
+      <Users className="w-5 h-5 mr-2" />
+      Join Community
+    </Link>
+  </Button>
+
+- בסקשן “My Trips” (כפתור “New Trip”):
+  <Link href="/my-trips">
+    <Button className="bg-primary hover:bg-orange-600">
+      <Plus className="w-4 h-4 mr-2" />
+      New Trip
+    </Button>
+  </Link>
+  →
+  <Button asChild className="bg-primary hover:bg-orange-600">
+    <Link href="/my-trips">
+      <Plus className="w-4 h-4 mr-2" />
+      New Trip
+    </Link>
+  </Button>
+
+- כרטיס “No trips yet” (Create Your First Trip):
+  <Link href="/my-trips">
+    <Button className="bg-primary hover:bg-orange-600">
+      <Plus className="w-4 h-4 mr-2" />
+      Create Your First Trip
+    </Button>
+  </Link>
+  →
+  <Button asChild className="bg-primary hover:bg-orange-600">
+    <Link href="/my-trips">
+      <Plus className="w-4 h-4 mr-2" />
+      Create Your First Trip
+    </Link>
+  </Button>
+
+- “Quick Actions” (3 כפתורים):
+  1) Plan New Trip:
+     <Link href="/my-trips" className="block">
+       <Button variant="outline" className="w-full justify-start">
+         <Calendar className="w-4 h-4 mr-2" />
+         Plan New Trip
+       </Button>
+     </Link>
+     →
+     <Button asChild variant="outline" className="w-full justify-start">
+       <Link href="/my-trips" className="block">
+         <Calendar className="w-4 h-4 mr-2" />
+         Plan New Trip
+       </Link>
+     </Button>
+
+  2) Track Expenses:
+     <Link href="/budget-tracker" className="block">
+       <Button variant="outline" className="w-full justify-start">
+         <DollarSign className="w-4 h-4 mr-2" />
+         Track Expenses
+       </Button>
+     </Link>
+     →
+     <Button asChild variant="outline" className="w-full justify-start">
+       <Link href="/budget-tracker" className="block">
+         <DollarSign className="w-4 h-4 mr-2" />
+         Track Expenses
+       </Link>
+     </Button>
+
+  3) Find Travel Buddies:
+     <Link href="/community" className="block">
+       <Button variant="outline" className="w-full justify-start">
+         <Users className="w-4 h-4 mr-2" />
+         Find Travel Buddies
+       </Button>
+     </Link>
+     →
+     <Button asChild variant="outline" className="w-full justify-start">
+       <Link href="/community" className="block">
+         <Users className="w-4 h-4 mr-2" />
+         Find Travel Buddies
+       </Link>
+     </Button>
+
+חיפוש כללי נוסף: עברו על הקובץ והחליפו כל Link‑שעוטף‑Button ל‑Button asChild‑שעוטף‑Link.
+
+========================
+B) עוגיות אימות – התנהגות נכונה בין dev/production
+========================
+קובץ: server/replitAuth.ts
+
+במקום:
+cookie: {
+  httpOnly: true,
+  secure: true,
+  maxAge: sessionTtl,
+},
+
+השתמשו:
+cookie: {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'lax',
+  // אם בעתיד הלקוח והשרת יהיו על דומיינים שונים:
+  // השתמשו: sameSite: 'none' ו‑secure: true (חובה HTTPS)
+  maxAge: sessionTtl,
+},
+
+(אם הקובץ הזה אינו בשימוש בגרסה הנוכחית – אפשר להשאיר, אבל השינוי לא מזיק וימנע תקלות אם תחזרו להשתמש בו.)
+
+========================
+C) התאמת ה‑APIים שהקליינט שואל (demo mode)
+========================
+קובץ: client/src/lib/queryClient.ts – כבר יש fallback “demo mode” ל‑401. השאירו את זה, אבל הוסיפו גם fallback ל‑404 כדי למנוע שגיאות מיותרות בזמן הדגמה:
+
+מצאו ב‑apiRequest אחרי ה‑fetch:
+if (res.status === 401) { ... }
+
+והוסיפו מיד אחריו בדיקה ל‑404:
+if (res.status === 404) {
+  console.warn("Endpoint not found, returning empty demo response:", url);
+  return new Response(JSON.stringify({ items: [], total: 0 }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
+
+(אופציונלי: באזורים שמבצעים useQuery ל‑"/api/trips/user" ו‑"/api/reviews", אפשר זמנית להחליף ל‑endpoints שכן קיימים, כמו "/api/places" ו‑"/api/place-reviews", או לעטוף ב‑try/catch ולהציג state דמו.)
+
+========================
+D) צ’ק‑ליסט סיום
+========================
+1. אין יותר מבנים של <Link><Button>...</Button></Link> — יש Button asChild שמכיל Link.
+2. בדפדפן: לחיצה על כל כפתורי הניווט ב‑home מעבירה נתיב בלי רענון דף.
+3. אם משתמשים באימות/קוקי – ב‑dev הקוקי נשמר (secure=false ב‑dev).
+4. בקרת demo: 401/404 לא מפילים את ה‑UI.
+
+בצעו את כל השינויים ושמרו.

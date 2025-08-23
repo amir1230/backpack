@@ -38,7 +38,10 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'lax',
+      // אם בעתיד הלקוח והשרת יהיו על דומיינים שונים:
+      // השתמשו: sameSite: 'none' ו‑secure: true (חובה HTTPS)
       maxAge: sessionTtl,
     },
   });

@@ -35,6 +35,14 @@ export async function apiRequest(
     });
   }
 
+  if (res.status === 404) {
+    console.warn("Endpoint not found, returning empty demo response:", url);
+    return new Response(JSON.stringify({ items: [], total: 0 }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   await throwIfResNotOk(res);
   return res;
 }
@@ -62,6 +70,11 @@ export const getQueryFn: <T>(options: {
     if (res.status === 401) {
       console.log("Unauthorized request in demo mode, continuing");
       return null;
+    }
+
+    if (res.status === 404) {
+      console.warn("Endpoint not found in queryFn, returning empty array:", queryKey[0]);
+      return { items: [], total: 0 };
     }
 
     await throwIfResNotOk(res);

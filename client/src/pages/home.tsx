@@ -45,18 +45,18 @@ export default function Home() {
             <h1 className="text-3xl md:text-4xl font-bold mb-4">{welcomeMessage}</h1>
             <p className="text-xl opacity-90 mb-6">Ready for your next South American adventure?</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-              <Link href="/my-trips">
-                <Button className="bg-white text-primary hover:bg-gray-100 px-6 py-3">
+              <Button asChild className="bg-white text-primary hover:bg-gray-100 px-6 py-3">
+                <Link href="/my-trips">
                   <Plus className="w-5 h-5 mr-2" />
                   Plan New Trip
-                </Button>
-              </Link>
-              <Link href="/community">
-                <Button variant="outline" className="border-white text-white hover:bg-white hover:text-primary px-6 py-3">
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="border-white text-white hover:bg-white hover:text-primary px-6 py-3">
+                <Link href="/community">
                   <Users className="w-5 h-5 mr-2" />
                   Join Community
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -70,12 +70,12 @@ export default function Home() {
             <section>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-slate-700">My Trips</h2>
-                <Link href="/my-trips">
-                  <Button className="bg-primary hover:bg-orange-600">
+                <Button asChild className="bg-primary hover:bg-orange-600">
+                  <Link href="/my-trips">
                     <Plus className="w-4 h-4 mr-2" />
                     New Trip
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
               
               {userTripsLoading ? (
@@ -102,12 +102,12 @@ export default function Home() {
                     <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-600 mb-2">No trips yet</h3>
                     <p className="text-gray-500 mb-4">Start planning your first South American adventure!</p>
-                    <Link href="/my-trips">
-                      <Button className="bg-primary hover:bg-orange-600">
+                    <Button asChild className="bg-primary hover:bg-orange-600">
+                      <Link href="/my-trips">
                         <Plus className="w-4 h-4 mr-2" />
                         Create Your First Trip
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </CardContent>
                 </Card>
               )}
@@ -229,11 +229,11 @@ export default function Home() {
                   <p className="text-gray-500 text-sm">No recent activity</p>
                 )}
                 
-                <Link href="/community">
-                  <Button variant="outline" size="sm" className="w-full mt-4">
+                <Button asChild variant="outline" size="sm" className="w-full mt-4">
+                  <Link href="/community">
                     View All Activity
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
 
@@ -243,24 +243,24 @@ export default function Home() {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Link href="/my-trips" className="block">
-                  <Button variant="outline" className="w-full justify-start">
+                <Button asChild variant="outline" className="w-full justify-start">
+                  <Link href="/my-trips" className="block">
                     <Calendar className="w-4 h-4 mr-2" />
                     Plan New Trip
-                  </Button>
-                </Link>
-                <Link href="/budget-tracker" className="block">
-                  <Button variant="outline" className="w-full justify-start">
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full justify-start">
+                  <Link href="/budget-tracker" className="block">
                     <DollarSign className="w-4 h-4 mr-2" />
                     Track Expenses
-                  </Button>
-                </Link>
-                <Link href="/community" className="block">
-                  <Button variant="outline" className="w-full justify-start">
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full justify-start">
+                  <Link href="/community" className="block">
                     <Users className="w-4 h-4 mr-2" />
                     Find Travel Buddies
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
 
