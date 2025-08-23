@@ -167,7 +167,15 @@ export default function Landing() {
               AI-powered trip planning for backpackers. Get personalized itineraries, connect with fellow travelers, and explore South America like never before.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button onClick={handleStartPlanning} className="bg-white text-primary px-8 py-4 rounded-xl font-semibold hover:bg-gray-100">
+              <Button 
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleStartPlanning();
+                }} 
+                className="bg-white text-primary px-8 py-4 rounded-xl font-semibold hover:bg-gray-100"
+              >
                 <Bot className="w-5 h-5 mr-2" />
                 Start Planning
               </Button>
@@ -293,7 +301,15 @@ export default function Landing() {
               </div>
               
               <div className="text-center">
-                <Button onClick={handleStartPlanning} className="bg-primary text-white px-8 py-4 rounded-xl font-semibold hover:bg-orange-600">
+                <Button 
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleStartPlanning();
+                  }} 
+                  className="bg-primary text-white px-8 py-4 rounded-xl font-semibold hover:bg-orange-600"
+                >
                   <Bot className="w-5 h-5 mr-2" />
                   {user ? "Generate My Trip" : "Start Planning"}
                 </Button>
