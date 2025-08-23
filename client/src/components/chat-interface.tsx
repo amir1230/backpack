@@ -33,15 +33,15 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const user = null; // Demo mode - no auth
+  const user = null as any; // Demo mode - no auth
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: chatRooms = [], isLoading: roomsLoading } = useQuery({
+  const { data: chatRooms = [], isLoading: roomsLoading } = useQuery<any[]>({
     queryKey: ["/api/chat/rooms"],
   });
 
-  const { data: messages = [], isLoading: messagesLoading } = useQuery({
+  const { data: messages = [], isLoading: messagesLoading } = useQuery<any[]>({
     queryKey: ["/api/chat/messages", selectedRoom],
     enabled: !!selectedRoom,
   });
@@ -96,12 +96,12 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
   }, [messages]);
 
   const sendMessage = () => {
-    if (!newMessage.trim() || !socket || !selectedRoom || !user) return;
+    if (!newMessage.trim() || !socket || !selectedRoom) return;
 
     const messageData = {
       type: 'chat_message',
       roomId: selectedRoom,
-      userId: user.id,
+      userId: user?.id || 'demo-user',
       text: newMessage.trim(),
     };
 
@@ -262,7 +262,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                     ) : messages.length > 0 ? (
                       <div className="space-y-4">
                         {messages.map((message: any) => {
-                          const isOwnMessage = message.userId === user?.id;
+                          const isOwnMessage = message.userId === (user?.id || 'demo-user');
                           
                           return (
                             <div

@@ -43,7 +43,7 @@ export default function Landing() {
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [destination, setDestination] = useState<string>("");
   // const { user } = useAuth(); // Demo mode - no auth needed
-  const user = null;
+  const user = null as any;
   const [, setLocation] = useLocation();
 
   // Handle logout cleanup on page load

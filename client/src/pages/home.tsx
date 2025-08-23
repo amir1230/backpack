@@ -20,17 +20,17 @@ import {
 } from "lucide-react";
 
 export default function Home() {
-  const user = null; // Demo mode - no auth
+  const user = null as any; // Demo mode - no auth
 
-  const { data: trips = [], isLoading: tripsLoading } = useQuery({
+  const { data: trips = [], isLoading: tripsLoading } = useQuery<any[]>({
     queryKey: ["/api/trips"]
   });
 
-  const { data: userTrips = [], isLoading: userTripsLoading } = useQuery({
+  const { data: userTrips = [], isLoading: userTripsLoading } = useQuery<any[]>({
     queryKey: ["/api/trips/user"]
   });
 
-  const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
+  const { data: reviews = [], isLoading: reviewsLoading } = useQuery<any[]>({
     queryKey: ["/api/reviews"]
   });
 
@@ -171,7 +171,7 @@ export default function Home() {
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Reviews Written</span>
                   <Badge variant="secondary">
-                    {reviews.filter((r: any) => r.userId === user?.id).length}
+                    {reviews.filter((r: any) => r.userId === (user?.id || 'demo-user')).length}
                   </Badge>
                 </div>
               </CardContent>
