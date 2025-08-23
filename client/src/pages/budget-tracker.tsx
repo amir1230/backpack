@@ -140,20 +140,20 @@ export default function BudgetTracker() {
     return categoryData ? categoryData.color : 'bg-gray-500';
   };
 
-  const currentTripExpenses = selectedTrip ? tripExpenses : expenses;
+  const currentTripExpenses = selectedTrip ? (tripExpenses || []) : (expenses || []);
   const filteredExpenses = selectedCategory === "all" 
-    ? currentTripExpenses 
-    : currentTripExpenses.filter((expense: any) => expense.category === selectedCategory);
+    ? (currentTripExpenses || []) 
+    : (currentTripExpenses || []).filter((expense: any) => expense.category === selectedCategory);
 
-  const totalSpent = currentTripExpenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
+  const totalSpent = (currentTripExpenses || []).reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
   const categoryTotals = EXPENSE_CATEGORIES.map(category => ({
     ...category,
-    total: currentTripExpenses
+    total: (currentTripExpenses || [])
       .filter((expense: any) => expense.category === category.id)
       .reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0)
   }));
 
-  const selectedTripData = selectedTrip ? userTrips.find((trip: any) => trip.id === selectedTrip) : null;
+  const selectedTripData = selectedTrip ? (userTrips || []).find((trip: any) => trip.id === selectedTrip) : null;
   const budget = selectedTripData ? parseFloat(selectedTripData.budget || 0) : 0;
   const budgetUsed = budget > 0 ? (totalSpent / budget) * 100 : 0;
 
@@ -178,7 +178,7 @@ export default function BudgetTracker() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Expenses</SelectItem>
-                {userTrips.map((trip: any) => (
+                {(userTrips || []).map((trip: any) => (
                   <SelectItem key={trip.id} value={trip.id.toString()}>
                     {trip.title}
                   </SelectItem>
@@ -220,7 +220,7 @@ export default function BudgetTracker() {
                       <SelectValue placeholder="Select a trip" />
                     </SelectTrigger>
                     <SelectContent>
-                      {userTrips.map((trip: any) => (
+                      {(userTrips || []).map((trip: any) => (
                         <SelectItem key={trip.id} value={trip.id.toString()}>
                           {trip.title}
                         </SelectItem>

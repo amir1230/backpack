@@ -68,8 +68,18 @@ export const getQueryFn: <T>(options: {
 
     // If unauthorized and should throw, allow in demo mode
     if (res.status === 401) {
-      console.log("Unauthorized request in demo mode, continuing");
-      return null;
+      console.log("Unauthorized request in demo mode, returning empty array");
+      // Return empty array for different endpoint types
+      if (queryKey[0]?.toString().includes('/trips/user')) {
+        return [];
+      }
+      if (queryKey[0]?.toString().includes('/expenses')) {
+        return [];
+      }
+      if (queryKey[0]?.toString().includes('/analytics')) {
+        return { totalSpent: 0, categories: [], recentExpenses: [], monthlyData: [] };
+      }
+      return [];
     }
 
     if (res.status === 404) {
