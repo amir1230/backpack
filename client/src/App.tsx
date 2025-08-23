@@ -64,36 +64,28 @@ function AuthenticatedApp() {
 }
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
-
   return (
-    <Switch>
-      {isAuthenticated && !isLoading ? (
-        <Route path="*" component={AuthenticatedApp} />
-      ) : (
-        <>
-          {isLoading && (
-            <Route path="*">
-              <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                  <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading...</p>
-                </div>
-              </div>
-            </Route>
-          )}
-          {!isLoading && (
-            <>
-              <Route path="/" component={Landing} />
-              <Route path="/my-trips" component={MyTripsNew} />
-              <Route path="/community" component={Community} />
-              <Route path="/explore" component={Explore} />
-              <Route component={NotFound} />
-            </>
-          )}
-        </>
-      )}
-    </Switch>
+    <div className="min-h-screen">
+      <Navigation />
+      <main>
+        <Switch>
+          <Route path="/" component={Landing} />
+          <Route path="/home" component={Home} />
+          <Route path="/my-trips" component={MyTripsNew} />
+          <Route path="/community" component={Community} />
+          <Route path="/budget-tracker" component={BudgetTracker} />
+          <Route path="/achievements" component={Achievements} />
+          <Route path="/tripadvisor-data" component={TripAdvisorData} />
+          <Route path="/explore" component={Explore} />
+          <Route path="/weather" component={Weather} />
+          <Route path="/onboarding" component={Onboarding} />
+          <Route path="/registry" component={Registry} />
+          <Route path="/demo-real-places" component={DemoRealPlaces} />
+          <Route path="/collector-data" component={CollectorData} />
+          <Route component={NotFound} />
+        </Switch>
+      </main>
+    </div>
   );
 }
 
