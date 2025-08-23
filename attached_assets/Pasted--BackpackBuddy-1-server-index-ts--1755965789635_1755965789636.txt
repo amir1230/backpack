@@ -1,0 +1,84 @@
+בצעו את השינויים הבאים בפרויקט BackpackBuddy.
+
+========================
+1) server/index.ts – הפעלת trust proxy (ברפליט חובה)
+========================
+אחרי יצירת ה‑Express app, הוסיפו:
+  app.set('trust proxy', 1);
+
+דוגמה:
+  import express from 'express';
+  const app = express();
+  app.set('trust proxy', 1); // <<< חשוב מאחורי פרוקסי/רברס פרוקסי
+
+(אם זה בקובץ אחר – הוסיפו שם, מייד אחרי const app = express())
+
+========================
+2) server/replitAuth.ts – הגדרות Cookie נכונות ל‑dev/production
+========================
+אתרו את המקום שבו מוגדר ה‑cookie של הסשן (session/cookieOptions) ושנו ל:
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // ב-dev = false
+    sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'lax',
+    // אם בעתיד הלקוח והשרת יהיו על דומיינים שונים:
+    // sameSite: 'none', secure: true (חובה HTTPS) + השאירו trust proxy
+    path: '/',
+    maxAge: sessionTtl,
+  }
+
+========================
+3) server/routes.ts – הוספת נתיבי דיבאג לבדיקת קוקיות
+========================
+פתחו את server/routes.ts (שם יש export async function registerRoutes(app: Express)) והוסיפו בתוך הפונקציה BEFORE הנתיבים המוגנים:
+
+  // --- Debug cookie endpoints (temporary for diagnosis) ---
+  app.get('/api/debug/set-cookie', (req, res) => {
+    res.cookie('bb_debug', 'ok', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'lax',
+      path: '/',
+      maxAge: 1000 * 60 * 10,
+    });
+    res.json({ ok: true });
+  });
+
+  app.get('/api/debug/echo-cookie', (req, res) => {
+    res.json({ cookiesSeen: req.headers.cookie || null });
+  });
+
+שימו לב: חשוב שהנתיבים האלו יירשמו בקובץ שבו אתם כבר עושים app.get('/api/...') — כלומר בתוך אותה פונקציית registerRoutes(app).
+
+========================
+4) client/src/lib/queryClient.ts (או ה‑API wrapper) – credentials
+========================
+ודאו שכל fetch נשלח עם credentials:
+  const res = await fetch(url, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    ...options,
+  });
+
+========================
+5) הפעלה מחדש + בדיקות ידניות (בדפדפן, DevTools)
+========================
+א. פתחו את ה‑URL של האפליקציה (https://xxxxx.replit.dev).
+ב. לכו לכתובת: /api/debug/set-cookie
+   - ב‑DevTools → Network → הבקשה → Headers → ב‑Response Headers צריך להופיע **Set-Cookie** עם bb_debug=ok.
+ג. בקונסולה הריצו:
+   await fetch('/api/debug/echo-cookie', { credentials: 'include' }).then(r => r.json())
+   → חייב להחזיר { cookiesSeen: "bb_debug=ok" }
+ד. בדקו אימות:
+   await fetch('/api/auth/user', { credentials: 'include' }).then(r => r.status)
+   → אם 200 = הסשן עובד; אם 401/302 = עדיין אין סשן (נבדוק login/Set-Cookie של הסשן).
+
+========================
+6) אם עדיין אין Set-Cookie או שהקוקי לא נשלח
+========================
+- ודאו שהדומיין נטען ב‑https ולא ב‑http.
+- ודאו ש‑app.set('trust proxy', 1) אכן מופיע פעם אחת אחרי יצירת ה‑app.
+- בסביבת dev השאירו secure=false (כמו בסעיף 2).
+- אם תריצו לקוח ושרת על דומיינים שונים: עברו ל‑sameSite:'none' ו‑secure:true (חובה https), והשאירו trust proxy.
+
+בצעו את כל הסעיפים ושמרו. אם /api/debug/set-cookie עדיין מחזיר 404 – זה אומר שלא הוספתם את שני הנתיבים ב‑server/routes.ts בתוך registerRoutes(app) (או שהקובץ/פונקציה לא נטענים). במקרה כזה, הוסיפו את שני ה‑app.get גם לקובץ השרת הראשי שבו אתם בטוח רושמים נתיבי /api קיימים.
