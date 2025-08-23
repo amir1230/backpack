@@ -117,8 +117,12 @@ export default function Navigation() {
                     }`}
                   >
                     <Link href={item.href}>
-                      <item.icon className="w-5 h-5 mr-3" />
-                      {item.label}
+                      {item.icon ? (
+                        <>
+                          <span className="mr-3"><item.icon className="w-5 h-5" /></span>
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </>
+                      ) : item.label}
                     </Link>
                   </Button>
                 ))}
@@ -170,8 +174,12 @@ export default function Navigation() {
                 }`}
               >
                 <Link href={item.href}>
-                  <item.icon className="w-5 h-5 mb-1" />
-                  <span className="text-xs font-medium truncate">{item.label}</span>
+                  {item.icon ? (
+                    <>
+                      <span className="mb-1"><item.icon className="w-5 h-5" /></span>
+                      <span className="text-xs font-medium truncate">{item.label}</span>
+                    </>
+                  ) : item.label}
                 </Link>
               </Button>
             ))}
@@ -203,7 +211,14 @@ export default function Navigation() {
                         : "text-slate-600 hover:text-primary hover:bg-gray-50"
                     }`}
                   >
-                    <Link href={item.href}>{item.label}</Link>
+                    <Link href={item.href}>
+                      {item.icon ? (
+                        <>
+                          <span className="mr-2"><item.icon className="w-4 h-4" /></span>
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </>
+                      ) : item.label}
+                    </Link>
                   </Button>
                 ))}
               </div>
