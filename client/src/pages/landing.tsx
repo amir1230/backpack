@@ -79,20 +79,12 @@ export default function Landing() {
 
   const handleStartPlanning = () => {
     console.log("Start Planning button clicked!");
+    alert("הכפתור נלחץ! עוברים לדף תכנון הטיולים");
     console.log("Current location:", window.location.pathname);
-    console.log("Attempting to navigate to /my-trips");
     
-    try {
-      setLocation("/my-trips");
-      console.log("setLocation called successfully");
-      
-      // Also add a timeout to check if navigation worked
-      setTimeout(() => {
-        console.log("Location after navigation:", window.location.pathname);
-      }, 100);
-    } catch (error) {
-      console.error("Navigation error:", error);
-    }
+    // Try direct navigation first to test if it works
+    console.log("Using direct navigation to /my-trips");
+    window.location.href = "/my-trips";
   };
 
   const handleLogout = async () => {
