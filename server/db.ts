@@ -1,25 +1,36 @@
+// server/db.ts - Database connection using Drizzle ORM with Supabase
 import pkg from 'pg';
 const { Pool } = pkg;
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "../shared/schema.js";
+import { config, DATABASE_URL } from './config.js';
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+console.log('Connecting to Supabase via Transaction Pooler...');
+
+// Use singleton pattern for connection pool
+let poolInstance: typeof Pool.prototype | null = null;
+let dbInstance: ReturnType<typeof drizzle> | null = null;
+
+export function getPool() {
+  if (!poolInstance) {
+    poolInstance = new Pool({ 
+      connectionString: DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+      max: 10, // Maximum connections in pool
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
+    });
+  }
+  return poolInstance;
 }
 
-// Use DATABASE_URL, but if it's a Supabase URL, we need to use Supabase client instead
-const DATABASE_URL = process.env.DATABASE_URL;
+export function getDb() {
+  if (!dbInstance) {
+    dbInstance = drizzle(getPool(), { schema });
+  }
+  return dbInstance;
+}
 
-console.log('Using DATABASE_URL via Transaction Pooler for Supabase compatibility');
-
-// For Supabase, we should use the proper PostgreSQL connection string
-// Use hardcoded Supabase Transaction Pooler since environment variables point to old Neon database
-const supabasePostgresUrl = 'postgresql://postgres.wuzhvkmfdyiwaaladyxc:QK83yFVTMcDMJ2uX@aws-0-sa-east-1.pooler.supabase.com:6543/postgres';
-
-export const pool = new Pool({ 
-  connectionString: supabasePostgresUrl,
-  ssl: { rejectUnauthorized: false }
-});
-export const db = drizzle(pool, { schema });
+// Legacy exports for backward compatibility
+export const pool = getPool();
+export const db = getDb();
