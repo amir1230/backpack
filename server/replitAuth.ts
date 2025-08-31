@@ -25,8 +25,8 @@ const getOidcConfig = memoize(
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   const pgStore = connectPg(session);
-  // Use the same Transaction Pooler URL that works with Supabase from Replit
-  const connectionString = 'postgresql://postgres.wuzhvkmfdyiwaaladyxc:!Dornt0740$@aws-1-sa-east-1.pooler.supabase.com:6543/postgres';
+  // Use the DATABASE_URL from environment variables
+  const connectionString = process.env.DATABASE_URL;
   const sessionStore = new pgStore({
     conString: connectionString,
     createTableIfMissing: false,
