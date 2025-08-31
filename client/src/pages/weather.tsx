@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { WeatherWidget } from "@/components/WeatherWidget";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Badge } from "../components/ui/badge";
+import { WeatherWidget } from "../components/WeatherWidget";
 import { Search, MapPin, Calendar, Thermometer, Info } from 'lucide-react';
-import { SOUTH_AMERICAN_COUNTRIES } from "@/lib/constants";
+import { SOUTH_AMERICAN_COUNTRIES } from "../lib/constants";
 
 const SOUTH_AMERICAN_DESTINATIONS = [
   { name: 'Lima', country: 'Peru', description: 'Coastal capital with year-round mild weather' },
