@@ -24,26 +24,16 @@ const getOidcConfig = memoize(
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const pgStore = connectPg(session);
-  // Use the DATABASE_URL from environment variables
-  const connectionString = process.env.DATABASE_URL;
-  const sessionStore = new pgStore({
-    conString: connectionString,
-    createTableIfMissing: false,
-    ttl: sessionTtl,
-    tableName: "sessions",
-  });
+  
+  // Use in-memory store temporarily until database is ready
   return session({
-    secret: process.env.SESSION_SECRET!,
-    store: sessionStore,
+    secret: process.env.SESSION_SECRET || 'demo-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'lax',
-      // אם בעתיד הלקוח והשרת יהיו על דומיינים שונים:
-      // השתמשו: sameSite: 'none' ו‑secure: true (חובה HTTPS)
       path: '/',
       maxAge: sessionTtl,
     },
