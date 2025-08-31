@@ -108,6 +108,16 @@ export const expensesApi = {
     }),
 };
 
+// Destinations API
+export async function getDestinations() {
+  const r = await fetch('/api/destinations', { method: 'GET' });
+  if (!r.ok) {
+    const msg = await r.text().catch(() => r.statusText);
+    throw new Error(`Failed to fetch destinations: ${r.status} ${msg}`);
+  }
+  return r.json();
+}
+
 // Export all APIs
 export const api = {
   dashboard: dashboardApi,
