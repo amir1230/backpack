@@ -3,9 +3,15 @@ import { z } from 'zod';
 
 const Env = z.object({
   NODE_ENV: z.enum(['development','production']).default('development'),
-  SUPABASE_URL: z.string().url(),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
-  SUPABASE_ANON_KEY: z.string().min(20),
+  SUPABASE_URL: z.string()
+    .transform((val) => val.replace(/[\u200E\u200F\u202A-\u202E]/g, '').trim())
+    .pipe(z.string().url()),
+  SUPABASE_SERVICE_ROLE_KEY: z.string()
+    .transform((val) => val.replace(/[\u200E\u200F\u202A-\u202E]/g, '').trim())
+    .pipe(z.string().min(20)),
+  SUPABASE_ANON_KEY: z.string()
+    .transform((val) => val.replace(/[\u200E\u200F\u202A-\u202E]/g, '').trim())
+    .pipe(z.string().min(20)),
   DATABASE_URL: z.string().min(10).optional(), // אופציונלי אם יש Drizzle/pg
   PORT: z.string().transform(Number).default('5000'),
   HOST: z.string().default('0.0.0.0'),
