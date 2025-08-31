@@ -46,7 +46,8 @@ const navigationItems = [
 
 export default function Navigation() {
   const [location] = useLocation();
-  const user = null; // Demo mode - no auth
+  // Always show sidebar - no authentication required
+  const user = { name: "Guest User", email: "guest@tripwise.com" }; 
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isVisible } = useScrollDirection();
@@ -74,8 +75,8 @@ export default function Navigation() {
     }
   };
 
-  const userInitials = "U"; // Demo mode
-  const userName = "Demo User"; // Demo mode
+  const userInitials = "G"; // Guest user
+  const userName = "Guest User"; // Always accessible
 
   if (isMobile) {
     return (
