@@ -1,3 +1,4 @@
+import React from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -30,7 +31,8 @@ function Router() {
   return (
     <div className="min-h-screen">
       <Navigation />
-      <main>
+      {/* Main content area adjusted for right sidebar */}
+      <main className="md:pr-64">
         <Switch>
           <Route path="/" component={Landing} />
           <Route path="/home" component={Home} />

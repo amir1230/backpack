@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 // import { useAuth } from "@/hooks/useAuth"; // Disabled for demo mode
 import { Button } from "@/components/ui/button";
@@ -39,9 +39,6 @@ const navigationItems = [
   { href: "/weather", label: "Weather", icon: Cloud },
   { href: "/community", label: "Community", icon: Users },
   { href: "/budget-tracker", label: "Budget", icon: DollarSign },
-  { href: "/achievements", label: "Achievements", icon: Trophy },
-  { href: "/tripadvisor-data", label: "Travel Data", icon: Database },
-  { href: "/collector-data", label: "South America Data", icon: Compass },
   { href: "/ingestion-dashboard", label: "Ingestion Dashboard", icon: Database },
 ];
 
@@ -190,78 +187,66 @@ export default function Navigation() {
     );
   }
 
+  // Desktop Right Sidebar
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50 hidden md:block">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0 flex items-center">
-              <img src={logoCompact} alt="TripWise" className="h-8" />
-            </Link>
-            
-            <div className="hidden md:block ml-10">
-              <div className="flex items-baseline space-x-4">
-                {navigationItems.map((item) => (
-                  <Button
-                    key={item.href}
-                    asChild
-                    variant="ghost"
-                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                      location === item.href
-                        ? "text-primary bg-orange-50"
-                        : "text-slate-600 hover:text-primary hover:bg-gray-50"
-                    }`}
-                  >
-                    <Link href={item.href}>
-                      {item.icon ? (
-                        <>
-                          <span className="mr-2"><item.icon className="w-4 h-4" /></span>
-                          <span className="text-sm font-medium">{item.label}</span>
-                        </>
-                      ) : item.label}
-                    </Link>
-                  </Button>
-                ))}
-              </div>
+    <>
+      {/* Desktop Right Sidebar */}
+      <aside className="fixed top-0 right-0 h-full w-64 bg-white shadow-2xl border-l border-gray-200 z-50 hidden md:flex flex-col">
+        {/* Sidebar Header with Logo */}
+        <div className="p-6 border-b border-gray-200">
+          <Link href="/" className="flex items-center justify-center">
+            <img src={logoCompact} alt="TripWise" className="h-10" />
+          </Link>
+        </div>
+        
+        {/* Navigation Items */}
+        <nav className="flex-1 p-4 space-y-2">
+          {navigationItems.map((item) => (
+            <Button
+              key={item.href}
+              asChild
+              variant="ghost"
+              className={`w-full justify-start px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                location === item.href
+                  ? "bg-orange-100 text-orange-800 hover:bg-orange-200"
+                  : "text-slate-700 hover:bg-gray-100 hover:text-slate-900"
+              }`}
+            >
+              <Link href={item.href}>
+                {item.icon && (
+                  <span className="ml-1 mr-3">
+                    <item.icon className="w-5 h-5" />
+                  </span>
+                )}
+                <span>{item.label}</span>
+              </Link>
+            </Button>
+          ))}
+        </nav>
+        
+        {/* User Profile and Logout at Bottom */}
+        <div className="p-4 border-t border-gray-200">
+          <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-lg">
+            <Avatar className="w-10 h-10 mr-3">
+              <AvatarImage src={(user as any)?.profileImageUrl} />
+              <AvatarFallback className="bg-orange-200 text-orange-800">{userInitials}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-slate-900 truncate">{userName}</p>
+              <p className="text-xs text-gray-500 truncate">{(user as any)?.email || "demo@tripwise.com"}</p>
             </div>
           </div>
-
-          <div className="flex items-center space-x-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={(user as any)?.profileImageUrl} alt={userName} />
-                    <AvatarFallback>{userInitials}</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <div className="flex items-center justify-start gap-2 p-2">
-                  <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium">{userName}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {(user as any)?.email}
-                    </p>
-                  </div>
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/profile" className="w-full">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            className="w-full justify-start px-4 py-3 text-slate-700 border-gray-300 hover:bg-red-50 hover:text-red-700 hover:border-red-300"
+          >
+            <LogOut className="w-5 h-5 mr-3" />
+            Sign Out
+          </Button>
         </div>
-      </div>
-    </nav>
+      </aside>
+    </>
   );
 }
