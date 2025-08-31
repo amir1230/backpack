@@ -3,8 +3,8 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer } from 'http';
-import { registerRoutes } from './routes';
-import { setupVite } from './vite';
+import { registerRoutes } from './routes.js';
+import { setupVite } from './vite.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,7 +30,7 @@ async function startServer() {
     res.sendFile(path.join(publicDir, 'index.html'));
   });
 
-  const PORT = Number(process.env.PORT) || 3000;
+  const PORT = Number(process.env.PORT) || 5000;
   const HOST = '0.0.0.0';
   const server = createServer(app);
   server.keepAliveTimeout = 61000;
