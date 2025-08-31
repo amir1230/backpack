@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
-// import { useAuth } from "@/hooks/useAuth"; // Disabled for demo mode
-import { Button } from "@/components/ui/button";
-import { queryClient } from "@/lib/queryClient";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { useAuth } from "../hooks/useAuth"; // Disabled for demo mode
+import { Button } from "./ui/button";
+import { queryClient } from "../lib/queryClient";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useScrollDirection } from "@/hooks/useScrollDirection";
-import logoCompact from "@/assets/tripwise-logo-compact.svg";
+} from "./ui/dropdown-menu";
+import { useIsMobile } from "../hooks/use-mobile";
+import { useScrollDirection } from "../hooks/useScrollDirection";
+// import logoCompact from "../../attached_assets/tripwise-logo-compact.svg";
 import { 
   Compass, 
   Home, 
@@ -85,7 +85,7 @@ export default function Navigation() {
           <div className="px-4">
             <div className="flex justify-between items-center h-16">
               <Link href="/" className="flex items-center">
-                <img src={logoCompact} alt="TripWise" className="h-8" />
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">TW</div>
               </Link>
               
               <div className="flex items-center space-x-4">
@@ -197,7 +197,7 @@ export default function Navigation() {
         {/* Sidebar Header with Logo */}
         <div className="p-6 border-b border-gray-200">
           <Link href="/" className="flex items-center justify-center">
-            <img src={logoCompact} alt="TripWise" className="h-10" />
+            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">TW</div>
           </Link>
         </div>
         
