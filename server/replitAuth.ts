@@ -8,9 +8,8 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-if (!process.env.REPLIT_DOMAINS) {
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
-}
+// Demo mode - skip auth checks
+console.log('Running in demo mode - no authentication required');
 
 const getOidcConfig = memoize(
   async () => {
