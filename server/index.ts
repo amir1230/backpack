@@ -22,14 +22,6 @@ async function startServer() {
 
   await registerRoutes(app);
 
-  const publicDir = path.join(__dirname, '../dist/public');
-  app.use(express.static(publicDir));
-
-  app.get('*', (req, res) => {
-    if (req.path.startsWith('/api/')) return res.status(404).end();
-    res.sendFile(path.join(publicDir, 'index.html'));
-  });
-
   const PORT = Number(process.env.PORT) || 5000;
   const HOST = '0.0.0.0';
   const server = createServer(app);
@@ -40,6 +32,15 @@ async function startServer() {
   // Setup Vite in development mode
   if (process.env.NODE_ENV === 'development') {
     await setupVite(app, server);
+  } else {
+    // Production mode - serve static files
+    const publicDir = path.join(__dirname, '../dist/public');
+    app.use(express.static(publicDir));
+
+    app.get('*', (req, res) => {
+      if (req.path.startsWith('/api/')) return res.status(404).end();
+      res.sendFile(path.join(publicDir, 'index.html'));
+    });
   }
 
   server.listen(PORT, HOST, () => {
