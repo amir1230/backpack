@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Database, Table, BarChart3, Users, MapPin, MessageSquare, CreditCard, Trophy } from "lucide-react";
-import { api, type DashboardResponse } from "@/lib/api";
+import { api, type DashboardResponse, type TableData } from "@/lib/api";
 
 export default function Dashboard() {
   const { data: dashboardData, isLoading, error } = useQuery<DashboardResponse>({
@@ -12,8 +12,8 @@ export default function Dashboard() {
   });
 
   const displayData = dashboardData?.tables || [];
-  const totalRecords = displayData.reduce((sum, table) => sum + table.approx_row_count, 0);
-  const tablesWithData = displayData.filter(table => table.approx_row_count > 0).length;
+  const totalRecords = displayData.reduce((sum: number, table: TableData) => sum + table.approx_row_count, 0);
+  const tablesWithData = displayData.filter((table: TableData) => table.approx_row_count > 0).length;
 
   const getTableIcon = (tableName: string) => {
     if (tableName.includes('user') || tableName.includes('session')) return Users;
@@ -35,7 +35,7 @@ export default function Dashboard() {
     return 'Other';
   };
 
-  const groupedTables = displayData.reduce((groups, table) => {
+  const groupedTables = displayData.reduce((groups: Record<string, TableData[]>, table: TableData) => {
     const category = getTableCategory(table.table_name);
     if (!groups[category]) groups[category] = [];
     groups[category].push(table);
