@@ -42,6 +42,7 @@ const navigationItems = [
   { href: "/achievements", label: "Achievements", icon: Trophy },
   { href: "/tripadvisor-data", label: "Travel Data", icon: Database },
   { href: "/collector-data", label: "South America Data", icon: Compass },
+  { href: "/ingestion-dashboard", label: "Ingestion Dashboard", icon: Database },
 ];
 
 export default function Navigation() {

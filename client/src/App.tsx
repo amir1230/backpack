@@ -20,6 +20,7 @@ import Onboarding from "@/pages/onboarding";
 import Registry from "@/pages/registry";
 import DemoRealPlaces from "@/pages/demo-real-places";
 import CollectorData from "@/pages/CollectorData";
+import IngestionDashboard from "@/pages/IngestionDashboard";
 import Navigation from "@/components/navigation";
 import { ErrorBoundary } from "@/components/error-boundary";
 
@@ -44,6 +45,7 @@ function Router() {
           <Route path="/registry" component={Registry} />
           <Route path="/demo-real-places" component={DemoRealPlaces} />
           <Route path="/collector-data" component={CollectorData} />
+          <Route path="/ingestion-dashboard" component={IngestionDashboard} />
           <Route component={NotFound} />
         </Switch>
       </main>
