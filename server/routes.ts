@@ -1,31 +1,31 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
-import { db, pool } from "./db";
-import { googlePlaces } from "./googlePlaces";
-import { seedSouthAmericanData } from "./dataSeeder";
-import { weatherService } from "./weatherService";
-import { travelTimingService } from "./travelTimingService";
-import { achievements } from "@shared/schema";
+import { storage } from "./storage.js";
+import { setupAuth, isAuthenticated } from "./replitAuth.js";
+import { db, pool } from "./db.js";
+import { googlePlaces } from "./googlePlaces.js";
+import { seedSouthAmericanData } from "./dataSeeder.js";
+import { weatherService } from "./weatherService.js";
+import { travelTimingService } from "./travelTimingService.js";
 import { eq } from "drizzle-orm";
-import { registerCollectorRoutes } from "./collectorRoutes";
+import { registerCollectorRoutes } from "./collectorRoutes.js";
 import type { Request, Response, Router } from 'express';
-import { supabaseAdmin } from './supabase';
-import {
-  insertTripSchema,
-  insertReviewSchema,
-  insertExpenseSchema,
-  insertChatMessageSchema,
-  insertConnectionSchema,
-  insertPlaceReviewSchema,
-  insertReviewVoteSchema,
-  insertChatRoomSchema,
-  insertTravelBuddyPostSchema,
-  insertTravelBuddyApplicationSchema,
-  insertLocationReviewSchema,
-} from "@shared/schema";
+import { supabaseAdmin } from './supabase.js';
+// Temporarily commenting out schema imports until we fix the shared module
+// import {
+//   insertTripSchema,
+//   insertReviewSchema,
+//   insertExpenseSchema,
+//   insertChatMessageSchema,
+//   insertConnectionSchema,
+//   insertPlaceReviewSchema,
+//   insertReviewVoteSchema,
+//   insertChatRoomSchema,
+//   insertTravelBuddyPostSchema,
+//   insertTravelBuddyApplicationSchema,
+//   insertLocationReviewSchema,
+// } from "@shared/schema";
 import {
   generateTravelSuggestions,
   generateItinerary,
@@ -35,8 +35,8 @@ import {
   conversationalTripAssistant,
   generateConversationalSuggestions,
   enrichSuggestionsWithRealPlaces
-} from "./openai";
-import { generateItinerary as generateDetailedItinerary } from "./generateItinerary";
+} from "./openai.js";
+import { generateItinerary as generateDetailedItinerary } from "./generateItinerary.js";
 
 // In-memory storage for user itineraries
 interface UserItineraryDay {
@@ -58,13 +58,32 @@ export async function registerRoutes(app: Express): Promise<void> {
 
   // Destinations endpoint using Supabase
   app.get('/api/destinations', async (_req: Request, res: Response) => {
-    const { data, error } = await supabaseAdmin
-      .from('destinations')
-      .select('*')
-      .limit(50);
+    try {
+      console.log('Fetching destinations from Supabase...');
+      const { data, error } = await supabaseAdmin
+        .from('destinations')
+        .select('*')
+        .limit(50);
 
-    if (error) return res.status(500).json({ error: error.message });
-    res.json(data);
+      if (error) {
+        console.error('Supabase error:', error);
+        return res.status(500).json({ 
+          error: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+      }
+
+      console.log(`Found ${data?.length || 0} destinations`);
+      res.json(data || []);
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      res.status(500).json({ 
+        error: 'Internal server error',
+        message: err instanceof Error ? err.message : 'Unknown error'
+      });
+    }
   });
 
   // --- Debug cookie endpoints (temporary for diagnosis) ---

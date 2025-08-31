@@ -20,6 +20,38 @@ async function startServer() {
   // Health check endpoint for monitoring
   app.get('/health-check', (_req, res) => res.send('OK'));
 
+  // Test destination endpoint directly in index.ts to bypass route issues
+  app.get('/api/destinations', async (_req, res) => {
+    try {
+      const { supabaseAdmin } = await import('./supabase.js');
+      console.log('Fetching destinations from Supabase...');
+      
+      const { data, error } = await supabaseAdmin
+        .from('destinations')
+        .select('*')
+        .limit(50);
+
+      if (error) {
+        console.error('Supabase error:', error);
+        return res.status(500).json({ 
+          error: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+      }
+
+      console.log(`Found ${data?.length || 0} destinations`);
+      res.json(data || []);
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      res.status(500).json({ 
+        error: 'Internal server error',
+        message: err instanceof Error ? err.message : 'Unknown error'
+      });
+    }
+  });
+
   // Dashboard API endpoint - registered before Vite middleware
   app.get('/api/dashboard/tables', async (_req, res) => {
     try {

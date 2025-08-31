@@ -1,0 +1,127 @@
+בדיקה מהירה
+curl (מהטרמינל ברפליט)
+curl -i http://localhost:3000/api/destinations
+
+
+עדכן את ה־port אם שונה אצלך. ברפליט לעתים המסלול הוא דרך ה־preview URL שלהם.
+
+בדיקת פרונט
+
+קרא getDestinations() וודא שמתקבלת רשימה.
+
+אם אין נתונים — ודא שב־Supabase קיימת טבלה public.destinations עם שורות.
+
+10) אבטחה בסיסית (קריטי)
+
+SUPABASE_SERVICE_ROLE_KEY נשאר אך ורק בצד שרת (Replit Secrets).
+
+אם תרצה חיבור ישיר מ־Client ל־Supabase (לא חובה), השתמש ב־SUPABASE_ANON_KEY ורשום RLS הדוק לטבלאות (Read-only, רק עמודות נדרשות, תנאי where לפי צורך).
+
+פעולות כתיבה/עדכון/אדמין — לבצע דרך השרת שלך בלבד.
+
+11) (אופציונלי) פרוקסי REST כללי ל־PostgREST
+
+אם אתה רוצה מסלול גנרי מהיר לכל טבלה (Read/Write) דרך השרת, הוסף:
+
+// server/supabaseProxy.ts
+import type { Request, Response, NextFunction } from 'express';
+import { env } from './config';
+
+const ALLOW_TABLES = new Set([
+  'destinations','attractions','restaurants','accommodations'
+]);
+const BASE = `${env.SUPABASE_URL}/rest/v1`;
+const APIKEY = env.SUPABASE_SERVICE_ROLE_KEY; // שרת בלבד
+
+export function supabaseProxy() {
+  return async (req: Request, res: Response, _next: NextFunction) => {
+    try {
+      // נתיב בסגנון: /sb/<table>
+      const [, , table] = req.path.split('/');
+      if (!ALLOW_TABLES.has(table)) {
+        return res.status(403).json({ error: 'table not allowed' });
+      }
+
+      const url = new URL(`${BASE}/${table}`);
+      for (const [k, v] of Object.entries(req.query)) {
+        url.searchParams.set(k, String(v));
+      }
+
+      const resp = await fetch(url, {
+        method: req.method,
+        headers: {
+          apikey: APIKEY!,
+          Authorization: `Bearer ${APIKEY}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=representation',
+        },
+        body: ['GET','HEAD'].includes(req.method) ? undefined : JSON.stringify(req.body),
+      });
+
+      const contentType = resp.headers.get('content-type') || 'application/json';
+      const body = await resp.text();
+      res.status(resp.status).type(contentType).send(body);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  };
+}
+
+
+רישום במסלול:
+
+// server/index.ts (קטע הוספה)
+import { supabaseProxy } from './supabaseProxy';
+app.use('/sb', supabaseProxy());
+
+// דוגמאות שימוש מהדפדפן/לקוח:
+// GET  /sb/destinations?select=*&limit=20
+// POST /sb/destinations  (עם JSON בגוף הבקשה)
+
+
+שים לב: מומלץ להשאיר allowlist מצומצם (רק טבלאות ציבוריות), ובכתיבה — לשקול ולידציה.
+
+12) סקריפטים שימושיים ב־package.json
+{
+  "scripts": {
+    "dev:server": "tsx watch server/index.ts",
+    "dev:client": "vite",                       // אם אתה עם Vite
+    "dev": "concurrently \"npm:dev:server\" \"npm:dev:client\"",
+    "typegen": "supabase gen types typescript --project-id <<< YOUR_PROJECT_REF >>> --schema public > shared/supabase.types.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.16.0",
+    "concurrently": "^9.0.0",
+    "zod": "^3.23.8",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "express": "^4.19.2"
+  }
+}
+
+
+אם אתה לא עם Vite/TSX — עדכן לפי הסטאק שלך.
+
+13) צ׳קליסט קצר לסיום
+
+ מילאת את כל ה־Secrets ברפליט:
+
+SUPABASE_URL → <<< https://xxxxx.supabase.co >>>
+
+SUPABASE_SERVICE_ROLE_KEY → <<< your-service-role-key >>>
+
+SUPABASE_ANON_KEY → <<< your-anon-key >>>
+
+DATABASE_URL → <<< postgresql://... >>> (אם נחוץ)
+
+ יצרת server/config.ts, server/supabase.ts.
+
+ הוספת ראוט /api/destinations ובדקת שהוא מחזיר נתונים.
+
+ עדכנת את client/src/lib/api.ts לצריכת הראוט.
+
+ (אופציונלי) יצרת shared/supabase.types.ts ע״י typegen.
+
+ (אופציונלי) חיברת /sb/* כפרוקסי וטמעת allowlist.
