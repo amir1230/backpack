@@ -52,29 +52,78 @@ async function startServer() {
     });
   });
 
-  // Test destination endpoint directly in index.ts to bypass route issues
+  // Enhanced destinations endpoint with photos for user interface
   app.get('/api/destinations', async (_req, res) => {
     try {
-      const { supabaseAdmin } = await import('./supabase.js');
-      console.log('Fetching destinations from Supabase...');
+      const { getSupabaseAdmin } = await import('./supabase.js');
+      const supabase = getSupabaseAdmin();
+      console.log('Fetching destinations with photos for user view...');
       
-      const { data, error } = await supabaseAdmin
+      // Get destinations with their photos
+      const { data: destinations, error: destError } = await supabase
         .from('destinations')
-        .select('*')
-        .limit(50);
+        .select(`
+          id,
+          location_id,
+          name,
+          latitude,
+          longitude,
+          city,
+          state,
+          country,
+          address_string,
+          web_url,
+          photo_count,
+          created_at
+        `)
+        .order('name');
 
-      if (error) {
-        console.error('Supabase error:', error);
+      if (destError) {
+        console.error('Destinations error:', destError);
         return res.status(500).json({ 
-          error: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
+          error: destError.message,
+          details: destError.details,
+          hint: destError.hint,
+          code: destError.code
         });
       }
 
-      console.log(`Found ${data?.length || 0} destinations`);
-      res.json(data || []);
+      // Get photos for all destinations
+      const { data: photos, error: photoError } = await supabase
+        .from('location_photos')
+        .select(`
+          location_id,
+          photo_url,
+          thumbnail_url,
+          caption,
+          width,
+          height
+        `)
+        .eq('location_category', 'destination')
+        .order('id');
+
+      if (photoError) {
+        console.log('Photos query error (continuing without photos):', photoError.message);
+      }
+
+      // Combine destinations with their photos
+      const destinationsWithPhotos = destinations?.map(dest => ({
+        ...dest,
+        photos: photos?.filter(photo => photo.location_id === dest.location_id) || [],
+        mainPhoto: photos?.find(photo => photo.location_id === dest.location_id)?.thumbnail_url || 
+                   photos?.find(photo => photo.location_id === dest.location_id)?.photo_url,
+        coordinates: dest.latitude && dest.longitude ? {
+          lat: parseFloat(dest.latitude),
+          lng: parseFloat(dest.longitude)
+        } : null
+      })) || [];
+
+      console.log(`Found ${destinationsWithPhotos.length} destinations with photos`);
+      res.json({
+        success: true,
+        count: destinationsWithPhotos.length,
+        destinations: destinationsWithPhotos
+      });
     } catch (err) {
       console.error('Unexpected error:', err);
       res.status(500).json({ 
