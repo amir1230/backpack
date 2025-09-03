@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card.js";
+import { Button } from "../components/ui/button.js";
+import { Badge } from "../components/ui/badge.js";
 // import { useAuth } from "@/hooks/useAuth"; // Demo mode
-import TripCard from "@/components/trip-card";
-import AiChat from "@/components/ai-chat";
-import PersonalizedRecommendations from "@/components/personalized-recommendations";
+import TripCard from "../components/trip-card.js";
+import AiChat from "../components/ai-chat.js";
+import PersonalizedRecommendations from "../components/personalized-recommendations.js";
 import { Link } from "wouter";
 import { 
   Plus, 

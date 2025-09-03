@@ -1,31 +1,31 @@
 import React from "react";
 import { Switch, Route, useLocation } from "wouter";
-import { queryClient } from "./lib/queryClient";
+import { queryClient } from "./lib/queryClient.js";
 import { QueryClientProvider } from "@tanstack/react-query";
 // import { useQuery } from "@tanstack/react-query"; // Not needed in demo mode
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "./components/ui/toaster.js";
+import { TooltipProvider } from "./components/ui/tooltip.js";
 // import { useAuth } from "@/hooks/useAuth"; // Demo mode
-import NotFound from "@/pages/not-found";
-import Landing from "@/pages/landing";
-import Home from "@/pages/home";
+import NotFound from "./pages/not-found.js";
+import Landing from "./pages/landing.js";
+import Home from "./pages/home.js";
 
-import Community from "@/pages/Community";
-import BudgetTracker from "@/pages/budget-tracker";
-import Achievements from "@/pages/achievements";
-import TripAdvisorData from "@/pages/tripadvisor-data";
-import Explore from "@/pages/explore";
-import Weather from "@/pages/weather";
-import MyTripsNew from "@/pages/my-trips-new";
-import Onboarding from "@/pages/onboarding";
-import Registry from "@/pages/registry";
-import DemoRealPlaces from "@/pages/demo-real-places";
-import CollectorData from "@/pages/CollectorData";
-import IngestionDashboard from "@/pages/IngestionDashboard";
-import Dashboard from "@/pages/dashboard";
-import Destinations from "@/pages/Destinations";
-import Navigation from "@/components/navigation";
-import { ErrorBoundary } from "@/components/error-boundary";
+import Community from "./pages/Community.js";
+import BudgetTracker from "./pages/budget-tracker.js";
+import Achievements from "./pages/achievements.js";
+import TripAdvisorData from "./pages/tripadvisor-data.js";
+import Explore from "./pages/explore.js";
+import Weather from "./pages/weather.js";
+import MyTripsNew from "./pages/my-trips-new.js";
+import Onboarding from "./pages/onboarding.js";
+import Registry from "./pages/registry.js";
+import DemoRealPlaces from "./pages/demo-real-places.js";
+import CollectorData from "./pages/CollectorData.js";
+import IngestionDashboard from "./pages/IngestionDashboard.js";
+import Dashboard from "./pages/dashboard.js";
+import Destinations from "./pages/Destinations.js";
+import Navigation from "./components/navigation.js";
+import { ErrorBoundary } from "./components/error-boundary.js";
 
 // Simplified demo app - no authentication needed
 

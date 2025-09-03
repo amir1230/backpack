@@ -1,7 +1,7 @@
 import React from 'react';
 import { Plus, ArrowUp } from 'lucide-react';
-import { useScrollDirection } from '@/hooks/useScrollDirection';
-import { cn } from '@/lib/utils';
+import { useScrollDirection } from '../hooks/useScrollDirection.js';
+import { cn } from '../lib/utils.js';
 
 interface FloatingActionButtonProps {
   onClick?: () => void;

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card.js';
+import { Button } from '../components/ui/button.js';
+import { Input } from '../components/ui/input.js';
+import { Badge } from '../components/ui/badge.js';
 import { MapPin, Star, Users, Search, Globe, Filter, SortAsc } from 'lucide-react';
-import { MobileContainer, MobileGrid } from '@/components/MobileOptimized';
-import { FloatingActionButton, QuickActionsMenu } from '@/components/FloatingActionButton';
+import { MobileContainer, MobileGrid } from '../components/MobileOptimized.js';
+import { FloatingActionButton, QuickActionsMenu } from '../components/FloatingActionButton.js';
 
 interface CollectorPlace {
   place_id: string;
