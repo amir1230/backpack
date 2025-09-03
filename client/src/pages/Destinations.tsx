@@ -125,11 +125,24 @@ export default function Destinations() {
       )}
 
       {/* Destinations Grid */}
-      {!isLoading && (
+      {!isLoading && filteredDestinations && filteredDestinations.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredDestinations.map((destination) => (
             <DestinationCard key={destination.id} destination={destination} />
           ))}
+        </div>
+      )}
+
+      {/* No Data Available */}
+      {!isLoading && (!destinations || destinations.length === 0) && !searchQuery && (
+        <div className="text-center py-12">
+          <MapPin className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            No destinations available
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300">
+            Data is being loaded. Please refresh the page in a moment.
+          </p>
         </div>
       )}
 
@@ -150,7 +163,7 @@ export default function Destinations() {
 }
 
 function DestinationCard({ destination }: { destination: Destination }) {
-  const hasPhotos = destination.photos.length > 0;
+  const hasPhotos = destination.photos && destination.photos.length > 0;
   const mainPhoto = destination.mainPhoto || '/placeholder-destination.jpg';
   
   const location = [destination.city, destination.state, destination.country]
