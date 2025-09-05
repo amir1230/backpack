@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { getSupabaseUrl, getSupabaseAnonKey } from '@/config/env'
+import { getSupabaseUrl, getSupabaseAnonKey } from '../config/env.js'
 
 export const supabase = createClient(
   getSupabaseUrl(),
@@ -36,7 +36,10 @@ export async function fetchPhotosForEntities(
   const photoMap = new Map<number, LocationPhoto>()
   photos?.forEach(photo => {
     if (!photoMap.has(photo.entity_id)) {
-      photoMap.set(photo.entity_id, photo)
+      photoMap.set(photo.entity_id, {
+        ...photo,
+        entity_type: entityType
+      })
     }
   })
 

@@ -9,9 +9,9 @@ export function getSupabaseUrl(): string {
             process.env.NEXT_PUBLIC_SUPABASE_URL
 
   // Try Vite env (wrapped in try-catch for Node.js compatibility)
-  if (!url) {
+  if (!url && typeof import.meta !== 'undefined' && import.meta.env) {
     try {
-      url = (import.meta.env as any)?.VITE_SUPABASE_URL
+      url = import.meta.env.VITE_SUPABASE_URL as string
     } catch {
       // import.meta not available in Node.js, ignore
     }
@@ -31,9 +31,9 @@ export function getSupabaseAnonKey(): string {
             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   // Try Vite env (wrapped in try-catch for Node.js compatibility)
-  if (!key) {
+  if (!key && typeof import.meta !== 'undefined' && import.meta.env) {
     try {
-      key = (import.meta.env as any)?.VITE_SUPABASE_ANON_KEY
+      key = import.meta.env.VITE_SUPABASE_ANON_KEY as string
     } catch {
       // import.meta not available in Node.js, ignore
     }

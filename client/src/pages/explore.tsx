@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { supabase, fetchPhotosForEntities, type LocationPhoto } from "@/lib/supabaseClient";
+import { supabase, fetchPhotosForEntities, type LocationPhoto } from "../../../src/lib/supabaseClient.js";
 import { MapPin, Star, Phone, Globe, Clock, DollarSign, Users, Camera, CloudSun, Eye } from "lucide-react";
 import DestinationWeather from "@/components/DestinationWeather";
 import { BestTimeInfo } from "@/components/BestTimeInfo";
@@ -149,7 +149,7 @@ export default function ExplorePage() {
       }
       
       setTotalCount(count || 0);
-      setDebugInfo(prev => ({ ...prev, destinations: { count, rows: data?.length || 0 } }));
+      setDebugInfo((prev: any) => ({ ...prev, destinations: { count, rows: data?.length || 0 } }));
       return data as Destination[];
     }
   });
@@ -178,7 +178,7 @@ export default function ExplorePage() {
       }
       
       setTotalCount(count || 0);
-      setDebugInfo(prev => ({ ...prev, accommodations: { count, rows: data?.length || 0 } }));
+      setDebugInfo((prev: any) => ({ ...prev, accommodations: { count, rows: data?.length || 0 } }));
       return data as Accommodation[];
     },
     enabled: activeTab === 'accommodations'
@@ -208,7 +208,7 @@ export default function ExplorePage() {
       }
       
       setTotalCount(count || 0);
-      setDebugInfo(prev => ({ ...prev, attractions: { count, rows: data?.length || 0 } }));
+      setDebugInfo((prev: any) => ({ ...prev, attractions: { count, rows: data?.length || 0 } }));
       return data as Attraction[];
     },
     enabled: activeTab === 'attractions'
@@ -238,7 +238,7 @@ export default function ExplorePage() {
       }
       
       setTotalCount(count || 0);
-      setDebugInfo(prev => ({ ...prev, restaurants: { count, rows: data?.length || 0 } }));
+      setDebugInfo((prev: any) => ({ ...prev, restaurants: { count, rows: data?.length || 0 } }));
       return data as Restaurant[];
     },
     enabled: activeTab === 'restaurants'
@@ -279,9 +279,13 @@ export default function ExplorePage() {
         const photoMap = await fetchPhotosForEntities(entityType, entityIds);
         
         // Cache the photos
-        setPhotoCache(prev => new Map([...prev, [cacheKey, ...photoMap.entries()].flat(2)]));
+        setPhotoCache((prev: Map<string, LocationPhoto>) => {
+          const newMap = new Map(prev)
+          newMap.set(cacheKey, Array.from(photoMap.values())[0] || {} as LocationPhoto)
+          return newMap
+        });
         
-        setDebugInfo(prev => ({
+        setDebugInfo((prev: any) => ({
           ...prev,
           photos: {
             [`${entityType}_loaded`]: photoMap.size,
@@ -326,7 +330,7 @@ export default function ExplorePage() {
   
   const runSupabaseHealth = async () => {
     try {
-      const { runSupabaseHealthCheck } = await import('../health/supabaseCheck');
+      const { runSupabaseHealthCheck } = await import('../../../src/health/supabaseCheck.js');
       console.log('=== Running Supabase Health Check ===');
       await runSupabaseHealthCheck();
     } catch (err) {
