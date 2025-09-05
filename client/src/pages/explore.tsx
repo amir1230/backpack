@@ -596,8 +596,15 @@ export default function ExplorePage() {
     console.log('🌤️ weather data for destination', destinationId, ':', weather);
     
     if (!weather) {
-      console.log('🌤️ No weather data for destination', destinationId, 'returning null');
-      return null; // No weather data available
+      console.log('🌤️ No weather data for destination', destinationId, 'showing loading state');
+      return (
+        <div className="border-t pt-3 mt-3">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+            <span>🌤️</span>
+            <span>Loading weather...</span>
+          </div>
+        </div>
+      );
     }
 
     const formatTime = () => {
@@ -723,6 +730,7 @@ export default function ExplorePage() {
         <TabsContent value="destinations" className="mt-6">
           <div style={{ backgroundColor: 'yellow', padding: '10px', marginBottom: '10px' }}>
             <strong>DEBUG:</strong> Destinations tab active. ActiveTab: {activeTab}, Destinations count: {destinations.length}, Weather data size: {weatherData.size}
+            <br />Weather loading: {weatherLoading ? 'YES' : 'NO'}, Weather error: {weatherError ? 'YES' : 'NO'}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {destinationsLoading ? (
