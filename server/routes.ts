@@ -2657,7 +2657,11 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
       
       console.log('Retrieved accommodations:', accommodations.length);
-      res.json(accommodations || []);
+      res.json({
+        success: true,
+        count: accommodations.length,
+        accommodations: accommodations || []
+      });
     } catch (error) {
       console.error("Error fetching accommodations:", error);
       res.status(500).json({ message: "Failed to fetch accommodations", error: error instanceof Error ? error.message : 'Unknown error' });
@@ -2744,7 +2748,11 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
       
       console.log('Retrieved attractions:', attractions.length);
-      res.json(attractions || []);
+      res.json({
+        success: true,
+        count: attractions.length,
+        attractions: attractions || []
+      });
     } catch (error) {
       console.error("Error fetching attractions:", error);
       res.status(500).json({ message: "Failed to fetch attractions", error: error instanceof Error ? error.message : 'Unknown error' });
@@ -2832,7 +2840,11 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
       
       console.log('Retrieved restaurants:', restaurants.length);
-      res.json(restaurants || []);
+      res.json({
+        success: true,
+        count: restaurants.length,
+        restaurants: restaurants || []
+      });
     } catch (error) {
       console.error("Error fetching restaurants:", error);
       res.status(500).json({ message: "Failed to fetch restaurants", error: error instanceof Error ? error.message : 'Unknown error' });

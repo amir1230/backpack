@@ -105,20 +105,31 @@ export default function ExplorePage() {
     },
   });
 
-  // Google Places search mutation
-  const googleSearchMutation = useMutation({
-    mutationFn: ({ query, type, location }: { query: string; type?: string; location?: string }) =>
-      apiRequest(`/api/places/search?query=${encodeURIComponent(query)}&type=${type || ''}&location=${location || ''}`),
+  // Local search mutation for all data types
+  const localSearchMutation = useMutation({
+    mutationFn: async ({ query, type }: { query: string; type: string }) => {
+      const endpoints = {
+        destinations: '/api/destinations/search',
+        accommodations: '/api/accommodations/search', 
+        attractions: '/api/attractions/search',
+        restaurants: '/api/ta-restaurants/search'
+      };
+      
+      const endpoint = endpoints[type as keyof typeof endpoints] || endpoints.destinations;
+      return apiRequest(`${endpoint}?q=${encodeURIComponent(query)}`);
+    },
     onSuccess: (data: any) => {
       toast({
-        title: "Places Found",
-        description: `Found ${data?.results?.length || 0} places from Google Places API.`,
+        title: "Search Complete",
+        description: `Found results in your database.`,
       });
+      // Refresh the current tab data
+      queryClient.invalidateQueries({ queryKey: [`/api/${activeTab === 'destinations' ? 'destinations' : activeTab === 'accommodations' ? 'accommodations' : activeTab === 'attractions' ? 'attractions' : 'ta-restaurants'}`] });
     },
     onError: () => {
       toast({
         title: "Search Failed",
-        description: "Could not search Google Places. Please try again.",
+        description: "Could not search local data. Please try again.",
         variant: "destructive",
       });
     },
@@ -142,7 +153,7 @@ export default function ExplorePage() {
     ));
   };
 
-  const handleGoogleSearch = () => {
+  const handleLocalSearch = () => {
     if (!searchQuery.trim()) {
       toast({
         title: "Search Required",
@@ -152,12 +163,9 @@ export default function ExplorePage() {
       return;
     }
     
-    googleSearchMutation.mutate({
+    localSearchMutation.mutate({
       query: searchQuery,
-      type: activeTab === 'accommodations' ? 'lodging' : 
-            activeTab === 'restaurants' ? 'restaurant' : 
-            activeTab === 'attractions' ? 'tourist_attraction' : undefined,
-      location: 'South America'
+      type: activeTab
     });
   };
 
@@ -179,11 +187,11 @@ export default function ExplorePage() {
               className="flex-1"
             />
             <Button 
-              onClick={handleGoogleSearch}
-              disabled={googleSearchMutation.isPending}
+              onClick={handleLocalSearch}
+              disabled={localSearchMutation.isPending}
               variant="outline"
             >
-              {googleSearchMutation.isPending ? "Searching..." : "Google Search"}
+              {localSearchMutation.isPending ? "Searching..." : "Search Database"}
             </Button>
           </div>
           
@@ -487,41 +495,6 @@ export default function ExplorePage() {
         </TabsContent>
       </Tabs>
 
-      {/* Google Places Search Results */}
-      {googleSearchMutation.data && googleSearchMutation.data.results && (
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Google Places Search Results</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {googleSearchMutation.data.results.map((place: any) => (
-              <Card key={place.place_id} className="border-blue-200">
-                <CardHeader>
-                  <CardTitle className="text-lg">{place.name}</CardTitle>
-                  {place.rating && (
-                    <div className="flex items-center gap-2">
-                      <div className="flex">{renderStars(place.rating)}</div>
-                      <span className="text-sm text-muted-foreground">
-                        ({place.user_ratings_total} reviews)
-                      </span>
-                    </div>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {place.formatted_address}
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    {place.types?.slice(0, 3).map((type: string) => (
-                      <Badge key={type} variant="secondary" className="text-xs">
-                        {type.replace(/_/g, ' ')}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
