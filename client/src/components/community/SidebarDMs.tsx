@@ -111,7 +111,10 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
     createDMMutation.mutate(partnerInput);
   };
 
-  const filteredRooms = dmRooms.filter((room: DMRoom) => {
+  // Ensure dmRooms is always an array
+  const roomsArray = Array.isArray(dmRooms) ? dmRooms : [];
+  
+  const filteredRooms = roomsArray.filter((room: DMRoom) => {
     if (!searchTerm) return true;
     return room.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
            room.partnerName?.toLowerCase().includes(searchTerm.toLowerCase());
