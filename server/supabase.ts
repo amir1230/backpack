@@ -85,3 +85,83 @@ async function getTableCountsFallback() {
 
 // Legacy export
 export const getTableCounts = getActualTables;
+
+// Storage operations for file uploads
+export async function uploadFile(bucket: string, fileName: string, file: Buffer, contentType: string) {
+  const supabase = getSupabaseAdmin();
+  
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .upload(fileName, file, {
+      contentType,
+      upsert: true // Allow overwriting files with same name
+    });
+
+  if (error) {
+    throw new Error(`File upload failed: ${error.message}`);
+  }
+
+  return data;
+}
+
+export async function getFileUrl(bucket: string, fileName: string) {
+  const supabase = getSupabaseAdmin();
+  
+  const { data } = supabase.storage
+    .from(bucket)
+    .getPublicUrl(fileName);
+
+  return data.publicUrl;
+}
+
+export async function deleteFile(bucket: string, fileName: string) {
+  const supabase = getSupabaseAdmin();
+  
+  const { error } = await supabase.storage
+    .from(bucket)
+    .remove([fileName]);
+
+  if (error) {
+    throw new Error(`File deletion failed: ${error.message}`);
+  }
+
+  return true;
+}
+
+// Create storage bucket if it doesn't exist
+export async function ensureBucketExists(bucketName: string) {
+  const supabase = getSupabaseAdmin();
+  
+  try {
+    // Check if bucket exists
+    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+    
+    if (listError) {
+      console.error('Error listing buckets:', listError.message);
+      return false;
+    }
+
+    const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
+    
+    if (!bucketExists) {
+      // Create bucket if it doesn't exist
+      const { error: createError } = await supabase.storage.createBucket(bucketName, {
+        public: true, // Make files publicly accessible
+        allowedMimeTypes: ['image/*', 'application/pdf', 'text/*', 'application/msword', 'application/vnd.openxmlformats-officedocument.*'],
+        fileSizeLimit: 10 * 1024 * 1024 // 10MB limit
+      });
+
+      if (createError) {
+        console.error('Error creating bucket:', createError.message);
+        return false;
+      }
+
+      console.log(`Storage bucket '${bucketName}' created successfully`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error ensuring bucket exists:', error);
+    return false;
+  }
+}

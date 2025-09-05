@@ -8,6 +8,7 @@ import { Badge } from '../ui/badge';
 import { Send, Loader2, RefreshCw, Hash } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageItem } from './MessageItem';
+import { FileUpload } from './FileUpload';
 import { apiRequest } from '../../lib/queryClient';
 import { useToast } from '../../hooks/use-toast';
 
@@ -20,6 +21,24 @@ interface Message {
   created_at: string;
   message_type?: string;
   is_deleted?: boolean;
+  attachments?: Attachment[];
+}
+
+interface Attachment {
+  id: number;
+  url: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+  width?: number;
+  height?: number;
+}
+
+interface FileUploadPreview {
+  file: File;
+  id: string;
+  preview?: string;
+  type: 'image' | 'document' | 'other';
 }
 
 interface RoomViewProps {
@@ -32,6 +51,8 @@ export function RoomView({ roomId, roomName, roomDescription }: RoomViewProps) {
   const [newMessage, setNewMessage] = useState('');
   const [guestName, setGuestName] = useState('');
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<FileUploadPreview[]>([]);
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -65,22 +86,63 @@ export function RoomView({ roomId, roomName, roomDescription }: RoomViewProps) {
 
   // Send message mutation
   const sendMessageMutation = useMutation({
-    mutationFn: async (messageData: { message: string; author_name?: string }) => {
+    mutationFn: async (messageData: { 
+      message: string; 
+      author_name?: string;
+      attachments?: FileUploadPreview[];
+    }) => {
+      let uploadedAttachments: any[] = [];
+      
+      // Upload files if any
+      if (messageData.attachments && messageData.attachments.length > 0) {
+        setUploading(true);
+        try {
+          const uploadPromises = messageData.attachments.map(async (filePreview) => {
+            const formData = new FormData();
+            formData.append('file', filePreview.file);
+            formData.append('roomId', roomId.toString());
+            
+            const response = await fetch('/api/upload-attachment', {
+              method: 'POST',
+              body: formData
+            });
+            
+            if (!response.ok) {
+              throw new Error(`Upload failed: ${response.statusText}`);
+            }
+            
+            return response.json();
+          });
+          
+          uploadedAttachments = await Promise.all(uploadPromises);
+        } catch (error) {
+          setUploading(false);
+          throw error;
+        }
+      }
+      
+      // Send message with attachment references
       return apiRequest('/api/chat/messages', {
         method: 'POST',
         body: JSON.stringify({
           room_id: roomId,
-          ...messageData
+          message: messageData.message,
+          author_name: messageData.author_name,
+          message_type: uploadedAttachments.length > 0 ? 'file' : 'text',
+          attachments: uploadedAttachments
         })
       });
     },
     onSuccess: () => {
       setNewMessage('');
+      setSelectedFiles([]);
+      setUploading(false);
       queryClient.invalidateQueries({ queryKey: ['/api/chat/messages', roomId] });
       scrollToBottom();
     },
     onError: (error) => {
       console.error('Failed to send message:', error);
+      setUploading(false);
       toast({
         title: "Can't send message",
         description: "Please check your connection and try again",
@@ -99,10 +161,13 @@ export function RoomView({ roomId, roomName, roomDescription }: RoomViewProps) {
 
   const handleSendMessage = async () => {
     const trimmedMessage = newMessage.trim();
-    if (!trimmedMessage || sendMessageMutation.isPending) return;
+    
+    // Check if we have a message or files
+    if (!trimmedMessage && selectedFiles.length === 0) return;
+    if (sendMessageMutation.isPending || uploading) return;
 
     // Anti-spam check
-    if (trimmedMessage.length > 2000) {
+    if (trimmedMessage && trimmedMessage.length > 2000) {
       toast({
         title: "Message too long",
         description: "Please keep messages under 2000 characters",
@@ -118,11 +183,20 @@ export function RoomView({ roomId, roomName, roomDescription }: RoomViewProps) {
       saveGuestName(name.trim());
     }
 
-    // Send message
+    // Send message with attachments
     sendMessageMutation.mutate({
-      message: trimmedMessage,
-      author_name: guestName || 'Guest'
+      message: trimmedMessage || (selectedFiles.length > 0 ? `Shared ${selectedFiles.length} file(s)` : ''),
+      author_name: guestName || 'Guest',
+      attachments: selectedFiles.length > 0 ? selectedFiles : undefined
     });
+  };
+
+  const handleFilesSelected = (files: FileUploadPreview[]) => {
+    setSelectedFiles(files);
+  };
+
+  const handleFileRemove = (fileId: string) => {
+    setSelectedFiles(prev => prev.filter(f => f.id !== fileId));
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -240,15 +314,25 @@ export function RoomView({ roomId, roomName, roomDescription }: RoomViewProps) {
         </ScrollArea>
 
         {/* Message Composer */}
-        <div className="flex-shrink-0 border-t p-4">
+        <div className="flex-shrink-0 border-t p-4 space-y-3">
+          {/* File Upload Section */}
+          <FileUpload
+            onFilesSelected={handleFilesSelected}
+            onFileRemove={handleFileRemove}
+            selectedFiles={selectedFiles}
+            uploading={uploading}
+            disabled={sendMessageMutation.isPending}
+          />
+          
+          {/* Message Input */}
           <div className="flex gap-3">
             <div className="flex-1">
               <Input
                 placeholder={`Message #${roomName || roomId}...`}
                 value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                disabled={sendMessageMutation.isPending}
+                disabled={sendMessageMutation.isPending || uploading}
                 className="resize-none"
               />
               <div className="flex items-center justify-between mt-2">
@@ -266,10 +350,10 @@ export function RoomView({ roomId, roomName, roomDescription }: RoomViewProps) {
             </div>
             <Button 
               onClick={handleSendMessage}
-              disabled={!newMessage.trim() || sendMessageMutation.isPending}
+              disabled={(!newMessage.trim() && selectedFiles.length === 0) || sendMessageMutation.isPending || uploading}
               size="lg"
             >
-              {sendMessageMutation.isPending ? (
+              {sendMessageMutation.isPending || uploading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Send className="w-4 h-4" />

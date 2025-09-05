@@ -312,24 +312,145 @@ export async function registerRoutes(app: Express): Promise<void> {
 
   app.post('/api/chat/messages', async (req, res) => {
     try {
-      const { room_id, message, author_name } = req.body;
+      const { room_id, message, author_name, message_type, attachments } = req.body;
       
-      if (!room_id || !message || !message.trim()) {
-        return res.status(400).json({ message: "Room ID and message content are required" });
+      if (!room_id || (!message?.trim() && !attachments?.length)) {
+        return res.status(400).json({ message: "Room ID and message content or attachments are required" });
       }
 
       const messageData = {
         room_id: parseInt(room_id),
-        message: message.trim(),
+        message: message?.trim() || '',
         author_name: author_name || 'Guest',
-        user_id: null // Guest mode for now
+        user_id: null, // Guest mode for now
+        message_type: message_type || 'text'
       };
 
       const newMessage = await storage.createChatMessage(messageData);
+      
+      // If there are attachments, create them
+      if (attachments && attachments.length > 0) {
+        for (const attachment of attachments) {
+          await storage.createChatAttachment({
+            message_id: newMessage.id,
+            url: attachment.url,
+            filename: attachment.filename,
+            mime_type: attachment.mimeType,
+            size_bytes: attachment.sizeBytes,
+            width: attachment.width,
+            height: attachment.height
+          });
+        }
+      }
+      
       res.status(201).json(newMessage);
     } catch (error) {
       console.error("Error creating chat message:", error);
       res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  // Direct Messages routes
+  app.get('/api/dms', async (req, res) => {
+    try {
+      const { user_name } = req.query;
+      const rooms = await storage.getDMRooms(user_name as string);
+      res.json(rooms);
+    } catch (error) {
+      console.error("Error fetching DM rooms:", error);
+      res.status(500).json({ message: "Failed to fetch DM rooms" });
+    }
+  });
+
+  app.post('/api/dms/start', async (req, res) => {
+    try {
+      const { participant1, participant2 } = req.body;
+      
+      if (!participant1 || !participant2) {
+        return res.status(400).json({ message: "Both participant names are required" });
+      }
+
+      // Check if DM room already exists
+      const existingRoom = await storage.findDMRoom(participant1, participant2);
+      if (existingRoom) {
+        return res.json(existingRoom);
+      }
+
+      // Create new DM room
+      const roomData = {
+        name: `DM: ${participant1} & ${participant2}`,
+        description: `Direct message between ${participant1} and ${participant2}`,
+        is_private: true,
+        room_type: 'dm'
+      };
+
+      const newRoom = await storage.createChatRoom(roomData);
+      
+      // Add both participants to the room
+      await storage.addRoomMember(newRoom.id, participant1);
+      await storage.addRoomMember(newRoom.id, participant2);
+      
+      res.status(201).json(newRoom);
+    } catch (error) {
+      console.error("Error starting DM:", error);
+      res.status(500).json({ message: "Failed to start DM" });
+    }
+  });
+
+  // File upload endpoint for attachments
+  app.post('/api/upload-attachment', async (req, res) => {
+    try {
+      const multer = await import('multer');
+      const upload = multer.default({ 
+        storage: multer.default.memoryStorage(),
+        limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+      });
+      
+      // Use multer middleware to parse the uploaded file
+      upload.single('file')(req, res, async (err) => {
+        if (err) {
+          console.error('Multer error:', err);
+          return res.status(400).json({ message: 'File upload error' });
+        }
+        
+        if (!req.file) {
+          return res.status(400).json({ message: 'No file uploaded' });
+        }
+        
+        try {
+          const { uploadFile, getFileUrl, ensureBucketExists } = await import('./supabase.js');
+          
+          // Ensure the attachments bucket exists
+          await ensureBucketExists('attachments');
+          
+          // Generate unique filename
+          const fileExtension = req.file.originalname.split('.').pop() || '';
+          const uniqueFileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExtension}`;
+          
+          // Upload to Supabase Storage
+          await uploadFile('attachments', uniqueFileName, req.file.buffer, req.file.mimetype);
+          
+          // Get public URL
+          const fileUrl = await getFileUrl('attachments', uniqueFileName);
+          
+          // Return file metadata
+          res.json({
+            url: fileUrl,
+            filename: req.file.originalname,
+            mimeType: req.file.mimetype,
+            sizeBytes: req.file.size,
+            width: undefined, // TODO: Extract image dimensions if needed
+            height: undefined
+          });
+          
+        } catch (storageError) {
+          console.error('Storage error:', storageError);
+          res.status(500).json({ message: 'Failed to store file' });
+        }
+      });
+    } catch (error) {
+      console.error("Error uploading attachment:", error);
+      res.status(500).json({ message: "Failed to upload attachment" });
     }
   });
 

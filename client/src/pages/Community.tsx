@@ -10,6 +10,7 @@ import { Star, MessageCircle, Users, MapPin, Calendar, ThumbsUp, Search } from "
 import { apiRequest } from "../lib/queryClient";
 import { ChatSidebar } from "../components/community/ChatSidebar";
 import { RoomView } from "../components/community/RoomView";
+import { SidebarDMs } from "../components/community/SidebarDMs";
 import { TravelBuddyList } from "../components/community/TravelBuddyList";
 import { NewBuddyPostModal } from "../components/community/NewBuddyPostModal";
 
@@ -37,6 +38,10 @@ export default function Community() {
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
   const [selectedRoomName, setSelectedRoomName] = useState<string>('');
   const [selectedRoomDescription, setSelectedRoomDescription] = useState<string>('');
+  
+  // DM state
+  const [selectedDMRoom, setSelectedDMRoom] = useState<number | null>(null);
+  const [selectedDMUser, setSelectedDMUser] = useState<string>('');
   
   // Travel Buddy state
   const [showNewPostModal, setShowNewPostModal] = useState(false);
@@ -102,9 +107,10 @@ export default function Community() {
       </div>
 
       <Tabs defaultValue="reviews" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="reviews">Place Reviews</TabsTrigger>
           <TabsTrigger value="chat">Chat Rooms</TabsTrigger>
+          <TabsTrigger value="dms">Direct Messages</TabsTrigger>
           <TabsTrigger value="buddies">Travel Buddies</TabsTrigger>
         </TabsList>
         
@@ -215,6 +221,29 @@ export default function Community() {
               roomId={selectedRoom}
               roomName={selectedRoomName}
               roomDescription={selectedRoomDescription}
+            />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="dms" className="mt-6">
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-2">Direct Messages</h2>
+            <p className="text-gray-600">
+              Private conversations with fellow travelers
+            </p>
+          </div>
+          <div className="flex h-[600px] gap-4">
+            <SidebarDMs 
+              selectedDMRoom={selectedDMRoom}
+              onDMSelect={(roomId, userName) => {
+                setSelectedDMRoom(roomId);
+                setSelectedDMUser(userName);
+              }}
+            />
+            <RoomView 
+              roomId={selectedDMRoom}
+              roomName={selectedDMUser ? `${selectedDMUser}` : undefined}
+              roomDescription={selectedDMUser ? `Direct message with ${selectedDMUser}` : undefined}
             />
           </div>
         </TabsContent>

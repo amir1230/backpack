@@ -6,6 +6,7 @@ import {
   chatRooms,
   chatMessages,
   chatRoomMembers,
+  chatAttachments,
   connections,
   achievements,
   userAchievements,
@@ -34,6 +35,8 @@ import {
   type InsertChatMessage,
   type ChatRoomMember,
   type InsertChatRoomMember,
+  type ChatAttachment,
+  type InsertChatAttachment,
   type Connection,
   type InsertConnection,
   type Achievement,
@@ -95,6 +98,15 @@ export interface IStorage {
   getChatRooms(): Promise<ChatRoom[]>;
   getChatMessages(roomId: number): Promise<ChatMessage[]>;
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  createChatRoom(room: any): Promise<ChatRoom>;
+  
+  // DM operations
+  getDMRooms(userName: string): Promise<ChatRoom[]>;
+  findDMRoom(participant1: string, participant2: string): Promise<ChatRoom | undefined>;
+  addRoomMember(roomId: number, userName: string): Promise<ChatRoomMember>;
+  
+  // Attachment operations
+  createChatAttachment(attachment: InsertChatAttachment): Promise<ChatAttachment>;
   
   // Connection operations
   createConnection(connection: InsertConnection): Promise<Connection>;
@@ -418,6 +430,87 @@ export class DatabaseStorage implements IStorage {
   async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
     const [newMessage] = await db.insert(chatMessages).values(message).returning();
     return newMessage;
+  }
+
+  async createChatRoom(roomData: any): Promise<ChatRoom> {
+    const [newRoom] = await db.insert(chatRooms).values({
+      ...roomData,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).returning();
+    return newRoom;
+  }
+
+  // DM operations
+  async getDMRooms(userName: string): Promise<ChatRoom[]> {
+    return await db
+      .select({
+        id: chatRooms.id,
+        name: chatRooms.name,
+        description: chatRooms.description,
+        isPrivate: chatRooms.isPrivate,
+        roomType: chatRooms.roomType,
+        createdAt: chatRooms.createdAt,
+        updatedAt: chatRooms.updatedAt,
+        isActive: chatRooms.isActive
+      })
+      .from(chatRooms)
+      .leftJoin(chatRoomMembers, eq(chatRooms.id, chatRoomMembers.roomId))
+      .where(
+        and(
+          eq(chatRooms.roomType, 'dm'),
+          eq(chatRooms.isActive, true),
+          eq(chatRoomMembers.userId, userName)
+        )
+      )
+      .orderBy(desc(chatRooms.updatedAt));
+  }
+
+  async findDMRoom(participant1: string, participant2: string): Promise<ChatRoom | undefined> {
+    const rooms = await db
+      .select({
+        id: chatRooms.id,
+        name: chatRooms.name,
+        description: chatRooms.description,
+        isPrivate: chatRooms.isPrivate,
+        roomType: chatRooms.roomType,
+        createdAt: chatRooms.createdAt,
+        updatedAt: chatRooms.updatedAt,
+        isActive: chatRooms.isActive
+      })
+      .from(chatRooms)
+      .where(
+        and(
+          eq(chatRooms.roomType, 'dm'),
+          eq(chatRooms.isActive, true),
+          or(
+            eq(chatRooms.name, `DM: ${participant1} & ${participant2}`),
+            eq(chatRooms.name, `DM: ${participant2} & ${participant1}`)
+          )
+        )
+      );
+    
+    return rooms[0];
+  }
+
+  async addRoomMember(roomId: number, userName: string): Promise<ChatRoomMember> {
+    const [member] = await db.insert(chatRoomMembers).values({
+      roomId,
+      userId: userName,
+      role: 'member',
+      joinedAt: new Date()
+    }).returning();
+    return member;
+  }
+
+  // Attachment operations
+  async createChatAttachment(attachment: InsertChatAttachment): Promise<ChatAttachment> {
+    const [newAttachment] = await db.insert(chatAttachments).values({
+      ...attachment,
+      createdAt: new Date()
+    }).returning();
+    return newAttachment;
   }
 
   // Connection operations

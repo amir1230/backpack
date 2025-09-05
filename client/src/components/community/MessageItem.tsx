@@ -1,9 +1,20 @@
 import { useState } from 'react';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { formatDistanceToNow, format } from 'date-fns';
-import { User, Bot } from 'lucide-react';
+import { User, Bot, Download, File, Image, Eye } from 'lucide-react';
+
+interface Attachment {
+  id: number;
+  url: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+  width?: number;
+  height?: number;
+}
 
 interface Message {
   id: number;
@@ -16,6 +27,7 @@ interface Message {
   is_deleted?: boolean;
   is_edited?: boolean;
   edited_at?: string;
+  attachments?: Attachment[];
 }
 
 interface MessageItemProps {
@@ -24,6 +36,7 @@ interface MessageItemProps {
 
 export function MessageItem({ message }: MessageItemProps) {
   const [imageError, setImageError] = useState(false);
+  const [imagePreviewOpen, setImagePreviewOpen] = useState<string | null>(null);
   
   const formatTime = (timestamp: string) => {
     try {
@@ -41,6 +54,31 @@ export function MessageItem({ message }: MessageItemProps) {
     }
   };
 
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const isImageFile = (mimeType: string) => {
+    return mimeType.startsWith('image/');
+  };
+
+  const handleImagePreview = (url: string) => {
+    setImagePreviewOpen(url);
+  };
+
+  const handleDownload = (attachment: Attachment) => {
+    const link = document.createElement('a');
+    link.href = attachment.url;
+    link.download = attachment.filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const getAvatarContent = () => {
     const authorName = message.author_name || 'Guest';
     const firstLetter = authorName.charAt(0).toUpperCase();
@@ -56,6 +94,77 @@ export function MessageItem({ message }: MessageItemProps) {
       <AvatarFallback className={`${colors[colorIndex]} text-white font-medium`}>
         {firstLetter}
       </AvatarFallback>
+    );
+  };
+
+  const renderAttachments = () => {
+    if (!message.attachments || message.attachments.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="mt-2 space-y-2">
+        {message.attachments.map((attachment) => (
+          <div
+            key={attachment.id}
+            className="border rounded-lg p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            {isImageFile(attachment.mimeType) ? (
+              <div className="space-y-2">
+                <div className="relative max-w-xs">
+                  <img
+                    src={attachment.url}
+                    alt={attachment.filename}
+                    className="max-w-full h-auto rounded cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => handleImagePreview(attachment.url)}
+                    onError={() => setImageError(true)}
+                  />
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="absolute top-2 right-2 opacity-75 hover:opacity-100"
+                    onClick={() => handleImagePreview(attachment.url)}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between text-xs text-gray-600">
+                  <span className="truncate">{attachment.filename}</span>
+                  <div className="flex items-center gap-2">
+                    <span>{formatFileSize(attachment.sizeBytes)}</span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleDownload(attachment)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Download className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0">
+                  <File className="w-8 h-8 text-gray-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-sm truncate">{attachment.filename}</div>
+                  <div className="text-xs text-gray-500">{formatFileSize(attachment.sizeBytes)}</div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleDownload(attachment)}
+                >
+                  <Download className="w-4 h-4 mr-1" />
+                  Download
+                </Button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     );
   };
 
@@ -146,10 +255,28 @@ export function MessageItem({ message }: MessageItemProps) {
           </TooltipProvider>
         </div>
         
-        <div className="text-sm">
+        <div className="text-sm space-y-2">
           {renderMessageContent()}
+          {renderAttachments()}
         </div>
       </div>
+      
+      {/* Image Preview Modal */}
+      {imagePreviewOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onClick={() => setImagePreviewOpen(null)}
+        >
+          <div className="max-w-4xl max-h-full p-4">
+            <img
+              src={imagePreviewOpen}
+              alt="Preview"
+              className="max-w-full max-h-full object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

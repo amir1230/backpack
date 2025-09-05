@@ -149,11 +149,12 @@ export const chatRooms = pgTable("chat_rooms", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Chat room members
+// Chat room members (updated for guest support)
 export const chatRoomMembers = pgTable("chat_room_members", {
   id: serial("id").primaryKey(),
   roomId: integer("room_id").references(() => chatRooms.id).notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id").references(() => users.id), // Made nullable for guest support
+  guestName: varchar("guest_name"), // For guest mode support
   role: varchar("role").default("member"), // "admin", "moderator", "member"
   joinedAt: timestamp("joined_at").defaultNow(),
   lastSeen: timestamp("last_seen").defaultNow(),
@@ -164,9 +165,10 @@ export const chatRoomMembers = pgTable("chat_room_members", {
 export const chatMessages = pgTable("chat_messages", {
   id: serial("id").primaryKey(),
   roomId: integer("room_id").references(() => chatRooms.id).notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id").references(() => users.id), // Made nullable for guest support
+  authorName: varchar("author_name"), // For guest mode support
   message: text("message").notNull(),
-  messageType: varchar("message_type").default("text"), // "text", "image", "location", "place_share", "trip_share"
+  messageType: varchar("message_type").default("text"), // "text", "image", "location", "place_share", "trip_share", "file"
   metadata: jsonb("metadata"), // Store URLs, coordinates, place info, etc.
   replyTo: integer("reply_to"), // Reference to another message
   reactions: jsonb("reactions").default('{}'), // {👍: ["user1", "user2"], ❤️: ["user3"]}
@@ -175,6 +177,21 @@ export const chatMessages = pgTable("chat_messages", {
   isDeleted: boolean("is_deleted").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Chat attachments for file uploads
+export const chatAttachments = pgTable("chat_attachments", {
+  id: serial("id").primaryKey(),
+  messageId: integer("message_id").references(() => chatMessages.id).notNull(),
+  bucket: varchar("bucket").notNull().default("chat-uploads"),
+  path: text("path").notNull(),
+  url: text("url").notNull(),
+  mimeType: varchar("mime_type").notNull(),
+  sizeBytes: integer("size_bytes").notNull(),
+  width: integer("width"), // For images
+  height: integer("height"), // For images
+  filename: varchar("filename").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Travel buddy matching system
@@ -465,7 +482,7 @@ export const chatRoomsRelations = relations(chatRooms, ({ one, many }) => ({
   messages: many(chatMessages),
 }));
 
-export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
+export const chatMessagesRelations = relations(chatMessages, ({ one, many }) => ({
   room: one(chatRooms, {
     fields: [chatMessages.roomId],
     references: [chatRooms.id],
@@ -473,6 +490,14 @@ export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
   user: one(users, {
     fields: [chatMessages.userId],
     references: [users.id],
+  }),
+  attachments: many(chatAttachments),
+}));
+
+export const chatAttachmentsRelations = relations(chatAttachments, ({ one }) => ({
+  message: one(chatMessages, {
+    fields: [chatAttachments.messageId],
+    references: [chatMessages.id],
   }),
 }));
 
@@ -664,6 +689,11 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   createdAt: true,
 });
 
+export const insertChatAttachmentSchema = createInsertSchema(chatAttachments).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertConnectionSchema = createInsertSchema(connections).omit({
   id: true,
   createdAt: true,
@@ -815,6 +845,8 @@ export type Expense = typeof expenses.$inferSelect;
 export type InsertExpense = z.infer<typeof insertExpenseSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+export type ChatAttachment = typeof chatAttachments.$inferSelect;
+export type InsertChatAttachment = z.infer<typeof insertChatAttachmentSchema>;
 export type Connection = typeof connections.$inferSelect;
 export type InsertConnection = z.infer<typeof insertConnectionSchema>;
 export type Achievement = typeof achievements.$inferSelect;
