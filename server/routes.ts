@@ -2612,55 +2612,59 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Accommodations API
+  // Accommodations API - using places table with category filter
   app.get('/api/accommodations', async (req, res) => {
     try {
       const { destinationId } = req.query;
-      console.log('Fetching accommodations with destinationId:', destinationId);
+      console.log('Fetching accommodations from places table');
       
       let accommodations = [];
+      const client = await pool.connect();
       try {
-        accommodations = await storage.getAccommodations(
-          destinationId ? parseInt(destinationId as string) : undefined
-        );
+        // Query places table for accommodation-type places
+        const query = `
+          SELECT id, name, location as city, country, rating, description, created_at, updated_at,
+                 CASE 
+                   WHEN rating >= 4.5 THEN '$$$$'
+                   WHEN rating >= 4.0 THEN '$$$' 
+                   WHEN rating >= 3.5 THEN '$$'
+                   ELSE '$'
+                 END as "priceLevel"
+          FROM places 
+          WHERE LOWER(description) LIKE '%hotel%' 
+             OR LOWER(description) LIKE '%hostel%' 
+             OR LOWER(description) LIKE '%accommodation%'
+             OR LOWER(name) LIKE '%hotel%'
+             OR LOWER(name) LIKE '%hostel%'
+          ORDER BY rating DESC
+        `;
+        
+        const result = await client.query(query);
+        accommodations = result.rows.map(place => ({
+          id: place.id,
+          locationId: `acc_${place.id}`,
+          name: place.name,
+          city: place.city,
+          country: place.country,
+          rating: parseFloat(place.rating) || 0,
+          priceLevel: place.priceLevel,
+          description: place.description,
+          amenities: ["wifi", "service"],
+          createdAt: place.created_at,
+          updatedAt: place.updated_at
+        }));
       } catch (dbError) {
-        console.log('Database error, using mock data:', dbError);
-        // Mock accommodations data
-        accommodations = [
-          {
-            id: 1,
-            locationId: "acc_1",
-            name: "Hotel El Dorado",
-            city: "Lima",
-            country: "Peru",
-            rating: 4.5,
-            priceLevel: "$$$",
-            description: "Luxury hotel in the heart of Lima",
-            amenities: ["wifi", "pool", "restaurant"],
-            createdAt: new Date(),
-            updatedAt: new Date()
-          },
-          {
-            id: 2,
-            locationId: "acc_2", 
-            name: "Backpackers Hostel",
-            city: "Cusco",
-            country: "Peru",
-            rating: 4.2,
-            priceLevel: "$",
-            description: "Budget-friendly hostel near historic center",
-            amenities: ["wifi", "kitchen", "lounge"],
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }
-        ];
+        console.error('Places database error:', dbError);
+        accommodations = [];
+      } finally {
+        client.release();
       }
       
-      console.log('Retrieved accommodations:', accommodations.length);
+      console.log('Retrieved accommodations from places:', accommodations.length);
       res.json({
         success: true,
         count: accommodations.length,
-        accommodations: accommodations || []
+        accommodations: accommodations
       });
     } catch (error) {
       console.error("Error fetching accommodations:", error);
@@ -2703,55 +2707,69 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Attractions API
+  // Attractions API - using places table with category filter
   app.get('/api/attractions', async (req, res) => {
     try {
       const { destinationId } = req.query;
-      console.log('Fetching attractions with destinationId:', destinationId);
+      console.log('Fetching attractions from places table');
       
       let attractions = [];
+      const client = await pool.connect();
       try {
-        attractions = await storage.getAttractions(
-          destinationId ? parseInt(destinationId as string) : undefined
-        );
+        // Query places table for attraction-type places
+        const query = `
+          SELECT id, name, location as city, country, rating, description, created_at, updated_at,
+                 CASE 
+                   WHEN LOWER(description) LIKE '%museum%' OR LOWER(name) LIKE '%museum%' THEN 'Museum'
+                   WHEN LOWER(description) LIKE '%church%' OR LOWER(description) LIKE '%cathedral%' THEN 'Religious Site'
+                   WHEN LOWER(description) LIKE '%park%' OR LOWER(description) LIKE '%nature%' THEN 'Natural Site'
+                   WHEN LOWER(description) LIKE '%historic%' OR LOWER(description) LIKE '%ancient%' THEN 'Historical Site'
+                   WHEN LOWER(description) LIKE '%monument%' OR LOWER(description) LIKE '%statue%' THEN 'Monument'
+                   ELSE 'Attraction'
+                 END as category
+          FROM places 
+          WHERE LOWER(description) LIKE '%museum%' 
+             OR LOWER(description) LIKE '%church%'
+             OR LOWER(description) LIKE '%cathedral%'
+             OR LOWER(description) LIKE '%park%'
+             OR LOWER(description) LIKE '%monument%'
+             OR LOWER(description) LIKE '%statue%'
+             OR LOWER(description) LIKE '%historic%'
+             OR LOWER(description) LIKE '%ancient%'
+             OR LOWER(description) LIKE '%attraction%'
+             OR LOWER(name) LIKE '%museum%'
+             OR LOWER(name) LIKE '%church%'
+             OR LOWER(name) LIKE '%cathedral%'
+             OR LOWER(name) LIKE '%park%'
+          ORDER BY rating DESC
+        `;
+        
+        const result = await client.query(query);
+        attractions = result.rows.map(place => ({
+          id: place.id,
+          locationId: `att_${place.id}`,
+          name: place.name,
+          city: place.city,
+          country: place.country,
+          rating: parseFloat(place.rating) || 0,
+          category: place.category,
+          description: place.description,
+          address: `${place.name}, ${place.country}`,
+          createdAt: place.created_at,
+          updatedAt: place.updated_at
+        }));
       } catch (dbError) {
-        console.log('Database error, using mock data:', dbError);
-        // Mock attractions data
-        attractions = [
-          {
-            id: 1,
-            locationId: "att_1",
-            name: "Machu Picchu",
-            city: "Aguas Calientes",
-            country: "Peru",
-            rating: 4.8,
-            category: "Historical Site",
-            description: "Ancient Incan citadel in the Andes",
-            address: "Machu Picchu, Peru",
-            createdAt: new Date(),
-            updatedAt: new Date()
-          },
-          {
-            id: 2,
-            locationId: "att_2",
-            name: "Cristo Redentor",
-            city: "Rio de Janeiro", 
-            country: "Brazil",
-            rating: 4.6,
-            category: "Monument",
-            description: "Iconic statue overlooking Rio",
-            address: "Corcovado Mountain, Rio de Janeiro",
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }
-        ];
+        console.error('Places database error:', dbError);
+        attractions = [];
+      } finally {
+        client.release();
       }
       
-      console.log('Retrieved attractions:', attractions.length);
+      console.log('Retrieved attractions from places:', attractions.length);
       res.json({
         success: true,
         count: attractions.length,
-        attractions: attractions || []
+        attractions: attractions
       });
     } catch (error) {
       console.error("Error fetching attractions:", error);
@@ -2793,57 +2811,77 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Restaurants API
+  // Restaurants API - using places table with category filter
   app.get('/api/ta-restaurants', async (req, res) => {
     try {
       const { destinationId } = req.query;
-      console.log('Fetching restaurants with destinationId:', destinationId);
+      console.log('Fetching restaurants from places table');
       
       let restaurants = [];
+      const client = await pool.connect();
       try {
-        restaurants = await storage.getRestaurants(
-          destinationId ? parseInt(destinationId as string) : undefined
-        );
+        // Query places table for restaurant-type places
+        const query = `
+          SELECT id, name, location as city, country, rating, description, created_at, updated_at,
+                 CASE 
+                   WHEN rating >= 4.5 THEN '$$$$'
+                   WHEN rating >= 4.0 THEN '$$$' 
+                   WHEN rating >= 3.5 THEN '$$'
+                   ELSE '$'
+                 END as "priceLevel",
+                 CASE 
+                   WHEN LOWER(description) LIKE '%steakhouse%' OR LOWER(description) LIKE '%meat%' THEN ARRAY['Steakhouse', 'Grill']
+                   WHEN LOWER(description) LIKE '%seafood%' OR LOWER(description) LIKE '%fish%' THEN ARRAY['Seafood', 'Fresh']
+                   WHEN LOWER(description) LIKE '%pizza%' OR LOWER(description) LIKE '%italian%' THEN ARRAY['Italian', 'Pizza']
+                   WHEN LOWER(description) LIKE '%sushi%' OR LOWER(description) LIKE '%japanese%' THEN ARRAY['Japanese', 'Sushi']
+                   WHEN LOWER(description) LIKE '%french%' THEN ARRAY['French', 'Fine Dining']
+                   WHEN country = 'Peru' THEN ARRAY['Peruvian', 'Local']
+                   WHEN country = 'Brazil' THEN ARRAY['Brazilian', 'Local']
+                   WHEN country = 'Argentina' THEN ARRAY['Argentine', 'Local']
+                   WHEN country = 'Chile' THEN ARRAY['Chilean', 'Local']
+                   WHEN country = 'Colombia' THEN ARRAY['Colombian', 'Local']
+                   ELSE ARRAY['International', 'Restaurant']
+                 END as cuisine
+          FROM places 
+          WHERE LOWER(description) LIKE '%restaurant%' 
+             OR LOWER(description) LIKE '%cafe%'
+             OR LOWER(description) LIKE '%bar%'
+             OR LOWER(description) LIKE '%food%'
+             OR LOWER(description) LIKE '%dining%'
+             OR LOWER(description) LIKE '%kitchen%'
+             OR LOWER(name) LIKE '%restaurant%'
+             OR LOWER(name) LIKE '%cafe%'
+             OR LOWER(name) LIKE '%bar%'
+          ORDER BY rating DESC
+        `;
+        
+        const result = await client.query(query);
+        restaurants = result.rows.map(place => ({
+          id: place.id,
+          locationId: `res_${place.id}`,
+          name: place.name,
+          city: place.city,
+          country: place.country,
+          rating: parseFloat(place.rating) || 0,
+          priceLevel: place.priceLevel,
+          cuisine: place.cuisine,
+          description: place.description,
+          address: `${place.name}, ${place.city || place.country}`,
+          createdAt: place.created_at,
+          updatedAt: place.updated_at
+        }));
       } catch (dbError) {
-        console.log('Database error, using mock data:', dbError);
-        // Mock restaurants data
-        restaurants = [
-          {
-            id: 1,
-            locationId: "res_1",
-            name: "Central Restaurante",
-            city: "Lima",
-            country: "Peru",
-            rating: 4.7,
-            priceLevel: "$$$$",
-            cuisine: ["Peruvian", "Contemporary"],
-            description: "World-renowned restaurant featuring modern Peruvian cuisine",
-            address: "Santa Isabel 376, Lima",
-            createdAt: new Date(),
-            updatedAt: new Date()
-          },
-          {
-            id: 2,
-            locationId: "res_2",
-            name: "Pichana Restaurant",
-            city: "Buenos Aires",
-            country: "Argentina", 
-            rating: 4.4,
-            priceLevel: "$$$",
-            cuisine: ["Argentine", "Steakhouse"],
-            description: "Traditional Argentine steakhouse",
-            address: "Av. Corrientes 1234, Buenos Aires",
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }
-        ];
+        console.error('Places database error:', dbError);
+        restaurants = [];
+      } finally {
+        client.release();
       }
       
-      console.log('Retrieved restaurants:', restaurants.length);
+      console.log('Retrieved restaurants from places:', restaurants.length);
       res.json({
         success: true,
         count: restaurants.length,
-        restaurants: restaurants || []
+        restaurants: restaurants
       });
     } catch (error) {
       console.error("Error fetching restaurants:", error);
