@@ -14,92 +14,73 @@ import DestinationWeather from "@/components/DestinationWeather";
 import { BestTimeInfo } from "@/components/BestTimeInfo";
 import { resolveCityCountry, type BaseEntity, type DestinationMini } from "@/utils/locationResolve";
 
-// Updated types to match Supabase schema
+// Updated types to match actual Supabase schema
 interface Destination {
   id: number;
-  locationId: string;
   name: string;
-  city?: string;
-  state?: string;
   country: string;
-  addressString?: string;
-  latitude?: string;
-  longitude?: string;
   lat?: number;
   lon?: number;
-  address?: string;
-  photoCount?: number;
-  webUrl?: string;
-  website?: string;
-  rating?: string;
-  priceLevel?: string;
-  tags?: string[];
-  createdAt: string;
-  updatedAt: string;
+  source?: string;
+  external_id?: string;
+  inserted_at?: string;
+  updated_at?: string;
 }
 
 interface Accommodation {
   id: number;
-  locationId: string;
+  destination_id?: number;
   name: string;
-  rating?: string;
-  numReviews?: number;
-  priceLevel?: string;
-  category?: string;
-  city?: string;
-  country: string;
-  addressString?: string;
-  address?: string;
+  place_type?: string;
   lat?: number;
   lon?: number;
-  webUrl?: string;
+  address?: string;
+  phone?: string;
   website?: string;
-  tags?: string[];
-  amenities?: string[];
-  createdAt: string;
-  updatedAt: string;
+  rating?: number;
+  source?: string;
+  external_id?: string;
+  inserted_at?: string;
+  updated_at?: string;
+  user_ratings_total?: number;
 }
 
 interface Attraction {
   id: number;
-  locationId: string;
+  destination_id?: number;
   name: string;
-  rating?: string;
-  numReviews?: number;
-  category?: string;
-  city?: string;
-  country: string;
-  addressString?: string;
-  address?: string;
+  description?: string;
   lat?: number;
   lon?: number;
-  webUrl?: string;
+  address?: string;
   website?: string;
+  rating?: number;
   tags?: string[];
-  createdAt: string;
-  updatedAt: string;
+  source?: string;
+  external_id?: string;
+  inserted_at?: string;
+  updated_at?: string;
+  user_ratings_total?: number;
 }
 
 interface Restaurant {
   id: number;
-  locationId: string;
+  destination_id?: number;
   name: string;
-  rating?: string;
-  numReviews?: number;
-  priceLevel?: string;
-  category?: string;
-  cuisine?: string[];
-  city?: string;
-  country: string;
-  addressString?: string;
-  address?: string;
+  cuisine?: string;
   lat?: number;
   lon?: number;
-  webUrl?: string;
+  address?: string;
+  phone?: string;
   website?: string;
-  tags?: string[];
-  createdAt: string;
-  updatedAt: string;
+  price_level?: string;
+  source?: string;
+  external_id?: string;
+  inserted_at?: string;
+  updated_at?: string;
+  cuisines?: string[];
+  rating?: number;
+  user_ratings_total?: number;
 }
 
 // Photo state management
@@ -183,7 +164,7 @@ export default function ExplorePage() {
       const pageStart = currentPage * ITEMS_PER_PAGE;
       const pageEnd = pageStart + ITEMS_PER_PAGE - 1;
       
-      const selectFields = 'id, locationId, name, country, city, addressString, latitude, longitude, lat, lon, address, photoCount, webUrl, website, rating, priceLevel, tags, createdAt, updatedAt';
+      const selectFields = 'id, name, country, lat, lon, source, external_id, inserted_at, updated_at';
       
       let query = supabase
         .from('destinations')
@@ -217,7 +198,7 @@ export default function ExplorePage() {
       const pageStart = currentPage * ITEMS_PER_PAGE;
       const pageEnd = pageStart + ITEMS_PER_PAGE - 1;
       
-      const selectFields = 'id, locationId, name, country, city, addressString, address, lat, lon, rating, numReviews, priceLevel, category, webUrl, website, tags, amenities, createdAt, updatedAt';
+      const selectFields = 'id, destination_id, name, place_type, lat, lon, address, phone, website, rating, source, external_id, inserted_at, updated_at, user_ratings_total';
       
       let query = supabase
         .from('accommodations')
@@ -249,7 +230,7 @@ export default function ExplorePage() {
       const pageStart = currentPage * ITEMS_PER_PAGE;
       const pageEnd = pageStart + ITEMS_PER_PAGE - 1;
       
-      const selectFields = 'id, locationId, name, country, city, addressString, address, lat, lon, rating, numReviews, category, webUrl, website, tags, createdAt, updatedAt';
+      const selectFields = 'id, destination_id, name, description, lat, lon, address, website, rating, tags, source, external_id, inserted_at, updated_at, user_ratings_total';
       
       let query = supabase
         .from('attractions')
@@ -281,7 +262,7 @@ export default function ExplorePage() {
       const pageStart = currentPage * ITEMS_PER_PAGE;
       const pageEnd = pageStart + ITEMS_PER_PAGE - 1;
       
-      const selectFields = 'id, locationId, name, country, city, addressString, address, lat, lon, rating, numReviews, priceLevel, category, cuisine, webUrl, website, tags, createdAt, updatedAt';
+      const selectFields = 'id, destination_id, name, cuisine, lat, lon, address, phone, website, price_level, source, external_id, inserted_at, updated_at, cuisines, rating, user_ratings_total';
       
       let query = supabase
         .from('restaurants')
@@ -630,20 +611,11 @@ export default function ExplorePage() {
                           </p>
                         )}
                         
-                        {destination.addressString && (
-                          <p className="text-xs text-muted-foreground line-clamp-2">
-                            {destination.addressString}
-                          </p>
-                        )}
+                        {/* No address field in current schema */}
                         
                         <div className="flex items-center justify-between pt-2">
                           <div className="flex items-center gap-2">
-                            {destination.photoCount && destination.photoCount > 0 && (
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Camera className="w-3 h-3" />
-                                {destination.photoCount}
-                              </div>
-                            )}
+                            {/* Photo count not available in current schema */}
                           </div>
                           <Button size="sm" variant="outline" className="text-xs">
                             <Eye className="w-3 h-3 mr-1" />
@@ -719,31 +691,24 @@ export default function ExplorePage() {
                       
                       <div className="flex items-center gap-2 mb-3">
                         <div className="flex">{renderStars(accommodation.rating)}</div>
-                        {accommodation.numReviews && (
+                        {accommodation.user_ratings_total && (
                           <span className="text-sm text-muted-foreground">
-                            ({accommodation.numReviews} reviews)
+                            ({accommodation.user_ratings_total} reviews)
                           </span>
                         )}
-                        {accommodation.priceLevel && (
-                          <Badge variant="outline">{accommodation.priceLevel}</Badge>
-                        )}
+                        {/* Price level not available in current schema */}
                       </div>
                       
                       <div className="space-y-2">
-                        {accommodation.category && (
+                        {accommodation.place_type && (
                           <Badge variant="secondary" className="text-xs">
-                            {accommodation.category}
+                            {accommodation.place_type}
                           </Badge>
                         )}
                         
                         <div className="flex items-center justify-between pt-2">
                           <div className="flex items-center gap-2">
-                            {accommodation.amenities && accommodation.amenities.length > 0 && (
-                              <div className="text-xs text-muted-foreground">
-                                {accommodation.amenities.slice(0, 2).join(", ")}
-                                {accommodation.amenities.length > 2 && " ..."}
-                              </div>
-                            )}
+                            {/* Amenities not available in current schema */}
                           </div>
                           <Button size="sm" variant="outline" className="text-xs">
                             <Eye className="w-3 h-3 mr-1" />
@@ -806,19 +771,15 @@ export default function ExplorePage() {
                       
                       <div className="flex items-center gap-2 mb-3">
                         <div className="flex">{renderStars(attraction.rating)}</div>
-                        {attraction.numReviews && (
+                        {attraction.user_ratings_total && (
                           <span className="text-sm text-muted-foreground">
-                            ({attraction.numReviews} reviews)
+                            ({attraction.user_ratings_total} reviews)
                           </span>
                         )}
                       </div>
                       
                       <div className="space-y-2">
-                        {attraction.category && (
-                          <Badge variant="secondary" className="text-xs">
-                            {attraction.category}
-                          </Badge>
-                        )}
+                        {/* Category not available in current schema */}
                         
                         <div className="flex items-center justify-end pt-2">
                           <Button size="sm" variant="outline" className="text-xs">
@@ -882,19 +843,19 @@ export default function ExplorePage() {
                       
                       <div className="flex items-center gap-2 mb-3">
                         <div className="flex">{renderStars(restaurant.rating)}</div>
-                        {restaurant.numReviews && (
+                        {restaurant.user_ratings_total && (
                           <span className="text-sm text-muted-foreground">
-                            ({restaurant.numReviews} reviews)
+                            ({restaurant.user_ratings_total} reviews)
                           </span>
                         )}
-                        {restaurant.priceLevel && (
-                          <Badge variant="outline">{restaurant.priceLevel}</Badge>
+                        {restaurant.price_level && (
+                          <Badge variant="outline">{restaurant.price_level}</Badge>
                         )}
                       </div>
                       
                       <div className="space-y-2">
                         <div className="flex flex-wrap gap-1">
-                          {restaurant.cuisine?.slice(0, 3).map((cuisineType, idx) => (
+                          {restaurant.cuisines?.slice(0, 3).map((cuisineType: string, idx: number) => (
                             <Badge key={idx} variant="secondary" className="text-xs">
                               {cuisineType}
                             </Badge>
