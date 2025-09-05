@@ -1,0 +1,175 @@
+להפוך את /community לפונקציונלי (Chat Rooms + Travel Buddy)
+
+עדכן את הדף הקיים /community (אל תיצור דף חדש). בנה בו שני אזורי עבודה (טאבים/סיידבר):
+
+Chat Rooms — רשימת חדרים + צ’אט בזמן אמת לכל חדר
+
+Travel Buddy Board — לוח מודעות למציאת שותפי/ות נסיעה
+
+השתמש ב-Supabase (client קיים) ובטבלאות: public.chat_rooms, public.messages, public.travel_buddy_posts. אין להקשיח מפתחות; ENV בלבד.
+
+A) Chat Rooms
+
+UI:
+
+סיידבר שמציג את כל ה־chat_rooms (שם חדר, תיאור/מדינה אם קיימים, מונה הודעות אחרונות).
+
+אזור מרכזי: כותרת חדר, רשימת הודעות עם אינסוף-סקול (infinite scroll למעלה), ותיבת כתיבה (composer) למטה.
+
+מצב ריק (אם אין הודעות): “No messages yet — be the first to say hi 👋”.
+
+שליפות:
+
+chat_rooms: הצג שדות קיימים (למשל: id, name, description, country, created_at — דלג בשקט אם שדה לא קיים).
+
+messages: עבור חדר נבחר שלוף עמוד ראשון לפי order(created_at, asc) עם range() (ברירת מחדל 30). שמור מפתח “last seen id/ts” לטעינת עבר.
+
+Realtime:
+
+הירשם ל־realtime על public.messages מסונן לפי room_id (או השדה המקביל) והוסף הודעות חדשות ל־UI (scroll-stick לתחתית אם המשתמש למטה).
+
+נטר ניתוק/חיבור מחדש, ואל תכפיל מאזינים.
+
+שליחת הודעות (Composer):
+
+אם יש מערכת Auth פעילה — מלא user_id/author מ־auth.user().
+
+אם אין Auth (אצלך כרגע users ריק): אפשר מצב Guest:
+
+שמור guest_name (nickname) ב-localStorage.
+
+בעת insert ל־messages שלח author_name: guest_name (ושדות נוספים שקיימים בטבלה).
+
+Optimistic UI: הצג את ההודעה מיד, ואם insert נכשל — סמן 🔁 ונסה שוב.
+
+ולידציה: טקסט לא ריק, חיתוך לאורך מקסימלי (למשל 2,000 תווים), אנטי-ספאם בסיסי (debounce).
+
+אינסוף-סקול למעלה:
+
+בלחיצה/גלילה למעלה — טען עמודים קודמים (lte(created_at, firstLoadedTs)) עד שנגמר.
+
+B) Travel Buddy Board
+
+UI:
+
+ליסטה של מודעות travel_buddy_posts עם כרטיסים: כותרת/יעד, תאריכים (from-to), תיאור קצר, תקציב/סגנון (אם קיימים עמודות), ו־CTA “Contact”.
+
+פאנל פילטרים: מדינה/עיר, חלון תאריכים, טווח תקציב (אם קיים), מילת חיפוש.
+
+כפתור “New Post” שפותח Modal/Drawer עם טופס יצירת מודעה.
+
+CRUD:
+
+Create: טופס ולידציה (שדות חובה: כותרת/יעד + טווח תאריכים).
+
+אם יש Auth — שמור user_id/author.
+
+אם אין — בקש contact_method (למשל אימייל/טלגרם) ו־display_name ושמור אותם בשדות המתאימים.
+
+Read: עימוד range() (ברירת מחדל 20), order(created_at desc), חיפוש ilike על כותרת/יעד.
+
+Update/Delete: אם יש Auth — אפשר עריכה/מחיקה רק לבעלים (בדוק user_id === auth.uid()). אם אין Auth — השאר לקריאה בלבד (או אפשר עריכה עם token קצר ב-localStorage רק לפוסט שזה עתה נוצר — אופציונלי).
+
+Contact / Reply:
+
+אופציה 1 (מהיר): כפתור “Contact” פותח Modal עם פרטי קשר שהוגדרו בפוסט (מייל/טלגרם), או כפתור “Start chat” שיוצר/פותח chat_room ייעודי בין הצדדים (אם יש מנגנון כזה).
+
+אופציה 2 (רק אם תרצה): שלח “interest message” לטבלת messages בחדר כללי (למשל “#travel-buddy”) עם קישור לפוסט.
+
+C) הרשאות (RLS) — תיעוד ומסלול DEV
+
+הוסף קובצי עזרה בלבד (לא להריץ אוטומטית) בתיקיית docs/ ו־scripts/:
+
+scripts/printCommunityPolicies.sql — שורה לכל טבלה המציגה מדיניות קיימת.
+
+docs/community-rls.md — הסבר קצר + SQL לבחירתך:
+
+מצב DEV מהיר (קריאה/כתיבה חופשיים):
+
+alter table public.chat_rooms enable row level security;
+alter table public.messages enable row level security;
+alter table public.travel_buddy_posts enable row level security;
+
+create policy "public read chat_rooms" on public.chat_rooms for select using (true);
+create policy "public read messages"  on public.messages  for select using (true);
+create policy "public read tb_posts"  on public.travel_buddy_posts for select using (true);
+
+-- ל-DEV בלבד: מאפשר גם insert לכולם
+create policy "public write messages" on public.messages for insert with check (true);
+create policy "public write tb_posts" on public.travel_buddy_posts for insert with check (true);
+
+
+מצב PROD (אם Auth מופעל):
+insert/update/delete רק כאשר user_id = auth.uid(); select לכולם (או מסונן לפי חדרים פרטיים, אם יש).
+הסבר איך להתאים לפי שמות השדות שלך (למשל author_id/user_id).
+
+חשוב: אם אין לך כרגע Auth, תתחיל מ־DEV-open לכתיבה (כמו למעלה) כדי להדגים פונקציונליות, ואח״כ תחזק.
+
+D) התאמות סכימה רכות (ללא שבירת קיים)
+
+הקוד חייב לעבוד גם אם חלק מהעמודות לא קיימות. לכן בכל select():
+
+בקש רק עמודות שאתה מציג בפועל, ודלג בעדינות אם undefined.
+
+בהודעות, נסה את השדות הנפוצים: id, room_id, user_id, author_name, content, created_at.
+
+בצ’אט, אם אין author_name — הצג user_id מקוצר או “Guest”.
+
+E) חוויית משתמש קטנה אך חשובה
+
+תאריך/שעה: הצג ליד כל הודעה זמן יחסי (“3m”, “2h”, “yesterday”). Tooltip עם זמן מלא.
+
+Avatar: אות ראשונה של השם/אימוג׳י ברירת מחדל.
+
+מדינות: אם יש עמודת country ב־chat_rooms/travel_buddy_posts — הוסף פילטר “All Countries / Country…”.
+
+שגיאות: toast ברור (למשל “Can’t send message — check connection”).
+
+נגישות: קיצורי מקלדת (Enter לשליחה, Shift+Enter לשורה חדשה), aria-labels, פוקוס ל-composer כשנכנסים לחדר.
+
+Empty states יפים: אנימציית “wave hand” בצ’אט ריק; אייקון תרמיל בלוח מודעות ריק.
+
+F) קבצים/קומפוננטים (התאם למבנה שלך)
+
+pages/community.tsx (או הקיים אצלך — לעדכן בלבד)
+
+src/components/community/ChatSidebar.tsx — רשימת חדרים
+
+src/components/community/RoomView.tsx — תצוגת חדר + הודעות + composer
+
+src/components/community/MessageItem.tsx — הודעה בודדת
+
+src/components/community/TravelBuddyList.tsx — רשימת מודעות + פילטרים
+
+src/components/community/NewBuddyPostModal.tsx — יצירת מודעה
+
+src/lib/communityApi.ts — קריאות Supabase מרוכזות (select/insert/realtime)
+
+scripts/printCommunityPolicies.sql, docs/community-rls.md
+
+שמור סטייל אחיד (Tailwind/shadcn), רספונסיבי, RTL-ready.
+
+G) קבלה (Acceptance)
+
+ניווט ל־/community מציג שני טאבים: Chat Rooms ו-Travel Buddy Board.
+
+Chat Rooms:
+
+רואה רשימת חדרים; בחירת חדר מציגה הודעות קיימות + הודעות חדשות בזמן אמת.
+
+ניתן לשלוח הודעה (Guest nickname אם אין Auth).
+
+אינסוף-סקול לטעינת עבר; מצב ריק ברור.
+
+Travel Buddy Board:
+
+רואה כרטיסי מודעות עם פילטרים; ניתן ליצור מודעה חדשה (במצב DEV גם בלי Auth).
+
+אין הקשחת מפתחות; ENV בלבד.
+
+אין שבירת דפים אחרים.
+
+יש מסמכי RLS/SQL לעזרה, לא מבוצע אוטומטית.
+
+Commit בסוף:
+feat(community): chat rooms with realtime + travel buddy board (filters, new post, guest mode)

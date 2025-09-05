@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Star, MessageCircle, Users, MapPin, Calendar, ThumbsUp, Search } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "../lib/queryClient";
+import { ChatSidebar } from "../components/community/ChatSidebar";
+import { RoomView } from "../components/community/RoomView";
+import { TravelBuddyList } from "../components/community/TravelBuddyList";
+import { NewBuddyPostModal } from "../components/community/NewBuddyPostModal";
 
 const StarRating = ({ rating }: { rating: number }) => {
   return (
@@ -28,6 +32,14 @@ const StarRating = ({ rating }: { rating: number }) => {
 export default function Community() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('all');
+  
+  // Chat state
+  const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
+  const [selectedRoomName, setSelectedRoomName] = useState<string>('');
+  const [selectedRoomDescription, setSelectedRoomDescription] = useState<string>('');
+  
+  // Travel Buddy state
+  const [showNewPostModal, setShowNewPostModal] = useState(false);
 
   // Fetch place reviews (simplified version without authentication requirement)
   const { data: reviewsData, isLoading: reviewsLoading, error: reviewsError } = useQuery({
@@ -68,7 +80,7 @@ export default function Community() {
           <Input
             placeholder="Search reviews, chat rooms, or destinations..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
             className="pl-10"
           />
         </div>
@@ -189,123 +201,34 @@ export default function Community() {
         </TabsContent>
         
         <TabsContent value="chat" className="mt-6">
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-2">Community Chat Rooms</h2>
-            <p className="text-gray-600">
-              Join conversations with travelers sharing similar interests and destinations
-            </p>
-          </div>
-          
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Sample chat rooms */}
-            <Card className="w-full">
-              <CardHeader>
-                <CardTitle className="text-lg">Peru Backpackers 2024</CardTitle>
-                <CardDescription>
-                  Planning trips around Peru, sharing tips and experiences
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                  <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
-                    15/50
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
-                    Peru
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge variant="outline" className="text-xs">backpacking</Badge>
-                  <Badge variant="outline" className="text-xs">budget-travel</Badge>
-                  <Badge variant="outline" className="text-xs">machu-picchu</Badge>
-                </div>
-                <Button variant="default" size="sm">
-                  <MessageCircle className="w-4 h-4 mr-1" />
-                  Join Chat
-                </Button>
-              </CardContent>
-            </Card>
-            
-            <Card className="w-full">
-              <CardHeader>
-                <CardTitle className="text-lg">Colombia Adventure Group</CardTitle>
-                <CardDescription>
-                  For adventurous travelers exploring Colombia
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                  <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
-                    8/30
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
-                    Colombia
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge variant="outline" className="text-xs">hiking</Badge>
-                  <Badge variant="outline" className="text-xs">adventure</Badge>
-                  <Badge variant="outline" className="text-xs">cartagena</Badge>
-                </div>
-                <Button variant="default" size="sm">
-                  <MessageCircle className="w-4 h-4 mr-1" />
-                  Join Chat
-                </Button>
-              </CardContent>
-            </Card>
+          <div className="flex h-[600px] gap-4">
+            <ChatSidebar 
+              selectedRoom={selectedRoom}
+              onRoomSelect={(roomId) => {
+                setSelectedRoom(roomId);
+                // TODO: Fetch room details for name and description
+                setSelectedRoomName(`Room ${roomId}`);
+                setSelectedRoomDescription('');
+              }}
+            />
+            <RoomView 
+              roomId={selectedRoom}
+              roomName={selectedRoomName}
+              roomDescription={selectedRoomDescription}
+            />
           </div>
         </TabsContent>
         
         <TabsContent value="buddies" className="mt-6">
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-2">Find Travel Companions</h2>
-            <p className="text-gray-600">
-              Connect with like-minded travelers planning similar trips
-            </p>
-          </div>
-          
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Sample travel buddy posts */}
-            <Card className="w-full">
-              <CardHeader>
-                <CardTitle className="text-lg">Looking for hiking buddies in Patagonia!</CardTitle>
-                <CardDescription className="flex items-center gap-2 mt-1">
-                  <MapPin className="w-4 h-4" />
-                  Patagonia (Chile/Argentina)
-                  <Badge variant="outline" className="ml-2">mid budget</Badge>
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700 mb-4">
-                  Planning an epic 3-week trek through Torres del Paine and Los Glaciares. Looking for experienced hikers.
-                </p>
-                
-                <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    Nov 15 - Dec 6
-                  </div>
-                  <div>2/4 members</div>
-                </div>
-                
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge variant="secondary" className="text-xs">adventure</Badge>
-                  <Badge variant="secondary" className="text-xs">hiking</Badge>
-                  <Badge variant="secondary" className="text-xs">camping</Badge>
-                </div>
-                
-                <Button variant="default" className="w-full">
-                  Apply to Join Trip
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+          <TravelBuddyList onCreatePost={() => setShowNewPostModal(true)} />
         </TabsContent>
       </Tabs>
+
+      {/* New Travel Buddy Post Modal */}
+      <NewBuddyPostModal 
+        open={showNewPostModal} 
+        onOpenChange={setShowNewPostModal} 
+      />
     </div>
   );
 }

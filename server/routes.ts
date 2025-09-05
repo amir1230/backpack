@@ -288,6 +288,17 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Alternative endpoint with dash for chat-rooms (used by frontend)
+  app.get('/api/chat-rooms', async (req, res) => {
+    try {
+      const rooms = await storage.getChatRooms();
+      res.json(rooms);
+    } catch (error) {
+      console.error("Error fetching chat rooms:", error);
+      res.status(500).json({ message: "Failed to fetch chat rooms" });
+    }
+  });
+
   app.get('/api/chat/messages/:roomId', async (req, res) => {
     try {
       const roomId = parseInt(req.params.roomId);
@@ -296,6 +307,29 @@ export async function registerRoutes(app: Express): Promise<void> {
     } catch (error) {
       console.error("Error fetching chat messages:", error);
       res.status(500).json({ message: "Failed to fetch chat messages" });
+    }
+  });
+
+  app.post('/api/chat/messages', async (req, res) => {
+    try {
+      const { room_id, message, author_name } = req.body;
+      
+      if (!room_id || !message || !message.trim()) {
+        return res.status(400).json({ message: "Room ID and message content are required" });
+      }
+
+      const messageData = {
+        room_id: parseInt(room_id),
+        message: message.trim(),
+        author_name: author_name || 'Guest',
+        user_id: null // Guest mode for now
+      };
+
+      const newMessage = await storage.createChatMessage(messageData);
+      res.status(201).json(newMessage);
+    } catch (error) {
+      console.error("Error creating chat message:", error);
+      res.status(500).json({ message: "Failed to send message" });
     }
   });
 
