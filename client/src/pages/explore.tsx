@@ -7,12 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { supabase, fetchPhotosForEntities, type LocationPhoto } from "../../../src/lib/supabaseClient.js";
-import { MapPin, Star, Phone, Globe, Clock, DollarSign, Users, Camera, CloudSun, Eye } from "lucide-react";
+import { MapPin, Star, Phone, Globe, Clock, DollarSign, Users, Camera, CloudSun, Eye, Info, ExternalLink } from "lucide-react";
 import DestinationWeather from "@/components/DestinationWeather";
 import { BestTimeInfo } from "@/components/BestTimeInfo";
 import { resolveCityCountry, type BaseEntity, type DestinationMini } from "@/utils/locationResolve";
+import { weatherClient, type WeatherData } from "@/utils/weatherUtils";
 
 // Updated types to match actual Supabase schema
 interface Destination {
@@ -126,6 +128,7 @@ export default function ExplorePage() {
   const [debugInfo, setDebugInfo] = useState<any>({});
   const [photoCache, setPhotoCache] = useState<Map<string, LocationPhoto>>(new Map());
   const [destinationsMini, setDestinationsMini] = useState<DestinationMini[]>([]);
+  const [weatherData, setWeatherData] = useState<Map<number, WeatherData>>(new Map());
 
   // Fetch destinations mini for location resolution (cached)
   const { data: destinationsMiniData = [] } = useQuery({
@@ -190,6 +193,33 @@ export default function ExplorePage() {
       return data as Destination[];
     }
   });
+
+  // Fetch weather data for destinations (only when on destinations tab)
+  const { data: weatherResults } = useQuery({
+    queryKey: ['weather-data', destinations.map(d => d.id).sort()],
+    queryFn: async () => {
+      if (!destinations.length || activeTab !== 'destinations') return new Map();
+      
+      const destinationsWithCoords = destinations.filter(d => 
+        d.lat !== undefined && d.lon !== undefined && 
+        !isNaN(d.lat) && !isNaN(d.lon)
+      );
+      
+      if (destinationsWithCoords.length === 0) return new Map();
+      
+      return await weatherClient.getWeatherForDestinations(destinationsWithCoords);
+    },
+    enabled: activeTab === 'destinations' && destinations.length > 0,
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    refetchOnWindowFocus: false
+  });
+
+  // Update weather data state when results change
+  useEffect(() => {
+    if (weatherResults) {
+      setWeatherData(weatherResults);
+    }
+  }, [weatherResults]);
 
   // Fetch accommodations from Supabase
   const { data: accommodations = [], isLoading: accommodationsLoading } = useQuery({
@@ -471,27 +501,123 @@ export default function ExplorePage() {
     const tabPhotos = photos[activeTab as keyof PhotoState];
     const photo = tabPhotos.get(entityId.toString());
     
+    const formatDate = (dateString: string) => {
+      try {
+        return new Date(dateString).toLocaleDateString();
+      } catch {
+        return dateString;
+      }
+    };
+    
     if (photo) {
       const imageUrl = photo.thumbnail_url || photo.url;
+      
       return (
-        <img
-          src={imageUrl}
-          alt={`${alt} photo`}
-          className="w-full object-cover rounded-md mb-4"
-          style={{ height: '150px' }}
-          onError={(e) => {
-            // Fallback to placeholder if image fails to load
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-            target.nextElementSibling?.classList.remove('hidden');
-          }}
-        />
+        <div className="relative mb-4">
+          <img
+            src={imageUrl}
+            alt={`${alt} photo`}
+            className="w-full object-cover rounded-md"
+            style={{ height: '150px' }}
+            onError={(e) => {
+              // Fallback to placeholder if image fails to load
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              target.nextElementSibling?.classList.remove('hidden');
+            }}
+          />
+          
+          {/* Photo Info Tooltip */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors"
+                aria-label="Photo info"
+              >
+                <Info className="w-3 h-3" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="max-w-64">
+              <div className="space-y-1 text-xs">
+                {photo.inserted_at && (
+                  <div><strong>Inserted:</strong> {formatDate(photo.inserted_at)}</div>
+                )}
+                {photo.url && (
+                  <div className="flex items-center gap-1">
+                    <ExternalLink className="w-3 h-3" />
+                    <a 
+                      href={photo.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 underline"
+                    >
+                      Open image
+                    </a>
+                  </div>
+                )}
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </div>
       );
     }
     
     return (
       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-md mb-4 flex items-center justify-center" style={{ height: '150px' }}>
         <Camera className="w-8 h-8 text-gray-400" />
+      </div>
+    );
+  };
+
+  // Weather widget component (only for destinations)
+  const renderWeatherWidget = (destinationId: number) => {
+    const weather = weatherData.get(destinationId);
+    
+    if (!weather) {
+      return null; // No weather data available
+    }
+
+    const formatTime = () => {
+      return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    return (
+      <div className="border-t pt-3 mt-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{weather.icon}</span>
+            <span className="font-semibold text-lg">{weather.temperature}°</span>
+            <div className="text-xs text-muted-foreground">
+              <div>H: {weather.tempMax}° / L: {weather.tempMin}°</div>
+            </div>
+          </div>
+          
+          <div className="text-xs text-muted-foreground capitalize">
+            {weather.condition}
+          </div>
+        </div>
+        
+        {/* Weather Details Tooltip */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="mt-1 text-xs text-muted-foreground cursor-help">
+              Updated: {formatTime()}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-48">
+            <div className="space-y-1 text-xs">
+              <div><strong>Feels like:</strong> {weather.feelsLike}°C</div>
+              <div><strong>Humidity:</strong> {weather.humidity}%</div>
+              <div><strong>Wind:</strong> {weather.windSpeed} km/h</div>
+              {weather.precipitation > 0 && (
+                <div><strong>Precipitation:</strong> {weather.precipitation}mm</div>
+              )}
+              <div className="text-xs text-muted-foreground pt-1">
+                Weather data from OpenWeather
+              </div>
+            </div>
+          </TooltipContent>
+        </Tooltip>
       </div>
     );
   };
@@ -514,7 +640,8 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <TooltipProvider>
+      <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Explore South America</h1>
         <p className="text-muted-foreground mb-6">
@@ -623,6 +750,9 @@ export default function ExplorePage() {
                           </Button>
                         </div>
                       </div>
+                      
+                      {/* Weather Widget - Only for destinations */}
+                      {renderWeatherWidget(destination.id)}
                     </CardContent>
                   </Card>
                 );
@@ -1035,6 +1165,7 @@ export default function ExplorePage() {
         </DialogContent>
       </Dialog>
 
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }

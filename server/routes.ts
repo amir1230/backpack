@@ -1379,6 +1379,78 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Batch weather API for multiple destinations by coordinates
+  app.post('/api/weather/batch', async (req, res) => {
+    try {
+      const { destinations } = req.body;
+      
+      if (!destinations || !Array.isArray(destinations)) {
+        return res.status(400).json({ message: "Invalid destinations data" });
+      }
+      
+      const weatherResults = new Map<number, any>();
+      
+      // Process each destination
+      for (const dest of destinations) {
+        try {
+          if (!dest.lat || !dest.lon || isNaN(dest.lat) || isNaN(dest.lon)) {
+            continue; // Skip destinations without valid coordinates
+          }
+          
+          // Call OpenWeather API with coordinates
+          const response = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?lat=${dest.lat}&lon=${dest.lon}&appid=${process.env.OPENWEATHER_API_KEY}&units=metric`
+          );
+          
+          if (!response.ok) {
+            console.warn(`Weather API failed for ${dest.name}: ${response.statusText}`);
+            continue;
+          }
+          
+          const data = await response.json();
+          
+          // Map weather icon to emoji
+          const getWeatherIcon = (iconCode: string): string => {
+            const iconMap: { [key: string]: string } = {
+              '01d': '☀️', '01n': '🌙', '02d': '⛅', '02n': '☁️',
+              '03d': '☁️', '03n': '☁️', '04d': '☁️', '04n': '☁️',
+              '09d': '🌧️', '09n': '🌧️', '10d': '🌦️', '10n': '🌧️',
+              '11d': '⛈️', '11n': '⛈️', '13d': '❄️', '13n': '❄️',
+              '50d': '🌫️', '50n': '🌫️'
+            };
+            return iconMap[iconCode] || '🌤️';
+          };
+          
+          weatherResults.set(dest.id, {
+            id: dest.id,
+            temperature: Math.round(data.main.temp),
+            tempMin: Math.round(data.main.temp_min),
+            tempMax: Math.round(data.main.temp_max),
+            feelsLike: Math.round(data.main.feels_like),
+            condition: data.weather[0].description,
+            humidity: data.main.humidity,
+            windSpeed: Math.round(data.wind.speed * 3.6), // Convert m/s to km/h
+            precipitation: data.rain?.['1h'] || data.snow?.['1h'] || 0,
+            icon: getWeatherIcon(data.weather[0].icon),
+            lastUpdated: new Date().toISOString()
+          });
+          
+        } catch (error) {
+          console.warn(`Failed to get weather for ${dest.name}:`, error);
+          continue; // Continue with other destinations
+        }
+      }
+      
+      // Convert Map to object for JSON response
+      const responseData = Object.fromEntries(weatherResults);
+      res.json(responseData);
+      
+    } catch (error) {
+      console.error("Error in batch weather request:", error);
+      res.status(500).json({ message: "Failed to fetch weather data" });
+    }
+  });
+
   // Test endpoint to verify routing works
   app.get("/api/test-timing", (req, res) => {
     res.json({ message: "Travel timing routes are working" });
