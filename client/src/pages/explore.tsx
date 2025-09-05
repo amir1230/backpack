@@ -12,6 +12,7 @@ import { supabase, fetchPhotosForEntities, type LocationPhoto } from "../../../s
 import { MapPin, Star, Phone, Globe, Clock, DollarSign, Users, Camera, CloudSun, Eye } from "lucide-react";
 import DestinationWeather from "@/components/DestinationWeather";
 import { BestTimeInfo } from "@/components/BestTimeInfo";
+import { resolveCityCountry, type BaseEntity, type DestinationMini } from "@/utils/locationResolve";
 
 // Updated types to match Supabase schema
 interface Destination {
@@ -24,8 +25,15 @@ interface Destination {
   addressString?: string;
   latitude?: string;
   longitude?: string;
+  lat?: number;
+  lon?: number;
+  address?: string;
   photoCount?: number;
   webUrl?: string;
+  website?: string;
+  rating?: string;
+  priceLevel?: string;
+  tags?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -41,7 +49,12 @@ interface Accommodation {
   city?: string;
   country: string;
   addressString?: string;
+  address?: string;
+  lat?: number;
+  lon?: number;
   webUrl?: string;
+  website?: string;
+  tags?: string[];
   amenities?: string[];
   createdAt: string;
   updatedAt: string;
@@ -57,7 +70,12 @@ interface Attraction {
   city?: string;
   country: string;
   addressString?: string;
+  address?: string;
+  lat?: number;
+  lon?: number;
   webUrl?: string;
+  website?: string;
+  tags?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -74,7 +92,12 @@ interface Restaurant {
   city?: string;
   country: string;
   addressString?: string;
+  address?: string;
+  lat?: number;
+  lon?: number;
   webUrl?: string;
+  website?: string;
+  tags?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -121,6 +144,37 @@ export default function ExplorePage() {
   const isDev = process.env.NODE_ENV !== 'production';
   const [debugInfo, setDebugInfo] = useState<any>({});
   const [photoCache, setPhotoCache] = useState<Map<string, LocationPhoto>>(new Map());
+  const [destinationsMini, setDestinationsMini] = useState<DestinationMini[]>([]);
+
+  // Fetch destinations mini for location resolution (cached)
+  const { data: destinationsMiniData = [] } = useQuery({
+    queryKey: ['destinations-mini'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('destinations')
+        .select('id, name, country, latitude, longitude')
+        .order('name');
+      
+      if (error) {
+        console.error('Destinations mini query error:', error);
+        return [];
+      }
+      
+      return (data || []).map(d => ({
+        id: d.id.toString(),
+        name: d.name,
+        country: d.country,
+        lat: d.latitude ? parseFloat(d.latitude) : null,
+        lon: d.longitude ? parseFloat(d.longitude) : null
+      })) as DestinationMini[];
+    },
+    staleTime: 5 * 60 * 1000 // Cache for 5 minutes
+  });
+
+  // Update destinations mini state when data changes
+  useEffect(() => {
+    setDestinationsMini(destinationsMiniData);
+  }, [destinationsMiniData]);
 
   // Fetch destinations from Supabase
   const { data: destinations = [], isLoading: destinationsLoading } = useQuery({
@@ -129,9 +183,11 @@ export default function ExplorePage() {
       const pageStart = currentPage * ITEMS_PER_PAGE;
       const pageEnd = pageStart + ITEMS_PER_PAGE - 1;
       
+      const selectFields = 'id, locationId, name, country, city, addressString, latitude, longitude, lat, lon, address, photoCount, webUrl, website, rating, priceLevel, tags, createdAt, updatedAt';
+      
       let query = supabase
         .from('destinations')
-        .select('*', { count: 'exact', head: false })
+        .select(selectFields, { count: 'exact', head: false })
         .order('updated_at', { ascending: false })
         .range(pageStart, pageEnd);
       
@@ -161,9 +217,11 @@ export default function ExplorePage() {
       const pageStart = currentPage * ITEMS_PER_PAGE;
       const pageEnd = pageStart + ITEMS_PER_PAGE - 1;
       
+      const selectFields = 'id, locationId, name, country, city, addressString, address, lat, lon, rating, numReviews, priceLevel, category, webUrl, website, tags, amenities, createdAt, updatedAt';
+      
       let query = supabase
         .from('accommodations')
-        .select('*', { count: 'exact', head: false })
+        .select(selectFields, { count: 'exact', head: false })
         .order('updated_at', { ascending: false })
         .range(pageStart, pageEnd);
       
@@ -191,9 +249,11 @@ export default function ExplorePage() {
       const pageStart = currentPage * ITEMS_PER_PAGE;
       const pageEnd = pageStart + ITEMS_PER_PAGE - 1;
       
+      const selectFields = 'id, locationId, name, country, city, addressString, address, lat, lon, rating, numReviews, category, webUrl, website, tags, createdAt, updatedAt';
+      
       let query = supabase
         .from('attractions')
-        .select('*', { count: 'exact', head: false })
+        .select(selectFields, { count: 'exact', head: false })
         .order('updated_at', { ascending: false })
         .range(pageStart, pageEnd);
       
@@ -221,9 +281,11 @@ export default function ExplorePage() {
       const pageStart = currentPage * ITEMS_PER_PAGE;
       const pageEnd = pageStart + ITEMS_PER_PAGE - 1;
       
+      const selectFields = 'id, locationId, name, country, city, addressString, address, lat, lon, rating, numReviews, priceLevel, category, cuisine, webUrl, website, tags, createdAt, updatedAt';
+      
       let query = supabase
         .from('restaurants')
-        .select('*', { count: 'exact', head: false })
+        .select(selectFields, { count: 'exact', head: false })
         .order('updated_at', { ascending: false })
         .range(pageStart, pageEnd);
       
@@ -244,7 +306,7 @@ export default function ExplorePage() {
     enabled: activeTab === 'restaurants'
   });
 
-  // Load photos for current tab items (two-stage fetch)
+  // Load photos for current tab items (efficient batch loading)
   useEffect(() => {
     const loadPhotosForCurrentTab = async () => {
       let items: any[] = [];
@@ -271,32 +333,69 @@ export default function ExplorePage() {
       
       if (items.length > 0 && entityType) {
         const cacheKey = `${entityType}-${currentPage}`;
-        if (photoCache.has(cacheKey)) {
-          return; // Use cached photos
+        
+        // Check if we already have photos for this page cached
+        const existingPhotos = photos[activeTab as keyof PhotoState];
+        const hasAllPhotos = items.every(item => existingPhotos.has(item.id.toString()));
+        
+        if (hasAllPhotos) {
+          return; // All photos already loaded
         }
         
-        const entityIds = items.map(item => item.id);
-        const photoMap = await fetchPhotosForEntities(entityType, entityIds);
-        
-        // Cache the photos
-        setPhotoCache((prev: Map<string, LocationPhoto>) => {
-          const newMap = new Map(prev)
-          newMap.set(cacheKey, Array.from(photoMap.values())[0] || {} as LocationPhoto)
-          return newMap
-        });
-        
-        setDebugInfo((prev: any) => ({
-          ...prev,
-          photos: {
-            [`${entityType}_loaded`]: photoMap.size,
-            [`${entityType}_entities`]: entityIds.length
+        try {
+          // Batch fetch photos for all items on current page
+          const entityIds = items.map(item => item.id);
+          
+          const { data: photosData, error } = await supabase
+            .from('location_photos')
+            .select('entity_id, entity_type, url, thumbnail_url, inserted_at, source, license, attribution, width, height')
+            .eq('entity_type', entityType)
+            .in('entity_id', entityIds)
+            .order('inserted_at', { ascending: false });
+          
+          if (error) {
+            console.error('Photos fetch error:', error);
+            return;
           }
-        }));
-        
-        setPhotos(prev => ({
-          ...prev,
-          [activeTab]: photoMap
-        }));
+          
+          // Create photo map with preferred photo per entity
+          const photoMap = new Map<string, LocationPhoto>();
+          const entityPhotoGroups = new Map<string, LocationPhoto[]>();
+          
+          // Group photos by entity_id
+          photosData?.forEach(photo => {
+            const entityId = photo.entity_id.toString();
+            if (!entityPhotoGroups.has(entityId)) {
+              entityPhotoGroups.set(entityId, []);
+            }
+            entityPhotoGroups.get(entityId)!.push(photo as LocationPhoto);
+          });
+          
+          // Select preferred photo for each entity (thumbnail_url ?? url)
+          entityPhotoGroups.forEach((photos, entityId) => {
+            const preferredPhoto = photos.find(p => p.thumbnail_url) || photos[0];
+            if (preferredPhoto) {
+              photoMap.set(entityId, preferredPhoto);
+            }
+          });
+          
+          setDebugInfo((prev: any) => ({
+            ...prev,
+            photos: {
+              [`${entityType}_loaded`]: photoMap.size,
+              [`${entityType}_entities`]: entityIds.length,
+              [`${entityType}_total_photos`]: photosData?.length || 0
+            }
+          }));
+          
+          setPhotos(prev => ({
+            ...prev,
+            [activeTab]: photoMap
+          }));
+          
+        } catch (error) {
+          console.error('Error loading photos:', error);
+        }
       }
     };
     
@@ -360,17 +459,44 @@ export default function ExplorePage() {
     setDetailModal({ isOpen: false, type: null, item: null, photos: [] });
   };
 
-  const renderPhoto = (locationId: string, alt: string) => {
+  // Helper function to resolve city/country for non-destination entities
+  const getCityCountryForEntity = (entity: BaseEntity): { city?: string; country?: string } => {
+    const entityWithCoords = {
+      ...entity,
+      lat: entity.lat ?? (entity.latitude ? parseFloat(entity.latitude) : null),
+      lon: entity.lon ?? (entity.longitude ? parseFloat(entity.longitude) : null),
+      address: entity.address ?? entity.addressString
+    };
+    
+    return resolveCityCountry(entityWithCoords, { destinations: destinationsMini });
+  };
+  
+  // Helper function to format location subtitle
+  const formatLocationSubtitle = (entity: any, isDestination: boolean = false): string => {
+    if (isDestination) {
+      // For destinations, show only country
+      return entity.country || '';
+    } else {
+      // For other entities, resolve city/country
+      const { city, country } = getCityCountryForEntity(entity);
+      const parts = [];
+      if (city) parts.push(city);
+      if (country) parts.push(country);
+      return parts.join(', ');
+    }
+  };
+
+  const renderPhoto = (entityId: string, alt: string) => {
     const tabPhotos = photos[activeTab as keyof PhotoState];
-    const photo = tabPhotos.get(locationId);
+    const photo = tabPhotos.get(entityId.toString());
     
     if (photo) {
-      const imageUrl = photo.thumbnailUrl || photo.photoUrl;
+      const imageUrl = photo.thumbnail_url || photo.url;
       return (
         <img
           src={imageUrl}
-          alt={alt}
-          className="w-full h-150px object-cover rounded-md mb-4"
+          alt={`${alt} photo`}
+          className="w-full object-cover rounded-md mb-4"
           style={{ height: '150px' }}
           onError={(e) => {
             // Fallback to placeholder if image fails to load
@@ -383,7 +509,7 @@ export default function ExplorePage() {
     }
     
     return (
-      <div className="w-full h-150px bg-gray-200 dark:bg-gray-700 rounded-md mb-4 flex items-center justify-center" style={{ height: '150px' }}>
+      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-md mb-4 flex items-center justify-center" style={{ height: '150px' }}>
         <Camera className="w-8 h-8 text-gray-400" />
       </div>
     );
@@ -485,45 +611,50 @@ export default function ExplorePage() {
                 <p className="text-muted-foreground">No destinations found matching your criteria.</p>
               </div>
             ) : (
-              destinations.map((destination: Destination) => (
-                <Card key={destination.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => openDetailModal('destination', destination)}>
-                  <CardContent className="p-4">
-                    {renderPhoto(destination.locationId, destination.name)}
-                    
-                    <CardTitle className="flex items-center gap-2 mb-2">
-                      <MapPin className="w-4 h-4 text-blue-600" />
-                      <span className="text-lg">{destination.name}</span>
-                    </CardTitle>
-                    
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">
-                        {destination.city && `${destination.city}, `}{destination.country}
-                      </p>
+              destinations.map((destination: Destination) => {
+                const locationSubtitle = formatLocationSubtitle(destination, true);
+                return (
+                  <Card key={destination.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => openDetailModal('destination', destination)}>
+                    <CardContent className="p-4">
+                      {renderPhoto(destination.id.toString(), destination.name)}
                       
-                      {destination.addressString && (
-                        <p className="text-xs text-muted-foreground line-clamp-2">
-                          {destination.addressString}
-                        </p>
-                      )}
+                      <CardTitle className="flex items-center gap-2 mb-2">
+                        <MapPin className="w-4 h-4 text-blue-600" />
+                        <span className="text-lg">{destination.name}</span>
+                      </CardTitle>
                       
-                      <div className="flex items-center justify-between pt-2">
-                        <div className="flex items-center gap-2">
-                          {destination.photoCount && destination.photoCount > 0 && (
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Camera className="w-3 h-3" />
-                              {destination.photoCount}
-                            </div>
-                          )}
+                      <div className="space-y-2">
+                        {locationSubtitle && (
+                          <p className="text-sm text-muted-foreground">
+                            {locationSubtitle}
+                          </p>
+                        )}
+                        
+                        {destination.addressString && (
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {destination.addressString}
+                          </p>
+                        )}
+                        
+                        <div className="flex items-center justify-between pt-2">
+                          <div className="flex items-center gap-2">
+                            {destination.photoCount && destination.photoCount > 0 && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Camera className="w-3 h-3" />
+                                {destination.photoCount}
+                              </div>
+                            )}
+                          </div>
+                          <Button size="sm" variant="outline" className="text-xs">
+                            <Eye className="w-3 h-3 mr-1" />
+                            More Details
+                          </Button>
                         </div>
-                        <Button size="sm" variant="outline" className="text-xs">
-                          <Eye className="w-3 h-3 mr-1" />
-                          More Details
-                        </Button>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
+                    </CardContent>
+                  </Card>
+                );
+              })
             )}
           </div>
           
@@ -573,55 +704,57 @@ export default function ExplorePage() {
                 <p className="text-muted-foreground">No accommodations found matching your criteria.</p>
               </div>
             ) : (
-              accommodations.map((accommodation: Accommodation) => (
-                <Card key={accommodation.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => openDetailModal('accommodation', accommodation)}>
-                  <CardContent className="p-4">
-                    {renderPhoto(accommodation.locationId, accommodation.name)}
-                    
-                    <CardTitle className="text-lg mb-2">{accommodation.name}</CardTitle>
-                    
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="flex">{renderStars(accommodation.rating)}</div>
-                      {accommodation.numReviews && (
-                        <span className="text-sm text-muted-foreground">
-                          ({accommodation.numReviews} reviews)
-                        </span>
+              accommodations.map((accommodation: Accommodation) => {
+                const locationSubtitle = formatLocationSubtitle(accommodation);
+                return (
+                  <Card key={accommodation.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => openDetailModal('accommodation', accommodation)}>
+                    <CardContent className="p-4">
+                      {renderPhoto(accommodation.id.toString(), accommodation.name)}
+                      
+                      <CardTitle className="text-lg mb-2">{accommodation.name}</CardTitle>
+                      
+                      {locationSubtitle && (
+                        <p className="text-sm text-muted-foreground mb-3">{locationSubtitle}</p>
                       )}
-                      {accommodation.priceLevel && (
-                        <Badge variant="outline">{accommodation.priceLevel}</Badge>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="w-4 h-4" />
-                        <span>{accommodation.city && `${accommodation.city}, `}{accommodation.country}</span>
+                      
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="flex">{renderStars(accommodation.rating)}</div>
+                        {accommodation.numReviews && (
+                          <span className="text-sm text-muted-foreground">
+                            ({accommodation.numReviews} reviews)
+                          </span>
+                        )}
+                        {accommodation.priceLevel && (
+                          <Badge variant="outline">{accommodation.priceLevel}</Badge>
+                        )}
                       </div>
                       
-                      {accommodation.category && (
-                        <Badge variant="secondary" className="text-xs">
-                          {accommodation.category}
-                        </Badge>
-                      )}
-                      
-                      <div className="flex items-center justify-between pt-2">
-                        <div className="flex items-center gap-2">
-                          {accommodation.amenities && accommodation.amenities.length > 0 && (
-                            <div className="text-xs text-muted-foreground">
-                              {accommodation.amenities.slice(0, 2).join(", ")}
-                              {accommodation.amenities.length > 2 && " ..."}
-                            </div>
-                          )}
+                      <div className="space-y-2">
+                        {accommodation.category && (
+                          <Badge variant="secondary" className="text-xs">
+                            {accommodation.category}
+                          </Badge>
+                        )}
+                        
+                        <div className="flex items-center justify-between pt-2">
+                          <div className="flex items-center gap-2">
+                            {accommodation.amenities && accommodation.amenities.length > 0 && (
+                              <div className="text-xs text-muted-foreground">
+                                {accommodation.amenities.slice(0, 2).join(", ")}
+                                {accommodation.amenities.length > 2 && " ..."}
+                              </div>
+                            )}
+                          </div>
+                          <Button size="sm" variant="outline" className="text-xs">
+                            <Eye className="w-3 h-3 mr-1" />
+                            More Details
+                          </Button>
                         </div>
-                        <Button size="sm" variant="outline" className="text-xs">
-                          <Eye className="w-3 h-3 mr-1" />
-                          More Details
-                        </Button>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
+                    </CardContent>
+                  </Card>
+                );
+              })
             )}
           </div>
           
@@ -658,41 +791,42 @@ export default function ExplorePage() {
                 <p className="text-muted-foreground">No attractions found matching your criteria.</p>
               </div>
             ) : (
-              attractions.map((attraction: Attraction) => (
-                <Card key={attraction.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => openDetailModal('attraction', attraction)}>
-                  <CardContent className="p-4">
-                    {renderPhoto(attraction.locationId, attraction.name)}
-                    
-                    <CardTitle className="text-lg mb-2">{attraction.name}</CardTitle>
-                    
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="flex">{renderStars(attraction.rating)}</div>
-                      {attraction.numReviews && (
-                        <span className="text-sm text-muted-foreground">
-                          ({attraction.numReviews} reviews)
-                        </span>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="w-4 h-4" />
-                        <span>{attraction.city && `${attraction.city}, `}{attraction.country}</span>
-                      </div>
+              attractions.map((attraction: Attraction) => {
+                const locationSubtitle = formatLocationSubtitle(attraction);
+                return (
+                  <Card key={attraction.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => openDetailModal('attraction', attraction)}>
+                    <CardContent className="p-4">
+                      {renderPhoto(attraction.id.toString(), attraction.name)}
                       
-                      {attraction.category && (
-                        <Badge variant="secondary" className="text-xs">
-                          {attraction.category}
-                        </Badge>
+                      <CardTitle className="text-lg mb-2">{attraction.name}</CardTitle>
+                      
+                      {locationSubtitle && (
+                        <p className="text-sm text-muted-foreground mb-3">{locationSubtitle}</p>
                       )}
                       
-                      <div className="flex items-center justify-end pt-2">
-                        <Button size="sm" variant="outline" className="text-xs">
-                          <Eye className="w-3 h-3 mr-1" />
-                          More Details
-                        </Button>
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="flex">{renderStars(attraction.rating)}</div>
+                        {attraction.numReviews && (
+                          <span className="text-sm text-muted-foreground">
+                            ({attraction.numReviews} reviews)
+                          </span>
+                        )}
                       </div>
-                    </div>
+                      
+                      <div className="space-y-2">
+                        {attraction.category && (
+                          <Badge variant="secondary" className="text-xs">
+                            {attraction.category}
+                          </Badge>
+                        )}
+                        
+                        <div className="flex items-center justify-end pt-2">
+                          <Button size="sm" variant="outline" className="text-xs">
+                            <Eye className="w-3 h-3 mr-1" />
+                            More Details
+                          </Button>
+                        </div>
+                      </div>
                   </CardContent>
                 </Card>
               ))
@@ -732,49 +866,51 @@ export default function ExplorePage() {
                 <p className="text-muted-foreground">No restaurants found matching your criteria.</p>
               </div>
             ) : (
-              restaurants.map((restaurant: Restaurant) => (
-                <Card key={restaurant.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => openDetailModal('restaurant', restaurant)}>
-                  <CardContent className="p-4">
-                    {renderPhoto(restaurant.locationId, restaurant.name)}
-                    
-                    <CardTitle className="text-lg mb-2">{restaurant.name}</CardTitle>
-                    
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="flex">{renderStars(restaurant.rating)}</div>
-                      {restaurant.numReviews && (
-                        <span className="text-sm text-muted-foreground">
-                          ({restaurant.numReviews} reviews)
-                        </span>
+              restaurants.map((restaurant: Restaurant) => {
+                const locationSubtitle = formatLocationSubtitle(restaurant);
+                return (
+                  <Card key={restaurant.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => openDetailModal('restaurant', restaurant)}>
+                    <CardContent className="p-4">
+                      {renderPhoto(restaurant.id.toString(), restaurant.name)}
+                      
+                      <CardTitle className="text-lg mb-2">{restaurant.name}</CardTitle>
+                      
+                      {locationSubtitle && (
+                        <p className="text-sm text-muted-foreground mb-3">{locationSubtitle}</p>
                       )}
-                      {restaurant.priceLevel && (
-                        <Badge variant="outline">{restaurant.priceLevel}</Badge>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="w-4 h-4" />
-                        <span>{restaurant.city && `${restaurant.city}, `}{restaurant.country}</span>
+                      
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="flex">{renderStars(restaurant.rating)}</div>
+                        {restaurant.numReviews && (
+                          <span className="text-sm text-muted-foreground">
+                            ({restaurant.numReviews} reviews)
+                          </span>
+                        )}
+                        {restaurant.priceLevel && (
+                          <Badge variant="outline">{restaurant.priceLevel}</Badge>
+                        )}
                       </div>
                       
-                      <div className="flex flex-wrap gap-1">
-                        {restaurant.cuisine?.slice(0, 3).map((cuisineType, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs">
-                            {cuisineType}
-                          </Badge>
-                        ))}
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap gap-1">
+                          {restaurant.cuisine?.slice(0, 3).map((cuisineType, idx) => (
+                            <Badge key={idx} variant="secondary" className="text-xs">
+                              {cuisineType}
+                            </Badge>
+                          ))}
+                        </div>
+                        
+                        <div className="flex items-center justify-end pt-2">
+                          <Button size="sm" variant="outline" className="text-xs">
+                            <Eye className="w-3 h-3 mr-1" />
+                            More Details
+                          </Button>
+                        </div>
                       </div>
-                      
-                      <div className="flex items-center justify-end pt-2">
-                        <Button size="sm" variant="outline" className="text-xs">
-                          <Eye className="w-3 h-3 mr-1" />
-                          More Details
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
+                    </CardContent>
+                  </Card>
+                );
+              })
             )}
           </div>
           

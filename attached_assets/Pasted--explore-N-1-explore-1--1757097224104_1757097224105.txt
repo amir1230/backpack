@@ -1,0 +1,158 @@
+להוסיף תמונות + “עיר, מדינה” לכל פריט ב־/explore (ללא N+1)
+
+עדכן את הדף הקיים /explore כך:
+
+1) שליפת תמונות יעילה (כבר קיים fetch בשתי-קריאות – הרחבה קלה)
+
+עבור כל לשונית (destinations / accommodations / attractions / restaurants):
+
+לאחר שליפת הרשומות של העמוד (עם id,name,lat,lon,address,country,city,updated_at,website — רק מה שקיים בפועל), בצע קריאה אחת ל־location_photos:
+
+eq('entity_type', '<type>')
+
+in('entity_id', ids) (ids = המזהים של העמוד הנוכחי)
+
+order('inserted_at', { ascending: false })
+
+בחר לכל entity_id תמונה מועדפת: thumbnail_url ?? url.
+
+שמור cache (Map לפי <type>/<id>) כדי לא לטעון מחדש בין מעבר לשוניות/עמודים.
+
+בתצוגה: הצג תמונה (גובה ≈ 150px, object-cover, פינות מעוגלות). אם אין תמונה → placeholder.
+
+2) הוספת “עיר, מדינה” (או “יעד, מדינה” בלשונית Destinations)
+
+צור utility חדש: src/utils/locationResolve.ts עם:
+
+export type BaseEntity = {
+  id: string;
+  name?: string | null;
+  address?: string | null;
+  city?: string | null;
+  country?: string | null;
+  lat?: number | null;
+  lon?: number | null;
+};
+
+export type DestinationMini = {
+  id: string;
+  name: string | null;
+  country: string | null;
+  lat: number | null;
+  lon: number | null;
+};
+
+export function parseCityCountryFromAddress(address?: string | null): { city?: string; country?: string } {
+  if (!address) return {};
+  // פיצול נאיבי "City, Region, Country" (יתפוס רוב המקרים; לא לשבור אם קצר)
+  const parts = address.split(',').map(s => s.trim()).filter(Boolean);
+  if (parts.length === 0) return {};
+  const country = parts[parts.length - 1];
+  const city    = parts.length >= 2 ? parts[parts.length - 2] : undefined;
+  return { city, country };
+}
+
+function haversineKm(a: {lat:number;lon:number}, b:{lat:number;lon:number}) {
+  const toRad = (d:number)=> d*Math.PI/180;
+  const R=6371;
+  const dLat=toRad((b.lat-a.lat));
+  const dLon=toRad((b.lon-a.lon));
+  const la1=toRad(a.lat), la2=toRad(b.lat);
+  const h=Math.sin(dLat/2)**2 + Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
+}
+
+export function nearestDestinationNameCountry(
+  e: BaseEntity,
+  dests: DestinationMini[],
+  maxKm = 80
+): { city?: string; country?: string } {
+  if (e.lat == null || e.lon == null || dests.length === 0) return {};
+  let best: {d:number; name?:string|null; country?:string|null} = { d: 1e12 };
+  for (const d of dests) {
+    if (d.lat == null || d.lon == null) continue;
+    const dist = haversineKm({lat:e.lat, lon:e.lon}, {lat:d.lat, lon:d.lon});
+    if (dist < best.d) best = { d: dist, name: d.name ?? undefined, country: d.country ?? undefined };
+  }
+  if (best.d <= maxKm) return { city: best.name, country: best.country };
+  return {};
+}
+
+/** החזרת {city,country} לפי סדר עדיפויות: שדות ישירים → כתובת → יעד קרוב */
+export function resolveCityCountry(
+  e: BaseEntity,
+  nearby?: { destinations: DestinationMini[] }
+): { city?: string; country?: string } {
+  // 1) אם יש שדות מפורשים בטבלה — נשתמש בהם
+  if (e.country || e.city) return { city: e.city ?? undefined, country: e.country ?? undefined };
+  // 2) ננסה לנחש מהכתובת
+  const fromAddr = parseCityCountryFromAddress(e.address);
+  if (fromAddr.city || fromAddr.country) return fromAddr;
+  // 3) ניפול ל"יעד הקרוב" לפי lat/lon
+  if (nearby?.destinations?.length) {
+    return nearestDestinationNameCountry(e, nearby.destinations);
+  }
+  return {};
+}
+
+
+ואז:
+
+בעת טעינת הלשוניות שאינן Destinations — טען פעם אחת (ל-cache) גם רשימת destinations מצומצמת (רק id,name,country,lat,lon) לשימוש בשלב “יעד קרוב” (אפשר להגביל ל־South America / או כללית, מותר lazy-load).
+
+עבור כל רשומה ב-Accommodations / Attractions / Restaurants:
+
+נסה להציב city,country לפי resolveCityCountry(entity, { destinations: cachedDestinations }).
+
+בתצוגה, הצג שורת משנה: {city ? ${city}, : ''}{country ?? ''} (אם יש).
+
+בלשונית Destinations:
+
+כותרת: name
+
+שורת משנה: {country} בלבד (לפי הדרישה).
+
+3) התאמות SELECT (בלי לשבור את הסכמה)
+
+בכל טאב, נסה לבחור את העמודות הבאות אם קיימות בפועל (דלג בשקט אם לא):
+
+name, country, city, address, lat, lon, updated_at, website, rating, price_level, tags
+
+אל תיכשל אם עמודה לא קיימת — פשוט אל תציג אותה.
+
+4) UI
+
+בכרטיס/שורה בכל לשונית:
+
+תמונה בראש הכרטיס.
+
+כותרת: name
+
+תת-כותרת:
+
+Destinations: {country}
+
+אחרות: {city}, {country} (ללא פסיקים כפולים אם חסר).
+
+כפתור “More Details” נשאר כפי שהוא.
+
+הוסף alt לתמונה: alt={${name} photo}.
+
+Placeholder כשאין תמונה.
+
+5) קבלה (Acceptance)
+
+בכל הלשוניות מוצגות תמונות (כשיש) מתוך location_photos ללא N+1.
+
+Destinations מציגים: שם יעד + מדינה.
+
+Accommodations / Attractions / Restaurants מציגים: שם + “עיר, מדינה” ע"פ סדר עדיפויות: עמודות ישירות → כתובת → יעד קרוב לפי lat/lon (עד 80 ק"מ).
+
+אם לא נמצא עיר/מדינה — לא מוצג שדה ריק (לא “, ”).
+
+אין יצירת דפים/מסלולים חדשים. הכל בעמוד הקיים.
+
+אין הקשחת מפתחות; הכל דרך ENV.
+
+בסיום בצע commit:
+feat(explore): photos on all tabs + city/country subtitle (addr/nearest-destination fallback)
