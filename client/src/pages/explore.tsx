@@ -442,9 +442,9 @@ export default function ExplorePage() {
     const { data: itemPhotos } = await supabase
       .from('location_photos')
       .select('*')
-      .eq('locationCategory', type)
-      .eq('locationId', item.locationId)
-      .order('createdAt', { ascending: false })
+      .eq('entity_type', type)
+      .eq('entity_id', item.id)
+      .order('inserted_at', { ascending: false })
       .limit(6);
     
     setDetailModal({
@@ -827,9 +827,10 @@ export default function ExplorePage() {
                           </Button>
                         </div>
                       </div>
-                  </CardContent>
-                </Card>
-              ))
+                    </CardContent>
+                  </Card>
+                );
+              })
             )}
           </div>
           
@@ -943,18 +944,13 @@ export default function ExplorePage() {
                 {detailModal.photos.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {detailModal.photos.map((photo, idx) => (
-                      <div key={photo.id} className="relative group">
+                      <div key={photo.entity_id || idx} className="relative group">
                         <img
-                          src={photo.thumbnailUrl || photo.photoUrl}
-                          alt={photo.caption || `${detailModal.item.name} ${idx + 1}`}
+                          src={photo.thumbnail_url || photo.url}
+                          alt={`${detailModal.item.name} ${idx + 1}`}
                           className="w-full h-32 object-cover rounded-lg cursor-pointer transition-transform group-hover:scale-105"
-                          onClick={() => window.open(photo.photoUrl, '_blank')}
+                          onClick={() => window.open(photo.url, '_blank')}
                         />
-                        {photo.caption && (
-                          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs p-2 rounded-b-lg">
-                            {photo.caption}
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>

@@ -51,7 +51,7 @@ export function nearestDestinationNameCountry(
     const dist = haversineKm({ lat: e.lat, lon: e.lon }, { lat: d.lat, lon: d.lon });
     if (dist < best.d) best = { d: dist, name: d.name ?? undefined, country: d.country ?? undefined };
   }
-  if (best.d <= maxKm) return { city: best.name, country: best.country };
+  if (best.d <= maxKm) return { city: best.name || undefined, country: best.country || undefined };
   return {};
 }
 
@@ -61,9 +61,9 @@ export function resolveCityCountry(
   nearby?: { destinations: DestinationMini[] }
 ): { city?: string; country?: string } {
   // 1) אם יש שדות מפורשים בטבלה — נשתמש בהם
-  if (e.country || e.city) return { city: e.city ?? undefined, country: e.country ?? undefined };
+  if (e.country || e.city) return { city: e.city || undefined, country: e.country || undefined };
   // 2) ננסה לנחש מהכתובת
-  const fromAddr = parseCityCountryFromAddress(e.address);
+  const fromAddr = parseCityCountryFromAddress(e.address || e.addressString);
   if (fromAddr.city || fromAddr.country) return fromAddr;
   // 3) ניפול ל"יעד הקרוב" לפי lat/lon
   if (nearby?.destinations?.length) {

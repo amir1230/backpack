@@ -14,7 +14,7 @@ import Community from "./pages/Community.js";
 import BudgetTracker from "./pages/budget-tracker.js";
 import Achievements from "./pages/achievements.js";
 import TripAdvisorData from "./pages/tripadvisor-data.js";
-import Explore from "./pages/explore";
+import Explore from "./pages/explore.js";
 import Weather from "./pages/weather.js";
 import MyTripsNew from "./pages/my-trips-new.js";
 import Onboarding from "./pages/onboarding.js";
