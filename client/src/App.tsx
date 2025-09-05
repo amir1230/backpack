@@ -4,11 +4,11 @@ import { queryClient } from "./lib/queryClient.js";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./components/ui/toaster.js";
 import { TooltipProvider } from "./components/ui/tooltip.js";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext.js";
 import NotFound from "./pages/not-found.js";
 import Landing from "./pages/landing.js";
 import Home from "./pages/home.js";
-import { AuthCallback } from "./pages/auth/Callback";
+import { AuthCallback } from "./pages/auth/Callback.js";
 
 import Community from "./pages/Community.js";
 import BudgetTracker from "./pages/budget-tracker.js";

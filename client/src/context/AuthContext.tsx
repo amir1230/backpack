@@ -73,7 +73,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: any, session: any) => {
         console.log('Auth state changed:', event, session?.user?.email);
         
         setSession(session);
@@ -89,6 +89,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
             cached_at: Date.now()
           };
           localStorage.setItem('tripwise_user', JSON.stringify(userData));
+          
+          // If this is a sign-in event and we're on the callback page, 
+          // the callback handler will manage the redirect
+          if (event === 'SIGNED_IN' && !window.location.pathname.includes('/auth/callback')) {
+            console.log('User signed in successfully');
+          }
         } else {
           localStorage.removeItem('tripwise_user');
         }
@@ -192,21 +198,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signInWithGoogle = async () => {
     try {
+      // Store current location for redirect after auth
+      localStorage.setItem('auth_redirect_to', window.location.pathname);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
       
       if (error) {
         console.error('Google sign in error:', error);
+        localStorage.removeItem('auth_redirect_to');
         return { error };
       }
       
       return { error: null };
     } catch (error) {
       console.error('Unexpected Google sign in error:', error);
+      localStorage.removeItem('auth_redirect_to');
       return { 
         error: { 
           message: 'An unexpected error occurred during Google sign in',

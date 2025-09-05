@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import App from "./App";
+import App from "./App.js";
 import "./index.css";
 
 // Add global error handler for unhandled promise rejections

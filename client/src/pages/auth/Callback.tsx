@@ -15,51 +15,59 @@ export function AuthCallback() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get the URL fragment and search parameters
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const searchParams = new URLSearchParams(window.location.search);
+        console.log('Starting auth callback handling...');
+        console.log('Current URL:', window.location.href);
         
-        // Check for error parameters
-        const errorParam = hashParams.get('error') || searchParams.get('error');
-        const errorDescription = hashParams.get('error_description') || searchParams.get('error_description');
+        // Let Supabase automatically detect and handle the session from URL
+        // This is handled by detectSessionInUrl: true in our Supabase config
+        let attempts = 0;
+        const maxAttempts = 10;
         
-        if (errorParam) {
-          setError(errorDescription || 'Authentication failed');
-          setLoading(false);
-          return;
-        }
-
-        // Get session from Supabase (should be automatically set by detectSessionInUrl)
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error('Session error:', sessionError);
-          setError('Failed to retrieve session');
-          setLoading(false);
-          return;
-        }
-
-        if (session) {
-          setSuccess(true);
-          setLoading(false);
+        while (attempts < maxAttempts) {
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
           
-          // Redirect after a short delay to show success message
-          setTimeout(() => {
-            const redirectTo = localStorage.getItem('auth_redirect_to') || '/';
-            localStorage.removeItem('auth_redirect_to');
-            setLocation(redirectTo);
-          }, 2000);
-        } else {
-          setError('No session found');
-          setLoading(false);
+          if (sessionError) {
+            console.error('Session error:', sessionError);
+            setError('Failed to retrieve session');
+            setLoading(false);
+            return;
+          }
+
+          if (session && session.user) {
+            console.log('Authentication successful for:', session.user.email);
+            setSuccess(true);
+            setLoading(false);
+            
+            // Redirect after showing success message
+            setTimeout(() => {
+              const redirectTo = localStorage.getItem('auth_redirect_to') || '/';
+              localStorage.removeItem('auth_redirect_to');
+              
+              // Clear the URL from OAuth params and redirect
+              window.history.replaceState({}, document.title, redirectTo);
+              setLocation(redirectTo);
+            }, 1000);
+            return;
+          }
+          
+          // Wait before next attempt
+          await new Promise(resolve => setTimeout(resolve, 300));
+          attempts++;
         }
+        
+        // If we get here, no session was found after all attempts
+        console.warn('No session found after multiple attempts');
+        setError('Authentication timed out. Please try again.');
+        setLoading(false);
+        
       } catch (error) {
-        console.error('Auth callback error:', error);
-        setError('An unexpected error occurred');
+        console.error('Unexpected auth callback error:', error);
+        setError('An unexpected error occurred during authentication');
         setLoading(false);
       }
     };
 
+    // Always try to handle the callback
     handleAuthCallback();
   }, [setLocation]);
 
@@ -72,9 +80,9 @@ export function AuthCallback() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
           <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
-          <h2 className="text-xl font-semibold">Completing sign in...</h2>
+          <h2 className="text-xl font-semibold">מתחבר...</h2>
           <p className="text-muted-foreground">
-            Please wait while we finish setting up your account.
+            אנא המתן בזמן שאנחנו מסיימים להגדיר את החשבון שלך
           </p>
         </div>
       </div>
@@ -87,13 +95,13 @@ export function AuthCallback() {
         <div className="text-center space-y-4 max-w-md">
           <XCircle className="h-12 w-12 text-destructive mx-auto" />
           <h2 className="text-xl font-semibold text-destructive">
-            Authentication Failed
+            שגיאה בהתחברות
           </h2>
           <p className="text-muted-foreground">
             {error}
           </p>
           <Button onClick={handleRetryLogin} className="mt-4">
-            Try Again
+            נסה שוב
           </Button>
         </div>
       </div>
@@ -106,13 +114,13 @@ export function AuthCallback() {
         <div className="text-center space-y-4">
           <CheckCircle className="h-12 w-12 text-green-500 mx-auto" />
           <h2 className="text-xl font-semibold text-green-600">
-            Welcome to TripWise!
+            ברוך הבא ל-TripWise!
           </h2>
           <p className="text-muted-foreground">
-            {user?.email ? `Signed in as ${user.email}` : 'Successfully signed in'}
+            {user?.email ? `התחברת בהצלחה כ-${user.email}` : 'התחברת בהצלחה'}
           </p>
           <p className="text-sm text-muted-foreground">
-            Redirecting you to the app...
+            מעביר אותך לאפליקציה...
           </p>
         </div>
       </div>
