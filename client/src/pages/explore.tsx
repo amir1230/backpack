@@ -41,6 +41,15 @@ interface LocationItem {
   openingHours?: string[];
 }
 
+interface ApiResponse<T> {
+  success: boolean;
+  count: number;
+  destinations?: T[];
+  accommodations?: T[];
+  attractions?: T[];
+  restaurants?: T[];
+}
+
 export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("all");
@@ -50,24 +59,28 @@ export default function ExplorePage() {
   const queryClient = useQueryClient();
 
   // Fetch destinations
-  const { data: destinations = [], isLoading: destinationsLoading } = useQuery({
+  const { data: destinationsResponse, isLoading: destinationsLoading } = useQuery<ApiResponse<Destination>>({
     queryKey: ['/api/destinations'],
   });
+  const destinations = (destinationsResponse?.destinations || []) as Destination[];
 
   // Fetch accommodations
-  const { data: accommodations = [], isLoading: accommodationsLoading } = useQuery({
+  const { data: accommodationsResponse, isLoading: accommodationsLoading } = useQuery<ApiResponse<LocationItem>>({
     queryKey: ['/api/accommodations'],
   });
+  const accommodations = (accommodationsResponse?.accommodations || []) as LocationItem[];
 
   // Fetch attractions
-  const { data: attractions = [], isLoading: attractionsLoading } = useQuery({
+  const { data: attractionsResponse, isLoading: attractionsLoading } = useQuery<ApiResponse<LocationItem>>({
     queryKey: ['/api/attractions'],
   });
+  const attractions = (attractionsResponse?.attractions || []) as LocationItem[];
 
   // Fetch restaurants
-  const { data: restaurants = [], isLoading: restaurantsLoading } = useQuery({
+  const { data: restaurantsResponse, isLoading: restaurantsLoading } = useQuery<ApiResponse<LocationItem>>({
     queryKey: ['/api/ta-restaurants'],
   });
+  const restaurants = (restaurantsResponse?.restaurants || []) as LocationItem[];
 
   // Seed database mutation
   const seedDataMutation = useMutation({
@@ -96,10 +109,10 @@ export default function ExplorePage() {
   const googleSearchMutation = useMutation({
     mutationFn: ({ query, type, location }: { query: string; type?: string; location?: string }) =>
       apiRequest(`/api/places/search?query=${encodeURIComponent(query)}&type=${type || ''}&location=${location || ''}`),
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: "Places Found",
-        description: `Found ${data.results.length} places from Google Places API.`,
+        description: `Found ${data?.results?.length || 0} places from Google Places API.`,
       });
     },
     onError: () => {
@@ -162,7 +175,7 @@ export default function ExplorePage() {
             <Input
               placeholder="Search destinations, places..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               className="flex-1"
             />
             <Button 
@@ -475,7 +488,7 @@ export default function ExplorePage() {
       </Tabs>
 
       {/* Google Places Search Results */}
-      {googleSearchMutation.data && (
+      {googleSearchMutation.data && googleSearchMutation.data.results && (
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">Google Places Search Results</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
