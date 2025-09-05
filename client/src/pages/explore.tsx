@@ -190,7 +190,6 @@ export default function ExplorePage() {
       
       setTotalCount(count || 0);
       setDebugInfo((prev: any) => ({ ...prev, destinations: { count, rows: data?.length || 0 } }));
-      console.log('🗺️ Destinations query result:', data?.slice(0, 3)); // Log first 3 destinations
       return data as Destination[];
     }
   });
@@ -199,10 +198,7 @@ export default function ExplorePage() {
   const { data: weatherResults, isLoading: weatherLoading, error: weatherError } = useQuery({
     queryKey: ['weather-data', destinations.map(d => d.id).sort()],
     queryFn: async () => {
-      console.log('🌤️ Weather query starting...', { destinations: destinations.length, activeTab });
-      
       if (!destinations.length || activeTab !== 'destinations') {
-        console.log('🌤️ No destinations or wrong tab, skipping weather');
         return new Map();
       }
       
@@ -211,21 +207,11 @@ export default function ExplorePage() {
         !isNaN(d.lat) && !isNaN(d.lon)
       );
       
-      console.log('🌤️ Destinations with coordinates:', destinationsWithCoords.length, destinationsWithCoords.map(d => ({ id: d.id, name: d.name, lat: d.lat, lon: d.lon })));
-      
       if (destinationsWithCoords.length === 0) {
-        console.log('🌤️ No destinations with valid coordinates');
         return new Map();
       }
       
-      try {
-        const result = await weatherClient.getWeatherForDestinations(destinationsWithCoords);
-        console.log('🌤️ Weather data received:', result.size, 'destinations');
-        return result;
-      } catch (error) {
-        console.error('🌤️ Weather fetch error:', error);
-        throw error;
-      }
+      return await weatherClient.getWeatherForDestinations(destinationsWithCoords);
     },
     enabled: activeTab === 'destinations' && destinations.length > 0,
     staleTime: 30 * 60 * 1000, // 30 minutes
@@ -234,9 +220,7 @@ export default function ExplorePage() {
 
   // Update weather data state when results change
   useEffect(() => {
-    console.log('🌤️ useEffect: weatherResults changed:', weatherResults?.size || 0, 'items');
     if (weatherResults) {
-      console.log('🌤️ useEffect: updating weatherData state');
       setWeatherData(weatherResults);
     }
   }, [weatherResults]);
@@ -591,23 +575,11 @@ export default function ExplorePage() {
 
   // Weather widget component (only for destinations)
   const renderWeatherWidget = (destinationId: string) => {
-    console.log('🌤️ renderWeatherWidget called for destination:', destinationId, 'weatherData size:', weatherData.size);
     const weather = weatherData.get(destinationId);
-    console.log('🌤️ weather data for destination', destinationId, ':', weather);
     
     if (!weather) {
-      console.log('🌤️ No weather data for destination', destinationId, 'showing loading state');
-      return (
-        <div className="border-t pt-3 mt-3" style={{ backgroundColor: 'orange', padding: '4px' }}>
-          <div className="flex items-center gap-2 text-black text-sm">
-            <span>🌤️</span>
-            <span>No weather data for {destinationId}</span>
-          </div>
-        </div>
-      );
+      return null; // No weather data available
     }
-
-    console.log('🌤️ Weather data found! Rendering widget for', destinationId, weather);
 
     const formatTime = () => {
       return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -730,10 +702,6 @@ export default function ExplorePage() {
         </TabsList>
 
         <TabsContent value="destinations" className="mt-6">
-          <div style={{ backgroundColor: 'yellow', padding: '10px', marginBottom: '10px' }}>
-            <strong>DEBUG:</strong> Destinations tab active. ActiveTab: {activeTab}, Destinations count: {destinations.length}, Weather data size: {weatherData.size}
-            <br />Weather loading: {weatherLoading ? 'YES' : 'NO'}, Weather error: {weatherError ? 'YES' : 'NO'}
-          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {destinationsLoading ? (
               Array.from({ length: 6 }).map((_, i) => (
@@ -788,17 +756,7 @@ export default function ExplorePage() {
                       </div>
                       
                       {/* Weather Widget - Only for destinations */}
-                      <div style={{ border: '1px dashed red', padding: '4px', margin: '4px 0' }}>
-                        <small style={{ color: 'red' }}>
-                          DEBUG: Weather widget for destination {destination.id}<br/>
-                          Has coordinates: lat={destination.lat}, lon={destination.lon}<br/>
-                          ActiveTab: {activeTab}<br/>
-                          Weather loading: {weatherLoading ? 'YES' : 'NO'}<br/>
-                          Weather error: {weatherError ? 'YES' : 'NO'}<br/>
-                          Weather data size: {weatherData.size}
-                        </small>
-                        {renderWeatherWidget(destination.id)}
-                      </div>
+                      {renderWeatherWidget(destination.id)}
                     </CardContent>
                   </Card>
                 );
