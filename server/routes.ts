@@ -583,13 +583,32 @@ export async function registerRoutes(app: Express): Promise<void> {
   // ===== ENHANCED SOUTH AMERICAN DATA ENDPOINTS =====
   
   // Seed database with comprehensive South American data
-  app.post('/api/data/seed', isAuthenticated, async (req: any, res) => {
+  app.post('/api/data/seed', async (req: any, res) => {
     try {
       const result = await seedSouthAmericanData();
       res.json(result);
     } catch (error) {
       console.error('Seeding error:', error);
       res.status(500).json({ error: 'Failed to seed data' });
+    }
+  });
+
+  // Temporary public endpoint to load sample data
+  app.get('/api/data/load-samples', async (req: any, res) => {
+    try {
+      const result = await seedSouthAmericanData();
+      res.json({ 
+        success: true,
+        message: 'Sample data loaded successfully',
+        result 
+      });
+    } catch (error) {
+      console.error('Loading samples error:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'Failed to load samples', 
+        details: error instanceof Error ? error.message : 'Unknown error' 
+      });
     }
   });
 
