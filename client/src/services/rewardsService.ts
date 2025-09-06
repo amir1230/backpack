@@ -215,7 +215,7 @@ export async function fetchLeaderboard30d(limit = 10): Promise<LeaderboardEntry[
   // Aggregate points by user
   const userPointsMap = new Map<string, { points: number; user: any }>();
   
-  data?.forEach(entry => {
+  data?.forEach((entry: any) => {
     const existing = userPointsMap.get(entry.userId);
     if (existing) {
       existing.points += entry.points;
@@ -281,7 +281,7 @@ export async function fetchMyHistory(limit = 50, page = 0) {
   return { rows: data ?? [], total: count ?? 0 };
 }
 
-// RPC award_points: זיכוי נקודות אידמפוטנטי - updated version
+// RPC award_points: זיכוי נקודות אידמפוטנטי
 type AwardParams = {
   action: string;
   points: number;
@@ -297,27 +297,10 @@ export async function awardPoints({ action, points, actionKey = null, meta = {} 
     p_meta: meta
   });
 
-  // Duplicate action_key (idempotency) לא נחשב לשגיאה קריטית — אפשר לטפל בטוסט "כבר זוכתה פעולה זו"
   if (error) {
     console.warn('awardPoints error', error);
   }
-  // data = [{ total_points, lifetime_points }]
   return (data?.[0]) ?? { total_points: undefined, lifetime_points: undefined };
-}
-
-// Backward compatibility wrapper
-export async function awardPointsOld(
-  action: string,
-  points: number,
-  actionKey: string,
-  meta?: any
-): Promise<{ success: boolean; message: string }> {
-  try {
-    const result = await awardPoints({ action, points, actionKey, meta });
-    return { success: true, message: 'נקודות נוספו בהצלחה!' };
-  } catch (error) {
-    return { success: false, message: 'שגיאה בהענקת נקודות' };
-  }
 }
 
 // Daily check-in - updated to use new awardPoints
@@ -332,36 +315,19 @@ export async function dailyCheckIn(): Promise<{ success: boolean; message: strin
     });
     
     if (result.total_points !== undefined) {
-      return { success: true, message: `צ'ק-אין מוצלח! +5 נקודות` };
+      return { success: true, message: 'צ׳ק-אין מוצלח! +5 נקודות' };
     } else {
-      return { success: false, message: 'כבר ביצעת צ'ק-אין היום' };
+      return { success: false, message: 'כבר ביצעת צ׳ק-אין היום' };
     }
   } catch (error) {
     console.error('Daily check-in error:', error);
-    return { success: false, message: 'שגיאה בביצוע הצ'ק-אין' };
+    return { success: false, message: 'שגיאה בביצוע הצ׳ק-אין' };
   }
-}
-
-// Award points for specific actions
-export async function awardReviewPoints(reviewId: number, placeId?: string) {
-  return awardPoints('review.create', 50, `review:${reviewId}`, { placeId, reviewId });
-}
-
-export async function awardPhotoPoints(photoId: number) {
-  return awardPoints('photo.upload', 10, `photo:${photoId}`, { photoId });
-}
-
-export async function awardItineraryPoints(itineraryId: number) {
-  return awardPoints('itinerary.save', 10, `itinerary:${itineraryId}`, { itineraryId });
-}
-
-export async function awardSharePoints(itineraryId: number, slug: string) {
-  return awardPointsOld('itinerary.share', 20, `share:${itineraryId}:${slug}`, { itineraryId, slug });
 }
 
 // עדכון התקדמות הישגים (Progress) + פתיחה (Unlock)
 export async function bumpAchievementsProgressForAction(action: string, bump = 1) {
-  // משוך את ההישגים הרלוונטיים (אפשר לשמור בקאש)
+  // משוך את ההישגים הרלוונטיים
   const { data: ach, error } = await supabase
     .from('achievements')
     .select('id, code, criteria_json, points_reward, name')
@@ -369,13 +335,13 @@ export async function bumpAchievementsProgressForAction(action: string, bump = 1
 
   if (error) throw error;
 
-  const targets = (ach ?? []).filter(a =>
+  const targets = (ach ?? []).filter((a: any) =>
     a.criteria_json?.type === 'count' &&
     a.criteria_json?.action === action
   );
 
   for (const t of targets) {
-    // upsert לשורת user_achievements, הגדלת progress עד progress_max
+    // upsert לשורת user_achievements
     const { data: ua } = await supabase
       .from('user_achievements')
       .select('progress, progress_max, unlocked_at')
@@ -386,24 +352,21 @@ export async function bumpAchievementsProgressForAction(action: string, bump = 1
     const progressMax = ua?.progress_max ?? (t.criteria_json?.target ?? 1);
     if (newProgress > progressMax) newProgress = progressMax;
 
-    // אם אין שורה קיימת — ניצור; אחרת נעדכן
     await supabase
       .from('user_achievements')
       .upsert({
         achievement_id: t.id,
         progress: newProgress,
         progress_max: progressMax,
-        // unlocked_at יתעדכן אחרי שנדע שהושלם
       }, { onConflict: 'user_id,achievement_id' });
 
-    // אם הושלם — נפתח באדג' ונזכה בבונוס (פעם אחת)
+    // אם הושלם — נפתח באדג׳ ונזכה בבונוס
     if (!ua?.unlocked_at && newProgress >= progressMax) {
       await supabase
         .from('user_achievements')
         .update({ unlocked_at: new Date().toISOString() })
         .eq('achievement_id', t.id);
 
-      // בונוס נקודות על unlock (אם קיים)
       const bonus = t.points_reward ?? 0;
       if (bonus > 0) {
         await awardPoints({
@@ -414,7 +377,6 @@ export async function bumpAchievementsProgressForAction(action: string, bump = 1
         });
       }
 
-      // החזרה של מידע על הישג שנפתח להצגת Toast
       return { 
         unlocked: true, 
         achievement: { id: t.id, name: t.name, points: bonus },
@@ -436,7 +398,6 @@ export async function awardReviewPointsWithProgress(reviewId: string, placeId: s
     meta: { place_id: placeId, review_id: reviewId }
   });
   
-  // עדכון התקדמות הישגים
   const progressResult = await bumpAchievementsProgressForAction('review.create');
   
   return { pointsResult: result, progressResult };

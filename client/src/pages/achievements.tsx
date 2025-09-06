@@ -129,6 +129,50 @@ export default function Achievements() {
     },
   });
 
+  // Handle quick actions for demo purposes
+  const handleQuickAction = async (actionType: string) => {
+    const randomId = Math.floor(Math.random() * 10000);
+    let result;
+    
+    try {
+      switch (actionType) {
+        case 'review':
+          result = await rewardsService.awardReviewPointsWithProgress(`demo-review-${randomId}`, `demo-place-${randomId}`);
+          break;
+        case 'photo':
+          result = await rewardsService.awardPhotoPointsWithProgress(`demo-photo-${randomId}`, `demo-place-${randomId}`);
+          break;
+        case 'itinerary':
+          result = await rewardsService.awardItineraryPointsWithProgress(`demo-itinerary-${randomId}`, true);
+          break;
+        default:
+          return;
+      }
+
+      // Show achievement unlocked notification if applicable
+      if (result.progressResult.unlocked) {
+        toast({
+          title: "🏆 השגת באדג' חדש!",
+          description: `${result.progressResult.achievement.name} (+${result.progressResult.achievement.points} נקודות)`,
+        });
+      } else {
+        toast({
+          title: "נקודות נוספו!",
+          description: `קיבלת נקודות על ${actionType}`,
+        });
+      }
+
+      // Refresh queries
+      queryClient.invalidateQueries({ queryKey: ["rewards"] });
+    } catch (error) {
+      toast({
+        title: "שגיאה",
+        description: "לא הצלחנו להעניק נקודות כרגע",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -299,15 +343,27 @@ export default function Achievements() {
                     <Calendar className="w-6 h-6" />
                     <span>צ'ק-אין יומי (+5)</span>
                   </Button>
-                  <Button className="h-20 flex-col space-y-2" variant="outline">
+                  <Button 
+                    className="h-20 flex-col space-y-2" 
+                    variant="outline"
+                    onClick={() => handleQuickAction('review')}
+                  >
                     <MessageSquare className="w-6 h-6" />
                     <span>כתוב ביקורת (+50)</span>
                   </Button>
-                  <Button className="h-20 flex-col space-y-2" variant="outline">
+                  <Button 
+                    className="h-20 flex-col space-y-2" 
+                    variant="outline"
+                    onClick={() => handleQuickAction('photo')}
+                  >
                     <Camera className="w-6 h-6" />
                     <span>העלה תמונה (+10)</span>
                   </Button>
-                  <Button className="h-20 flex-col space-y-2" variant="outline">
+                  <Button 
+                    className="h-20 flex-col space-y-2" 
+                    variant="outline"
+                    onClick={() => handleQuickAction('itinerary')}
+                  >
                     <MapPin className="w-6 h-6" />
                     <span>שתף מסלול (+20)</span>
                   </Button>
