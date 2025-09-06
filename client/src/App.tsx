@@ -17,6 +17,7 @@ import TripAdvisorData from "./pages/tripadvisor-data.js";
 import Explore from "./pages/explore.js";
 import Weather from "./pages/weather.js";
 import MyTripsNew from "./pages/my-trips-new.js";
+import ItineraryDetail from "./pages/itinerary-detail.js";
 import Onboarding from "./pages/onboarding.js";
 import Registry from "./pages/registry.js";
 import DemoRealPlaces from "./pages/demo-real-places.js";
@@ -37,6 +38,7 @@ function Router() {
           <Route path="/" component={Landing} />
           <Route path="/home" component={Home} />
           <Route path="/my-trips" component={MyTripsNew} />
+          <Route path="/itineraries/:id" component={ItineraryDetail} />
           <Route path="/community" component={Community} />
           <Route path="/budget-tracker" component={BudgetTracker} />
           <Route path="/achievements" component={Achievements} />

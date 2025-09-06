@@ -1,0 +1,148 @@
+מסך פירוט Itinerary עם עריכה, גרירה והורדות
+
+מטרה:
+בלשונית My Itineraries, בלחיצה על הכותרת (למשל: “Puerto Iguazú Itinerary – 6.9.2025”) תיפתח תצוגת פירוט מלאה של האיטינררי: כל הימים והפעילויות, אפשרות סידור (drag & drop), עריכה ומחיקה של פריטים, הוספת פריטים חדשים, שמירה ל-Supabase, והורדה בפורמטים JSON/CSV/ICS + הדפסה ל-PDF.
+
+A) ניווט ומסכי UI
+
+ראוט חדש: /itineraries/:id
+
+מתרענן מ-Supabase:
+
+itineraries (כותרת, plan_json, created/updated)
+
+itinerary_items (אם בשימוש; מסנן לפי itinerary_id, ממיין לפי day_index, item_index).
+
+כותרת הדף:
+
+מציג שם האיטינררי + תאריך יצירה/טווח תאריכים (אם קיים).
+
+פעולות בכותרת:
+
+Edit Title (שינוי השם ושמירה)
+
+Export (תפריט: Download JSON / Download CSV / Download ICS / Print)
+
+Share (קישור שיתוף קריא) – אופציונלי
+
+Delete (עם אישור)
+
+סרגל ימים (Side/Top Nav):
+
+רשימת הימים (Day 1, Day 2, …) ניתנת לגלילה/קפיצה.
+
+לכל יום מוצג סיכום קצר (שם יעד/עיר, אומדן עלות ו-N פריטים).
+
+אזור תוכן יום:
+
+רשימת פעילויות עם drag & drop (בתוך אותו יום ולבין ימים שונים).
+
+כפתורים: Add item, Delete, Duplicate, Notes.
+
+לכל פריט: שם מקום, זמן התחלה/סיום, כתובת/lat-lon (אם קיים), הערות, עלות משוערת.
+
+B) התנהגות עריכה ושמירה
+
+טעינה ראשונית:
+
+אם יש itinerary_items – בנה מודל לפי day_index → item_index.
+
+אם עובדים רק עם plan_json – בנה state מה-JSON (ימים/פריטים), ושמור לשרת את ה-JSON השלם בכל עדכון.
+
+גרירה (D&D):
+
+עדכון day_index ו-item_index לכל פריט שנע.
+
+בצד הלקוח עדכון state מיידי (optimistic UI).
+
+בצד השרת (Supabase):
+
+אם עובדים עם itinerary_items: שגר batch upsert ל-item_index + day_index.
+
+אם עובדים עם plan_json: עדכן את ה-JSON כולו ב-itineraries.plan_json.
+
+הוספת פריט:
+
+דיאלוג בחירה: חיפוש מקום (מהטבלאות הקיימות אצלך: attractions/restaurants/accommodations), או הוספה ידנית.
+
+הוסף ל-state עם item_index בסוף הרשימה.
+
+שמור ל-DB (upsert).
+
+מחיקת פריט:
+
+מחק מה-state → שלח מחיקה ל-DB (או עדכון JSON).
+
+עדכן item_index לשאר הפריטים ביום.
+
+עריכת פריט:
+
+עריכת שדות: שם/שעות/עלות/הערות.
+
+שמור מיידית (debounce 500ms) או בכפתור Save יום.
+
+שמירת כותרת:
+
+עריכת כותרת האיטינררי ושמירה ב-itineraries.title.
+
+שמירת שינויים:
+
+שמור עם בדיקת session.user. אם אין – פתח מודאל התחברות Google (כמו שהוגדר קודם).
+
+RLS: ודא user_id = auth.uid() מתלכד.
+
+C) ייצוא/הורדות
+
+בתפריט Export:
+
+Download JSON:
+
+הורד את plan_json (או יבנה מ-items) לקובץ itinerary_<title>.json.
+
+Download CSV:
+
+טורים מוצעים: day_index, item_index, name, entity_type, entity_id/external_id, start_time, end_time, address, lat, lon, est_cost, notes.
+
+Download ICS (Calendar):
+
+צור אירוע לכל פריט עם start_time/end_time (אם יש; אחרת זמן דיפולט יומי), כותרת = שם פריט, מיקום = כתובת.
+
+קובץ itinerary_<title>.ics.
+
+Print:
+
+תצוגת print-friendly (A4), יום אחרי יום; המשתמש יכול “Save as PDF”.
+
+אל תעשה שימוש ב-SERVICE_ROLE בצד הלקוח. שימוש רגיל ב-anon key + RLS.
+
+D) הרשאות ואבטחה
+
+טען/שמור רק אם session.user קיים; אחרת פתח מודאל התחברות.
+
+מדיניות RLS קיימות: משתמש רואה/עורך רק את האיטינררי שלו.
+
+בצד שרת (אם יש) ודא שמזהים user_id מה-JWT ולא מגוף הבקשה.
+
+E) UX ונגישות
+
+Auto-scroll ליום שנבחר בסרגל הימים.
+
+Undo (אופציונלי): אחרי מחיקה, Toast עם “Undo”.
+
+Dirty-state guard: אם המשתמש מנווט החוצה עם שינויים שלא נשמרו, בקש אישור.
+
+Mobile-first: גרירה גם בנייד (handlebars ברורות), כפתורי פעולה גדולים.
+
+F) בדיקות
+
+כניסה מ-My Itineraries → לחיצה על כותרת → דף פירוט נטען.
+
+גרירת פריט בין ימים → תצוגה מתעדכנת ושמירה ל-DB.
+
+הוספה/מחיקה/עריכה → נשמרות.
+
+Export JSON/CSV/ICS → קבצים נפתחים תקין.
+
+Print → פרינט נקי.
+
+ללא התחברות → מודאל התחברות, ואז שמירה מתבצעת אוטומטית.
