@@ -49,6 +49,7 @@ function Router() {
           <Route path="/collector-data" component={CollectorData} />
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/auth/callback" component={AuthCallback} />
+          <Route path="/supabase/callback" component={AuthCallback} />
           <Route component={NotFound} />
         </Switch>
       </main>
