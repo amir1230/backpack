@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 // import { useAuth } from "@/hooks/useAuth"; // Demo mode
 import { useLocation, Link } from "wouter";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { queryClient } from "@/lib/queryClient";
 import { SOUTH_AMERICAN_COUNTRIES } from "@/lib/constants";
 import logo from "@/assets/tripwise-logo.svg";
@@ -45,6 +46,7 @@ export default function Landing() {
   // const { user } = useAuth(); // Demo mode - no auth needed
   const user = null as any;
   const [, setLocation] = useLocation();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   // Handle logout cleanup on page load
   useEffect(() => {
@@ -70,15 +72,11 @@ export default function Landing() {
   };
 
   const handleLogin = () => {
-    // Use AuthModal instead of direct login
-    // This should be handled by AuthModal component
-    console.log("Login should be handled by AuthModal component");
+    setAuthModalOpen(true);
   };
 
   const handleRegister = () => {
-    // Use AuthModal instead of direct signup
-    // This should be handled by AuthModal component
-    console.log("Register should be handled by AuthModal component");
+    setAuthModalOpen(true);
   };
 
 
@@ -518,6 +516,12 @@ window.location.href = "/?logout=true";
           </div>
         </div>
       </footer>
+
+      {/* Auth Modal */}
+      <AuthModal 
+        open={authModalOpen} 
+        onOpenChange={setAuthModalOpen}
+      />
     </div>
   );
 }
