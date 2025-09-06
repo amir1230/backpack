@@ -1,0 +1,132 @@
+Fix Overview Totals, Quick-Action Points, and Badge Count (English-only)
+
+Goal:
+Align all figures on the Achievements → Overview with live Supabase data and ensure consistent labeling. Fix:
+
+My Balance = 0 while Recent Activity = +125 (must not conflict)
+
+Quick Actions must display the exact points awarded per action
+
+Unlocked Badges count shows different values in two places (make them identical)
+
+Data Sources (single source of truth)
+
+Balance: always read from user_points_summary.total_points (live).
+
+Recent Activity – Points This Week: compute from points_ledger for the last 7 days (rolling week). Do not use total_points here.
+
+Unlocked Badges count: count rows in user_achievements where unlocked_at IS NOT NULL. This count must feed both the Overview metric card and the “Badges Unlocked” stat in Recent Activity.
+
+Fix 1: Balance vs. Recent Activity
+
+Ensure the Overview “My Balance” card binds to user_points_summary.total_points only.
+
+Ensure “Points This Week” is sum(ledger.points) where created_at >= now() - 7 days (do not include negative/adjustments unless intended).
+
+After any mutation (daily check-in, review, photo, share, achievement unlock), revalidate both:
+
+user_points_summary (for Balance), and
+
+the 7-day ledger aggregate (for Recent Activity).
+
+Prevent race conditions: only update UI after RPC returns; use one cache key per query, invalidate both after each award.
+
+Fix 2: Quick Actions point labels
+
+Show the exact award values next to each Quick Action button (English-only):
+
+Daily Check-in — +5 pts
+
+Write Review — +50 pts
+
+Upload Photo — +10 pts
+
+Share Itinerary — +20 pts
+
+Do not hardcode in multiple places. Centralize the mapping (action → points) in one config used by:
+
+Quick Actions labels
+
+Missions/criteria tooltips
+
+Toast messages after award
+
+If any values are stored in DB (e.g., in missions.points_reward), read from there and fall back to the config. The UI must show the same values the RPC actually credits.
+
+Fix 3: Unlocked Badges count parity
+
+Use one function/query to get unlocked_badges_count = count(*) from user_achievements where unlocked_at is not null.
+
+Feed this single value into:
+
+The Overview card “Unlocked Badges”
+
+The “Badges Unlocked” stat in Recent Activity
+
+Any other place showing that count
+
+Revalidate the same query after progress bumps/unlocks so both widgets update together.
+
+Consistency & Formatting
+
+Keep Achievements English-only and LTR.
+
+Use the same number formatter across all widgets (e.g., no mixing of “0 pts” and “0”).
+
+Labels:
+
+Balance: “My Balance” → “0 pts” format
+
+Weekly: “Points This Week” → “+125” format (no “pts” in the value line to keep consistent with your card layout; add “points” as a caption if needed).
+
+Quick-Action badges: “+X pts”.
+
+When a badge unlocks, increment the unified unlocked_badges_count and refresh both displays.
+
+Refresh & Cache Rules
+
+After calling award_points or award_mission_progress, invalidate/reload:
+
+user_points_summary (Balance)
+
+7-day points_ledger aggregate (Recent Activity)
+
+user_achievements unlocked count
+
+Avoid optimistic “+points” math in the Balance card; rely on server response or revalidation to prevent flicker/mismatch.
+
+Edge Cases
+
+If a duplicate action_key (already credited) occurs, do not change balances; show neutral toast (“Already credited for this period”).
+
+If the week aggregate includes negative corrections, keep them as designed; otherwise filter to positive points only (define and apply consistently).
+
+If the user has zero history:
+
+Balance card shows 0 pts
+
+Points This Week shows 0 (no “+” sign)
+
+Acceptance Criteria (visual)
+
+The My Balance number equals user_points_summary.total_points and updates after actions.
+
+Points This Week equals the sum of the last 7 days of ledger entries and never equals the Balance unless it happens to match.
+
+Quick Actions display exactly +5 / +50 / +10 / +20 pts (or values from DB) and match the actual awards credited by RPC.
+
+Unlocked Badges shows the same count everywhere.
+
+All Achievements UI remains English-only, LTR.
+
+Testing
+
+Perform Daily Check-in → Balance increases by 5; Points This Week increases by 5.
+
+Add a Review (+50) → Balance +50; Points This Week +50; progress bars update; unlocked count updates if a badge is triggered.
+
+Try duplicate Daily Check-in same day → no change to Balance or Weekly points; neutral toast shown.
+
+Confirm both “Unlocked Badges” displays show the same number after an unlock.
+
+Verify Quick Action labels match credited points (check ledger and summary).

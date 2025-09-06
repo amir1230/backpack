@@ -77,6 +77,14 @@ export interface LeaderboardEntry {
   };
 }
 
+// Centralized point values (single source of truth)
+export const POINT_VALUES = {
+  DAILY_CHECKIN: 5,
+  WRITE_REVIEW: 50,
+  UPLOAD_PHOTO: 10,
+  SHARE_ITINERARY: 20,
+} as const;
+
 // Calculate user level based on total points
 export function calcLevel(totalPoints: number): number {
   if (totalPoints >= 2000) return 5;
@@ -123,6 +131,41 @@ export async function fetchMySummary(): Promise<UserPointsSummary> {
     ...data,
     level: calcLevel(data.totalPoints)
   };
+}
+
+// Fetch weekly points from ledger (last 7 days)
+export async function fetchWeeklyPoints(): Promise<number> {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('User not authenticated');
+
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+
+  const { data, error } = await supabase
+    .from('points_ledger')
+    .select('points')
+    .eq('userId', user.id)
+    .gte('createdAt', weekAgo.toISOString());
+
+  if (error) throw error;
+
+  return data?.reduce((sum, entry) => sum + entry.points, 0) || 0;
+}
+
+// Fetch count of unlocked badges
+export async function fetchUnlockedBadgesCount(): Promise<number> {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('User not authenticated');
+
+  const { count, error } = await supabase
+    .from('user_achievements')
+    .select('*', { count: 'exact', head: true })
+    .eq('userId', user.id)
+    .not('unlockedAt', 'is', null);
+
+  if (error) throw error;
+
+  return count || 0;
 }
 
 // Fetch user achievements with progress
