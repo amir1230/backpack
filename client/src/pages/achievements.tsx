@@ -1,457 +1,429 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import AchievementBadge from "@/components/achievement-badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   Trophy, 
-  Award, 
   Target, 
-  Star, 
-  TrendingUp, 
-  Users, 
-  MapPin, 
-  DollarSign,
-  Sparkles,
-  Crown,
-  Medal,
-  Gift,
-  Zap,
+  Medal, 
+  Crown, 
   Calendar,
-  Activity
+  Clock,
+  Star,
+  Gift,
+  TrendingUp,
+  Users,
+  ChevronRight,
+  Plus,
+  CheckCircle,
+  Camera,
+  MessageSquare,
+  Heart,
+  MapPin,
+  Award,
+  Zap
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+
+// Helper function to calculate level from points
+const calculateLevel = (totalPoints: number) => {
+  if (totalPoints < 100) return 1;
+  if (totalPoints < 300) return 2;
+  if (totalPoints < 700) return 3;
+  if (totalPoints < 1500) return 4;
+  return 5;
+};
+
+const getPointsToNextLevel = (totalPoints: number) => {
+  const level = calculateLevel(totalPoints);
+  const thresholds = [0, 100, 300, 700, 1500, Infinity];
+  return thresholds[level] - totalPoints;
+};
+
+const getLevelName = (level: number) => {
+  const names = ["מטיין", "חוקר", "נוודן", "מומחה טיולים", "גלוברוטר"];
+  return names[level - 1] || "גלוברוטר";
+};
 
 export default function Achievements() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [showNewAchievements, setShowNewAchievements] = useState(false);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  const { data: allAchievements = [], isLoading: achievementsLoading } = useQuery({
-    queryKey: ["/api/achievements"]
+  // Fetch user points summary
+  const { data: pointsSummary, isLoading: pointsLoading } = useQuery({
+    queryKey: ["/api/rewards/summary"],
+    enabled: !!user,
   });
 
-  const { data: userAchievementData, isLoading: userAchievementsLoading } = useQuery({
-    queryKey: ["/api/achievements/user"],
-    refetchInterval: 30000 // Check for new achievements every 30 seconds
+  // Fetch achievements
+  const { data: achievements, isLoading: achievementsLoading } = useQuery({
+    queryKey: ["/api/achievements"],
+    enabled: !!user,
   });
 
-  const userAchievements = userAchievementData?.userAchievements || [];
-  const newlyUnlocked = userAchievementData?.newlyUnlocked || [];
-
-  const checkAchievementsMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("/api/achievements/check", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-    },
-    onSuccess: (data) => {
-      if (data.count > 0) {
-        setShowNewAchievements(true);
-        toast({
-          title: "New Achievement Unlocked!",
-          description: `You've unlocked ${data.count} new achievement${data.count > 1 ? 's' : ''}!`,
-        });
-      }
-      queryClient.invalidateQueries({ queryKey: ["/api/achievements/user"] });
-    },
-    onError: (error) => {
-      if (!isUnauthorizedError(error)) {
-        console.error("Error checking achievements:", error);
-      }
-    },
+  // Fetch missions
+  const { data: missions, isLoading: missionsLoading } = useQuery({
+    queryKey: ["/api/missions"],
+    enabled: !!user,
   });
 
-  const initAchievementsMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("/api/achievements/init", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/achievements"] });
-      toast({
-        title: "Success",
-        description: "Achievement system initialized successfully",
-      });
-    },
+  // Fetch leaderboard
+  const { data: leaderboard, isLoading: leaderboardLoading } = useQuery({
+    queryKey: ["/api/rewards/leaderboard"],
+    enabled: !!user,
   });
 
-  // Auto-check for new achievements when component mounts
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!userAchievementsLoading) {
-        checkAchievementsMutation.mutate();
-      }
-    }, 1000);
+  // Fetch points history
+  const { data: pointsHistory, isLoading: historyLoading } = useQuery({
+    queryKey: ["/api/rewards/history"],
+    enabled: !!user,
+  });
 
-    return () => clearTimeout(timer);
-  }, []);
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="w-96">
+          <CardHeader>
+            <CardTitle className="text-center">נדרש להתחבר</CardTitle>
+            <CardDescription className="text-center">
+              התחבר כדי לצפות בהישגים ובנקודות שלך
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button className="w-full" onClick={() => supabase.auth.signInWithOAuth({ provider: 'google' })}>
+              התחבר עם Google
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-  const unlockedAchievementIds = new Set(userAchievements.map((ua: any) => ua.achievementId));
-  
-  const categorizedAchievements = allAchievements.reduce((acc: any, achievement: any) => {
-    if (!acc[achievement.category]) {
-      acc[achievement.category] = [];
-    }
-    acc[achievement.category].push(achievement);
-    return acc;
-  }, {});
-
-  const categories = Object.keys(categorizedAchievements);
-  
-  const filteredAchievements = selectedCategory === "all" 
-    ? allAchievements 
-    : categorizedAchievements[selectedCategory] || [];
-
-  const totalPoints = userAchievements.reduce((sum: number, ua: any) => 
-    ua.isCompleted ? sum + (ua.achievement?.points || 0) : sum, 0
-  );
-
-  const unlockedCount = userAchievements.filter((ua: any) => ua.isCompleted).length;
-  const totalAchievements = allAchievements.length;
-  const completionPercentage = totalAchievements > 0 ? (unlockedCount / totalAchievements) * 100 : 0;
-
-  const rarityStats = userAchievements
-    .filter((ua: any) => ua.isCompleted)
-    .reduce((acc: any, ua: any) => {
-      const rarity = ua.achievement?.rarity || 'common';
-      acc[rarity] = (acc[rarity] || 0) + 1;
-      return acc;
-    }, {});
+  const totalPoints = pointsSummary?.totalPoints || 0;
+  const currentLevel = calculateLevel(totalPoints);
+  const pointsToNext = getPointsToNextLevel(totalPoints);
+  const levelName = getLevelName(currentLevel);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 pb-20 md:pb-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4 flex items-center justify-center gap-3">
-            <Trophy className="w-10 h-10 text-yellow-500" />
-            Travel Achievements
-          </h1>
-          <p className="text-lg text-gray-600">Track your South American travel journey and earn badges</p>
+        <div className="mb-6">
+          <div className="flex items-center space-x-2 mb-2">
+            <Trophy className="w-6 h-6 text-yellow-600" />
+            <h1 className="text-2xl font-bold">הישגים ונקודות</h1>
+          </div>
+          <div className="flex items-center space-x-2 text-gray-600">
+            <span>בית</span>
+            <ChevronRight className="w-4 h-4" />
+            <span>הישגים</span>
+          </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="flex flex-wrap gap-4 justify-center mb-8">
-          <Button 
-            onClick={() => checkAchievementsMutation.mutate()}
-            disabled={checkAchievementsMutation.isPending}
-            className="bg-primary hover:bg-orange-600"
-          >
-            <Zap className="w-4 h-4 mr-2" />
-            {checkAchievementsMutation.isPending ? "Checking..." : "Check Progress"}
-          </Button>
-          
-          {allAchievements.length === 0 && (
-            <Button 
-              onClick={() => initAchievementsMutation.mutate()}
-              disabled={initAchievementsMutation.isPending}
-              variant="outline"
-            >
-              <Gift className="w-4 h-4 mr-2" />
-              {initAchievementsMutation.isPending ? "Initializing..." : "Initialize Achievements"}
-            </Button>
-          )}
-        </div>
-
-        {/* Main Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <Activity className="w-4 h-4" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="all" className="flex items-center gap-2">
-              <Target className="w-4 h-4" />
-              All Badges
-            </TabsTrigger>
-            <TabsTrigger value="unlocked" className="flex items-center gap-2">
-              <Award className="w-4 h-4" />
-              Unlocked
-            </TabsTrigger>
-            <TabsTrigger value="progress" className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              Progress
-            </TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="overview">סקירה</TabsTrigger>
+            <TabsTrigger value="missions">משימות</TabsTrigger>
+            <TabsTrigger value="badges">באדג'ים</TabsTrigger>
+            <TabsTrigger value="leaderboard">דירוג</TabsTrigger>
+            <TabsTrigger value="history">היסטוריה</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Total Points */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Total Points</p>
-                      <p className="text-2xl font-bold text-yellow-600">{totalPoints}</p>
-                    </div>
-                    <Star className="w-8 h-8 text-yellow-500" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Achievements Unlocked */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Unlocked</p>
-                      <p className="text-2xl font-bold text-green-600">{unlockedCount}/{totalAchievements}</p>
-                    </div>
-                    <Trophy className="w-8 h-8 text-green-500" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Completion Percentage */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Completion</p>
-                      <p className="text-2xl font-bold text-blue-600">{completionPercentage.toFixed(1)}%</p>
-                    </div>
-                    <Target className="w-8 h-8 text-blue-500" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Rarest Achievement */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Rarest Unlocked</p>
-                      <p className="text-2xl font-bold text-purple-600">
-                        {rarityStats.legendary ? 'Legendary' : rarityStats.epic ? 'Epic' : rarityStats.rare ? 'Rare' : 'Common'}
-                      </p>
-                    </div>
-                    <Crown className="w-8 h-8 text-purple-500" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Progress Overview */}
+            {/* My Balance Card */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <TrendingUp className="w-5 h-5 mr-2 text-primary" />
-                  Achievement Progress
+                <CardTitle className="flex items-center space-x-2">
+                  <Crown className="w-5 h-5 text-yellow-600" />
+                  <span>היתרה שלי</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-600">{totalPoints.toLocaleString()}</div>
+                    <div className="text-gray-600">נקודות כולל</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-600">רמה {currentLevel}</div>
+                    <div className="text-gray-600">{levelName}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-green-600">{pointsToNext > 0 ? pointsToNext : "MAX"}</div>
+                    <div className="text-gray-600">לרמה הבאה</div>
+                  </div>
+                </div>
+                {currentLevel < 5 && (
+                  <div className="mt-4">
+                    <div className="flex justify-between text-sm text-gray-600 mb-2">
+                      <span>התקדמות לרמה {currentLevel + 1}</span>
+                      <span>{Math.round(((totalPoints - [0, 100, 300, 700, 1500][currentLevel - 1]) / ([100, 300, 700, 1500, Infinity][currentLevel - 1] - [0, 100, 300, 700, 1500][currentLevel - 1])) * 100)}%</span>
+                    </div>
+                    <Progress 
+                      value={((totalPoints - [0, 100, 300, 700, 1500][currentLevel - 1]) / ([100, 300, 700, 1500, Infinity][currentLevel - 1] - [0, 100, 300, 700, 1500][currentLevel - 1])) * 100} 
+                      className="h-2"
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Unlocked Achievements */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Medal className="w-5 h-5 text-yellow-600" />
+                  <span>הישגים שנפתחו</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {achievements?.filter((ach: any) => ach.isCompleted)?.map((achievement: any) => (
+                    <div key={achievement.id} className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <Award className="w-8 h-8 text-yellow-600" />
+                      <div>
+                        <div className="font-semibold">{achievement.name}</div>
+                        <div className="text-sm text-gray-600">{achievement.description}</div>
+                        <div className="text-xs text-green-600">+{achievement.points} נקודות</div>
+                      </div>
+                    </div>
+                  )) || []}
+                </div>
+                {(!achievements?.some((ach: any) => ach.isCompleted)) && (
+                  <div className="text-center py-8 text-gray-500">
+                    <Trophy className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>עדיין לא השגת הישגים</p>
+                    <p className="text-sm">התחל לפעול כדי לפתוח הישגים!</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Active Progress */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <TrendingUp className="w-5 h-5 text-blue-600" />
+                  <span>התקדמות פעילה</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Overall Completion</span>
-                      <span>{unlockedCount}/{totalAchievements} achievements</span>
-                    </div>
-                    <Progress value={completionPercentage} className="h-3" />
-                  </div>
-                  
-                  {categories.map((category) => {
-                    const categoryAchievements = categorizedAchievements[category];
-                    const categoryUnlocked = categoryAchievements.filter((a: any) => 
-                      unlockedAchievementIds.has(a.id)
-                    ).length;
-                    const categoryPercentage = (categoryUnlocked / categoryAchievements.length) * 100;
-                    
-                    return (
-                      <div key={category}>
-                        <div className="flex justify-between text-sm mb-2">
-                          <span className="capitalize">{category}</span>
-                          <span>{categoryUnlocked}/{categoryAchievements.length}</span>
-                        </div>
-                        <Progress value={categoryPercentage} className="h-2" />
+                  {achievements?.filter((ach: any) => !ach.isCompleted && ach.progress > 0)?.map((achievement: any) => (
+                    <div key={achievement.id} className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="font-semibold">{achievement.name}</div>
+                        <div className="text-sm text-blue-600">{achievement.progress}/{achievement.progressMax}</div>
                       </div>
-                    );
-                  })}
+                      <div className="text-sm text-gray-600 mb-2">{achievement.description}</div>
+                      <Progress value={(achievement.progress / achievement.progressMax) * 100} className="h-2" />
+                    </div>
+                  )) || []}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Recent Achievements */}
+            {/* Quick Actions */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Medal className="w-5 h-5 mr-2 text-primary" />
-                  Recent Achievements
+                <CardTitle className="flex items-center space-x-2">
+                  <Zap className="w-5 h-5 text-orange-600" />
+                  <span>פעולות מהירות</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {userAchievements.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {userAchievements
-                      .filter((ua: any) => ua.isCompleted)
-                      .slice(0, 6)
-                      .map((ua: any) => (
-                        <AchievementBadge
-                          key={ua.id}
-                          achievement={ua.achievement}
-                          isUnlocked={true}
-                          size="md"
-                        />
-                      ))}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button className="h-20 flex-col space-y-2" variant="outline">
+                    <MessageSquare className="w-6 h-6" />
+                    <span>כתוב ביקורת (+50)</span>
+                  </Button>
+                  <Button className="h-20 flex-col space-y-2" variant="outline">
+                    <Camera className="w-6 h-6" />
+                    <span>העלה תמונה (+10)</span>
+                  </Button>
+                  <Button className="h-20 flex-col space-y-2" variant="outline">
+                    <MapPin className="w-6 h-6" />
+                    <span>שתף מסלול (+20)</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Missions Tab */}
+          <TabsContent value="missions" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Daily Missions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Calendar className="w-5 h-5 text-green-600" />
+                    <span>משימות יומיות</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {missions?.filter((m: any) => m.type === 'daily')?.map((mission: any) => (
+                      <div key={mission.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <div className="font-medium">{mission.nameHe || mission.name}</div>
+                          <div className="text-sm text-gray-600">{mission.descriptionHe || mission.description}</div>
+                          <div className="text-sm text-green-600">+{mission.pointsReward} נקודות</div>
+                        </div>
+                        {mission.isCompleted ? (
+                          <CheckCircle className="w-6 h-6 text-green-600" />
+                        ) : (
+                          <div className="text-sm text-gray-500">{mission.currentCount || 0}/{mission.targetCount}</div>
+                        )}
+                      </div>
+                    )) || []}
                   </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Trophy className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-600 mb-2">No Achievements Yet</h3>
-                    <p className="text-gray-500">Start planning trips and tracking expenses to earn your first badges!</p>
+                </CardContent>
+              </Card>
+
+              {/* Weekly Missions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Clock className="w-5 h-5 text-blue-600" />
+                    <span>משימות שבועיות</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {missions?.filter((m: any) => m.type === 'weekly')?.map((mission: any) => (
+                      <div key={mission.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <div className="font-medium">{mission.nameHe || mission.name}</div>
+                          <div className="text-sm text-gray-600">{mission.descriptionHe || mission.description}</div>
+                          <div className="text-sm text-blue-600">+{mission.pointsReward} נקודות</div>
+                        </div>
+                        {mission.isCompleted ? (
+                          <CheckCircle className="w-6 h-6 text-green-600" />
+                        ) : (
+                          <div className="text-sm text-gray-500">{mission.currentCount || 0}/{mission.targetCount}</div>
+                        )}
+                      </div>
+                    )) || []}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Badges Tab */}
+          <TabsContent value="badges" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Award className="w-5 h-5 text-purple-600" />
+                  <span>קטלוג הישגים</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {achievements?.map((achievement: any) => (
+                    <div key={achievement.id} className={`p-4 border rounded-lg ${achievement.isCompleted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                      <div className="flex items-center space-x-3 mb-3">
+                        <Award className={`w-8 h-8 ${achievement.isCompleted ? 'text-yellow-600' : 'text-gray-400'}`} />
+                        <div>
+                          <div className="font-semibold">{achievement.name}</div>
+                          <Badge variant={achievement.rarity === 'legendary' ? 'destructive' : achievement.rarity === 'epic' ? 'default' : 'secondary'}>
+                            {achievement.rarity === 'common' ? 'רגיל' : achievement.rarity === 'rare' ? 'נדיר' : achievement.rarity === 'epic' ? 'אפי' : 'אגדי'}
+                          </Badge>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">{achievement.description}</p>
+                      <div className="text-xs text-blue-600">+{achievement.points} נקודות</div>
+                      {!achievement.isCompleted && (
+                        <div className="mt-2">
+                          <Progress value={(achievement.progress / achievement.progressMax) * 100} className="h-2" />
+                          <div className="text-xs text-gray-500 mt-1">{achievement.progress}/{achievement.progressMax}</div>
+                        </div>
+                      )}
+                    </div>
+                  )) || []}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Leaderboard Tab */}
+          <TabsContent value="leaderboard" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Users className="w-5 h-5 text-orange-600" />
+                  <span>טופ 10 ב-30 הימים האחרונים</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {leaderboard?.map((user: any, index: number) => (
+                    <div key={user.id} className={`flex items-center space-x-4 p-3 rounded-lg ${index < 3 ? 'bg-yellow-50 border border-yellow-200' : 'bg-gray-50'}`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-400' : 'bg-gray-300'}`}>
+                        {index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium">{user.firstName} {user.lastName}</div>
+                        <div className="text-sm text-gray-600">רמה {calculateLevel(user.totalPoints)} • {getLevelName(calculateLevel(user.totalPoints))}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold">{user.totalPoints.toLocaleString()}</div>
+                        <div className="text-sm text-gray-600">נקודות</div>
+                      </div>
+                    </div>
+                  )) || []}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* History Tab */}
+          <TabsContent value="history" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Clock className="w-5 h-5 text-gray-600" />
+                  <span>היסטוריית נקודות</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {pointsHistory?.map((entry: any) => (
+                    <div key={entry.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${entry.points > 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                          {entry.points > 0 ? <Plus className="w-4 h-4" /> : <span>-</span>}
+                        </div>
+                        <div>
+                          <div className="font-medium">{entry.description}</div>
+                          <div className="text-sm text-gray-600">{new Date(entry.createdAt).toLocaleDateString('he-IL')}</div>
+                        </div>
+                      </div>
+                      <div className={`font-bold ${entry.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {entry.points > 0 ? '+' : ''}{entry.points}
+                      </div>
+                    </div>
+                  )) || []}
+                </div>
+                {(!pointsHistory || pointsHistory.length === 0) && (
+                  <div className="text-center py-8 text-gray-500">
+                    <Clock className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>עדיין אין פעילות נקודות</p>
+                    <p className="text-sm">התחל לפעול כדי לצבור נקודות!</p>
                   </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
-
-          {/* All Badges Tab */}
-          <TabsContent value="all" className="space-y-6">
-            {/* Category Filter */}
-            <div className="flex flex-wrap gap-2 justify-center">
-              <Button
-                variant={selectedCategory === "all" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory("all")}
-              >
-                All Categories
-              </Button>
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category)}
-                  className="capitalize"
-                >
-                  {category}
-                </Button>
-              ))}
-            </div>
-
-            {/* Achievement Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {filteredAchievements.map((achievement: any) => (
-                <div key={achievement.id} className="flex flex-col items-center">
-                  <AchievementBadge
-                    achievement={achievement}
-                    isUnlocked={unlockedAchievementIds.has(achievement.id)}
-                    size="lg"
-                    showDetails={true}
-                  />
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Unlocked Tab */}
-          <TabsContent value="unlocked" className="space-y-6">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                Your Earned Achievements
-              </h2>
-              <p className="text-gray-600">
-                You've unlocked {unlockedCount} out of {totalAchievements} achievements
-              </p>
-            </div>
-
-            {unlockedCount > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {userAchievements
-                  .filter((ua: any) => ua.isCompleted)
-                  .map((ua: any) => (
-                    <div key={ua.id} className="flex flex-col items-center">
-                      <AchievementBadge
-                        achievement={ua.achievement}
-                        isUnlocked={true}
-                        size="lg"
-                        showDetails={true}
-                      />
-                      <div className="mt-3 text-center">
-                        <Badge variant="outline" className="text-xs">
-                          Unlocked {new Date(ua.unlockedAt).toLocaleDateString()}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <Award className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-medium text-gray-600 mb-2">No Achievements Unlocked Yet</h3>
-                <p className="text-gray-500 mb-6">Start your travel journey to earn your first achievement badge!</p>
-                <Button onClick={() => setActiveTab("all")}>
-                  View Available Achievements
-                </Button>
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Progress Tab */}
-          <TabsContent value="progress" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Achievement Progress Tracking</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-600 mb-2">Progress Tracking Coming Soon</h3>
-                  <p className="text-gray-500">Detailed progress tracking and milestone visualization will be available soon.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
-
-        {/* New Achievement Celebration Modal */}
-        {showNewAchievements && newlyUnlocked.length > 0 && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <Card className="max-w-md mx-4 relative">
-              <CardHeader className="text-center">
-                <div className="mx-auto mb-4">
-                  <Sparkles className="w-16 h-16 text-yellow-500 animate-pulse" />
-                </div>
-                <CardTitle className="text-2xl text-yellow-600">
-                  Achievement Unlocked!
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-center space-y-4">
-                {newlyUnlocked.map((ua: any) => (
-                  <div key={ua.id} className="flex flex-col items-center">
-                    <AchievementBadge
-                      achievement={ua.achievement}
-                      isUnlocked={true}
-                      size="lg"
-                    />
-                    <div className="mt-2">
-                      <h3 className="font-semibold">{ua.achievement.name}</h3>
-                      <p className="text-sm text-gray-600">{ua.achievement.description}</p>
-                      <Badge className="mt-1">+{ua.achievement.points} points</Badge>
-                    </div>
-                  </div>
-                ))}
-                <Button 
-                  onClick={() => setShowNewAchievements(false)}
-                  className="w-full mt-6"
-                >
-                  Awesome!
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        )}
       </div>
     </div>
   );
