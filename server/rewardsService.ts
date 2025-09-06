@@ -1,5 +1,5 @@
 import { db } from './db.js';
-import { pointsTransactions, achievements, userAchievements, missions, userMissions, users } from '../shared/schema.js';
+import { pointsLedger, achievements, userAchievements, users } from '../shared/schema.js';
 import { eq, and, desc, sql } from 'drizzle-orm';
 
 export type RewardAction = 
@@ -33,13 +33,12 @@ export class RewardsService {
     const points = REWARD_POINTS[action];
     
     try {
-      // Create points transaction
-      await db.insert(pointsTransactions).values({
+      // Create points transaction  
+      await db.insert(pointsLedger).values({
         userId,
         points,
         action,
         description: description || `Points earned for ${action}`,
-        createdAt: new Date(),
       });
 
       // Check for achievements
@@ -87,9 +86,8 @@ export class RewardsService {
               .update(userAchievements)
               .set({
                 isCompleted: true,
-                progress: achievement.progressMax,
-                completedAt: new Date(),
-                updatedAt: new Date(),
+                progress: existingRecord.progressMax || 1,
+                unlockedAt: new Date(),
               })
               .where(eq(userAchievements.id, existingRecord.id));
           } else {
@@ -98,20 +96,18 @@ export class RewardsService {
               userId,
               achievementId: achievement.id,
               isCompleted: true,
-              progress: achievement.progressMax,
-              completedAt: new Date(),
-              createdAt: new Date(),
-              updatedAt: new Date(),
+              progress: 1, // Default progress max
+              progressMax: 1,
+              unlockedAt: new Date(),
             });
           }
 
           // Award achievement points
-          await db.insert(pointsTransactions).values({
+          await db.insert(pointsLedger).values({
             userId,
             points: achievement.points,
             action: 'ACHIEVEMENT_UNLOCKED',
             description: `Achievement unlocked: ${achievement.name}`,
-            createdAt: new Date(),
           });
         } else {
           // Update progress for incomplete achievements
@@ -124,7 +120,6 @@ export class RewardsService {
               .update(userAchievements)
               .set({
                 progress: currentProgress,
-                updatedAt: new Date(),
               })
               .where(eq(userAchievements.id, existingRecord.id));
           } else if (!existingRecord && currentProgress > 0) {
@@ -133,8 +128,7 @@ export class RewardsService {
               achievementId: achievement.id,
               isCompleted: false,
               progress: currentProgress,
-              createdAt: new Date(),
-              updatedAt: new Date(),
+              progressMax: 1, // Default, will be updated based on achievement type
             });
           }
         }
@@ -150,12 +144,12 @@ export class RewardsService {
       // Get points transactions summary
       const transactionSummary = await db
         .select({
-          action: pointsTransactions.action,
+          action: pointsLedger.action,
           count: sql<number>`count(*)::int`,
         })
-        .from(pointsTransactions)
-        .where(eq(pointsTransactions.userId, userId))
-        .groupBy(pointsTransactions.action);
+        .from(pointsLedger)
+        .where(eq(pointsLedger.userId, userId))
+        .groupBy(pointsLedger.action);
 
       // Convert to stats object
       const stats: Record<string, number> = {};
@@ -221,8 +215,8 @@ export class RewardsService {
         .select({
           total: sql<number>`COALESCE(SUM(points), 0)::int`,
         })
-        .from(pointsTransactions)
-        .where(eq(pointsTransactions.userId, userId));
+        .from(pointsLedger)
+        .where(eq(pointsLedger.userId, userId));
 
       return result[0]?.total || 0;
     } catch (error) {
@@ -240,16 +234,16 @@ export class RewardsService {
 
       const leaderboard = await db
         .select({
-          userId: pointsTransactions.userId,
+          userId: pointsLedger.userId,
           totalPoints: sql<number>`SUM(points)::int`,
           firstName: users.firstName,
           lastName: users.lastName,
           profileImageUrl: users.profileImageUrl,
         })
-        .from(pointsTransactions)
-        .innerJoin(users, eq(pointsTransactions.userId, users.id))
-        .where(sql`${pointsTransactions.createdAt} >= ${thirtyDaysAgo}`)
-        .groupBy(pointsTransactions.userId, users.firstName, users.lastName, users.profileImageUrl)
+        .from(pointsLedger)
+        .innerJoin(users, eq(pointsLedger.userId, users.id))
+        .where(sql`${pointsLedger.createdAt} >= ${thirtyDaysAgo}`)
+        .groupBy(pointsLedger.userId, users.firstName, users.lastName, users.profileImageUrl)
         .orderBy(desc(sql`SUM(points)`))
         .limit(limit);
 
@@ -265,9 +259,9 @@ export class RewardsService {
     try {
       const history = await db
         .select()
-        .from(pointsTransactions)
-        .where(eq(pointsTransactions.userId, userId))
-        .orderBy(desc(pointsTransactions.createdAt))
+        .from(pointsLedger)
+        .where(eq(pointsLedger.userId, userId))
+        .orderBy(desc(pointsLedger.createdAt))
         .limit(limit);
 
       return history;
@@ -359,9 +353,14 @@ export class RewardsService {
 
         if (existing.length === 0) {
           await db.insert(achievements).values({
-            ...achievement,
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            name: achievement.name,
+            description: achievement.description,
+            category: achievement.category,
+            iconName: 'trophy', // Default icon
+            badgeColor: '#FFD700', // Default gold color
+            requirement: JSON.stringify({ type: achievement.type, count: achievement.progressMax }),
+            points: achievement.points,
+            rarity: achievement.rarity,
           });
         }
       }
