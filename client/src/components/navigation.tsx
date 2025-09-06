@@ -39,6 +39,7 @@ const navigationItems = [
   { href: "/explore", label: "Explore", icon: MapPin },
   { href: "/weather", label: "Weather", icon: Cloud },
   { href: "/community", label: "Community", icon: Users },
+  { href: "/achievements", label: "Achievements", icon: Trophy },
   { href: "/budget-tracker", label: "Budget", icon: DollarSign },
   { href: "/dashboard", label: "Database Dashboard", icon: Database },
 ];
