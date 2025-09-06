@@ -439,28 +439,34 @@ export const locationAncestors = pgTable("location_ancestors", {
 
 // Itineraries table - stores saved daily itineraries
 export const itineraries = pgTable("itineraries", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").notNull(), // Matches auth.users.id in Supabase
   title: text("title"),
   planJson: jsonb("plan_json").notNull(), // The complete daily itinerary object
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 }, (table) => [
   index("itineraries_user_id_idx").on(table.userId),
+  index("itineraries_created_at_idx").on(table.createdAt),
   // GIN index for JSONB queries
+  index("itineraries_plan_json_gin_idx").on(table.planJson).using("gin"),
 ]);
 
 // Optional: Itinerary items table for detailed breakdown
 export const itineraryItems = pgTable("itinerary_items", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  itineraryId: varchar("itinerary_id").references(() => itineraries.id, { onDelete: "cascade" }).notNull(),
-  dayIndex: integer("day_index").notNull(),
-  entityType: varchar("entity_type").notNull(), // 'destination', 'attraction', 'restaurant', 'accommodation'
-  entityId: varchar("entity_id"), // UUID or external ID
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  itineraryId: uuid("itinerary_id").references(() => itineraries.id, { onDelete: "cascade" }).notNull(),
+  dayIndex: integer("day_index").notNull().default(0),
+  entityType: text("entity_type").notNull(), // 'destination', 'attraction', 'restaurant', 'accommodation'
+  entityId: uuid("entity_id"), // UUID or external ID
   externalId: text("external_id"), // For external service IDs
   meta: jsonb("meta"), // Place name, hours, coordinates, etc.
-  createdAt: timestamp("created_at").defaultNow(),
-});
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("items_itinerary_id_idx").on(table.itineraryId),
+  index("items_day_idx").on(table.dayIndex),
+  index("items_meta_gin_idx").on(table.meta).using("gin"),
+]);
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
