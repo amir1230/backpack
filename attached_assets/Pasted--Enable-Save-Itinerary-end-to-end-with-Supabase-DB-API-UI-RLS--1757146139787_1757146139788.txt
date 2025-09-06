@@ -1,0 +1,119 @@
+כותרת: Enable “Save Itinerary” end-to-end with Supabase (DB, API, UI, RLS)
+
+הוראות (כתובות לסוכן):
+
+בפרויקט הקיים (TripWise), תקן ויישם שמירה/טעינה/מחיקה של Itinerary למשתמש המחובר ב-Supabase, כך שכפתור Save Itinerary בלשונית Itinerary יעבוד בלי שגיאות. אל תשתמש ב־localStorage לצורך התמPersist; השמירה תהיה במסד הנתונים של Supabase בלבד.
+
+דרישות מפורטות:
+
+A) סכמת DB ותלויות
+
+פרויקט משתמש ב-Supabase. ודא שמוגדרים משתני סביבה מתאימים (SUPABASE_URL, SUPABASE_ANON_KEY) בצד הלקוח, ואם יש שרת/worker — גם SERVICE_ROLE_KEY בצד השרת בלבד (לא לחשוף בדפדפן).
+
+ניצור שתי טבלאות:
+
+itineraries — מייצגת תכנון יומי מלא (JSON) אחד למשתמש.
+
+itinerary_items — אופציונלי לפריטים מפורקים (אטרקציות/לינות/מסעדות) לכל יום. אם המודל שלך כבר מחזיר JSON יומי, שמור אותו ישירות בשדה plan_json ואל תשתמש בטבלת הפריטים (אך תשאיר אותה זמינה לעתיד).
+
+הפעל RLS על שתי הטבלאות, עם מדיניות שכל משתמש רואה/עורך רק את הרשומות שלו (לפי user_id = auth.uid()).
+
+B) חוזה נתונים
+
+itineraries:
+
+id (uuid, PK, default gen_random_uuid())
+
+user_id (uuid, not null) – מזהה משתמש Supabase
+
+title (text, nullable) – כותרת חופשית (למשל “Peru 7 days”)
+
+plan_json (jsonb, not null) – כל האיטינררי היומי כפי שהאפליקציה מייצרת (ימים, תאריכים, רשימות מקומות, הערות)
+
+created_at timestamptz default now(), updated_at timestamptz default now()
+
+אינדקסים על (user_id), ו-GIN על plan_json.
+
+itinerary_items (אופציונלי):
+
+id uuid, PK
+
+itinerary_id uuid FK → itineraries(id) on delete cascade
+
+day_index int
+
+entity_type text CHECK IN ('destination','attraction','restaurant','accommodation')
+
+entity_id uuid/null או external_id text/null
+
+meta jsonb (שם מקום/שעות/קואורדינטות)
+
+created_at timestamptz
+
+C) API/שרת
+
+אם יש שכבת שרת (Node/TS), הוסף ראוטים:
+
+POST /api/itineraries – שומר תכנון: גוף בקשה כולל title (אופציונלי) ו-plan_json. מאתר user_id מה-Supabase auth של הבקשה. מחזיר 200 עם האובייקט השמור. בצד השרת השתמש ב-service role רק אם נדרש (ולא בחשיפה ללקוח).
+
+GET /api/itineraries – מחזיר את כל האיטינרריז של המשתמש המחובר (עמוד ראשון, עם אפשרות pagination).
+
+DELETE /api/itineraries/:id – מוחק איטינררי של המשתמש.
+
+אם אין שרת ייעודי — בצד הלקוח, השתמש ישירות ב-Supabase JS Client עם session פעיל.
+
+D) UI/לקוח
+
+בלשונית תכנן טיול נשאר כפתור Generate Daily Itinerary שמייצר את האובייקט.
+
+בלשונית Itinerary:
+
+ודא ש־Save Itinerary מקבל את האובייקט שנוצר (plan_json) וקורא ל־POST/insert.
+
+בזמן שמירה: הצג מצב טעינה וכיבוי זמני של הכפתור, טפל בשגיאות בצורה קריאה (toast/alert) במקום הודעת “Failed to save itinerary”.
+
+לאחר שמירה מוצלחת: הצג toast “Itinerary saved”, ונקה את מצב השגיאה.
+
+הוסף רשימת “My Itineraries” בצד/חלק עליון: טען דרך GET /api/itineraries, הצג כרטיסיות עם כותרת/תאריך עדכון/סיכום ימים.
+
+הוסף כפתור מחיקה לכל כרטיס (IconButton “Delete”), שמבצע DELETE ומסיר מיידית מה-UI (optimistic).
+
+אם יש “Google only login” – ודא שהמשתמש חייב להיות מחובר כדי לראות/לשמור/למחוק. אם לא — כפתור Save יהיה disabled עם tooltip “Sign in with Google to save”.
+
+E) אותנטיקציה
+
+בצד הלקוח: שימוש ב-supabase.auth.getSession() בעת טעינת האפליקציה ושמירה ב-Context/State.
+
+ודא persistSession: true ו-autoRefreshToken: true.
+
+אם קיימת התחברות נוספת של Replit – השאר אותה כבויה/מוסתרת; כניסה באמצעות Google בלבד.
+
+F) טיפול בשגיאה שיש היום
+
+מצא את הקריאה הנוכחית שמבוצעת בעת לחיצה על Save Itinerary. החלף אותה בפנייה ל-Supabase (או לראוט שרת שתיצור) בהתאם לחוזה הנתונים לעיל.
+
+נהל שגיאות: אם insert נכשל (לדוגמה RLS או auth לא פעיל), הצג הודעה עם סיבת השגיאה המלאה בקונסולה וטוסט ידידותי למשתמש.
+
+הוסף לוגים מינימליים (console.warn/error) סביב הכפתור כדי לזהות אם אין session.user.
+
+G) בדיקות ידניות
+
+ללא התחברות – כפתור Save אמור להיות disabled עם Tooltip.
+
+התחברות עם Google – Generate → מעבר ל-Itinerary → Save – מתקבל Toast “Saved” ונוצר רשומה ב-itineraries.
+
+רענון דף – בדוק ש-“My Itineraries” נטען מה-DB.
+
+מחיקה – לחץ Delete, האיטינררי נעלם מהרשימה ונמחק מה-DB.
+
+ודא שאין שגיאות CORS/Key/Policy בקונסולה.
+
+H) ביצועים וניקיון
+
+הוסף אינדקסים כפי שמוגדר בסכמה למטה.
+
+אל תשתמש ב-SERVICE_ROLE בצד לקוח.
+
+הפרד מפתחות (env) לקליינט ולשרת, ועדכן README קצר עם משתני סביבה.
+
+בסיום, ודא שהכול פועל מקצה לקצה ושהשגיאה האדומה לא מופיעה יותר.

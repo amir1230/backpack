@@ -10,6 +10,7 @@ import {
   decimal,
   boolean,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -436,6 +437,31 @@ export const locationAncestors = pgTable("location_ancestors", {
   abbreviation: varchar("abbreviation"),
 });
 
+// Itineraries table - stores saved daily itineraries
+export const itineraries = pgTable("itineraries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  title: text("title"),
+  planJson: jsonb("plan_json").notNull(), // The complete daily itinerary object
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("itineraries_user_id_idx").on(table.userId),
+  // GIN index for JSONB queries
+]);
+
+// Optional: Itinerary items table for detailed breakdown
+export const itineraryItems = pgTable("itinerary_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  itineraryId: varchar("itinerary_id").references(() => itineraries.id, { onDelete: "cascade" }).notNull(),
+  dayIndex: integer("day_index").notNull(),
+  entityType: varchar("entity_type").notNull(), // 'destination', 'attraction', 'restaurant', 'accommodation'
+  entityId: varchar("entity_id"), // UUID or external ID
+  externalId: text("external_id"), // For external service IDs
+  meta: jsonb("meta"), // Place name, hours, coordinates, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   trips: many(trips),
@@ -445,6 +471,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   receivedConnections: many(connections, { relationName: "receiver" }),
   chatMessages: many(chatMessages),
   userAchievements: many(userAchievements),
+  itineraries: many(itineraries),
 }));
 
 export const tripsRelations = relations(trips, ({ one, many }) => ({
@@ -666,6 +693,22 @@ export const locationAncestorsRelations = relations(locationAncestors, ({ one })
   }),
 }));
 
+// New itinerary relations
+export const itinerariesRelations = relations(itineraries, ({ one, many }) => ({
+  user: one(users, {
+    fields: [itineraries.userId],
+    references: [users.id],
+  }),
+  items: many(itineraryItems),
+}));
+
+export const itineraryItemsRelations = relations(itineraryItems, ({ one }) => ({
+  itinerary: one(itineraries, {
+    fields: [itineraryItems.itineraryId],
+    references: [itineraries.id],
+  }),
+}));
+
 // Insert schemas
 export const insertTripSchema = createInsertSchema(trips).omit({
   id: true,
@@ -871,3 +914,20 @@ export type LocationPhoto = typeof locationPhotos.$inferSelect;
 export type InsertLocationPhoto = z.infer<typeof insertLocationPhotoSchema>;
 export type LocationAncestor = typeof locationAncestors.$inferSelect;
 export type InsertLocationAncestor = z.infer<typeof insertLocationAncestorSchema>;
+
+// Itinerary schemas and types
+export const insertItinerarySchema = createInsertSchema(itineraries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertItineraryItemSchema = createInsertSchema(itineraryItems).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type Itinerary = typeof itineraries.$inferSelect;
+export type InsertItinerary = z.infer<typeof insertItinerarySchema>;
+export type ItineraryItem = typeof itineraryItems.$inferSelect;
+export type InsertItineraryItem = z.infer<typeof insertItineraryItemSchema>;
