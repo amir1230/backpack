@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Trophy, 
   Target, 
@@ -29,6 +30,7 @@ import {
   Zap
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import * as rewardsService from "@/services/rewardsService";
 
 // Helper function to calculate level from points
 const calculateLevel = (totalPoints: number) => {
@@ -53,35 +55,78 @@ const getLevelName = (level: number) => {
 export default function Achievements() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch user points summary
   const { data: pointsSummary, isLoading: pointsLoading } = useQuery({
-    queryKey: ["/api/rewards/summary"],
+    queryKey: ["rewards", "summary"],
+    queryFn: rewardsService.fetchMySummary,
     enabled: !!user,
   });
 
-  // Fetch achievements
+  // Fetch user achievements
   const { data: achievements, isLoading: achievementsLoading } = useQuery({
-    queryKey: ["/api/achievements"],
+    queryKey: ["rewards", "achievements"],
+    queryFn: rewardsService.fetchMyAchievements,
+    enabled: !!user,
+  });
+
+  // Fetch catalog achievements for Badges tab
+  const { data: catalogAchievements, isLoading: catalogLoading } = useQuery({
+    queryKey: ["rewards", "catalog"],
+    queryFn: rewardsService.fetchCatalogAchievements,
     enabled: !!user,
   });
 
   // Fetch missions
   const { data: missions, isLoading: missionsLoading } = useQuery({
-    queryKey: ["/api/missions"],
+    queryKey: ["rewards", "missions"],
+    queryFn: rewardsService.fetchMissions,
     enabled: !!user,
   });
 
   // Fetch leaderboard
   const { data: leaderboard, isLoading: leaderboardLoading } = useQuery({
-    queryKey: ["/api/rewards/leaderboard"],
+    queryKey: ["rewards", "leaderboard"],
+    queryFn: () => rewardsService.fetchLeaderboard30d(10),
     enabled: !!user,
   });
 
   // Fetch points history
   const { data: pointsHistory, isLoading: historyLoading } = useQuery({
-    queryKey: ["/api/rewards/history"],
+    queryKey: ["rewards", "history"],
+    queryFn: () => rewardsService.fetchMyPointsHistory(50),
     enabled: !!user,
+  });
+
+  // Daily check-in mutation
+  const dailyCheckInMutation = useMutation({
+    mutationFn: rewardsService.dailyCheckIn,
+    onSuccess: (result) => {
+      if (result.success) {
+        toast({
+          title: "צ'ק-אין יומי מוצלח!",
+          description: result.message,
+        });
+        // Refresh relevant queries
+        queryClient.invalidateQueries({ queryKey: ["rewards", "summary"] });
+        queryClient.invalidateQueries({ queryKey: ["rewards", "history"] });
+      } else {
+        toast({
+          title: "כבר ביצעת צ'ק-אין היום",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "שגיאה בצ'ק-אין",
+        description: "נסה שוב מאוחר יותר",
+        variant: "destructive",
+      });
+    },
   });
 
   if (!user) {
@@ -179,23 +224,23 @@ export default function Achievements() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Medal className="w-5 h-5 text-yellow-600" />
-                  <span>הישגים שנפתחו</span>
+                  <span>הישגים שנפתחו ({achievements?.unlocked?.length || 0})</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {achievements?.filter((ach: any) => ach.isCompleted)?.map((achievement: any) => (
-                    <div key={achievement.id} className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  {achievements?.unlocked?.slice(0, 6)?.map((userAchievement: any) => (
+                    <div key={userAchievement.id} className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                       <Award className="w-8 h-8 text-yellow-600" />
                       <div>
-                        <div className="font-semibold">{achievement.name}</div>
-                        <div className="text-sm text-gray-600">{achievement.description}</div>
-                        <div className="text-xs text-green-600">+{achievement.points} נקודות</div>
+                        <div className="font-semibold">{userAchievement.achievement?.name}</div>
+                        <div className="text-sm text-gray-600">{userAchievement.achievement?.description}</div>
+                        <div className="text-xs text-green-600">+{userAchievement.achievement?.points} נקודות</div>
                       </div>
                     </div>
                   )) || []}
                 </div>
-                {(!achievements?.some((ach: any) => ach.isCompleted)) && (
+                {(!achievements?.unlocked || achievements.unlocked.length === 0) && (
                   <div className="text-center py-8 text-gray-500">
                     <Trophy className="w-12 h-12 mx-auto mb-2 opacity-50" />
                     <p>עדיין לא השגת הישגים</p>
@@ -210,22 +255,28 @@ export default function Achievements() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <TrendingUp className="w-5 h-5 text-blue-600" />
-                  <span>התקדמות פעילה</span>
+                  <span>התקדמות פעילה ({achievements?.inProgress?.length || 0})</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {achievements?.filter((ach: any) => !ach.isCompleted && ach.progress > 0)?.map((achievement: any) => (
-                    <div key={achievement.id} className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  {achievements?.inProgress?.slice(0, 5)?.map((userAchievement: any) => (
+                    <div key={userAchievement.id} className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                       <div className="flex justify-between items-center mb-2">
-                        <div className="font-semibold">{achievement.name}</div>
-                        <div className="text-sm text-blue-600">{achievement.progress}/{achievement.progressMax}</div>
+                        <div className="font-semibold">{userAchievement.achievement?.name}</div>
+                        <div className="text-sm text-blue-600">{userAchievement.progress}/{userAchievement.progressMax}</div>
                       </div>
-                      <div className="text-sm text-gray-600 mb-2">{achievement.description}</div>
-                      <Progress value={(achievement.progress / achievement.progressMax) * 100} className="h-2" />
+                      <div className="text-sm text-gray-600 mb-2">{userAchievement.achievement?.description}</div>
+                      <Progress value={(userAchievement.progress / userAchievement.progressMax) * 100} className="h-2" />
                     </div>
                   )) || []}
                 </div>
+                {(!achievements?.inProgress || achievements.inProgress.length === 0) && (
+                  <div className="text-center py-6 text-gray-500">
+                    <TrendingUp className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p>אין התקדמות פעילה כרגע</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -238,7 +289,16 @@ export default function Achievements() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <Button 
+                    className="h-20 flex-col space-y-2" 
+                    variant="outline"
+                    onClick={() => dailyCheckInMutation.mutate()}
+                    disabled={dailyCheckInMutation.isPending}
+                  >
+                    <Calendar className="w-6 h-6" />
+                    <span>צ'ק-אין יומי (+5)</span>
+                  </Button>
                   <Button className="h-20 flex-col space-y-2" variant="outline">
                     <MessageSquare className="w-6 h-6" />
                     <span>כתוב ביקורת (+50)</span>
@@ -319,6 +379,76 @@ export default function Achievements() {
 
           {/* Badges Tab */}
           <TabsContent value="badges" className="space-y-6">
+            {/* Unlocked Achievements */}
+            {achievements && achievements.unlocked.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Trophy className="w-5 h-5 text-yellow-600" />
+                    <span>הישגים פתוחים ({achievements.unlocked.length})</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {achievements.unlocked.map((userAchievement: any) => (
+                      <div key={userAchievement.id} className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <Award className="w-8 h-8 text-yellow-600" />
+                          <div>
+                            <div className="font-semibold">{userAchievement.achievement?.name}</div>
+                            <Badge variant={userAchievement.achievement?.rarity === 'legendary' ? 'destructive' : userAchievement.achievement?.rarity === 'epic' ? 'default' : 'secondary'}>
+                              {userAchievement.achievement?.rarity === 'common' ? 'רגיל' : userAchievement.achievement?.rarity === 'rare' ? 'נדיר' : userAchievement.achievement?.rarity === 'epic' ? 'אפי' : 'אגדי'}
+                            </Badge>
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{userAchievement.achievement?.description}</p>
+                        <div className="flex justify-between items-center">
+                          <div className="text-xs text-blue-600">+{userAchievement.achievement?.points} נקודות</div>
+                          <div className="text-xs text-green-600">נפתח {new Date(userAchievement.unlockedAt).toLocaleDateString('he-IL')}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* In Progress Achievements */}
+            {achievements && achievements.inProgress.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Target className="w-5 h-5 text-blue-600" />
+                    <span>בתהליך ({achievements.inProgress.length})</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {achievements.inProgress.map((userAchievement: any) => (
+                      <div key={userAchievement.id} className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <Award className="w-8 h-8 text-gray-400" />
+                          <div>
+                            <div className="font-semibold">{userAchievement.achievement?.name}</div>
+                            <Badge variant={userAchievement.achievement?.rarity === 'legendary' ? 'destructive' : userAchievement.achievement?.rarity === 'epic' ? 'default' : 'secondary'}>
+                              {userAchievement.achievement?.rarity === 'common' ? 'רגיל' : userAchievement.achievement?.rarity === 'rare' ? 'נדיר' : userAchievement.achievement?.rarity === 'epic' ? 'אפי' : 'אגדי'}
+                            </Badge>
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{userAchievement.achievement?.description}</p>
+                        <div className="text-xs text-blue-600 mb-2">+{userAchievement.achievement?.points} נקודות</div>
+                        <div className="mt-2">
+                          <Progress value={(userAchievement.progress / userAchievement.progressMax) * 100} className="h-2" />
+                          <div className="text-xs text-gray-500 mt-1">{userAchievement.progress}/{userAchievement.progressMax}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* All Available Achievements */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -328,10 +458,10 @@ export default function Achievements() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {achievements?.map((achievement: any) => (
-                    <div key={achievement.id} className={`p-4 border rounded-lg ${achievement.isCompleted ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                  {catalogAchievements?.map((achievement: any) => (
+                    <div key={achievement.id} className="p-4 border rounded-lg bg-gray-50 border-gray-200">
                       <div className="flex items-center space-x-3 mb-3">
-                        <Award className={`w-8 h-8 ${achievement.isCompleted ? 'text-yellow-600' : 'text-gray-400'}`} />
+                        <Award className="w-8 h-8 text-gray-400" />
                         <div>
                           <div className="font-semibold">{achievement.name}</div>
                           <Badge variant={achievement.rarity === 'legendary' ? 'destructive' : achievement.rarity === 'epic' ? 'default' : 'secondary'}>
@@ -341,12 +471,6 @@ export default function Achievements() {
                       </div>
                       <p className="text-sm text-gray-600 mb-2">{achievement.description}</p>
                       <div className="text-xs text-blue-600">+{achievement.points} נקודות</div>
-                      {!achievement.isCompleted && (
-                        <div className="mt-2">
-                          <Progress value={(achievement.progress / achievement.progressMax) * 100} className="h-2" />
-                          <div className="text-xs text-gray-500 mt-1">{achievement.progress}/{achievement.progressMax}</div>
-                        </div>
-                      )}
                     </div>
                   )) || []}
                 </div>
@@ -365,17 +489,19 @@ export default function Achievements() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {leaderboard?.map((user: any, index: number) => (
-                    <div key={user.id} className={`flex items-center space-x-4 p-3 rounded-lg ${index < 3 ? 'bg-yellow-50 border border-yellow-200' : 'bg-gray-50'}`}>
+                  {leaderboard?.map((entry: any, index: number) => (
+                    <div key={entry.userId} className={`flex items-center space-x-4 p-3 rounded-lg ${index < 3 ? 'bg-yellow-50 border border-yellow-200' : 'bg-gray-50'}`}>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-400' : 'bg-gray-300'}`}>
-                        {index + 1}
+                        {entry.rank || index + 1}
                       </div>
                       <div className="flex-1">
-                        <div className="font-medium">{user.firstName} {user.lastName}</div>
-                        <div className="text-sm text-gray-600">רמה {calculateLevel(user.totalPoints)} • {getLevelName(calculateLevel(user.totalPoints))}</div>
+                        <div className="font-medium">
+                          {entry.user?.firstName || 'משתמש'} {entry.user?.lastName || `#${entry.userId.slice(-4)}`}
+                        </div>
+                        <div className="text-sm text-gray-600">רמה {calculateLevel(entry.totalPoints)} • {getLevelName(calculateLevel(entry.totalPoints))}</div>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold">{user.totalPoints.toLocaleString()}</div>
+                        <div className="font-bold">{entry.totalPoints.toLocaleString()}</div>
                         <div className="text-sm text-gray-600">נקודות</div>
                       </div>
                     </div>
