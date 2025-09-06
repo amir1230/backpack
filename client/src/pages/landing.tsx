@@ -70,11 +70,15 @@ export default function Landing() {
   };
 
   const handleLogin = () => {
-    window.location.href = "/api/login";
+    // Use AuthModal instead of direct login
+    // This should be handled by AuthModal component
+    console.log("Login should be handled by AuthModal component");
   };
 
   const handleRegister = () => {
-    window.location.href = "/api/login?signup=true";
+    // Use AuthModal instead of direct signup
+    // This should be handled by AuthModal component
+    console.log("Register should be handled by AuthModal component");
   };
 
 
