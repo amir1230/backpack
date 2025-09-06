@@ -13,9 +13,9 @@ console.log('  SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY ? '✅ SET' : 
 console.log('  GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? '✅ SET' : '⚠️ MISSING (check Supabase console)');
 console.log('  GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? '✅ SET' : '⚠️ MISSING (check Supabase console)');
 
-// Replit specific
-console.log('  REPL_SLUG:', process.env.REPL_SLUG ? `✅ ${process.env.REPL_SLUG}` : '❌ Not on Replit');
-console.log('  REPLIT_DOMAINS:', process.env.REPLIT_DOMAINS ? `✅ ${process.env.REPLIT_DOMAINS}` : '❌ MISSING');
+// Deployment platform detection
+console.log('  REPL_SLUG:', process.env.REPL_SLUG ? `✅ ${process.env.REPL_SLUG}` : '❌ Not on Replit (OK for local)');
+console.log('  Platform:', process.env.REPLIT_DOMAINS ? 'Replit' : 'Other/Local');
 
 console.log('====================================');
 console.log('✅ Server Auth Health Check Complete');
