@@ -97,11 +97,13 @@ export default function Landing() {
       });
       
       // Navigate to logout endpoint which will destroy server session
-      window.location.href = "/api/logout";
+      // Logout handled by Supabase Auth Context
+window.location.href = "/?logout=true";
     } catch (error) {
       console.error("Logout error:", error);
       // Fallback: force reload to clear everything
-      window.location.href = "/api/logout";
+      // Logout handled by Supabase Auth Context
+window.location.href = "/?logout=true";
     }
   };
 
