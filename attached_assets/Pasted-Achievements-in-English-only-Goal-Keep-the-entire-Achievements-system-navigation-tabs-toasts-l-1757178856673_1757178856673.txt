@@ -1,0 +1,89 @@
+Achievements in English only
+
+Goal:
+Keep the entire Achievements system (navigation, tabs, toasts, labels, actions) in English only, regardless of the rest of the app language (which may stay RTL Hebrew).
+
+1) Navigation
+
+Sidebar: show “Achievements” (with trophy icon).
+
+Top bar: also add link “Achievements”.
+
+Route: /achievements.
+
+Do not localize this label; always show in English.
+
+2) Tabs (English only)
+
+Overview
+
+Missions
+
+Badges
+
+Leaderboard
+
+History
+
+3) Text & Labels
+
+All text inside Achievements pages must be in English only, e.g.:
+
+“My Balance”, “Unlocked Badges”, “In Progress”, “Daily Check-in”.
+
+Mission titles/descriptions come from DB (achievements.description), show them as English strings only (no Hebrew fallback).
+
+Badge metadata: name, description, rarity, tier → always in English.
+
+4) Toasts & Messages
+
+Success toast: "Points added successfully"
+
+Error toast: "Error awarding points, please try again"
+
+Achievement unlocked: "🏆 New badge unlocked: {{name}} (+{{points}} pts)"
+
+Daily check-in duplicate: "Already checked in today"
+
+Auth required: "Sign in with Google to save your progress"
+
+5) UX Notes
+
+Even if the rest of the app uses RTL/Hebrew, Achievements section must stay LTR English:
+
+Force dir="ltr" for the Achievements root container.
+
+Text alignment: left.
+
+Numbers and dates: use English/US locale formatting (MM/DD/YYYY, thousands separators).
+
+6) Data Binding
+
+All queries remain the same:
+
+user_points_summary → balance & level
+
+user_achievements joined with achievements → unlocked + in-progress
+
+achievements → catalog
+
+points_ledger → history
+
+v_leaderboard_30d or aggregate from points_ledger → leaderboard
+
+Display as-is, assuming English strings in DB.
+
+7) Testing
+
+Sidebar + topbar always show “Achievements”.
+
+Tabs always in English.
+
+Toasts/messages only in English.
+
+Page renders LTR layout even if app is RTL elsewhere.
+
+If DB contains Hebrew text in achievements, still render them, but do not provide Hebrew labels/tooltips from the UI side.
+
+⚠️ Important:
+Do not add Hebrew translations or RTL styling inside the Achievements pages. The rest of the app may stay in Hebrew/RTL, but Achievements is English-only, LTR.
