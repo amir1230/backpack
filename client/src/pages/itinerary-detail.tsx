@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,6 +79,10 @@ export default function ItineraryDetail() {
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [draggedItem, setDraggedItem] = useState<ItineraryItem | null>(null);
+  const [isAddingActivity, setIsAddingActivity] = useState(false);
+  const [newActivityName, setNewActivityName] = useState("");
+  const [editingActivity, setEditingActivity] = useState<{dayIndex: number, activityIndex: number} | null>(null);
+  const [editActivityName, setEditActivityName] = useState("");
 
   // Fetch itinerary data
   const { data: itinerary, isLoading, error } = useQuery({
@@ -168,6 +173,43 @@ export default function ItineraryDetail() {
       toast({
         title: "שגיאה במחיקה",
         description: "לא הצלחנו למחוק את האיטינררי",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update itinerary activities mutation
+  const updateActivitiesMutation = useMutation({
+    mutationFn: async (updatedDays: ItineraryDay[]) => {
+      if (!user || !itinerary) return;
+
+      const updatedPlan = {
+        ...itinerary.plan_json,
+        itinerary: updatedDays
+      };
+
+      const { error } = await supabase
+        .from('itineraries')
+        .update({ 
+          plan_json: updatedPlan, 
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', itinerary.id)
+        .eq('user_id', user.id);
+
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      toast({
+        title: "שינויים נשמרו",
+        description: "השינויים נשמרו בהצלחה",
+      });
+      queryClient.invalidateQueries({ queryKey: ['itinerary', id] });
+    },
+    onError: () => {
+      toast({
+        title: "שגיאה בשמירה",
+        description: "לא הצלחנו לשמור את השינויים",
         variant: "destructive",
       });
     },
@@ -272,6 +314,80 @@ export default function ItineraryDetail() {
     }
   };
 
+  // Drag and drop handler
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination || !itinerary) return;
+
+    const { source, destination } = result;
+    const newDays = [...itineraryDays];
+
+    // Find source and destination days
+    const sourceDayIndex = newDays.findIndex(day => day.day === parseInt(source.droppableId));
+    const destDayIndex = newDays.findIndex(day => day.day === parseInt(destination.droppableId));
+
+    if (sourceDayIndex === -1 || destDayIndex === -1) return;
+
+    // Get the activity being moved
+    const [movedActivity] = newDays[sourceDayIndex].activities.splice(source.index, 1);
+
+    // Add to destination
+    newDays[destDayIndex].activities.splice(destination.index, 0, movedActivity);
+
+    // Update the itinerary
+    updateActivitiesMutation.mutate(newDays);
+  };
+
+  // Add new activity
+  const handleAddActivity = () => {
+    if (!newActivityName.trim() || !itinerary) return;
+
+    const newDays = [...itineraryDays];
+    const dayIndex = newDays.findIndex(day => day.day === selectedDay);
+    
+    if (dayIndex !== -1) {
+      newDays[dayIndex].activities.push(newActivityName.trim());
+      updateActivitiesMutation.mutate(newDays);
+      setNewActivityName("");
+      setIsAddingActivity(false);
+    }
+  };
+
+  // Delete activity
+  const handleDeleteActivity = (dayNumber: number, activityIndex: number) => {
+    if (!itinerary) return;
+
+    const newDays = [...itineraryDays];
+    const dayIndex = newDays.findIndex(day => day.day === dayNumber);
+    
+    if (dayIndex !== -1) {
+      newDays[dayIndex].activities.splice(activityIndex, 1);
+      updateActivitiesMutation.mutate(newDays);
+    }
+  };
+
+  // Edit activity
+  const handleEditActivity = (dayNumber: number, activityIndex: number) => {
+    const dayIndex = itineraryDays.findIndex(day => day.day === dayNumber);
+    if (dayIndex !== -1) {
+      setEditingActivity({ dayIndex: dayNumber, activityIndex });
+      setEditActivityName(itineraryDays[dayIndex].activities[activityIndex]);
+    }
+  };
+
+  const handleSaveEditActivity = () => {
+    if (!editActivityName.trim() || !editingActivity || !itinerary) return;
+
+    const newDays = [...itineraryDays];
+    const dayIndex = newDays.findIndex(day => day.day === editingActivity.dayIndex);
+    
+    if (dayIndex !== -1) {
+      newDays[dayIndex].activities[editingActivity.activityIndex] = editActivityName.trim();
+      updateActivitiesMutation.mutate(newDays);
+      setEditingActivity(null);
+      setEditActivityName("");
+    }
+  };
+
   // Authentication check
   if (!isAuthenticated) {
     return (
@@ -328,8 +444,20 @@ export default function ItineraryDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Print Styles */}
+      <style>{`
+        @media print {
+          .no-print { display: none !important; }
+          .print-only { display: block !important; }
+          body { background: white !important; }
+          .bg-gray-50 { background: white !important; }
+          .border { border: 1px solid #ddd !important; }
+          .shadow-lg { box-shadow: none !important; }
+          .sticky { position: static !important; }
+        }
+      `}</style>
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10 no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
@@ -488,7 +616,11 @@ export default function ItineraryDetail() {
                               עלות משוערת: ${day.estimatedCost}
                             </CardDescription>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setIsAddingActivity(true)}
+                          >
                             <Plus className="w-4 h-4 mr-2" />
                             הוסף פעילות
                           </Button>
@@ -496,31 +628,164 @@ export default function ItineraryDetail() {
                       </CardHeader>
                       <CardContent>
                         {/* Activities */}
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="font-semibold mb-3">פעילויות</h4>
-                            <div className="space-y-2">
-                              {day.activities.map((activity, index) => (
-                                <div
-                                  key={index}
-                                  className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-sm transition-shadow"
-                                >
-                                  <GripVertical className="w-4 h-4 text-gray-400 cursor-move mr-3" />
-                                  <div className="flex-1">
-                                    <div className="font-medium">{activity}</div>
-                                  </div>
+                        <DragDropContext onDragEnd={handleDragEnd}>
+                          <div className="space-y-4">
+                            <div>
+                              <h4 className="font-semibold mb-3">פעילויות</h4>
+                              
+                              {/* Add Activity Form */}
+                              {isAddingActivity && selectedDay === day.day && (
+                                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                   <div className="flex items-center space-x-2">
-                                    <Button variant="ghost" size="sm">
-                                      <Edit3 className="w-4 h-4" />
+                                    <Input
+                                      placeholder="שם הפעילות החדשה..."
+                                      value={newActivityName}
+                                      onChange={(e) => setNewActivityName(e.target.value)}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') handleAddActivity();
+                                        if (e.key === 'Escape') {
+                                          setIsAddingActivity(false);
+                                          setNewActivityName("");
+                                        }
+                                      }}
+                                      className="flex-1"
+                                      autoFocus
+                                    />
+                                    <Button 
+                                      size="sm" 
+                                      onClick={handleAddActivity}
+                                      disabled={!newActivityName.trim() || updateActivitiesMutation.isPending}
+                                    >
+                                      {updateActivitiesMutation.isPending ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                      ) : (
+                                        "הוסף"
+                                      )}
                                     </Button>
-                                    <Button variant="ghost" size="sm" className="text-red-600">
-                                      <Trash2 className="w-4 h-4" />
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      onClick={() => {
+                                        setIsAddingActivity(false);
+                                        setNewActivityName("");
+                                      }}
+                                    >
+                                      ביטול
                                     </Button>
                                   </div>
                                 </div>
-                              ))}
+                              )}
+
+                              <Droppable droppableId={day.day.toString()}>
+                                {(provided, snapshot) => (
+                                  <div
+                                    {...provided.droppableProps}
+                                    ref={provided.innerRef}
+                                    className={`space-y-2 min-h-[100px] p-2 rounded-lg transition-colors ${
+                                      snapshot.isDraggingOver ? 'bg-blue-50 border-2 border-blue-200 border-dashed' : ''
+                                    }`}
+                                  >
+                                    {day.activities.map((activity, index) => (
+                                      <Draggable 
+                                        key={`${day.day}-${index}`} 
+                                        draggableId={`${day.day}-${index}`} 
+                                        index={index}
+                                      >
+                                        {(provided, snapshot) => (
+                                          <div
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            className={`flex items-center p-3 bg-white rounded-lg border border-gray-200 hover:shadow-sm transition-shadow ${
+                                              snapshot.isDragging ? 'shadow-lg rotate-2' : ''
+                                            }`}
+                                          >
+                                            <div
+                                              {...provided.dragHandleProps}
+                                              className="mr-3 cursor-move hover:text-primary"
+                                            >
+                                              <GripVertical className="w-4 h-4 text-gray-400" />
+                                            </div>
+                                            
+                                            <div className="flex-1">
+                                              {editingActivity?.dayIndex === day.day && editingActivity?.activityIndex === index ? (
+                                                <div className="flex items-center space-x-2">
+                                                  <Input
+                                                    value={editActivityName}
+                                                    onChange={(e) => setEditActivityName(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                      if (e.key === 'Enter') handleSaveEditActivity();
+                                                      if (e.key === 'Escape') {
+                                                        setEditingActivity(null);
+                                                        setEditActivityName("");
+                                                      }
+                                                    }}
+                                                    className="flex-1"
+                                                    autoFocus
+                                                  />
+                                                  <Button 
+                                                    size="sm" 
+                                                    onClick={handleSaveEditActivity}
+                                                    disabled={!editActivityName.trim() || updateActivitiesMutation.isPending}
+                                                  >
+                                                    {updateActivitiesMutation.isPending ? (
+                                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                                    ) : (
+                                                      <Save className="w-4 h-4" />
+                                                    )}
+                                                  </Button>
+                                                  <Button 
+                                                    size="sm" 
+                                                    variant="outline"
+                                                    onClick={() => {
+                                                      setEditingActivity(null);
+                                                      setEditActivityName("");
+                                                    }}
+                                                  >
+                                                    ביטול
+                                                  </Button>
+                                                </div>
+                                              ) : (
+                                                <div className="font-medium">{activity}</div>
+                                              )}
+                                            </div>
+                                            
+                                            <div className="flex items-center space-x-2">
+                                              <Button 
+                                                variant="ghost" 
+                                                size="sm"
+                                                onClick={() => handleEditActivity(day.day, index)}
+                                                disabled={editingActivity !== null}
+                                              >
+                                                <Edit3 className="w-4 h-4" />
+                                              </Button>
+                                              <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                className="text-red-600 hover:text-red-700"
+                                                onClick={() => handleDeleteActivity(day.day, index)}
+                                                disabled={updateActivitiesMutation.isPending}
+                                              >
+                                                <Trash2 className="w-4 h-4" />
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </Draggable>
+                                    ))}
+                                    {provided.placeholder}
+                                    
+                                    {day.activities.length === 0 && (
+                                      <div className="text-center py-8 text-gray-500">
+                                        <div className="text-lg mb-2">אין פעילויות ליום זה</div>
+                                        <div className="text-sm">לחץ על "הוסף פעילות" כדי להתחיל</div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </Droppable>
                             </div>
                           </div>
+                        </DragDropContext>
 
                           {/* Tips */}
                           {day.tips.length > 0 && (
