@@ -626,7 +626,7 @@ export default function MyTripsNew() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="preferences" className="flex items-center">
               <Bot className="w-4 h-4 mr-2" />
               Preferences
@@ -638,6 +638,10 @@ export default function MyTripsNew() {
             <TabsTrigger value="itinerary" className="flex items-center">
               <Route className="w-4 h-4 mr-2" />
               Itinerary
+            </TabsTrigger>
+            <TabsTrigger value="my-itineraries" className="flex items-center">
+              <Save className="w-4 h-4 mr-2" />
+              My Itineraries
             </TabsTrigger>
             <TabsTrigger value="saved" className="flex items-center">
               <FolderOpen className="w-4 h-4 mr-2" />
