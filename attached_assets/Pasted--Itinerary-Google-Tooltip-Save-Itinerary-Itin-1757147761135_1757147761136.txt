@@ -1,0 +1,99 @@
+שמירת Itinerary עם התחברות Google + מודאל + Tooltip
+
+מטרה: לתקן את כפתור Save Itinerary בלשונית Itinerary כך שיעבוד מול Supabase, כולל שמירה/מחיקה, טיפול במצב לא מחובר באמצעות פופאפ התחברות (Google-only), ותוספת Tooltip.
+
+דרישות
+A) חיבור ל־DB (Supabase)
+
+ודא שהאפליקציה מחוברת ל־Supabase עם משתני סביבה (SUPABASE_URL, SUPABASE_ANON_KEY) בצד הלקוח.
+
+הטבלה itineraries קיימת (כמו שהוגדרה בשאילתת SQL שסיפקנו).
+
+שמירה תתבצע ל־plan_json (JSON מלא של האיטינררי), כולל user_id = auth.uid().
+
+B) כפתור Save Itinerary
+
+כאשר המשתמש מחובר (session.user קיים):
+
+כפתור Save מבצע insert ל־itineraries.
+
+מציג Toast הצלחה: “Itinerary saved successfully.” / “האיטינררי נשמר בהצלחה.”
+
+שגיאה: מציג Toast קריא (“שמירה נכשלה, נסה שוב”) ולוג מפורט בקונסולה.
+
+כאשר המשתמש לא מחובר:
+
+על הכפתור יופיע Tooltip:
+
+עברית: “צריך להתחבר כדי לשמור. לחיצה תפתח מסך התחברות.”
+
+אנגלית: “You need to sign in to save. Clicking will open the sign-in screen.”
+
+בלחיצה על הכפתור נפתח מודאל התחברות.
+
+C) מודאל התחברות (Google-only)
+
+כותרת:
+
+he: “התחבר כדי לשמור את האיטינררי”
+
+en: “Sign in to save your itinerary”
+
+טקסט קצר:
+
+he: “כדי לשמור ולגשת לאיטינררי שלך מכל מכשיר, התחבר עם Google.”
+
+en: “To save and access your itinerary from any device, please sign in with Google.”
+
+כפתור ראשי:
+
+he: “התחבר עם Google”
+
+en: “Continue with Google”
+
+כפתור משני: “ביטול” / “Cancel”
+
+אפשרות סגירה (X).
+
+לאחר התחברות מוצלחת:
+
+המודאל נסגר.
+
+השמירה מתבצעת אוטומטית עם ה־plan_json האחרון.
+
+Toast הצלחה מוצג.
+
+אם המשתמש סוגר את המודאל בלי להתחבר → Toast: “שמירה דורשת התחברות.”
+
+D) רשימת Itineraries
+
+בלשונית Itinerary יש רשימה “My Itineraries”:
+
+טען את כל הרשומות של המשתמש (GET /itineraries).
+
+הצג כרטיסיות עם כותרת/תאריך עדכון.
+
+לכל כרטיס הוסף כפתור Delete שמבצע מחיקה מה־DB ומעדכן את ה־UI (optimistic).
+
+E) UX נוסף
+
+Save button תמיד נראה פעיל (כדי להראות Tooltip ולפתוח מודאל).
+
+Tooltip מוצג במעבר עכבר (Desktop) או בלחיצה קצרה (Mobile).
+
+Toast messages דו־לשוניים לפי הגדרת הממשק.
+
+F) בדיקות
+
+משתמש לא מחובר → Hover על Save → Tooltip מוצג. בלחיצה → מודאל.
+
+התחברות Google → מודאל נסגר, מתבצע Save אוטומטי, Toast הצלחה.
+
+התחברות מבוטלת → Toast “שמירה דורשת התחברות.”
+
+משתמש מחובר → Save שומר ישירות → Toast הצלחה.
+
+מחיקה פועלת → כרטיס נעלם מה־UI וגם מה־DB.
+
+🔑 הקפד לא להשתמש ב־SERVICE_ROLE_KEY בצד לקוח.
+השימוש הוא ב־anon key בלבד עם RLS (auth.uid()).
