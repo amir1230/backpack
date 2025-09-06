@@ -1,0 +1,146 @@
+Single Source of Truth for Achievements Values
+
+Goal:
+Enforce a single source of truth for points, labels, and criteria across the Achievements system (UI, RPC calls, toasts, quick actions, missions). Prevent any future drift between what the UI shows and what Supabase actually credits.
+
+1) Source of Truth Hierarchy
+
+Use this strict order whenever the app needs a value (points, name, description, progress target, etc.):
+
+DB missions/achievements (preferred)
+
+missions.points_reward, missions.progress_max, missions.code, missions.name, missions.description, missions.criteria_json.
+
+achievements.points_reward, achievements.code, achievements.name, achievements.description, achievements.criteria_json.
+
+Central config map (fallback only)
+
+A single in-app config (one file) mapping action → points and optional labels, used only if DB fields are missing.
+
+Hardcoded literals are forbidden outside this config.
+
+2) Central Config (one place only)
+
+Create/keep one config object (single file) that maps:
+
+review.create → +50
+
+photo.upload → +10
+
+itinerary.save → +10
+
+itinerary.share → +20
+
+daily.checkin → +5
+
+This config is referenced by:
+
+Quick Actions button labels
+
+Toasts text (when DB doesn’t specify)
+
+Fallback points for RPC (award_points) only if DB doesn’t provide points_reward via mission/achievement.
+
+3) Binding Rules (must follow)
+
+Quick Actions labels:
+
+Display the DB value if a matching mission exists (missions.points_reward for the relevant code/action).
+
+If no mission row exists, use the config fallback.
+
+Labels must be exactly what RPC will credit.
+
+RPC calls (award_points / award_mission_progress):
+
+Use missions.points_reward when calling mission-related awards.
+
+Use the config value only when there is no DB mission for that action.
+
+Never pass a value that differs from the visible label.
+
+Toasts & badges:
+
+Show points from the same source used for the RPC call that just ran.
+
+Achievement unlock bonus: show achievements.points_reward (no fallback unless missing).
+
+Weekly aggregate (“Points This Week”):
+
+Always computed from points_ledger (last 7 days).
+
+Never reuse total_points or any cached estimate.
+
+4) Naming & Contracts
+
+Each Quick Action/mission must have a canonical code/action string used everywhere:
+
+daily.checkin, review.create, photo.upload, itinerary.save, itinerary.share.
+
+Use the same identifier for:
+
+DB rows (missions.code, achievements.criteria_json.action)
+
+Config keys
+
+RPC parameters (p_action, p_mission_code)
+
+Toasts and analytics.
+
+5) UI Consistency (English-only, LTR)
+
+All texts in Achievements remain English-only and layout LTR.
+
+Number formatting unified:
+
+Balance: 0 pts, 135 pts
+
+Quick Actions: +5 pts, +50 pts, etc.
+
+Weekly card value may omit “pts” on the big number, but include “points” in the caption for clarity.
+
+6) Refresh & Invalidation
+
+After every award/progress: revalidate in this order:
+
+user_points_summary (for Balance)
+
+7-day points_ledger aggregate (for Points This Week)
+
+user_achievements unlocked count (for both Overview + Recent Activity)
+
+user_mission_progress (for progress bars)
+
+7) Guardrails
+
+Prohibit adding ad-hoc constants for points in components. CI review should fail if duplicates are detected.
+
+If a mission exists in DB but points_reward is null, log a warning and fall back to config; track this with an analytics event so the data team can fill the missing value.
+
+If both DB and config lack a value, hide the points badge and show a small “No points configured” caption (English).
+
+8) Acceptance Criteria
+
+Quick Actions show values identical to what RPC credits.
+
+“My Balance” equals user_points_summary.total_points.
+
+“Points This Week” equals sum of points_ledger (7 days), never equals Balance unless by chance.
+
+“Unlocked Badges” count is identical in both places (single query/selector).
+
+No component defines its own points; all read from DB or the single config file.
+
+All copy is English-only; layout is LTR.
+
+9) Testing Scenarios
+
+No missions in DB → Quick Actions use fallback config; RPC credits same values; labels match.
+
+Missions present with points_reward → UI and RPC use DB values; changing DB updates labels after reload.
+
+Duplicate action attempt (same action_key) → no balance change; neutral toast.
+
+Unlock achievement → bonus equals achievements.points_reward; both unlocked counts update together.
+
+Regression check: add a temporary different value in a component → linter/review rejects (must import from central config/DB).

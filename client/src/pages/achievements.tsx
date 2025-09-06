@@ -162,8 +162,11 @@ export default function Achievements() {
     onSuccess: (result) => {
       showMissionProgressToast(result);
       
-      // Refresh relevant queries
-      queryClient.invalidateQueries({ queryKey: ["rewards"] });
+      // Refresh all relevant queries for consistency
+      queryClient.invalidateQueries({ queryKey: ["rewards", "summary"] });
+      queryClient.invalidateQueries({ queryKey: ["rewards", "weekly-points"] });
+      queryClient.invalidateQueries({ queryKey: ["rewards", "unlocked-badges-count"] });
+      queryClient.invalidateQueries({ queryKey: ["rewards", "history"] });
     },
     onError: (error) => {
       toast({
@@ -182,7 +185,11 @@ export default function Achievements() {
     ),
     onSuccess: (result) => {
       showMissionProgressToast(result);
-      queryClient.invalidateQueries({ queryKey: ["rewards"] });
+      // Refresh all relevant queries for consistency
+      queryClient.invalidateQueries({ queryKey: ["rewards", "summary"] });
+      queryClient.invalidateQueries({ queryKey: ["rewards", "weekly-points"] });
+      queryClient.invalidateQueries({ queryKey: ["rewards", "unlocked-badges-count"] });
+      queryClient.invalidateQueries({ queryKey: ["rewards", "history"] });
     },
     onError: () => {
       toast({
@@ -200,7 +207,11 @@ export default function Achievements() {
     ),
     onSuccess: (result) => {
       showMissionProgressToast(result);
-      queryClient.invalidateQueries({ queryKey: ["rewards"] });
+      // Refresh all relevant queries for consistency
+      queryClient.invalidateQueries({ queryKey: ["rewards", "summary"] });
+      queryClient.invalidateQueries({ queryKey: ["rewards", "weekly-points"] });
+      queryClient.invalidateQueries({ queryKey: ["rewards", "unlocked-badges-count"] });
+      queryClient.invalidateQueries({ queryKey: ["rewards", "history"] });
     },
     onError: () => {
       toast({
@@ -217,7 +228,11 @@ export default function Achievements() {
     ),
     onSuccess: (result) => {
       showMissionProgressToast(result);
-      queryClient.invalidateQueries({ queryKey: ["rewards"] });
+      // Refresh all relevant queries for consistency
+      queryClient.invalidateQueries({ queryKey: ["rewards", "summary"] });
+      queryClient.invalidateQueries({ queryKey: ["rewards", "weekly-points"] });
+      queryClient.invalidateQueries({ queryKey: ["rewards", "unlocked-badges-count"] });
+      queryClient.invalidateQueries({ queryKey: ["rewards", "history"] });
     },
     onError: () => {
       toast({
