@@ -1,0 +1,140 @@
+Connect Achievements Page to Supabase (replace mock data)
+
+Goal:
+Replace all mock data in the Achievements system with live data from Supabase. Integrate with the schema we built:
+
+achievements
+
+user_achievements
+
+points_ledger
+
+user_points_summary
+
+RPC award_points
+
+1) Navigation
+
+Keep “Achievements” in sidebar and topbar, linking to /achievements.
+
+Page must load live data from Supabase instead of static mocks.
+
+2) Supabase Client
+
+Ensure the client is initialized with SUPABASE_URL and SUPABASE_ANON_KEY.
+
+Session persistence: persistSession: true, autoRefreshToken: true.
+
+Use supabase.auth.getSession() on app load.
+
+If not signed in → show Google login modal before allowing actions.
+
+3) Data Fetching
+
+Overview tab:
+
+Fetch from user_points_summary where user_id=auth.uid(). Show total_points and calculate level locally (tiers: 0–99 = L1, 100–299 = L2, etc).
+
+Fetch from user_achievements joined with achievements:
+
+unlocked (unlocked_at is not null) → grid of badges.
+
+in-progress (progress < progress_max) → show progress bars.
+
+Missions tab:
+
+Fetch from achievements where active=true and category=’missions’ (or placeholder if none). Show criteria from criteria_json.
+
+Badges tab:
+
+Fetch all from achievements where active=true. Show name, description, rarity, icon, badge_color.
+
+Leaderboard tab:
+
+Query points_ledger aggregated by user for last 30 days, or select from v_leaderboard_30d if exists.
+
+Display top 10 and highlight current user.
+
+History tab:
+
+Fetch last 50 from points_ledger where user_id=auth.uid(). Show date, action, points, meta.
+
+4) Awarding Points (RPC)
+
+Wire real actions to Supabase RPC:
+
+On review creation:
+
+Call supabase.rpc('award_points', { p_action: 'review.create', p_points: 50, p_action_key: 'review:<reviewId>', p_meta: { place_id, review_id } }).
+
+On photo upload:
+
+action='photo.upload', points=10, action_key='photo:<photoId>'.
+
+On itinerary save:
+
+action='itinerary.save', points=10, action_key='itinerary:<itineraryId>'.
+
+On itinerary share:
+
+action='itinerary.share', points=20, action_key='share:<itineraryId>:<slug>'.
+
+On daily check-in (button in Overview):
+
+action='daily.checkin', points=5, action_key='checkin:<YYYY-MM-DD>'.
+
+Behavior:
+
+After success: update local state immediately + refresh summary/ledger.
+
+On conflict (duplicate action_key), handle gracefully with toast: “Already credited”.
+
+5) Achievements Progress
+
+After every award_points call:
+
+Re-check user_achievements and increment progress if criteria matches.
+
+When progress == progress_max: set unlocked_at=now(), show unlock toast, and also award points_reward by calling award_points with action='achievement.unlock:<code>'.
+
+Criteria parsing: expect JSON like: { "type": "count", "action": "review.create", "target": 5 }.
+
+6) UI/UX
+
+Remove mock placeholders. All sections fetch live data.
+
+Show skeleton loaders while fetching.
+
+RTL Hebrew text, with fallback English.
+
+Toasts:
+
+Success: “נקודות נוספו בהצלחה”
+
+Error: “שגיאה בזיכוי נקודות, נסה שוב”
+
+Achievement unlocked: “🏆 השגת באדג' חדש: {{name}}”
+
+Auth modal: if no session, show Google-only sign-in.
+
+7) Testing Checklist
+
+User logs in → Achievements page shows their points & badges.
+
+Review created → points increase in summary, entry added to History.
+
+Daily check-in → +5 points, duplicate same day blocked.
+
+Unlock badge criteria met → badge unlocked, bonus points awarded once.
+
+Leaderboard shows real rankings (top 10) with self highlighted.
+
+Refresh page → data persists (session + points).
+
+⚠️ Important:
+
+Do not expose SERVICE_ROLE_KEY in the client. Use anon key only.
+
+Respect RLS: all queries are filtered by auth.uid() automatically.
+
+Use award_points RPC for idempotent inserts (avoid duplicate credit).

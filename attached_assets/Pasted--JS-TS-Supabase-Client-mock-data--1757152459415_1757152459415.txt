@@ -1,0 +1,122 @@
+הנה דוגמאות JS/TS מוכנות עם Supabase Client שאפשר להדביק בקוד ולהחליף את ה-mock data. כולן עובדות עם anon key בלבד (ללא Service Role) ומניחות שיש RLS לפי auth.uid().
+
+טיפ: עדיף לרכז את כל ה־API בקובץ services/rewardsService.ts/supabaseClient.ts ולהשתמש בו מכל הטאבים.
+
+אתחול Supabase + Session
+// services/supabaseClient.ts
+import { createClient } from '@supabase/supabase-js';
+
+export const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL!,
+  import.meta.env.VITE_SUPABASE_ANON_KEY!,
+  { auth: { persistSession: true, autoRefreshToken: true } }
+);
+
+export async function getSession() {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  return data.session ?? null;
+}
+
+Overview: יתרה (summary) + חישוב Level
+// services/rewardsService.ts
+import { supabase } from './supabaseClient';
+
+export function calcLevel(totalPoints: number) {
+  if (totalPoints >= 1500) return 5;
+  if (totalPoints >= 700)  return 4;
+  if (totalPoints >= 300)  return 3;
+  if (totalPoints >= 100)  return 2;
+  return 1;
+}
+
+export async function fetchMySummary() {
+  // user_points_summary של המשתמש הנוכחי (RLS יסנן לבד)
+  const { data, error } = await supabase
+    .from('user_points_summary')
+    .select('*')
+    .single(); // מחזיר שורה אחת למשתמש
+
+  if (error && error.code !== 'PGRST116') throw error; // 116 = no rows
+  const total = data?.total_points ?? 0;
+  const lifetime = data?.lifetime_points ?? 0;
+  return { total_points: total, lifetime_points: lifetime, level: calcLevel(total) };
+}
+
+Badges & Progress: user_achievements מצורף ל־achievements
+export type UserAchievement = {
+  achievement_id: string;
+  unlocked_at: string | null;
+  progress: number;
+  progress_max: number;
+  achievement?: {
+    code: string;
+    name: string;
+    description?: string;
+    icon?: string;
+    badge_color?: string;
+    rarity?: string;
+    tier?: number;
+    criteria_json?: any;
+  };
+};
+
+export async function fetchMyAchievements() {
+  const { data, error } = await supabase
+    .from('user_achievements')
+    .select(`
+      achievement_id,
+      unlocked_at,
+      progress,
+      progress_max,
+      achievement:achievements (
+        code, name, description, icon, badge_color, rarity, tier, criteria_json
+      )
+    `)
+    .order('unlocked_at', { ascending: false });
+
+  if (error) throw error;
+  const unlocked = (data as UserAchievement[]).filter(a => !!a.unlocked_at);
+  const inProgress = (data as UserAchievement[]).filter(a => !a.unlocked_at && a.progress < a.progress_max);
+  return { unlocked, inProgress, all: data as UserAchievement[] };
+}
+
+export async function fetchCatalogAchievements() {
+  const { data, error } = await supabase
+    .from('achievements')
+    .select('*')
+    .eq('active', true)
+    .order('tier', { ascending: true })
+    .order('name', { ascending: true });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+Missions: לפי קטגוריה/קריטריונים
+export async function fetchMissions() {
+  const { data, error } = await supabase
+    .from('achievements')
+    .select('code, name, description, icon, badge_color, tier, rarity, criteria_json')
+    .eq('active', true)
+    .eq('category', 'missions'); // אם אתה מסמן משימות בקטגוריה הזו
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+Leaderboard (עדיפות ל־View אם יצרת)
+export async function fetchLeaderboard30d(limit = 10) {
+  // אם יצרת את ה־VIEW v_leaderboard_30d:
+  const { data, error } = await supabase
+    .from('v_leaderboard_30d')
+    .select('*')
+    .order('points_30d', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+
+אם אין VIEW, אפשר למשוך מה־ledger ולחשב בצד לקוח, אבל עדיף VIEW לביצועים.
