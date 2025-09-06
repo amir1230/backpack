@@ -789,20 +789,19 @@ export default function ItineraryDetail() {
                           </div>
                         </DragDropContext>
 
-                          {/* Tips */}
-                          {day.tips.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold mb-3">טיפים מקומיים</h4>
-                              <div className="space-y-2">
-                                {day.tips.map((tip, index) => (
-                                  <div key={index} className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                    <p className="text-sm">{tip}</p>
-                                  </div>
-                                ))}
-                              </div>
+                        {/* Tips */}
+                        {day.tips.length > 0 && (
+                          <div className="mt-6">
+                            <h4 className="font-semibold mb-3">טיפים מקומיים</h4>
+                            <div className="space-y-2">
+                              {day.tips.map((tip, index) => (
+                                <div key={index} className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                  <p className="text-sm">{tip}</p>
+                                </div>
+                              ))}
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   ))}
