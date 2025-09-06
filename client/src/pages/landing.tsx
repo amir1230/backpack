@@ -150,18 +150,7 @@ window.location.href = "/?logout=true";
                     Logout
                   </Button>
                 </>
-              ) : (
-                <>
-                  <Button onClick={handleLogin} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Login
-                  </Button>
-                  <Button onClick={handleRegister} className="bg-primary text-white hover:bg-orange-600">
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Register
-                  </Button>
-                </>
-              )}
+              ) : null}
             </div>
           </div>
         </div>

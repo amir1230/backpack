@@ -257,7 +257,26 @@ export default function Navigation() {
                 {isLoading ? "Signing Out..." : "Sign Out"}
               </Button>
             </>
-          ) : null}
+          ) : (
+            <div className="space-y-2">
+              <Button
+                onClick={() => setAuthModalOpen(true)}
+                className="w-full"
+                disabled={isLoading}
+              >
+                <User className="w-5 h-5 mr-2" />
+                Sign In
+              </Button>
+              <Button
+                onClick={() => setAuthModalOpen(true)}
+                variant="outline"
+                className="w-full"
+                disabled={isLoading}
+              >
+                Create Account
+              </Button>
+            </div>
+          )}
         </div>
       </aside>
       
