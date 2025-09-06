@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../context/AuthContext.js";
 import { Button } from "@/components/ui/button";
 import { queryClient } from "@/lib/queryClient";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AuthModal } from "@/components/auth/AuthModal";
+import { AuthModal } from "./auth/AuthModal.js";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -136,11 +136,11 @@ export default function Navigation() {
                       
                       <button
                         onClick={handleLogout}
-                        disabled={loading}
+                        disabled={isLoading}
                         className="w-full flex items-center px-3 py-2 text-slate-600 hover:bg-gray-100 rounded-lg disabled:opacity-50"
                       >
                         <LogOut className="w-5 h-5 mr-3" />
-                        {loading ? "Signing Out..." : "Sign Out"}
+                        {isLoading ? "Signing Out..." : "Sign Out"}
                       </button>
                     </>
                   ) : (
@@ -151,7 +151,7 @@ export default function Navigation() {
                           setMobileMenuOpen(false);
                         }}
                         className="w-full"
-                        disabled={loading}
+                        disabled={isLoading}
                       >
                         <User className="w-5 h-5 mr-2" />
                         Sign In
@@ -163,7 +163,7 @@ export default function Navigation() {
                         }}
                         variant="outline"
                         className="w-full"
-                        disabled={loading}
+                        disabled={isLoading}
                       >
                         Create Account
                       </Button>
@@ -274,11 +274,11 @@ export default function Navigation() {
               <Button
                 onClick={handleLogout}
                 variant="outline"
-                disabled={loading}
+                disabled={isLoading}
                 className="w-full justify-start px-4 py-3 text-slate-700 border-gray-300 hover:bg-red-50 hover:text-red-700 hover:border-red-300"
               >
                 <LogOut className="w-5 h-5 mr-3" />
-                {loading ? "Signing Out..." : "Sign Out"}
+                {isLoading ? "Signing Out..." : "Sign Out"}
               </Button>
             </>
           ) : (
@@ -286,7 +286,7 @@ export default function Navigation() {
               <Button
                 onClick={() => setAuthModalOpen(true)}
                 className="w-full"
-                disabled={loading}
+                disabled={isLoading}
               >
                 <User className="w-5 h-5 mr-2" />
                 Sign In
@@ -295,7 +295,7 @@ export default function Navigation() {
                 onClick={() => setAuthModalOpen(true)}
                 variant="outline"
                 className="w-full"
-                disabled={loading}
+                disabled={isLoading}
               >
                 Create Account
               </Button>
