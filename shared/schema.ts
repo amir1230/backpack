@@ -260,9 +260,65 @@ export const userAchievements = pgTable("user_achievements", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").references(() => users.id).notNull(),
   achievementId: integer("achievement_id").references(() => achievements.id).notNull(),
-  unlockedAt: timestamp("unlocked_at").defaultNow(),
+  unlockedAt: timestamp("unlocked_at"),
   progress: integer("progress").default(0), // Current progress towards achievement
+  progressMax: integer("progress_max").default(1), // Target for completion
   isCompleted: boolean("is_completed").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Points ledger for tracking all point transactions
+export const pointsLedger = pgTable("points_ledger", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  action: varchar("action").notNull(), // "review.create", "photo.upload", etc.
+  actionKey: varchar("action_key").unique(), // "review:123" for anti-abuse
+  points: integer("points").notNull(),
+  metadata: jsonb("metadata"), // Additional context data
+  description: text("description"), // Human readable description
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User points summary for quick access
+export const userPointsSummary = pgTable("user_points_summary", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  totalPoints: integer("total_points").default(0),
+  level: integer("level").default(1),
+  weeklyPoints: integer("weekly_points").default(0),
+  monthlyPoints: integer("monthly_points").default(0),
+  lastResetDate: timestamp("last_reset_date").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Daily/weekly missions
+export const missions = pgTable("missions", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  nameHe: varchar("name_he"), // Hebrew translation
+  description: text("description").notNull(),
+  descriptionHe: text("description_he"), // Hebrew translation
+  type: varchar("type").notNull(), // "daily", "weekly"
+  action: varchar("action").notNull(), // "review.create", "photo.upload", etc.
+  targetCount: integer("target_count").default(1), // How many times to complete
+  pointsReward: integer("points_reward").notNull(),
+  isActive: boolean("is_active").default(true),
+  validFrom: timestamp("valid_from").defaultNow(),
+  validUntil: timestamp("valid_until"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User mission progress
+export const userMissionProgress = pgTable("user_mission_progress", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  missionId: integer("mission_id").references(() => missions.id).notNull(),
+  currentCount: integer("current_count").default(0),
+  isCompleted: boolean("is_completed").default(false),
+  completedAt: timestamp("completed_at"),
+  periodStart: timestamp("period_start").defaultNow(), // Start of current period
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // TripAdvisor-like data tables
@@ -467,7 +523,7 @@ export const itineraryItems = pgTable("itinerary_items", {
 ]);
 
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   trips: many(trips),
   reviews: many(reviews),
   expenses: many(expenses),
@@ -476,6 +532,9 @@ export const usersRelations = relations(users, ({ many }) => ({
   chatMessages: many(chatMessages),
   userAchievements: many(userAchievements),
   itineraries: many(itineraries),
+  pointsLedger: many(pointsLedger),
+  pointsSummary: one(userPointsSummary),
+  missionProgress: many(userMissionProgress),
 }));
 
 export const tripsRelations = relations(trips, ({ one, many }) => ({
@@ -607,6 +666,36 @@ export const travelBuddyApplicationsRelations = relations(travelBuddyApplication
   applicant: one(users, {
     fields: [travelBuddyApplications.applicantId],
     references: [users.id],
+  }),
+}));
+
+// Points and achievements relations
+export const pointsLedgerRelations = relations(pointsLedger, ({ one }) => ({
+  user: one(users, {
+    fields: [pointsLedger.userId],
+    references: [users.id],
+  }),
+}));
+
+export const userPointsSummaryRelations = relations(userPointsSummary, ({ one }) => ({
+  user: one(users, {
+    fields: [userPointsSummary.userId],
+    references: [users.id],
+  }),
+}));
+
+export const missionsRelations = relations(missions, ({ many }) => ({
+  userProgress: many(userMissionProgress),
+}));
+
+export const userMissionProgressRelations = relations(userMissionProgress, ({ one }) => ({
+  user: one(users, {
+    fields: [userMissionProgress.userId],
+    references: [users.id],
+  }),
+  mission: one(missions, {
+    fields: [userMissionProgress.missionId],
+    references: [missions.id],
   }),
 }));
 
@@ -835,6 +924,29 @@ export type InsertTravelBuddyApplication = z.infer<typeof insertTravelBuddyAppli
 export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
   id: true,
   unlockedAt: true,
+  createdAt: true,
+});
+
+// Points and missions insert schemas
+export const insertPointsLedgerSchema = createInsertSchema(pointsLedger).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserPointsSummarySchema = createInsertSchema(userPointsSummary).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export const insertMissionSchema = createInsertSchema(missions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserMissionProgressSchema = createInsertSchema(userMissionProgress).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 // TripAdvisor insert schemas
@@ -900,6 +1012,16 @@ export type Achievement = typeof achievements.$inferSelect;
 export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
 export type UserAchievement = typeof userAchievements.$inferSelect;
 export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+
+// Points and missions types
+export type PointsLedger = typeof pointsLedger.$inferSelect;
+export type InsertPointsLedger = z.infer<typeof insertPointsLedgerSchema>;
+export type UserPointsSummary = typeof userPointsSummary.$inferSelect;
+export type InsertUserPointsSummary = z.infer<typeof insertUserPointsSummarySchema>;
+export type Mission = typeof missions.$inferSelect;
+export type InsertMission = z.infer<typeof insertMissionSchema>;
+export type UserMissionProgress = typeof userMissionProgress.$inferSelect;
+export type InsertUserMissionProgress = z.infer<typeof insertUserMissionProgressSchema>;
 
 // TripAdvisor types
 export type Destination = typeof destinations.$inferSelect;

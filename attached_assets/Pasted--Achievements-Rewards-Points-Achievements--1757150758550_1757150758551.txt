@@ -1,0 +1,126 @@
+“Achievements + Rewards Points”
+
+מטרה:
+להוסיף דף Achievements עם ניווט גם בסיידבר וגם בטופ־בר, ולבנות מערכת תגמול (Points) שמעניקה נקודות על פעולות (כמו פרסום ביקורת, העלאת תמונה, שמירת Itinerary, שיתוף וכו’), עם תצוגת נקודות, הישגים, משימות יומיות/שבועיות, ו־leaderboard.
+
+A) ניווט וראוטים
+
+הוסף פריטי ניווט:
+
+סיידבר: “Achievements” (אייקון גביע/מדליה)
+
+טופ־בר (navbar): “Achievements”
+
+ראוט חדש: /achievements
+
+תתי־טאבים: Overview, Missions, Badges, Leaderboard, History
+
+breadcrumb פשוט: Home → Achievements
+
+B) UX דף Achievements
+
+Overview:
+
+כרטיס “היתרה שלי”: נקודות נוכחיות (total_points), רמה (Level) מחושבת לפי מדרגות נקודות.
+
+“הישגים שנפתחו”: גריד באדג’ים (שם, אייקון, תאריך פתיחה).
+
+“התקדמות בהישגים פעילים”: Progress bars (progress / progress_max).
+
+CTA: “כתוב ביקורת”, “העלה תמונה”, “שתף מסלול” — כל אחד מפנה למסך המתאים.
+
+Missions:
+
+רשימת משימות יומיות/שבועיות (למשל “העלה תמונה היום (+10)”, “כתוב ביקורת השבוע (+50)”), מצב נעילה/הושלמה.
+
+Badges:
+
+קטלוג הישגים (active=TRUE), עם קריטריונים וטיפים איך להשיג.
+
+Leaderboard:
+
+Top 10 ב-30 הימים האחרונים + המיקום של המשתמש.
+
+History:
+
+היסטוריית נקודות מה־ledger: תאריך, פעולה, נקודות, הערה.
+
+C) מנוע נקודות (Server/Client)
+
+צר לי פונקציה מרכזית: awardPoints(userId, action, points, meta={}, actionKey=null)
+
+כותבת שורה ל־points_ledger (עם action_key יוניקלי למניעת כפל זיכוי לאותה פעולה).
+
+מעדכנת user_points_summary.total_points (טריגר ב-DB יעדכן — ראה SQL).
+
+מחזירה יתרה עדכנית.
+
+Actions (מוצעים; תוכל לעדכן ערכים):
+
+review.create = +50
+
+review.like_received = +2 (עד 50 לייקים ליום → cap ב־app)
+
+photo.upload = +10
+
+itinerary.save = +10
+
+itinerary.share = +20
+
+referral.signup_completed = +100
+
+daily.checkin = +5 (מוגבל פעם ביום)
+
+אנטי-אבוז:
+
+action_key (למשל review:<id>) כדי לא לקבל פעמיים על אותה ביקורת.
+
+Caps יומיים/שבועיים בצד האפליקציה (בדיקה לפני קריאה ל-awardPoints).
+
+API:
+
+POST /api/rewards/award (עם אימות): מבצע ולידציה של action/caps ומזכה; מחזיר יתרה.
+
+GET /api/rewards/summary – מחזיר balance, הרמה, הישגים, משימות פתוחות.
+
+GET /api/rewards/history?limit=… – היסטוריית ledger.
+
+GET /api/achievements – רשימת הישגים פעילים + סטטוס למשתמש.
+
+הישגים (Badges):
+
+טיפול לוגי: לאחר פעולות → עדכן user_achievements.progress. אם הגיע ל־progress_max → קבע unlocked_at ותן בונוס נקודות אם מוגדר.
+
+D) אינטגרציה במסכים קיימים
+
+כשמשתמש שולח ביקורת (reviews): קריאה ל-awardPoints עם action="review.create", action_key="review:<review_id>".
+
+העלאת תמונה למקום: action="photo.upload", action_key="photo:<id>".
+
+שמירת Itinerary: action="itinerary.save", action_key="itinerary:<id>".
+
+שיתוף (לינק): action="itinerary.share", action_key="share:<itinerary_id>:<day>" (לפי היגיון).
+
+Check-in יומי: action="daily.checkin", מוודאים שלא קיים היום ב-ledger.
+
+E) חישוב רמות (Levels)
+
+בצד הלקוח או השרת: מיפוי מדרגות (לדוגמה)
+
+L1: 0–99, L2: 100–299, L3: 300–699, L4: 700–1499, L5: 1500+
+
+ניתן לשנות בטבלת achievements/config.
+
+F) Internationalization
+
+טקסטים דו-לשוניים (he/en) בכותרות, טוסטים, ומשימות. השאר default באנגלית אם לא הוגדר.
+
+G) בדיקות
+
+כניסה לדף Achievements → היתרה והישגים נטענים.
+
+יצירת ביקורת → נקודות מתווספות; היסטוריה מתעדכנת; אם הושגה מדרגה, מציג טוסט/אנימציית באדג’.
+
+Caps: פעולה מעבר לתקרה היומית לא מזכה.
+
+Leaderboard מציג נכון 30 ימים אחרונים.
