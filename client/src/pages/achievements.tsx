@@ -101,118 +101,113 @@ export default function Achievements() {
     enabled: !!user,
   });
 
-  // Daily check-in mutation
+  // Helper function to show mission progress toasts
+  const showMissionProgressToast = (result: any) => {
+    if (!result) {
+      toast({
+        title: "Error saving progress",
+        description: "Please try again",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (result.already_credited) {
+      toast({
+        title: "Already credited for this period",
+        description: "You've already completed this mission for the current period",
+        variant: "default",
+        className: "border-gray-300 bg-gray-50 text-gray-900",
+      });
+      return;
+    }
+
+    if (result.completed) {
+      // Mission completion toast
+      toast({
+        title: "✅ Mission complete",
+        description: `${result.mission_name} (+${result.awarded_points} pts)`,
+        variant: "default",
+        className: "border-green-300 bg-green-50 text-green-900",
+      });
+    } else {
+      // Progress increment toast
+      toast({
+        title: "Progress saved",
+        description: `${result.mission_name} — ${result.current_progress} / ${result.target_progress}${result.awarded_points > 0 ? ` (+${result.awarded_points} pts)` : ''}`,
+        variant: "default",
+        className: "border-blue-300 bg-blue-50 text-blue-900",
+      });
+    }
+  };
+
+  // Daily check-in mutation with mission progress tracking
   const dailyCheckInMutation = useMutation({
-    mutationFn: rewardsService.dailyCheckIn,
+    mutationFn: rewardsService.trackDailyCheckIn,
     onSuccess: (result) => {
-      if (result.success) {
-        toast({
-          title: "Daily Check-in Successful!",
-          description: "Points added successfully",
-        });
-        // Refresh relevant queries
-        queryClient.invalidateQueries({ queryKey: ["rewards", "summary"] });
-        queryClient.invalidateQueries({ queryKey: ["rewards", "history"] });
-      } else {
-        toast({
-          title: "Already checked in today",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
+      showMissionProgressToast(result);
+      
+      // Refresh relevant queries
+      queryClient.invalidateQueries({ queryKey: ["rewards"] });
     },
     onError: (error) => {
       toast({
         title: "Check-in Error",
-        description: "Error awarding points, please try again",
+        description: "Error saving progress, please try again",
         variant: "destructive",
       });
     },
   });
 
-  // Demo mutations for quick actions
+  // Mission-based mutations for quick actions
   const awardReviewPointsMutation = useMutation({
-    mutationFn: () => rewardsService.awardReviewPointsWithProgress(
+    mutationFn: () => rewardsService.trackReviewCreation(
       `demo-review-${Date.now()}`, 
       "demo-place-123"
     ),
     onSuccess: (result) => {
-      const progressResult = result.progressResult;
-      if (progressResult.unlocked) {
-        toast({
-          title: "🏆 New badge unlocked!",
-          description: `${progressResult.achievement?.name} (+${progressResult.achievement?.points} pts)`,
-        });
-      } else {
-        toast({
-          title: "Points added successfully",
-          description: "+50 points for writing a review",
-        });
-      }
+      showMissionProgressToast(result);
       queryClient.invalidateQueries({ queryKey: ["rewards"] });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Error awarding points, please try again",
+        title: "Error saving progress",
+        description: "Please try again",
         variant: "destructive",
       });
     },
   });
 
   const awardPhotoPointsMutation = useMutation({
-    mutationFn: () => rewardsService.awardPhotoPointsWithProgress(
+    mutationFn: () => rewardsService.trackPhotoUpload(
       `demo-photo-${Date.now()}`, 
       "demo-place-456"
     ),
     onSuccess: (result) => {
-      const progressResult = result.progressResult;
-      if (progressResult.unlocked) {
-        toast({
-          title: "🏆 New badge unlocked!",
-          description: `${progressResult.achievement?.name} (+${progressResult.achievement?.points} pts)`,
-        });
-      } else {
-        toast({
-          title: "Points added successfully",
-          description: "+10 points for uploading a photo",
-        });
-      }
+      showMissionProgressToast(result);
       queryClient.invalidateQueries({ queryKey: ["rewards"] });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Error awarding points, please try again",
+        title: "Error saving progress",
+        description: "Please try again",
         variant: "destructive",
       });
     },
   });
 
   const awardItineraryPointsMutation = useMutation({
-    mutationFn: () => rewardsService.awardItineraryPointsWithProgress(
-      `demo-itinerary-${Date.now()}`, 
-      true // isShare = true
+    mutationFn: () => rewardsService.trackItineraryShare(
+      `demo-itinerary-${Date.now()}`
     ),
     onSuccess: (result) => {
-      const progressResult = result.progressResult;
-      if (progressResult.unlocked) {
-        toast({
-          title: "🏆 New badge unlocked!",
-          description: `${progressResult.achievement?.name} (+${progressResult.achievement?.points} pts)`,
-        });
-      } else {
-        toast({
-          title: "Points added successfully",
-          description: "+20 points for sharing an itinerary",
-        });
-      }
+      showMissionProgressToast(result);
       queryClient.invalidateQueries({ queryKey: ["rewards"] });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Error awarding points, please try again",
+        title: "Error saving progress",
+        description: "Please try again",
         variant: "destructive",
       });
     },
@@ -299,9 +294,10 @@ export default function Achievements() {
                   disabled={awardReviewPointsMutation.isPending}
                   variant="outline"
                   className="flex items-center gap-2 whitespace-nowrap"
+                  aria-label="Track review writing progress"
                 >
                   <MessageSquare className="w-4 h-4" />
-                  {awardReviewPointsMutation.isPending ? "Adding..." : "Write Review (+50 pts)"}
+                  {awardReviewPointsMutation.isPending ? "Tracking..." : "Write Review"}
                 </Button>
                 
                 <Button 
@@ -309,9 +305,10 @@ export default function Achievements() {
                   disabled={awardPhotoPointsMutation.isPending}
                   variant="outline"
                   className="flex items-center gap-2 whitespace-nowrap"
+                  aria-label="Track photo upload progress"
                 >
                   <Camera className="w-4 h-4" />
-                  {awardPhotoPointsMutation.isPending ? "Adding..." : "Upload Photo (+10 pts)"}
+                  {awardPhotoPointsMutation.isPending ? "Tracking..." : "Upload Photo"}
                 </Button>
                 
                 <Button 
@@ -319,9 +316,10 @@ export default function Achievements() {
                   disabled={awardItineraryPointsMutation.isPending}
                   variant="outline"
                   className="flex items-center gap-2 whitespace-nowrap"
+                  aria-label="Track itinerary sharing progress"
                 >
                   <MapPin className="w-4 h-4" />
-                  {awardItineraryPointsMutation.isPending ? "Adding..." : "Share Itinerary (+20 pts)"}
+                  {awardItineraryPointsMutation.isPending ? "Tracking..." : "Share Itinerary"}
                 </Button>
               </div>
             </CardContent>
