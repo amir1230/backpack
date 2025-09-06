@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import * as rewardsService from "@/services/rewardsService";
+import { POINT_VALUES } from "@/services/rewardsService";
 
 // Helper function to calculate level from points
 const calculateLevel = (totalPoints: number) => {
@@ -98,6 +99,20 @@ export default function Achievements() {
   const { data: pointsHistory, isLoading: historyLoading } = useQuery({
     queryKey: ["rewards", "history"],
     queryFn: () => rewardsService.fetchMyPointsHistory(50),
+    enabled: !!user,
+  });
+
+  // Weekly points from ledger (last 7 days)
+  const { data: weeklyPoints } = useQuery({
+    queryKey: ["rewards", "weekly-points"],
+    queryFn: () => rewardsService.fetchWeeklyPoints(),
+    enabled: !!user,
+  });
+
+  // Unlocked badges count
+  const { data: unlockedBadgesCount } = useQuery({
+    queryKey: ["rewards", "unlocked-badges-count"],
+    queryFn: () => rewardsService.fetchUnlockedBadgesCount(),
     enabled: !!user,
   });
 
@@ -286,7 +301,7 @@ export default function Achievements() {
                   className="flex items-center gap-2 whitespace-nowrap"
                 >
                   <Calendar className="w-4 h-4" />
-                  {dailyCheckInMutation.isPending ? "Checking in..." : "Daily Check-in"}
+                  {dailyCheckInMutation.isPending ? "Checking in..." : `Daily Check-in — +${POINT_VALUES.DAILY_CHECKIN} pts`}
                 </Button>
                 
                 <Button 
@@ -297,7 +312,7 @@ export default function Achievements() {
                   aria-label="Track review writing progress"
                 >
                   <MessageSquare className="w-4 h-4" />
-                  {awardReviewPointsMutation.isPending ? "Tracking..." : "Write Review"}
+                  {awardReviewPointsMutation.isPending ? "Tracking..." : `Write Review — +${POINT_VALUES.WRITE_REVIEW} pts`}
                 </Button>
                 
                 <Button 
@@ -308,7 +323,7 @@ export default function Achievements() {
                   aria-label="Track photo upload progress"
                 >
                   <Camera className="w-4 h-4" />
-                  {awardPhotoPointsMutation.isPending ? "Tracking..." : "Upload Photo"}
+                  {awardPhotoPointsMutation.isPending ? "Tracking..." : `Upload Photo — +${POINT_VALUES.UPLOAD_PHOTO} pts`}
                 </Button>
                 
                 <Button 
@@ -319,7 +334,7 @@ export default function Achievements() {
                   aria-label="Track itinerary sharing progress"
                 >
                   <MapPin className="w-4 h-4" />
-                  {awardItineraryPointsMutation.isPending ? "Tracking..." : "Share Itinerary"}
+                  {awardItineraryPointsMutation.isPending ? "Tracking..." : `Share Itinerary — +${POINT_VALUES.SHARE_ITINERARY} pts`}
                 </Button>
               </div>
             </CardContent>
