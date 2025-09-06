@@ -77,12 +77,42 @@ export interface LeaderboardEntry {
   };
 }
 
-// Centralized point values (single source of truth)
+// Single Source of Truth for Achievement Values
+// This config serves as fallback when DB values are missing
+export const ACHIEVEMENT_CONFIG = {
+  'daily.checkin': { 
+    points: 5, 
+    label: 'Daily Check-in',
+    action: 'daily.checkin' 
+  },
+  'review.create': { 
+    points: 50, 
+    label: 'Write Review',
+    action: 'review.create' 
+  },
+  'photo.upload': { 
+    points: 10, 
+    label: 'Upload Photo',
+    action: 'photo.upload' 
+  },
+  'itinerary.save': { 
+    points: 10, 
+    label: 'Save Itinerary',
+    action: 'itinerary.save' 
+  },
+  'itinerary.share': { 
+    points: 20, 
+    label: 'Share Itinerary',
+    action: 'itinerary.share' 
+  },
+} as const;
+
+// Legacy point values for backward compatibility
 export const POINT_VALUES = {
-  DAILY_CHECKIN: 5,
-  WRITE_REVIEW: 50,
-  UPLOAD_PHOTO: 10,
-  SHARE_ITINERARY: 20,
+  DAILY_CHECKIN: ACHIEVEMENT_CONFIG['daily.checkin'].points,
+  WRITE_REVIEW: ACHIEVEMENT_CONFIG['review.create'].points,
+  UPLOAD_PHOTO: ACHIEVEMENT_CONFIG['photo.upload'].points,
+  SHARE_ITINERARY: ACHIEVEMENT_CONFIG['itinerary.share'].points,
 } as const;
 
 // Calculate user level based on total points
@@ -166,6 +196,79 @@ export async function fetchUnlockedBadgesCount(): Promise<number> {
   if (error) throw error;
 
   return count || 0;
+}
+
+// Get achievement value using single source of truth hierarchy
+export async function getAchievementValue(actionCode: string): Promise<{
+  points: number;
+  label: string;
+  source: 'db_mission' | 'db_achievement' | 'config' | 'missing';
+}> {
+  try {
+    // 1. Try to get from missions table first (preferred)
+    const { data: mission } = await supabase
+      .from('missions')
+      .select('points_reward, name, code')
+      .eq('code', actionCode)
+      .eq('is_active', true)
+      .single();
+
+    if (mission && mission.points_reward !== null) {
+      return {
+        points: mission.points_reward,
+        label: mission.name || ACHIEVEMENT_CONFIG[actionCode as keyof typeof ACHIEVEMENT_CONFIG]?.label || actionCode,
+        source: 'db_mission'
+      };
+    }
+
+    // 2. Try to get from achievements table
+    const { data: achievement } = await supabase
+      .from('achievements')
+      .select('points, name, code')
+      .eq('code', actionCode)
+      .eq('is_active', true)
+      .single();
+
+    if (achievement && achievement.points !== null) {
+      return {
+        points: achievement.points,
+        label: achievement.name || ACHIEVEMENT_CONFIG[actionCode as keyof typeof ACHIEVEMENT_CONFIG]?.label || actionCode,
+        source: 'db_achievement'
+      };
+    }
+
+    // 3. Fallback to central config
+    const config = ACHIEVEMENT_CONFIG[actionCode as keyof typeof ACHIEVEMENT_CONFIG];
+    if (config) {
+      return {
+        points: config.points,
+        label: config.label,
+        source: 'config'
+      };
+    }
+
+    // 4. Missing value
+    console.warn(`No achievement value found for action: ${actionCode}`);
+    return {
+      points: 0,
+      label: actionCode,
+      source: 'missing'
+    };
+
+  } catch (error) {
+    console.error('Error fetching achievement value:', error);
+    // Fallback to config on error
+    const config = ACHIEVEMENT_CONFIG[actionCode as keyof typeof ACHIEVEMENT_CONFIG];
+    return config ? {
+      points: config.points,
+      label: config.label,
+      source: 'config'
+    } : {
+      points: 0,
+      label: actionCode,
+      source: 'missing'
+    };
+  }
 }
 
 // Fetch user achievements with progress
