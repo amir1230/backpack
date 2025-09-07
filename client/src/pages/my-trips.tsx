@@ -194,7 +194,7 @@ export default function MyTripsScreen() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="overflow-x-auto">
-            <TabsList className="inline-flex w-auto min-w-full justify-start h-10">
+            <TabsList className="inline-flex w-auto min-w-full justify-evenly h-10">
               <TabsTrigger value="generate" className="whitespace-nowrap">
                 <Users className="w-4 h-4 mr-2" />
                 Preferences

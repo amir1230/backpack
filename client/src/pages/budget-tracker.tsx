@@ -297,7 +297,7 @@ export default function BudgetTracker() {
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto">
-            <TabsList className="inline-flex w-auto min-w-full justify-start h-10">
+            <TabsList className="inline-flex w-auto min-w-full justify-evenly h-10">
               <TabsTrigger value="overview" className="flex items-center gap-2 whitespace-nowrap">
                 <BarChart3 className="w-4 h-4" />
                 Overview
