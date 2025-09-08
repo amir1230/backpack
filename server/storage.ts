@@ -462,7 +462,7 @@ export class DatabaseStorage implements IStorage {
         name: chatRooms.name,
         description: chatRooms.description,
         isPrivate: chatRooms.isPrivate,
-        roomType: chatRooms.roomType,
+        type: chatRooms.type,
         createdAt: chatRooms.createdAt,
         updatedAt: chatRooms.updatedAt,
         isActive: chatRooms.isActive
@@ -471,7 +471,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(chatRoomMembers, eq(chatRooms.id, chatRoomMembers.roomId))
       .where(
         and(
-          eq(chatRooms.roomType, 'dm'),
+          eq(chatRooms.type, 'dm'),
           eq(chatRooms.isActive, true),
           eq(chatRoomMembers.userId, userName)
         )
@@ -486,7 +486,7 @@ export class DatabaseStorage implements IStorage {
         name: chatRooms.name,
         description: chatRooms.description,
         isPrivate: chatRooms.isPrivate,
-        roomType: chatRooms.roomType,
+        type: chatRooms.type,
         createdAt: chatRooms.createdAt,
         updatedAt: chatRooms.updatedAt,
         isActive: chatRooms.isActive
@@ -494,7 +494,7 @@ export class DatabaseStorage implements IStorage {
       .from(chatRooms)
       .where(
         and(
-          eq(chatRooms.roomType, 'dm'),
+          eq(chatRooms.type, 'dm'),
           eq(chatRooms.isActive, true),
           or(
             eq(chatRooms.name, `DM: ${participant1} & ${participant2}`),
@@ -1147,19 +1147,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(placeReviews.id, reviewId));
   }
 
-  // Enhanced chat room operations
-  async createChatRoom(room: any): Promise<ChatRoom> {
-    const [chatRoom] = await db.insert(chatRooms).values(room).returning();
-    
-    // Add creator as first member with admin role
-    await db.insert(chatRoomMembers).values({
-      roomId: chatRoom.id,
-      userId: room.createdBy,
-      role: 'admin',
-    });
-
-    return chatRoom;
-  }
+  // Enhanced chat room operations - this function is duplicated, removing it
 
   async getChatRoomById(id: number): Promise<ChatRoom | undefined> {
     const [room] = await db.select().from(chatRooms).where(eq(chatRooms.id, id));
