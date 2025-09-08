@@ -66,6 +66,74 @@ export async function registerRoutes(app: Express): Promise<void> {
   // Basic health endpoint
   app.get('/api/health', (_req, res) => res.json({ ok: true, time: new Date().toISOString() }));
 
+  // Database test endpoint
+  app.get('/api/test-db', async (_req, res) => {
+    try {
+      const client = await pool.connect();
+      console.log('Database connected successfully');
+      
+      // Test if places table exists
+      const tableCheck = await client.query(`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_schema = 'public' 
+          AND table_name = 'places'
+        );
+      `);
+      
+      const placesTableExists = tableCheck.rows[0].exists;
+      console.log('Places table exists:', placesTableExists);
+      
+      if (!placesTableExists) {
+        // Create places table
+        await client.query(`
+          CREATE TABLE places (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            location VARCHAR(255),
+            country VARCHAR(100),
+            rating DECIMAL(2,1),
+            description TEXT,
+            created_at TIMESTAMP DEFAULT NOW(),
+            updated_at TIMESTAMP DEFAULT NOW()
+          );
+        `);
+        
+        // Insert sample data
+        await client.query(`
+          INSERT INTO places (name, location, country, rating, description) VALUES
+          ('Machu Picchu', 'Cusco', 'Peru', 4.8, 'Ancient Incan citadel set high in the Andes Mountains'),
+          ('Christ the Redeemer', 'Rio de Janeiro', 'Brazil', 4.5, 'Iconic statue overlooking Rio de Janeiro'),
+          ('Salar de Uyuni', 'Potosí', 'Bolivia', 4.7, 'World''s largest salt flat with stunning mirror effects'),
+          ('Angel Falls', 'Canaima National Park', 'Venezuela', 4.6, 'World''s highest uninterrupted waterfall'),
+          ('Torres del Paine', 'Patagonia', 'Chile', 4.4, 'Dramatic granite peaks and pristine wilderness');
+        `);
+        
+        console.log('Places table created and seeded with sample data');
+      }
+      
+      // Get count of places
+      const countResult = await client.query('SELECT COUNT(*) FROM places');
+      const count = countResult.rows[0].count;
+      
+      client.release();
+      
+      res.json({ 
+        success: true, 
+        database: 'connected',
+        placesTableExists,
+        placesCount: parseInt(count),
+        message: 'Database connection and places table verified'
+      });
+    } catch (error) {
+      console.error('Database test error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Database connection failed' 
+      });
+    }
+  });
+
   // Create itinerary tables endpoint (development only)
   app.post('/api/setup/create-itinerary-tables', async (_req, res) => {
     try {
@@ -430,11 +498,11 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       const messageData = {
-        room_id: parseInt(room_id),
+        roomId: parseInt(room_id),
         message: message?.trim() || '',
-        author_name: author_name || 'Guest',
-        user_id: null, // Guest mode for now
-        message_type: message_type || 'text'
+        authorName: author_name || 'Guest',
+        userId: null, // Guest mode for now
+        messageType: message_type || 'text'
       };
 
       const newMessage = await storage.createChatMessage(messageData);
@@ -443,11 +511,11 @@ export async function registerRoutes(app: Express): Promise<void> {
       if (attachments && attachments.length > 0) {
         for (const attachment of attachments) {
           await storage.createChatAttachment({
-            message_id: newMessage.id,
+            messageId: newMessage.id,
             url: attachment.url,
             filename: attachment.filename,
-            mime_type: attachment.mimeType,
-            size_bytes: attachment.sizeBytes,
+            mimeType: attachment.mimeType,
+            sizeBytes: attachment.sizeBytes,
             width: attachment.width,
             height: attachment.height
           });
