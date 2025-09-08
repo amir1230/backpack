@@ -72,8 +72,8 @@ import {
   type InsertItinerary,
   type ItineraryItem,
   type InsertItineraryItem,
-} from "@shared/schema";
-import { db } from "./db";
+} from "../shared/schema.js";
+import { db } from "./db.js";
 import { eq, desc, and, or, sql } from "drizzle-orm";
 
 export interface IStorage {
