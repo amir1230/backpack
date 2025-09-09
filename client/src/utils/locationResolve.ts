@@ -3,8 +3,6 @@ export type BaseEntity = {
   name?: string | null;
   address?: string | null;
   addressString?: string | null;
-  latitude?: string | null;
-  longitude?: string | null;
   city?: string | null;
   country?: string | null;
   lat?: number | null;
@@ -21,7 +19,7 @@ export type DestinationMini = {
 
 export function parseCityCountryFromAddress(address?: string | null): { city?: string; country?: string } {
   if (!address) return {};
-  // פיצול נאיבי "City, Region, Country" (יתפוס רוב המקרים; לא לשבור אם קצר)
+  // Simple split "City, Region, Country" (handles most cases)
   const parts = address.split(',').map(s => s.trim()).filter(Boolean);
   if (parts.length === 0) return {};
   const country = parts[parts.length - 1];
@@ -55,17 +53,17 @@ export function nearestDestinationNameCountry(
   return {};
 }
 
-/** החזרת {city,country} לפי סדר עדיפויות: שדות ישירים → כתובת → יעד קרוב */
+/** Return {city,country} by priority: direct fields → address → nearby destination */
 export function resolveCityCountry(
   e: BaseEntity,
   nearby?: { destinations: DestinationMini[] }
 ): { city?: string; country?: string } {
-  // 1) אם יש שדות מפורשים בטבלה — נשתמש בהם
+  // 1) If explicit fields exist in table - use them
   if (e.country || e.city) return { city: e.city || undefined, country: e.country || undefined };
-  // 2) ננסה לנחש מהכתובת
+  // 2) Try to parse from address
   const fromAddr = parseCityCountryFromAddress(e.address || e.addressString);
   if (fromAddr.city || fromAddr.country) return fromAddr;
-  // 3) ניפול ל"יעד הקרוב" לפי lat/lon
+  // 3) Fall back to "nearby destination" by lat/lon
   if (nearby?.destinations?.length) {
     return nearestDestinationNameCountry(e, nearby.destinations);
   }

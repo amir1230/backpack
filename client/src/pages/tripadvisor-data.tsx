@@ -86,9 +86,9 @@ export default function TripAdvisorData() {
                     <p className="text-sm text-gray-600">
                       <strong>Location:</strong> {destination.addressString}
                     </p>
-                    {destination.latitude && destination.longitude && (
+                    {destination.lat && destination.lon && (
                       <p className="text-sm text-gray-600">
-                        <strong>Coordinates:</strong> {formatCoordinates(destination.latitude, destination.longitude)}
+                        <strong>Coordinates:</strong> {formatCoordinates(destination.lat, destination.lon)}
                       </p>
                     )}
                     <div className="flex items-center gap-2">

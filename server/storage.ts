@@ -1145,11 +1145,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateReviewHelpfulness(reviewId: number): Promise<void> {
-    const helpfulCount = await db
-      .select({ count: sql<number>`count(*)` })
+    const { count: helpfulCount } = await db
+      .select()
       .from(reviewVotes)
       .where(and(eq(reviewVotes.reviewId, reviewId), eq(reviewVotes.voteType, 'helpful')))
-      .then(result => result[0]?.count || 0);
+      .then(result => ({ count: result.length }));
 
     await db
       .update(placeReviews)

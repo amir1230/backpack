@@ -478,8 +478,8 @@ export default function ExplorePage() {
   const getCityCountryForEntity = (entity: BaseEntity): { city?: string; country?: string } => {
     const entityWithCoords = {
       ...entity,
-      lat: entity.lat ?? (entity.latitude ? parseFloat(entity.latitude) : null),
-      lon: entity.lon ?? (entity.longitude ? parseFloat(entity.longitude) : null),
+      lat: entity.lat ? parseFloat(entity.lat) : null,
+      lon: entity.lon ? parseFloat(entity.lon) : null,
       address: entity.address ?? entity.addressString
     };
     
@@ -1086,11 +1086,11 @@ export default function ExplorePage() {
                         </div>
                       )}
                       
-                      {detailModal.item.latitude && detailModal.item.longitude && (
+                      {detailModal.item.lat && detailModal.item.lon && (
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4" />
                           <a
-                            href={`https://www.google.com/maps?q=${detailModal.item.latitude},${detailModal.item.longitude}`}
+                            href={`https://www.google.com/maps?q=${detailModal.item.lat},${detailModal.item.lon}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:underline"
