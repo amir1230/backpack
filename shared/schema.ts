@@ -494,12 +494,16 @@ export const locationAncestors = pgTable("location_ancestors", {
   abbreviation: varchar("abbreviation"),
 });
 
-// Itineraries table - stores saved daily itineraries
+// Itineraries table - stores saved trips with editable items
 export const itineraries = pgTable("itineraries", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: uuid("user_id").notNull(), // Matches auth.users.id in Supabase
-  title: text("title"),
-  planJson: jsonb("plan_json").notNull(), // The complete daily itinerary object
+  title: text("title").notNull(),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  source: text("source"), // 'suggested', 'manual', etc.
+  sourceRef: text("source_ref"), // Reference to original suggestion
+  planJson: jsonb("plan_json"), // Optional: backup/cache of complete structure
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 }, (table) => [
@@ -507,19 +511,26 @@ export const itineraries = pgTable("itineraries", {
   index("itineraries_created_at_idx").on(table.createdAt),
 ]);
 
-// Optional: Itinerary items table for detailed breakdown
+// Detailed itinerary items table for day-by-day planning
 export const itineraryItems = pgTable("itinerary_items", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   itineraryId: uuid("itinerary_id").references(() => itineraries.id, { onDelete: "cascade" }).notNull(),
-  dayIndex: integer("day_index").notNull().default(0),
-  entityType: text("entity_type").notNull(), // 'destination', 'attraction', 'restaurant', 'accommodation'
-  entityId: uuid("entity_id"), // UUID or external ID
-  externalId: text("external_id"), // For external service IDs
-  meta: jsonb("meta"), // Place name, hours, coordinates, etc.
+  dayIndex: integer("day_index").notNull().default(1),
+  position: integer("position").notNull().default(0),
+  itemType: text("item_type").notNull(), // 'attraction', 'restaurant', 'accommodation', 'transport', 'other'
+  refTable: text("ref_table"), // 'attractions', 'restaurants', 'accommodations', 'destinations'
+  refId: text("ref_id"), // UUID or external ID to link to actual entities
+  title: text("title"), // Fallback name if no ref
+  notes: text("notes"),
+  startTime: timestamp("start_time", { withTimezone: true }),
+  endTime: timestamp("end_time", { withTimezone: true }),
+  source: text("source"), // 'suggested', 'manual', etc.
+  sourceRef: text("source_ref"), // Reference to original suggestion
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 }, (table) => [
   index("items_itinerary_id_idx").on(table.itineraryId),
-  index("items_day_idx").on(table.dayIndex),
+  index("items_day_position_idx").on(table.dayIndex, table.position),
 ]);
 
 // Relations
@@ -535,6 +546,21 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   pointsLedger: many(pointsLedger),
   pointsSummary: one(userPointsSummary),
   missionProgress: many(userMissionProgress),
+}));
+
+export const itinerariesRelations = relations(itineraries, ({ one, many }) => ({
+  user: one(users, {
+    fields: [itineraries.userId],
+    references: [users.id],
+  }),
+  items: many(itineraryItems),
+}));
+
+export const itineraryItemsRelations = relations(itineraryItems, ({ one }) => ({
+  itinerary: one(itineraries, {
+    fields: [itineraryItems.itineraryId],
+    references: [itineraries.id],
+  }),
 }));
 
 export const tripsRelations = relations(trips, ({ one, many }) => ({
