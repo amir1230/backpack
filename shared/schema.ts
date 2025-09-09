@@ -812,21 +812,6 @@ export const locationAncestorsRelations = relations(locationAncestors, ({ one })
   }),
 }));
 
-// New itinerary relations
-export const itinerariesRelations = relations(itineraries, ({ one, many }) => ({
-  user: one(users, {
-    fields: [itineraries.userId],
-    references: [users.id],
-  }),
-  items: many(itineraryItems),
-}));
-
-export const itineraryItemsRelations = relations(itineraryItems, ({ one }) => ({
-  itinerary: one(itineraries, {
-    fields: [itineraryItems.itineraryId],
-    references: [itineraries.id],
-  }),
-}));
 
 // Insert schemas
 export const insertTripSchema = createInsertSchema(trips).omit({

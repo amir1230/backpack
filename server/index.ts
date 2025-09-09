@@ -202,6 +202,10 @@ async function startServer() {
 
   // IMPORTANT: Register API routes BEFORE Vite middleware in development
   await registerRoutes(app);
+  
+  // Add itinerary routes
+  const { default: itineraryRouter } = await import('./itineraryRoutes.js');
+  app.use(itineraryRouter);
 
   // Setup Vite in development mode
   if (process.env.NODE_ENV === 'development') {
