@@ -1381,4 +1381,123 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// Simple in-memory storage for immediate functionality
+class MemStorage implements IStorage {
+  private trips: Trip[] = [];
+  private nextTripId = 1;
+
+  async createTrip(trip: InsertTrip): Promise<Trip> {
+    const newTrip: Trip = {
+      id: this.nextTripId++,
+      userId: trip.userId,
+      title: trip.title,
+      description: trip.description,
+      destinations: trip.destinations,
+      startDate: trip.startDate || null,
+      endDate: trip.endDate || null,
+      budget: trip.budget || null,
+      travelStyle: trip.travelStyle || null,
+      itinerary: trip.itinerary || null,
+      isPublic: trip.isPublic ?? true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.trips.push(newTrip);
+    console.log(`✅ Trip saved to memory (id=${newTrip.id}, user_id=${trip.userId})`);
+    return newTrip;
+  }
+
+  async getUserTrips(userId: string): Promise<Trip[]> {
+    const userTrips = this.trips.filter(trip => trip.userId === userId);
+    console.log(`📋 Found ${userTrips.length} trips for user: ${userId}`);
+    return userTrips;
+  }
+
+  // Placeholder implementations for required interface methods
+  async createUser(user: UpsertUser): Promise<User> { throw new Error('Not implemented'); }
+  async getUserById(id: string): Promise<User | undefined> { throw new Error('Not implemented'); }
+  async updateUser(id: string, user: Partial<UpsertUser>): Promise<User> { throw new Error('Not implemented'); }
+  async getPublicTrips(): Promise<Trip[]> { return []; }
+  async createReview(review: InsertReview): Promise<Review> { throw new Error('Not implemented'); }
+  async getReviewsByDestination(destination: string): Promise<Review[]> { return []; }
+  async getRecentReviews(): Promise<Review[]> { return []; }
+  async createExpense(expense: InsertExpense): Promise<Expense> { throw new Error('Not implemented'); }
+  async getTripExpenses(tripId: number): Promise<Expense[]> { return []; }
+  async getUserExpenses(userId: string): Promise<Expense[]> { return []; }
+  async getChatRooms(): Promise<ChatRoom[]> { return []; }
+  async getChatMessages(roomId: number): Promise<ChatMessage[]> { return []; }
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> { throw new Error('Not implemented'); }
+  async createChatRoom(room: any): Promise<ChatRoom> { throw new Error('Not implemented'); }
+  async getDMRooms(userName: string): Promise<ChatRoom[]> { return []; }
+  async findDMRoom(participant1: string, participant2: string): Promise<ChatRoom | undefined> { return undefined; }
+  async addRoomMember(roomId: number, userName: string): Promise<ChatRoomMember> { throw new Error('Not implemented'); }
+  async createChatAttachment(attachment: InsertChatAttachment): Promise<ChatAttachment> { throw new Error('Not implemented'); }
+  async createConnection(connection: InsertConnection): Promise<Connection> { throw new Error('Not implemented'); }
+  async getUserConnections(userId: string): Promise<Connection[]> { return []; }
+  async updateConnectionStatus(id: number, status: string): Promise<Connection> { throw new Error('Not implemented'); }
+  async getAllAchievements(): Promise<Achievement[]> { return []; }
+  async getUserAchievements(userId: string): Promise<UserAchievement[]> { return []; }
+  async createUserAchievement(userAchievement: InsertUserAchievement): Promise<UserAchievement> { throw new Error('Not implemented'); }
+  async updateAchievementProgress(userId: string, achievementId: number, progress: number): Promise<UserAchievement> { throw new Error('Not implemented'); }
+  async checkAndUnlockAchievements(userId: string): Promise<UserAchievement[]> { return []; }
+  async createDestination(destination: InsertDestination): Promise<Destination> { throw new Error('Not implemented'); }
+  async getDestinations(): Promise<Destination[]> { return []; }
+  async getDestinationByLocationId(locationId: string): Promise<Destination | undefined> { return undefined; }
+  async updateDestination(locationId: string, destination: Partial<InsertDestination>): Promise<Destination> { throw new Error('Not implemented'); }
+  async searchDestinations(query: string): Promise<Destination[]> { return []; }
+  async createAccommodation(accommodation: InsertAccommodation): Promise<Accommodation> { throw new Error('Not implemented'); }
+  async getAccommodations(destinationId?: number): Promise<Accommodation[]> { return []; }
+  async getAccommodationByLocationId(locationId: string): Promise<Accommodation | undefined> { return undefined; }
+  async updateAccommodation(locationId: string, accommodation: Partial<InsertAccommodation>): Promise<Accommodation> { throw new Error('Not implemented'); }
+  async searchAccommodations(query: string, filters?: any): Promise<Accommodation[]> { return []; }
+  async createAttraction(attraction: InsertAttraction): Promise<Attraction> { throw new Error('Not implemented'); }
+  async getAttractions(destinationId?: number): Promise<Attraction[]> { return []; }
+  async getAttractionByLocationId(locationId: string): Promise<Attraction | undefined> { return undefined; }
+  async updateAttraction(locationId: string, attraction: Partial<InsertAttraction>): Promise<Attraction> { throw new Error('Not implemented'); }
+  async searchAttractions(query: string, filters?: any): Promise<Attraction[]> { return []; }
+  async createRestaurant(restaurant: InsertRestaurant): Promise<Restaurant> { throw new Error('Not implemented'); }
+  async getRestaurants(destinationId?: number): Promise<Restaurant[]> { return []; }
+  async getRestaurantByLocationId(locationId: string): Promise<Restaurant | undefined> { return undefined; }
+  async updateRestaurant(locationId: string, restaurant: Partial<InsertRestaurant>): Promise<Restaurant> { throw new Error('Not implemented'); }
+  async searchRestaurants(query: string, filters?: any): Promise<Restaurant[]> { return []; }
+  async createLocationReview(review: InsertLocationReview): Promise<LocationReview> { throw new Error('Not implemented'); }
+  async getLocationReviews(locationId: string, category: string): Promise<LocationReview[]> { return []; }
+  async getRecentLocationReviews(): Promise<LocationReview[]> { return []; }
+  async upsertLocationSubratings(locationId: string, category: string, subratings: InsertLocationSubrating[]): Promise<LocationSubrating[]> { return []; }
+  async getLocationSubratings(locationId: string, category: string): Promise<LocationSubrating[]> { return []; }
+  async createLocationPhoto(photo: InsertLocationPhoto): Promise<LocationPhoto> { throw new Error('Not implemented'); }
+  async getLocationPhotos(locationId: string, category: string): Promise<LocationPhoto[]> { return []; }
+  async upsertLocationAncestors(locationId: string, ancestors: InsertLocationAncestor[]): Promise<LocationAncestor[]> { return []; }
+  async getLocationAncestors(locationId: string): Promise<LocationAncestor[]> { return []; }
+  async createPlaceReview(review: InsertPlaceReview): Promise<PlaceReview> { throw new Error('Not implemented'); }
+  async getPlaceReviews(placeId: string): Promise<PlaceReview[]> { return []; }
+  async getRecentPlaceReviews(limit?: number): Promise<PlaceReview[]> { return []; }
+  async getUserPlaceReviews(userId: string): Promise<PlaceReview[]> { return []; }
+  async searchPlaceReviews(location: string, placeType?: string): Promise<PlaceReview[]> { return []; }
+  async updatePlaceReview(id: number, review: Partial<InsertPlaceReview>): Promise<PlaceReview> { throw new Error('Not implemented'); }
+  async deletePlaceReview(id: number, userId: string): Promise<boolean> { return false; }
+  async voteOnReview(vote: InsertReviewVote): Promise<ReviewVote> { throw new Error('Not implemented'); }
+  async getReviewVotes(reviewId: number): Promise<ReviewVote[]> { return []; }
+  async getUserVoteOnReview(reviewId: number, userId: string): Promise<ReviewVote | undefined> { return undefined; }
+  async updateReviewHelpfulness(reviewId: number): Promise<void> {}
+  async getChatRoomById(id: number): Promise<ChatRoom | undefined> { return undefined; }
+  async updateChatRoom(id: number, room: Partial<any>): Promise<ChatRoom> { throw new Error('Not implemented'); }
+  async joinChatRoom(roomId: number, userName: string): Promise<ChatRoomMember> { throw new Error('Not implemented'); }
+  async leaveChatRoom(roomId: number, userName: string): Promise<void> {}
+  async deleteChatRoom(id: number, userName: string): Promise<void> {}
+  async searchChatRooms(query: string, filters?: any): Promise<ChatRoom[]> { return []; }
+  async getChatRoomMembers(roomId: number): Promise<ChatRoomMember[]> { return []; }
+  async createTravelBuddyPost(post: InsertTravelBuddyPost): Promise<TravelBuddyPost> { throw new Error('Not implemented'); }
+  async getTravelBuddyPosts(filters?: any): Promise<TravelBuddyPost[]> { return []; }
+  async updateTravelBuddyPost(id: number, post: Partial<InsertTravelBuddyPost>): Promise<TravelBuddyPost> { throw new Error('Not implemented'); }
+  async deleteTravelBuddyPost(id: number, userId: string): Promise<void> {}
+  async createTravelBuddyApplication(application: InsertTravelBuddyApplication): Promise<TravelBuddyApplication> { throw new Error('Not implemented'); }
+  async getTravelBuddyApplications(postId: number): Promise<TravelBuddyApplication[]> { return []; }
+  async updateTravelBuddyApplicationStatus(id: number, status: string): Promise<TravelBuddyApplication> { throw new Error('Not implemented'); }
+  async createItinerary(itinerary: InsertItinerary): Promise<Itinerary> { throw new Error('Not implemented'); }
+  async getUserItineraries(userId: string): Promise<Itinerary[]> { return []; }
+  async deleteItinerary(id: string, userId: string): Promise<void> {}
+  async getItineraryById(id: string): Promise<Itinerary | undefined> { return undefined; }
+}
+
+export const storage = new MemStorage();
