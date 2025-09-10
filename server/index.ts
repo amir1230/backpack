@@ -278,25 +278,22 @@ async function startServer() {
       // Import storage interface
       const { storage } = await import('./storage.js');
       
-      // Create trip object for storage
+      // Create trip object for storage (without timestamps - let DB handle them)
       const newTrip = {
-        id: Math.floor(Math.random() * 1000000).toString(),
         userId: userId,
         title: `${suggestion.destination}, ${suggestion.country}`,
         description: suggestion.description,
         destinations: [suggestion.destination],
         budget: suggestion.estimatedBudget?.high?.toString() || '1000',
         travelStyle: Array.isArray(suggestion.travelStyle) ? suggestion.travelStyle.join(', ') : (suggestion.travelStyle || 'Adventure'),
-        isPublic: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        isPublic: false
       };
       
       // Save to storage
-      await storage.createTrip(newTrip);
+      const savedTrip = await storage.createTrip(newTrip);
 
       // Check if trip was created successfully
-      if (!newTrip.id) {
+      if (!savedTrip?.id) {
         throw new Error('Failed to create trip');
       }
 
@@ -304,7 +301,7 @@ async function startServer() {
       
       res.json({
         success: true,
-        trip: newTrip,
+        trip: savedTrip,
         message: 'Saved to My Trips'
       });
       
