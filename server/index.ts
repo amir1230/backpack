@@ -223,6 +223,41 @@ async function startServer() {
   const { default: itineraryRouter } = await import('./itineraryRoutes.js');
   app.use(itineraryRouter);
 
+  // Create trips table if needed
+  app.post('/api/trips/create-table', async (_req, res) => {
+    try {
+      const { pool } = await import('./db.js');
+      
+      const createTableSQL = `
+        CREATE TABLE IF NOT EXISTS trips (
+          id SERIAL PRIMARY KEY,
+          user_id VARCHAR NOT NULL,
+          title VARCHAR NOT NULL,
+          description TEXT,
+          destinations JSONB NOT NULL,
+          start_date TIMESTAMP,
+          end_date TIMESTAMP,
+          budget DECIMAL(10,2),
+          travel_style VARCHAR,
+          itinerary JSONB,
+          is_public BOOLEAN DEFAULT true,
+          created_at TIMESTAMP DEFAULT NOW(),
+          updated_at TIMESTAMP DEFAULT NOW()
+        );
+      `;
+      
+      await pool.query(createTableSQL);
+      res.json({ success: true, message: "Trips table created successfully" });
+    } catch (error) {
+      console.error('Create table error:', error);
+      res.status(500).json({ 
+        error: 'database',
+        message: 'Failed to create table',
+        details: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   // Save Suggested Trip route - POST /api/trips/save-suggestion
   app.post('/api/trips/save-suggestion', async (req: any, res) => {
     try {
