@@ -587,7 +587,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(achievements)
       .where(eq(achievements.isActive, true))
-      .orderBy(achievements.category, achievements.points);
+      .orderBy(achievements.category, achievements.pointsReward);
   }
 
   async getUserAchievements(userId: string): Promise<UserAchievement[]> {

@@ -37,10 +37,10 @@ if (!supabaseProjectId) {
   throw new Error('Invalid SUPABASE_URL format');
 }
 
-// Use Transaction Pooler for Supabase connection - override incorrect env var
-export const DATABASE_URL = `postgresql://postgres.wuzhvkmfdyiwaaladyxc:QK83yFVTMcDMJ2uX@aws-0-sa-east-1.pooler.supabase.com:6543/postgres`;
+// Use Supabase direct connection instead of Transaction Pooler
+export const DATABASE_URL = `postgresql://postgres.wuzhvkmfdyiwaaladyxc:QK83yFVTMcDMJ2uX@db.wuzhvkmfdyiwaaladyxc.supabase.co:5432/postgres`;
 
-console.log('🔧 Using fixed DATABASE_URL for Supabase Transaction Pooler');
+console.log('🔧 Using direct Supabase connection (not Transaction Pooler)');
 
 // Configuration object for application use
 export const config = {

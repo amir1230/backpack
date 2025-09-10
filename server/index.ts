@@ -275,25 +275,28 @@ async function startServer() {
         });
       }
 
-      // Import required modules
-      const { db } = await import('./db.js');
-      const { trips } = await import('@shared/schema.js');
+      // Import storage interface
+      const { storage } = await import('./storage.js');
       
-      // Save to public.trips table with user_id as string
-      const [newTrip] = await db
-        .insert(trips)
-        .values({
-          userId: userId,
-          title: `${suggestion.destination}, ${suggestion.country}`,
-          description: suggestion.description,
-          destinations: [suggestion.destination],
-          budget: suggestion.estimatedBudget?.high?.toString() || '1000',
-          travelStyle: Array.isArray(suggestion.travelStyle) ? suggestion.travelStyle.join(', ') : (suggestion.travelStyle || 'Adventure'),
-          isPublic: false
-        })
-        .returning();
+      // Create trip object for storage
+      const newTrip = {
+        id: Math.floor(Math.random() * 1000000).toString(),
+        userId: userId,
+        title: `${suggestion.destination}, ${suggestion.country}`,
+        description: suggestion.description,
+        destinations: [suggestion.destination],
+        budget: suggestion.estimatedBudget?.high?.toString() || '1000',
+        travelStyle: Array.isArray(suggestion.travelStyle) ? suggestion.travelStyle.join(', ') : (suggestion.travelStyle || 'Adventure'),
+        isPublic: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      // Save to storage
+      await storage.createTrip(newTrip);
 
-      if (!newTrip) {
+      // Check if trip was created successfully
+      if (!newTrip.id) {
         throw new Error('Failed to create trip');
       }
 
@@ -335,16 +338,10 @@ async function startServer() {
       
       console.log(`📋 Fetching trips for user: ${userId}`);
 
-      const { db } = await import('./db.js');
-      const { trips } = await import('@shared/schema.js');
-      const { eq, desc } = await import('drizzle-orm');
+      const { storage } = await import('./storage.js');
       
-      // Query public.trips by string equality: user_id == userId  
-      const userTrips = await db
-        .select()
-        .from(trips)
-        .where(eq(trips.userId, userId))
-        .orderBy(desc(trips.updatedAt));
+      // Get trips for this user using storage
+      const userTrips = await storage.getUserTrips(userId);
       
       res.json(userTrips);
       
