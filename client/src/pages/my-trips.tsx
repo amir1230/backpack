@@ -165,11 +165,20 @@ export default function MyTripsScreen() {
         description: "Your trip has been saved as an editable itinerary.",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Save itinerary error:', error);
+      
+      // Show more specific error messages
+      let errorMessage = "Failed to save trip. Please try again.";
+      if (error?.response?.status === 503) {
+        errorMessage = "Database not ready. The itinerary feature needs to be set up first.";
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
       toast({
         title: "Save Error",
-        description: "Failed to save trip. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     }

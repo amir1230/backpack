@@ -69,9 +69,20 @@ itineraryRouter.post('/api/itineraries/save', async (req, res) => {
     
     if (error) {
       console.error('Save trip error:', error);
+      
+      // Provide more specific error messages
+      if (error.message?.includes('does not exist') || error.message?.includes('relation')) {
+        return res.status(503).json({ 
+          error: 'database_setup',
+          message: 'Database tables not ready. The itinerary feature needs to be initialized.',
+          details: 'Please contact support or run database setup first.'
+        });
+      }
+      
       return res.status(500).json({ 
-        error: error.type,
-        message: error.userMessage 
+        error: error.type || 'database',
+        message: error.userMessage || 'Database connection failed. Please try again later.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
     }
     

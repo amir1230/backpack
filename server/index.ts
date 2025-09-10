@@ -153,46 +153,75 @@ async function startServer() {
   server.requestTimeout = 60000;
   server.timeout = 65000;
 
-  // TEMP: Create itinerary tables setup endpoint - MUST be before Vite
+  // Create itinerary tables setup endpoint with correct schema
   app.post('/api/setup/create-itinerary-tables', async (_req, res) => {
     try {
       const { db } = await import('./db.js');
       const { sql } = await import('drizzle-orm');
       
-      // Create tables using direct SQL through db client
+      console.log('Creating itinerary tables with new schema...');
+      
+      // Create itineraries table with new schema
       await db.execute(sql`
         CREATE TABLE IF NOT EXISTS itineraries (
-            id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
-            user_id varchar NOT NULL,
-            title varchar NOT NULL,
-            plan_json jsonb NOT NULL,
-            created_at timestamp DEFAULT NOW(),
-            updated_at timestamp DEFAULT NOW()
+            id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id uuid NOT NULL,
+            title text NOT NULL,
+            start_date timestamp with time zone,
+            end_date timestamp with time zone,
+            source text,
+            source_ref text,
+            plan_json jsonb,
+            created_at timestamp with time zone DEFAULT NOW(),
+            updated_at timestamp with time zone DEFAULT NOW()
         );
       `);
       
+      // Create indexes for itineraries
+      await db.execute(sql`
+        CREATE INDEX IF NOT EXISTS itineraries_user_id_idx ON itineraries(user_id);
+      `);
+      await db.execute(sql`
+        CREATE INDEX IF NOT EXISTS itineraries_created_at_idx ON itineraries(created_at);
+      `);
+      
+      // Create itinerary_items table with new schema
       await db.execute(sql`
         CREATE TABLE IF NOT EXISTS itinerary_items (
-            id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
-            itinerary_id varchar NOT NULL REFERENCES itineraries(id) ON DELETE CASCADE,
-            day_number integer NOT NULL,
-            location varchar NOT NULL,
-            activity_type varchar,
-            description text,
-            estimated_cost decimal(10,2),
-            start_time time,
-            end_time time,
+            id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+            itinerary_id uuid NOT NULL REFERENCES itineraries(id) ON DELETE CASCADE,
+            day_index integer NOT NULL DEFAULT 1,
+            position integer NOT NULL DEFAULT 0,
+            item_type text NOT NULL,
+            ref_table text,
+            ref_id text,
+            title text,
             notes text,
-            created_at timestamp DEFAULT NOW()
+            start_time timestamp with time zone,
+            end_time timestamp with time zone,
+            source text,
+            source_ref text,
+            created_at timestamp with time zone DEFAULT NOW(),
+            updated_at timestamp with time zone DEFAULT NOW()
         );
       `);
+      
+      // Create indexes for itinerary_items
+      await db.execute(sql`
+        CREATE INDEX IF NOT EXISTS items_itinerary_id_idx ON itinerary_items(itinerary_id);
+      `);
+      await db.execute(sql`
+        CREATE INDEX IF NOT EXISTS items_day_position_idx ON itinerary_items(day_index, position);
+      `);
+      
+      console.log('✅ Itinerary tables created successfully');
       
       res.json({ 
         success: true, 
-        message: "Itinerary tables created successfully" 
+        message: "Itinerary tables created successfully with new schema" 
       });
     } catch (error) {
-      console.error('Error creating itinerary tables:', error);
+      console.error('❌ Error creating itinerary tables:', error);
       res.status(500).json({ 
         success: false, 
         error: error instanceof Error ? error.message : 'Failed to create tables' 
