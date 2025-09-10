@@ -100,7 +100,7 @@ export default function MyTripsScreen() {
   });
   const [suggestions, setSuggestions] = useState<TripSuggestion[]>([]);
   const [selectedTripForEditor, setSelectedTripForEditor] = useState<string | null>(null);
-  const [selectedTripForMerge, setSelectedTripForMerge] = useState<string | null>(null);
+  const [selectedTripForMerge, setSelectedTripForMerge] = useState<TripSuggestion | null>(null);
 
   // Fetch user trips from new endpoint (public.trips with string user_id)
   const { data: savedTrips = [], isLoading: tripsLoading } = useQuery<SavedTrip[]>({
@@ -360,12 +360,12 @@ export default function MyTripsScreen() {
                         <Label htmlFor="destination" className="text-sm font-medium text-slate-700">
                           Where do you want to go?
                         </Label>
-                        <Select value={formData.destination} onValueChange={(value) => setFormData(prev => ({ ...prev, destination: value }))}>
+                        <Select value={formData.destination} onValueChange={(value: string) => setFormData(prev => ({ ...prev, destination: value }))}>
                           <SelectTrigger className="w-full p-3 h-12">
                             <SelectValue placeholder="Select destination" />
                           </SelectTrigger>
                           <SelectContent>
-                            {SOUTH_AMERICAN_COUNTRIES.map((destination) => (
+                            {SOUTH_AMERICAN_COUNTRIES.map((destination: string) => (
                               <SelectItem key={destination} value={destination}>
                                 {destination}
                               </SelectItem>
@@ -378,7 +378,7 @@ export default function MyTripsScreen() {
                         <Label htmlFor="duration" className="text-sm font-medium text-slate-700">
                           Trip Duration
                         </Label>
-                        <Select value={formData.duration} onValueChange={(value) => setFormData(prev => ({ ...prev, duration: value }))}>
+                        <Select value={formData.duration} onValueChange={(value: string) => setFormData(prev => ({ ...prev, duration: value }))}>
                           <SelectTrigger className="w-full p-3 h-12">
                             <SelectValue placeholder="Select duration" />
                           </SelectTrigger>
