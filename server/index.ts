@@ -275,17 +275,17 @@ async function startServer() {
         message: 'Saved to My Trips'
       });
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Save suggestion error:', error);
       
       // Friendly error messages in English
       let message = 'Could not save trip. Please try again.';
       let errorType = 'database';
       
-      if (error.message?.includes('does not exist')) {
+      if (error?.message?.includes('does not exist')) {
         message = 'Database setup incomplete. Please contact support.';
         errorType = 'schema';
-      } else if (error.message?.includes('connection')) {
+      } else if (error?.message?.includes('connection')) {
         message = 'Database temporarily unavailable. Please try again.';
         errorType = 'network';
       }
@@ -323,7 +323,7 @@ async function startServer() {
       
       res.json(userTrips);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching user trips:', error);
       res.status(500).json({
         error: 'database',

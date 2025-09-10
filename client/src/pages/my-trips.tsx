@@ -102,13 +102,13 @@ export default function MyTripsScreen() {
   const [selectedTripForEditor, setSelectedTripForEditor] = useState<string | null>(null);
   const [selectedTripForMerge, setSelectedTripForMerge] = useState<string | null>(null);
 
-  // Fetch saved trips (old API)
+  // Fetch user trips from new endpoint (public.trips with string user_id)
   const { data: savedTrips = [], isLoading: tripsLoading } = useQuery<SavedTrip[]>({
-    queryKey: ['/api/my-trips/guest'],
+    queryKey: ['/api/trips/my-trips'],
     enabled: activeTab === "saved"
   });
 
-  // Fetch saved itineraries (new API) 
+  // Fetch saved itineraries (advanced planning features) 
   const { data: savedItineraries = [], isLoading: itinerariesLoading } = useQuery<SavedTripWithItems[]>({
     queryKey: ['/api/itineraries'],
     queryFn: async () => {
@@ -146,38 +146,53 @@ export default function MyTripsScreen() {
     }
   });
 
-  // Save trip mutation using the new itinerary endpoint
+  // Save trip mutation using the new trips table endpoint
   const saveItineraryMutation = useMutation({
     mutationFn: async (suggestion: TripSuggestion) => {
-      const response = await apiRequest('/api/itineraries/save', {
+      const response = await apiRequest('/api/trips/save-suggestion', {
         method: 'POST',
         body: JSON.stringify({ 
-          userId: 'guest-user',
           suggestion 
         })
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.requiresAuth) {
+          // TODO: Trigger Google sign-in, then retry
+          throw new Error('Please sign in to save trips');
+        }
+        throw new Error(errorData.message || 'Failed to save trip');
+      }
+      
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate both old and new query keys
+      queryClient.invalidateQueries({ queryKey: ['/api/trips/my-trips'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/my-trips/guest'] });
       queryClient.invalidateQueries({ queryKey: ['/api/itineraries'] });
+      
       toast({
-        title: "Trip Saved!",
-        description: "Your trip has been saved as an editable itinerary.",
+        title: "Saved to My Trips",
+        description: "Your trip suggestion has been saved successfully.",
       });
     },
     onError: (error: any) => {
-      console.error('Save itinerary error:', error);
+      console.error('Save trip error:', error);
       
-      // Show more specific error messages
-      let errorMessage = "Failed to save trip. Please try again.";
-      if (error?.response?.status === 503) {
-        errorMessage = "Database not ready. The itinerary feature needs to be set up first.";
-      } else if (error?.response?.data?.message) {
-        errorMessage = error.response.data.message;
+      // Friendly English error messages
+      let errorMessage = "Could not save trip. Please try again.";
+      if (error?.message?.includes('sign in')) {
+        errorMessage = "Please sign in to save trips";
+      } else if (error?.message?.includes('Database setup incomplete')) {
+        errorMessage = "Database setup incomplete. Please contact support.";
+      } else if (error?.message?.includes('Database temporarily unavailable')) {
+        errorMessage = "Database temporarily unavailable. Please try again.";
       }
       
       toast({
-        title: "Save Error",
+        title: "Error",
         description: errorMessage,
         variant: "destructive"
       });
