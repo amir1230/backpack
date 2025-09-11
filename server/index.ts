@@ -18,6 +18,7 @@ async function startServer() {
   app.use(express.urlencoded({ extended: true }));
 
   // Health check endpoints for monitoring
+  // Health check endpoint for production testing
   app.get('/health', async (_req, res) => {
     try {
       // Test Supabase connection
