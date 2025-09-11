@@ -17,9 +17,10 @@ async function startServer() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // Health check endpoints for monitoring
-  // Health check endpoint for production testing
-  app.get('/health', async (_req, res) => {
+  // Health check endpoint for production testing  
+  app.get('/health', (_req, res) => res.send('ok'));
+  
+  app.get('/health/detailed', async (_req, res) => {
     try {
       // Test Supabase connection
       const { getSupabaseAdmin } = await import('./supabase.js');
@@ -378,11 +379,11 @@ async function startServer() {
     });
   }
 
-  server.listen(PORT, HOST, () => {
-    console.log(`[server] BackpackBuddy listening on http://${HOST}:${PORT}`);
-    console.log(`[server] Using PORT from environment: ${process.env.PORT || 'default'}`);
-    console.log(`[server] Environment: ${config.server.nodeEnv}`);
-    console.log(`[server] Health check: http://${HOST}:${PORT}/health`);
+  server.listen(Number(process.env.PORT) || 3000, '0.0.0.0', () => {
+    console.log('listening');
+    console.log(`[server] BackpackBuddy listening on http://0.0.0.0:${process.env.PORT || 3000}`);
+    console.log(`[server] Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`[server] Health check: http://0.0.0.0:${process.env.PORT || 3000}/health`);
   });
   
   // Graceful shutdown

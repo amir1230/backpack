@@ -83,12 +83,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
       }
       
-      const redirectTo = `${getRedirectBase()}/auth/callback`;
+      const appUrl = (import.meta as any).env.VITE_PUBLIC_APP_URL;
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-          redirectTo,
+        options: { 
+          redirectTo: appUrl  // לא localhost
         }
       });
       
