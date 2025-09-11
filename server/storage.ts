@@ -1486,14 +1486,14 @@ class MemStorage implements IStorage {
   async getChatRoomById(id: number): Promise<ChatRoom | undefined> { return undefined; }
   async updateChatRoom(id: number, room: Partial<any>): Promise<ChatRoom> { throw new Error('Not implemented'); }
   async joinChatRoom(roomId: number, userName: string): Promise<ChatRoomMember> { throw new Error('Not implemented'); }
-  async leaveChatRoom(roomId: number, userName: string): Promise<void> {}
-  async deleteChatRoom(id: number, userName: string): Promise<void> {}
+  async leaveChatRoom(roomId: number, userName: string): Promise<boolean> { return true; }
+  async deleteChatRoom(id: number, userName: string): Promise<boolean> { return true; }
   async searchChatRooms(query: string, filters?: any): Promise<ChatRoom[]> { return []; }
   async getChatRoomMembers(roomId: number): Promise<ChatRoomMember[]> { return []; }
   async createTravelBuddyPost(post: InsertTravelBuddyPost): Promise<TravelBuddyPost> { throw new Error('Not implemented'); }
   async getTravelBuddyPosts(filters?: any): Promise<TravelBuddyPost[]> { return []; }
   async updateTravelBuddyPost(id: number, post: Partial<InsertTravelBuddyPost>): Promise<TravelBuddyPost> { throw new Error('Not implemented'); }
-  async deleteTravelBuddyPost(id: number, userId: string): Promise<void> {}
+  async deleteTravelBuddyPost(id: number, userId: string): Promise<boolean> { return true; }
   async createTravelBuddyApplication(application: InsertTravelBuddyApplication): Promise<TravelBuddyApplication> { throw new Error('Not implemented'); }
   async getTravelBuddyApplications(postId: number): Promise<TravelBuddyApplication[]> { return []; }
   async updateTravelBuddyApplicationStatus(id: number, status: string): Promise<TravelBuddyApplication> { throw new Error('Not implemented'); }
@@ -1503,4 +1503,5 @@ class MemStorage implements IStorage {
   async getItineraryById(id: string): Promise<Itinerary | undefined> { return undefined; }
 }
 
+// Use memory storage for immediate functionality
 export const storage = new MemStorage();

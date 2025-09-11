@@ -379,6 +379,7 @@ async function startServer() {
 
   server.listen(PORT, HOST, () => {
     console.log(`[server] BackpackBuddy listening on http://${HOST}:${PORT}`);
+    console.log(`[server] Using PORT from environment: ${process.env.PORT || 'default'}`);
     console.log(`[server] Environment: ${config.server.nodeEnv}`);
     console.log(`[server] Health check: http://${HOST}:${PORT}/health`);
   });
