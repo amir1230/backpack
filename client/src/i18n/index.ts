@@ -29,6 +29,11 @@ i18n
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage']
+    },
+
+    // Set up locale change handler for date formatting
+    react: {
+      useSuspense: false
     }
   });
 

@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase.js';
 import { getRedirectBase } from '../utils/redirectBase.js';
 import type { User, Session } from '@supabase/supabase-js';
 import { useToast } from '../hooks/use-toast.js';
+import { useTranslation } from 'react-i18next';
 
 interface AuthContextType {
   user: User | null;
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     let isMounted = true;
@@ -57,13 +59,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       if (event === 'SIGNED_IN' && session?.user) {
         toast({
-          title: "התחברת בהצלחה!",
-          description: `ברוך הבא ${session.user.email}`,
+          title: t('auth.signed_in_successfully'),
+          description: t('auth.welcome_back', { email: session.user.email }),
         });
       } else if (event === 'SIGNED_OUT') {
         toast({
-          title: "התנתקת בהצלחה",
-          description: "להתראות!",
+          title: t('auth.signed_out_successfully'),
+          description: t('auth.goodbye'),
         });
       }
     });
@@ -101,8 +103,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(false);
       console.error('Sign in error:', error);
       toast({
-        title: "שגיאה בהתחברות",
-        description: error.message || "נסה שוב מאוחר יותר",
+        title: t('auth.login_error'),
+        description: error.message || t('auth.try_again_later'),
         variant: "destructive",
       });
       throw error;

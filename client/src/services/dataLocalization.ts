@@ -1,6 +1,6 @@
 // Data access layer with localization support
-import { queryClient } from '@/lib/queryClient';
-import { LocalizationService } from './localizationService';
+import { queryClient } from '../lib/queryClient.js';
+import { LocalizationService } from './localizationService.js';
 
 interface LocalizedDataOptions {
   locale?: string;
