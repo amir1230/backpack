@@ -1,10 +1,13 @@
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from './ui/button.js';
 import { Globe } from 'lucide-react';
 import { useEffect } from 'react';
+import { invalidateLocalizedQueries } from '../lib/localizedData.js';
 
 export function LanguageToggle() {
   const { i18n, t } = useTranslation();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // Set HTML dir attribute based on language
@@ -15,6 +18,9 @@ export function LanguageToggle() {
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'he' : 'en';
     i18n.changeLanguage(newLang);
+    
+    // Invalidate all localized queries to trigger refetch with new language
+    invalidateLocalizedQueries(queryClient);
   };
 
   return (
