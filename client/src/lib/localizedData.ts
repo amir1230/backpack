@@ -17,6 +17,12 @@ export interface LocalizedPlace {
   priceLevel?: string;
   category?: string;
   categoryLocalized?: string;
+  // Additional properties needed by components
+  addressString?: string;
+  photoCount?: number;
+  rankingString?: string;
+  isBookable?: boolean;
+  dietaryRestrictions?: string[];
   // Entity-specific fields
   cuisine?: string[];
   cuisineLocalized?: string[];
@@ -52,6 +58,11 @@ export async function getLocalized(entity: 'destinations' | 'accommodations' | '
       priceLevel: item.price_level,
       category: item.category,
       categoryLocalized: item.category_localized || item.category,
+      addressString: item.address_string,
+      photoCount: item.photo_count || 0,
+      rankingString: item.ranking_string,
+      isBookable: item.is_bookable,
+      dietaryRestrictions: item.dietary_restrictions,
       cuisine: item.cuisine,
       cuisineLocalized: item.cuisine_localized || item.cuisine,
       amenities: item.amenities,
@@ -87,6 +98,11 @@ async function getLocalizedFallback(entity: 'destinations' | 'accommodations' | 
       priceLevel: item.price_level || item.priceLevel,
       category: item.category,
       categoryLocalized: localizeCategory(item.category, locale),
+      addressString: item.address_string || item.addressString,
+      photoCount: item.photo_count || item.photoCount || 0,
+      rankingString: item.ranking_string || item.rankingString,
+      isBookable: item.is_bookable || item.isBookable,
+      dietaryRestrictions: item.dietary_restrictions || item.dietaryRestrictions,
       cuisine: item.cuisine,
       cuisineLocalized: localizeCuisine(item.cuisine, locale),
       amenities: item.amenities,

@@ -5,30 +5,24 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, Star, Users, Camera, MessageSquare } from "lucide-react";
+import { 
+  useLocalizedDestinations, 
+  useLocalizedAccommodations, 
+  useLocalizedAttractions, 
+  useLocalizedRestaurants 
+} from "../lib/localizedData.js";
+import { useIntlFormatters } from "../lib/intlFormatters.js";
 
 export default function TripAdvisorData() {
   const [activeTab, setActiveTab] = useState("destinations");
 
-  // Fetch data for each category
-  const { data: destinations, isLoading: destinationsLoading } = useQuery({
-    queryKey: ["/api/destinations"],
-    enabled: activeTab === "destinations"
-  });
+  const { formatNumber, formatDate } = useIntlFormatters();
 
-  const { data: accommodations, isLoading: accommodationsLoading } = useQuery({
-    queryKey: ["/api/accommodations"],
-    enabled: activeTab === "accommodations"
-  });
-
-  const { data: attractions, isLoading: attractionsLoading } = useQuery({
-    queryKey: ["/api/attractions"],
-    enabled: activeTab === "attractions"
-  });
-
-  const { data: restaurants, isLoading: restaurantsLoading } = useQuery({
-    queryKey: ["/api/ta-restaurants"],
-    enabled: activeTab === "restaurants"
-  });
+  // Use localized data hooks
+  const { data: destinations, isLoading: destinationsLoading } = useLocalizedDestinations();
+  const { data: accommodations, isLoading: accommodationsLoading } = useLocalizedAccommodations();
+  const { data: attractions, isLoading: attractionsLoading } = useLocalizedAttractions();
+  const { data: restaurants, isLoading: restaurantsLoading } = useLocalizedRestaurants();
 
   const { data: recentReviews, isLoading: reviewsLoading } = useQuery({
     queryKey: ["/api/location-reviews/recent"],
@@ -72,12 +66,12 @@ export default function TripAdvisorData() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {destinationsLoading ? (
               <p>Loading destinations...</p>
-            ) : destinations?.map((destination: any) => (
+            ) : destinations?.map((destination) => (
               <Card key={destination.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MapPin className="w-5 h-5 text-blue-600" />
-                    {destination.name}
+                    {destination.nameLocalized}
                   </CardTitle>
                   <CardDescription>{destination.country}</CardDescription>
                 </CardHeader>
@@ -106,11 +100,11 @@ export default function TripAdvisorData() {
           <div className="grid gap-6 md:grid-cols-2">
             {accommodationsLoading ? (
               <p>Loading accommodations...</p>
-            ) : accommodations?.map((accommodation: any) => (
+            ) : accommodations?.map((accommodation) => (
               <Card key={accommodation.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
-                    <span>{accommodation.name}</span>
+                    <span>{accommodation.nameLocalized}</span>
                     <Badge variant="secondary">{accommodation.priceLevel}</Badge>
                   </CardTitle>
                   <CardDescription>
@@ -120,7 +114,7 @@ export default function TripAdvisorData() {
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      {renderStars(parseFloat(accommodation.rating))}
+                      {renderStars(accommodation.rating || 0)}
                       <span className="text-sm font-medium">{accommodation.rating}</span>
                       <span className="text-sm text-gray-500">({accommodation.numReviews} reviews)</span>
                     </div>
@@ -166,10 +160,10 @@ export default function TripAdvisorData() {
           <div className="grid gap-6 md:grid-cols-2">
             {attractionsLoading ? (
               <p>Loading attractions...</p>
-            ) : attractions?.map((attraction: any) => (
+            ) : attractions?.map((attraction) => (
               <Card key={attraction.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  <CardTitle>{attraction.name}</CardTitle>
+                  <CardTitle>{attraction.nameLocalized}</CardTitle>
                   <CardDescription>
                     {attraction.city}, {attraction.country}
                   </CardDescription>
@@ -177,7 +171,7 @@ export default function TripAdvisorData() {
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      {renderStars(parseFloat(attraction.rating))}
+                      {renderStars(attraction.rating || 0)}
                       <span className="text-sm font-medium">{attraction.rating}</span>
                       <span className="text-sm text-gray-500">({attraction.numReviews} reviews)</span>
                     </div>
@@ -213,11 +207,11 @@ export default function TripAdvisorData() {
           <div className="grid gap-6 md:grid-cols-2">
             {restaurantsLoading ? (
               <p>Loading restaurants...</p>
-            ) : restaurants?.map((restaurant: any) => (
+            ) : restaurants?.map((restaurant) => (
               <Card key={restaurant.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
-                    <span>{restaurant.name}</span>
+                    <span>{restaurant.nameLocalized}</span>
                     <Badge variant="secondary">{restaurant.priceLevel}</Badge>
                   </CardTitle>
                   <CardDescription>
@@ -227,7 +221,7 @@ export default function TripAdvisorData() {
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      {renderStars(parseFloat(restaurant.rating))}
+                      {renderStars(restaurant.rating || 0)}
                       <span className="text-sm font-medium">{restaurant.rating}</span>
                       <span className="text-sm text-gray-500">({restaurant.numReviews} reviews)</span>
                     </div>
@@ -238,9 +232,9 @@ export default function TripAdvisorData() {
                       </p>
                     )}
                     
-                    {restaurant.cuisine && restaurant.cuisine.length > 0 && (
+                    {restaurant.cuisineLocalized && restaurant.cuisineLocalized.length > 0 && (
                       <div className="flex flex-wrap gap-1">
-                        {restaurant.cuisine.map((cuisine: string, index: number) => (
+                        {restaurant.cuisineLocalized.map((cuisine: string, index: number) => (
                           <Badge key={index} variant="outline" className="text-xs">
                             {cuisine}
                           </Badge>
