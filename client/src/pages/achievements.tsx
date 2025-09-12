@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useIntlFormatters } from "@/lib/intlFormatters";
 import { 
   Trophy, 
   Target, 
@@ -59,6 +60,7 @@ export default function Achievements() {
   const [activeTab, setActiveTab] = useState("overview");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { formatNumber, formatShortDate } = useIntlFormatters();
 
   // Fetch user points summary
   const { data: pointsSummary, isLoading: pointsLoading } = useQuery({
@@ -862,7 +864,7 @@ export default function Achievements() {
                           </div>
                         </div>
                         <div className={`text-lg font-bold ${entry.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {entry.points > 0 ? '+' : ''}{entry.points}
+                          {entry.points > 0 ? '+' : ''}{formatNumber(entry.points)}
                         </div>
                       </div>
                     )) || []}
@@ -906,7 +908,7 @@ export default function Achievements() {
               <div className="pt-3 border-t border-gray-100">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-gray-600">Total Points</span>
-                  <span className="font-semibold text-orange-600">{totalPoints.toLocaleString()}</span>
+                  <span className="font-semibold text-orange-600">{formatNumber(totalPoints)}</span>
                 </div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-gray-600">Badges Unlocked</span>
@@ -964,7 +966,7 @@ export default function Achievements() {
                   <>
                     <Progress value={((totalPoints % 100) / 100) * 100} className="h-3" />
                     <p className="text-sm text-gray-600 text-center">
-                      {pointsToNext} points to next level
+                      {formatNumber(pointsToNext)} points to next level
                     </p>
                   </>
                 ) : (

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { EXPENSE_CATEGORIES } from "@/lib/expense-categories";
+import { useIntlFormatters } from "@/lib/intlFormatters";
 import { 
   DollarSign, 
   TrendingUp, 
@@ -33,6 +34,7 @@ export default function BudgetOverview({
   expenses = [], 
   currency = "USD" 
 }: BudgetOverviewProps) {
+  const { formatCurrency, formatNumber, formatShortDate } = useIntlFormatters();
   const budgetUsed = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
   const remaining = totalBudget - totalSpent;
 
@@ -100,7 +102,7 @@ export default function BudgetOverview({
                 <DollarSign className="w-5 h-5 text-gray-600" />
               </div>
               <div className="text-2xl font-bold text-gray-800">
-                ${totalSpent.toFixed(2)}
+                {formatCurrency(totalSpent, currency)}
               </div>
               <div className="text-sm text-gray-600">Total Spent</div>
             </div>
@@ -112,7 +114,7 @@ export default function BudgetOverview({
                     <Target className="w-5 h-5 text-gray-600" />
                   </div>
                   <div className="text-2xl font-bold text-gray-800">
-                    ${totalBudget.toFixed(2)}
+                    {formatCurrency(totalBudget, currency)}
                   </div>
                   <div className="text-sm text-gray-600">Budget</div>
                 </div>
@@ -126,7 +128,7 @@ export default function BudgetOverview({
                     )}
                   </div>
                   <div className={`text-2xl font-bold ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    ${Math.abs(remaining).toFixed(2)}
+                    {formatCurrency(Math.abs(remaining), currency)}
                   </div>
                   <div className="text-sm text-gray-600">
                     {remaining >= 0 ? 'Remaining' : 'Over Budget'}
@@ -163,8 +165,8 @@ export default function BudgetOverview({
                         <span className="font-medium">{category.label}</span>
                       </div>
                       <div className="text-right">
-                        <div className="font-semibold">${category.total.toFixed(2)}</div>
-                        <div className="text-sm text-gray-600">{percentage.toFixed(1)}%</div>
+                        <div className="font-semibold">{formatCurrency(category.total, currency)}</div>
+                        <div className="text-sm text-gray-600">{formatNumber(percentage, { maximumFractionDigits: 1 })}%</div>
                       </div>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -206,12 +208,12 @@ export default function BudgetOverview({
                         <div>
                           <div className="font-medium">{expense.description}</div>
                           <div className="text-sm text-gray-600">
-                            {category?.label || 'Other'} • {new Date(expense.date).toLocaleDateString()}
+                            {category?.label || 'Other'} • {formatShortDate(expense.date)}
                           </div>
                         </div>
                       </div>
                       <div className="font-semibold text-gray-800">
-                        ${expense.amount.toFixed(2)}
+                        {formatCurrency(expense.amount, currency)}
                       </div>
                     </div>
                     {index < (recentExpenses || []).length - 1 && <Separator className="mt-2" />}
