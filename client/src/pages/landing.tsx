@@ -1,17 +1,17 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "../components/ui/button.js";
+import { Card, CardContent } from "../components/ui/card.js";
+import { Input } from "../components/ui/input.js";
+import { Label } from "../components/ui/label.js";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select.js";
+import { Slider } from "../components/ui/slider.js";
+import { Badge } from "../components/ui/badge.js";
 import { useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../context/AuthContext.js";
 import { useLocation, Link } from "wouter";
-import { AuthModal } from "@/components/auth/AuthModal";
-import { queryClient } from "@/lib/queryClient";
-import { SOUTH_AMERICAN_COUNTRIES } from "@/lib/constants";
-import logo from "@/assets/tripwise-logo.svg";
+import { AuthModal } from "../components/auth/AuthModal.js";
+import { queryClient } from "../lib/queryClient.js";
+import { SOUTH_AMERICAN_COUNTRIES } from "../lib/constants.js";
+// import logo from "../assets/tripwise-logo.svg";
 import { 
   Compass, 
   MapPin, 
@@ -38,8 +38,10 @@ import {
   LogIn,
   LogOut
 } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 export default function Landing() {
+  const { t } = useTranslation();
   const [budget, setBudget] = useState([2500]);
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [destination, setDestination] = useState<string>("");

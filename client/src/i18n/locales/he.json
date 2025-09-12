@@ -53,7 +53,13 @@
     "title": "קהילה",
     "no_reviews": "אין ביקורות זמינות",
     "loading_reviews": "טוען ביקורות...",
-    "error_loading": "שגיאה בטעינת נתוני הקהילה"
+    "error_loading": "שגיאה בטעינת נתוני הקהילה",
+    "destinations": "יעדים",
+    "attractions": "אטרקציות",
+    "restaurants": "מסעדות",
+    "accommodations": "לינה",
+    "latest_reviews": "ביקורות אחרונות",
+    "explore_places": "גלו מקומות שהקהילה שלנו שיתפה"
   },
   "budget": {
     "title": "מעקב תקציב",
@@ -83,5 +89,28 @@
     "english": "English",
     "hebrew": "עברית",
     "switch_language": "החלף שפה"
+  },
+  "home": {
+    "welcome_message": "מוכנים להרפתקה הבאה בדרום אמריקה?",
+    "popular_routes": "מסלולים פופולריים",
+    "ai_trip_planning": "תכנון מסע חכם",
+    "get_started": "בואו נתחיל",
+    "new_trip": "מסע חדש",
+    "no_trips_yet": "אין מסעות עדיין",
+    "start_first_adventure": "התחילו לתכנן את ההרפתקה הראשונה שלכם בדרום אמריקה!"
+  },
+  "landing": {
+    "hero_title": "תכנון מסעות חכם לדרום אמריקה",
+    "hero_subtitle": "תכנון מסעות מונע בינה מלאכותית לתרמילאים. קבלו מסלולים מותאמים אישית, התחברו לנוסעים נוספים, וחקרו את דרום אמריקה כמו שלא עשיתם מעולם.",
+    "get_started": "בואו נתחיל",
+    "learn_more": "למידע נוסף",
+    "ai_trip_builder_title": "בונה מסעות AI",
+    "ai_trip_builder_desc": "תנו לבינה המלאכותית שלנו ליצור מסלולים מותאמים אישית בהתבסס על העדפותיכם, התקציב וסגנון הנסיעה.",
+    "community_title": "קהילת נוסעים",
+    "community_desc": "התחברו לתרמילאים נוספים, שתפו חוויות וקבלו טיפים פנימיים ממקומיים.",
+    "budget_tracker_title": "מעקב תקציב",
+    "budget_tracker_desc": "עקבו אחר ההוצאות שלכם והישארו במסגרת התקציב עם הכלים הפיננסיים החכמים שלנו.",
+    "popular_destinations_title": "יעדים פופולריים",
+    "start_planning": "התחילו לתכנן את ההרפתקה שלכם"
   }
 }

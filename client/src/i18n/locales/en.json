@@ -53,7 +53,13 @@
     "title": "Community",
     "no_reviews": "No reviews available",
     "loading_reviews": "Loading reviews...",
-    "error_loading": "Error loading community data"
+    "error_loading": "Error loading community data",
+    "destinations": "Destinations",
+    "attractions": "Attractions",
+    "restaurants": "Restaurants",
+    "accommodations": "Accommodations",
+    "latest_reviews": "Latest Reviews",
+    "explore_places": "Explore places shared by our community"
   },
   "budget": {
     "title": "Budget Tracker",
@@ -83,5 +89,28 @@
     "english": "English",
     "hebrew": "עברית",
     "switch_language": "Switch Language"
+  },
+  "home": {
+    "welcome_message": "Ready for your next South American adventure?",
+    "popular_routes": "Popular Routes",
+    "ai_trip_planning": "AI Trip Planning",
+    "get_started": "Get Started",
+    "new_trip": "New Trip",
+    "no_trips_yet": "No trips yet",
+    "start_first_adventure": "Start planning your first South American adventure!"
+  },
+  "landing": {
+    "hero_title": "Smart Travel Planning for South America",
+    "hero_subtitle": "AI-powered trip planning for backpackers. Get personalized itineraries, connect with fellow travelers, and explore South America like never before.",
+    "get_started": "Get Started",
+    "learn_more": "Learn More",
+    "ai_trip_builder_title": "AI Trip Builder",
+    "ai_trip_builder_desc": "Let our AI create personalized itineraries based on your preferences, budget, and travel style.",
+    "community_title": "Travel Community",
+    "community_desc": "Connect with fellow backpackers, share experiences, and get insider tips from locals.",
+    "budget_tracker_title": "Budget Tracker",
+    "budget_tracker_desc": "Keep track of your expenses and stay within budget with our smart financial tools.",
+    "popular_destinations_title": "Popular Destinations",
+    "start_planning": "Start Planning Your Adventure"
   }
 }
