@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,50 +9,54 @@ import { WeatherWidget } from "@/components/WeatherWidget";
 import { Search, MapPin, Calendar, Thermometer, Info } from 'lucide-react';
 import { SOUTH_AMERICAN_COUNTRIES } from "@/lib/constants";
 
-const SOUTH_AMERICAN_DESTINATIONS = [
-  { name: 'Lima', country: 'Peru', description: 'Coastal capital with year-round mild weather' },
-  { name: 'Cusco', country: 'Peru', description: 'High altitude city, gateway to Machu Picchu' },
-  { name: 'Bogota', country: 'Colombia', description: 'High-altitude capital with cool temperatures' },
-  { name: 'Cartagena', country: 'Colombia', description: 'Tropical Caribbean coast' },
-  { name: 'Buenos Aires', country: 'Argentina', description: 'Temperate climate, opposite seasons' },
-  { name: 'Mendoza', country: 'Argentina', description: 'Wine region with continental climate' },
-  { name: 'Rio de Janeiro', country: 'Brazil', description: 'Tropical climate with beach weather' },
-  { name: 'Sao Paulo', country: 'Brazil', description: 'Subtropical climate, urban environment' },
-  { name: 'Santiago', country: 'Chile', description: 'Mediterranean climate, mountain views' },
-  { name: 'Valparaiso', country: 'Chile', description: 'Coastal city with mild temperatures' },
-  { name: 'La Paz', country: 'Bolivia', description: 'Highest capital city in the world' },
-  { name: 'Uyuni', country: 'Bolivia', description: 'Desert climate, famous salt flats' },
-  { name: 'Quito', country: 'Ecuador', description: 'Equatorial highland climate' },
-  { name: 'Montevideo', country: 'Uruguay', description: 'Temperate oceanic climate' },
-  { name: 'Asuncion', country: 'Paraguay', description: 'Subtropical climate with wet summers' }
+const getSouthAmericanDestinations = (t: any) => [
+  { name: 'Lima', country: 'Peru', description: t('weather.destinations.lima_desc') },
+  { name: 'Cusco', country: 'Peru', description: t('weather.destinations.cusco_desc') },
+  { name: 'Bogota', country: 'Colombia', description: t('weather.destinations.bogota_desc') },
+  { name: 'Cartagena', country: 'Colombia', description: t('weather.destinations.cartagena_desc') },
+  { name: 'Buenos Aires', country: 'Argentina', description: t('weather.destinations.buenos_aires_desc') },
+  { name: 'Mendoza', country: 'Argentina', description: t('weather.destinations.mendoza_desc') },
+  { name: 'Rio de Janeiro', country: 'Brazil', description: t('weather.destinations.rio_desc') },
+  { name: 'Sao Paulo', country: 'Brazil', description: t('weather.destinations.sao_paulo_desc') },
+  { name: 'Santiago', country: 'Chile', description: t('weather.destinations.santiago_desc') },
+  { name: 'Valparaiso', country: 'Chile', description: t('weather.destinations.valparaiso_desc') },
+  { name: 'La Paz', country: 'Bolivia', description: t('weather.destinations.la_paz_desc') },
+  { name: 'Uyuni', country: 'Bolivia', description: t('weather.destinations.uyuni_desc') },
+  { name: 'Quito', country: 'Ecuador', description: t('weather.destinations.quito_desc') },
+  { name: 'Montevideo', country: 'Uruguay', description: t('weather.destinations.montevideo_desc') },
+  { name: 'Asuncion', country: 'Paraguay', description: t('weather.destinations.asuncion_desc') }
 ];
 
-const TRAVEL_SEASONS = [
+const getTravelSeasons = (t: any) => [
   {
-    season: 'Dry Season (May-September)',
-    description: 'Best for hiking, outdoor activities, and clear mountain views',
+    season: t('weather.seasons.dry_season'),
+    description: t('weather.seasons.dry_season_desc'),
     destinations: ['Cusco', 'Quito', 'La Paz', 'Uyuni'],
     color: 'bg-yellow-100 text-yellow-800'
   },
   {
-    season: 'Summer (December-March)',
-    description: 'Perfect for beaches, coastal activities, and warm weather',
+    season: t('weather.seasons.summer_season'),
+    description: t('weather.seasons.summer_season_desc'),
     destinations: ['Rio de Janeiro', 'Buenos Aires', 'Santiago', 'Montevideo'],
     color: 'bg-orange-100 text-orange-800'
   },
   {
-    season: 'Year-Round',
-    description: 'Stable climate suitable for travel any time of year',
+    season: t('weather.seasons.year_round'),
+    description: t('weather.seasons.year_round_desc'),
     destinations: ['Lima', 'Bogota', 'Cartagena', 'Quito'],
     color: 'bg-green-100 text-green-800'
   }
 ];
 
 export default function WeatherPage() {
+  const { t } = useTranslation();
   const [selectedDestination, setSelectedDestination] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
   const [customDestination, setCustomDestination] = useState('');
   const [showCustom, setShowCustom] = useState(false);
+  
+  const SOUTH_AMERICAN_DESTINATIONS = getSouthAmericanDestinations(t);
+  const TRAVEL_SEASONS = getTravelSeasons(t);
 
   const handleDestinationSelect = (destination: string) => {
     const dest = SOUTH_AMERICAN_DESTINATIONS.find(d => d.name === destination);
@@ -75,9 +80,9 @@ export default function WeatherPage() {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-gray-900">South America Weather Guide</h1>
+          <h1 className="text-4xl font-bold text-gray-900">{t('weather.page_title')}</h1>
           <p className="text-xl text-gray-600">
-            Get real-time weather data and travel recommendations for your South American adventure
+            {t('weather.page_subtitle')}
           </p>
         </div>
 
@@ -86,13 +91,13 @@ export default function WeatherPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="w-5 h-5" />
-              Choose Your Destination
+              {t('weather.choose_destination')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Quick Select Popular Destinations */}
             <div className="space-y-3">
-              <h3 className="font-semibold text-gray-700">Popular Destinations</h3>
+              <h3 className="font-semibold text-gray-700">{t('weather.popular_destinations')}</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                 {SOUTH_AMERICAN_DESTINATIONS.slice(0, 10).map((dest) => (
                   <Button
@@ -111,17 +116,17 @@ export default function WeatherPage() {
 
             {/* Custom Search */}
             <div className="space-y-3">
-              <h3 className="font-semibold text-gray-700">Search Custom Destination</h3>
+              <h3 className="font-semibold text-gray-700">{t('weather.search_custom_destination')}</h3>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Enter city name (e.g., Machu Picchu, Amazon)"
+                  placeholder={t('weather.search_placeholder')}
                   value={customDestination}
                   onChange={(e) => setCustomDestination(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleCustomSearch()}
                 />
                 <Select value={selectedCountry} onValueChange={setSelectedCountry}>
                   <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Select a country" />
+                    <SelectValue placeholder={t('weather.select_country')} />
                   </SelectTrigger>
                   <SelectContent>
                     {SOUTH_AMERICAN_COUNTRIES.map((country) => (
@@ -133,7 +138,7 @@ export default function WeatherPage() {
                 </Select>
                 <Button onClick={handleCustomSearch}>
                   <Search className="w-4 h-4 mr-2" />
-                  Search
+                  {t('common.search')}
                 </Button>
               </div>
             </div>
@@ -154,7 +159,7 @@ export default function WeatherPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="w-5 h-5" />
-              South America Travel Seasons
+              {t('weather.travel_seasons_title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -166,7 +171,7 @@ export default function WeatherPage() {
                   </div>
                   <p className="text-sm text-gray-600">{season.description}</p>
                   <div className="space-y-2">
-                    <h4 className="font-semibold text-sm">Best Destinations:</h4>
+                    <h4 className="font-semibold text-sm">{t('weather.best_destinations')}:</h4>
                     <div className="flex flex-wrap gap-1">
                       {season.destinations.map((dest, i) => (
                         <span key={i} className="text-xs bg-gray-100 px-2 py-1 rounded">
@@ -186,30 +191,30 @@ export default function WeatherPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Thermometer className="w-5 h-5" />
-              Climate Zones in South America
+              {t('weather.climate_zones_title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2 p-4 bg-blue-50 rounded-lg">
-                <h4 className="font-semibold text-blue-800">Coastal Desert</h4>
+                <h4 className="font-semibold text-blue-800">{t('weather.climate_zones.coastal_desert')}</h4>
                 <p className="text-sm text-blue-700">Lima, Ica</p>
-                <p className="text-xs text-blue-600">Dry, mild temperatures year-round</p>
+                <p className="text-xs text-blue-600">{t('weather.climate_zones.coastal_desert_desc')}</p>
               </div>
               <div className="space-y-2 p-4 bg-green-50 rounded-lg">
-                <h4 className="font-semibold text-green-800">Tropical</h4>
+                <h4 className="font-semibold text-green-800">{t('weather.climate_zones.tropical')}</h4>
                 <p className="text-sm text-green-700">Amazon, Cartagena</p>
-                <p className="text-xs text-green-600">Hot, humid, rainy seasons</p>
+                <p className="text-xs text-green-600">{t('weather.climate_zones.tropical_desc')}</p>
               </div>
               <div className="space-y-2 p-4 bg-purple-50 rounded-lg">
-                <h4 className="font-semibold text-purple-800">Highland</h4>
+                <h4 className="font-semibold text-purple-800">{t('weather.climate_zones.highland')}</h4>
                 <p className="text-sm text-purple-700">Cusco, Quito, La Paz</p>
-                <p className="text-xs text-purple-600">Cool, dry winters, wet summers</p>
+                <p className="text-xs text-purple-600">{t('weather.climate_zones.highland_desc')}</p>
               </div>
               <div className="space-y-2 p-4 bg-orange-50 rounded-lg">
-                <h4 className="font-semibold text-orange-800">Temperate</h4>
+                <h4 className="font-semibold text-orange-800">{t('weather.climate_zones.temperate')}</h4>
                 <p className="text-sm text-orange-700">Buenos Aires, Santiago</p>
-                <p className="text-xs text-orange-600">Four distinct seasons</p>
+                <p className="text-xs text-orange-600">{t('weather.climate_zones.temperate_desc')}</p>
               </div>
             </div>
           </CardContent>
@@ -220,27 +225,27 @@ export default function WeatherPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Info className="w-5 h-5" />
-              Weather-Based Travel Tips
+              {t('weather.travel_tips_title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <h4 className="font-semibold">Altitude Considerations</h4>
+                <h4 className="font-semibold">{t('weather.tips.altitude_considerations')}</h4>
                 <ul className="text-sm space-y-1 text-gray-600">
-                  <li>• Cusco (3,399m): Arrive 2-3 days early for acclimatization</li>
-                  <li>• La Paz (3,500m): World's highest capital city</li>
-                  <li>• Quito (2,850m): Mild temperatures due to altitude</li>
-                  <li>• Uyuni (3,656m): Extreme temperature variations</li>
+                  <li>• {t('weather.tips.cusco_altitude')}</li>
+                  <li>• {t('weather.tips.la_paz_altitude')}</li>
+                  <li>• {t('weather.tips.quito_altitude')}</li>
+                  <li>• {t('weather.tips.uyuni_altitude')}</li>
                 </ul>
               </div>
               <div className="space-y-3">
-                <h4 className="font-semibold">Seasonal Variations</h4>
+                <h4 className="font-semibold">{t('weather.tips.seasonal_variations')}</h4>
                 <ul className="text-sm space-y-1 text-gray-600">
-                  <li>• Southern Hemisphere: Seasons opposite to Northern</li>
-                  <li>• Equatorial regions: Minimal seasonal variation</li>
-                  <li>• Patagonia: Extreme weather, layered clothing essential</li>
-                  <li>• Amazon: Wet season (Dec-May), dry season (Jun-Nov)</li>
+                  <li>• {t('weather.tips.southern_hemisphere')}</li>
+                  <li>• {t('weather.tips.equatorial_regions')}</li>
+                  <li>• {t('weather.tips.patagonia')}</li>
+                  <li>• {t('weather.tips.amazon')}</li>
                 </ul>
               </div>
             </div>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,6 +50,7 @@ const expenseSchema = z.object({
 type ExpenseFormData = z.infer<typeof expenseSchema>;
 
 export default function BudgetTracker() {
+  const { t } = useTranslation();
   const [selectedTrip, setSelectedTrip] = useState<number | null>(null);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -153,9 +155,9 @@ export default function BudgetTracker() {
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4 flex items-center justify-center gap-3">
             <Wallet className="w-10 h-10 text-primary" />
-            Budget Tracker
+            {t('budget.title')}
           </h1>
-          <p className="text-lg text-gray-600">Manage your travel expenses and stay within budget</p>
+          <p className="text-lg text-gray-600">{t('budget.subtitle')}</p>
         </div>
 
         {/* Controls */}
@@ -166,7 +168,7 @@ export default function BudgetTracker() {
                 <SelectValue placeholder="Select a trip" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Expenses</SelectItem>
+                <SelectItem value="all">{t('budget.all_expenses')}</SelectItem>
                 {Array.isArray(userTrips) ? userTrips.map((trip: any) => (
                   <SelectItem key={trip.id} value={trip.id.toString()}>
                     {trip.title}
@@ -180,7 +182,7 @@ export default function BudgetTracker() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="all">{t('budget.all_categories')}</SelectItem>
                 {(EXPENSE_CATEGORIES || []).map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.label}
@@ -194,7 +196,7 @@ export default function BudgetTracker() {
             <DialogTrigger asChild>
               <Button className="bg-primary hover:bg-orange-600 whitespace-nowrap">
                 <Plus className="w-4 h-4 mr-2" />
-                Add Expense
+                {t('budget.add_expense')}
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -300,19 +302,19 @@ export default function BudgetTracker() {
             <TabsList className="inline-flex w-auto min-w-full justify-evenly h-10">
               <TabsTrigger value="overview" className="flex items-center gap-2 whitespace-nowrap">
                 <BarChart3 className="w-4 h-4" />
-                Overview
+                {t('budget.overview')}
               </TabsTrigger>
               <TabsTrigger value="expenses" className="flex items-center gap-2 whitespace-nowrap">
                 <DollarSign className="w-4 h-4" />
-                Expenses
+                {t('budget.expenses')}
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex items-center gap-2 whitespace-nowrap">
                 <PieChart className="w-4 h-4" />
-                Analytics
+                {t('budget.analytics')}
               </TabsTrigger>
               <TabsTrigger value="insights" className="flex items-center gap-2 whitespace-nowrap">
                 <Lightbulb className="w-4 h-4" />
-                AI Insights
+                {t('budget.ai_insights')}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -350,22 +352,22 @@ export default function BudgetTracker() {
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       <TrendingUp className="w-5 h-5 mr-2 text-primary" />
-                      Quick Stats
+                      {t('budget.quick_stats')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Total Spent</span>
+                      <span className="text-gray-600">{t('budget.total_spent')}</span>
                       <span className="text-lg font-semibold text-primary">${totalSpent.toFixed(2)}</span>
                     </div>
                     {selectedTrip && budget > 0 && (
                       <>
                         <div className="flex items-center justify-between">
-                          <span className="text-gray-600">Budget</span>
+                          <span className="text-gray-600">{t('budget.budget')}</span>
                           <span className="text-lg font-semibold text-slate-700">${budget.toFixed(2)}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-gray-600">Remaining</span>
+                          <span className="text-gray-600">{t('budget.remaining')}</span>
                           <span className={`text-lg font-semibold ${
                             budget - totalSpent >= 0 ? 'text-green-600' : 'text-red-600'
                           }`}>

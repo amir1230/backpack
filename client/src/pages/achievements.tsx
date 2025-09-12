@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,7 @@ const getLevelName = (level: number) => {
 };
 
 export default function Achievements() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const { toast } = useToast();
@@ -284,15 +286,15 @@ export default function Achievements() {
               <CardHeader>
                 <CardTitle className="flex items-center justify-center gap-2 text-2xl">
                   <Trophy className="w-8 h-8 text-orange-500" />
-                  Achievements
+                  {t('achievements.title')}
                 </CardTitle>
                 <CardDescription>
-                  Sign in with Google to save your progress
+                  {t('achievements.sign_in_to_save_progress')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Button onClick={() => window.location.href = '/api/auth/google'}>
-                  Sign In with Google
+                  {t('auth.sign_in_with_google')}
                 </Button>
               </CardContent>
             </Card>
@@ -325,9 +327,9 @@ export default function Achievements() {
           <div className="text-left">
             <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
               <Trophy className="w-10 h-10 text-orange-500" />
-              Achievements
+              {t('achievements.title')}
             </h1>
-            <p className="text-gray-600 text-lg">Track your travel progress and unlock rewards</p>
+            <p className="text-gray-600 text-lg">{t('achievements.subtitle')}</p>
           </div>
 
           {/* Quick Actions Bar */}
@@ -335,7 +337,7 @@ export default function Achievements() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Zap className="w-5 h-5 text-yellow-500" />
-                Quick Actions
+                {t('achievements.quick_actions')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -406,11 +408,11 @@ export default function Achievements() {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="overflow-x-auto">
               <TabsList className="inline-flex w-auto min-w-full justify-evenly h-10">
-                <TabsTrigger value="overview" className="whitespace-nowrap">Overview</TabsTrigger>
-                <TabsTrigger value="missions" className="whitespace-nowrap">Missions</TabsTrigger>
-                <TabsTrigger value="badges" className="whitespace-nowrap">Badges</TabsTrigger>
-                <TabsTrigger value="leaderboard" className="whitespace-nowrap">Leaderboard</TabsTrigger>
-                <TabsTrigger value="history" className="whitespace-nowrap">History</TabsTrigger>
+                <TabsTrigger value="overview" className="whitespace-nowrap">{t('achievements.overview')}</TabsTrigger>
+                <TabsTrigger value="missions" className="whitespace-nowrap">{t('achievements.missions')}</TabsTrigger>
+                <TabsTrigger value="badges" className="whitespace-nowrap">{t('achievements.badges')}</TabsTrigger>
+                <TabsTrigger value="leaderboard" className="whitespace-nowrap">{t('achievements.leaderboard')}</TabsTrigger>
+                <TabsTrigger value="history" className="whitespace-nowrap">{t('achievements.history')}</TabsTrigger>
               </TabsList>
             </div>
 
@@ -423,7 +425,7 @@ export default function Achievements() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2 text-orange-800">
                       <Star className="w-5 h-5" />
-                      My Balance
+                      {t('achievements.my_balance')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -450,7 +452,7 @@ export default function Achievements() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2 text-blue-800">
                       <Medal className="w-5 h-5" />
-                      Unlocked Badges
+                      {t('achievements.unlocked_badges')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -466,7 +468,7 @@ export default function Achievements() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2 text-purple-800">
                       <Crown className="w-5 h-5" />
-                      Current Rank
+                      {t('achievements.current_rank')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>

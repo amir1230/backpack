@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -102,6 +103,7 @@ interface DetailModalState {
 }
 
 export default function ExplorePage() {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("all");
   const [weatherFilter, setWeatherFilter] = useState("all");
@@ -647,16 +649,16 @@ export default function ExplorePage() {
     <TooltipProvider>
       <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Explore South America</h1>
+        <h1 className="text-3xl font-bold mb-4">{t('explore.page_title')}</h1>
         <p className="text-muted-foreground mb-6">
-          Discover amazing destinations across South America with real-time weather conditions and travel timing recommendations to help plan your perfect trip.
+          {t('explore.page_subtitle')}
         </p>
 
         {/* Search and Controls */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex flex-1 gap-2">
             <Input
-              placeholder="Search destinations, places..."
+              placeholder={t('explore.search_placeholder')}
               value={searchQuery}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               className="flex-1"
@@ -665,16 +667,16 @@ export default function ExplorePage() {
               onClick={handleSearch}
               variant="outline"
             >
-              Search
+              {t('common.search')}
             </Button>
           </div>
           
           <Select value={selectedCountry} onValueChange={setSelectedCountry}>
             <SelectTrigger className="w-full md:w-48">
-              <SelectValue placeholder="Select country" />
+              <SelectValue placeholder={t('explore.select_country')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Countries</SelectItem>
+              <SelectItem value="all">{t('explore.all_countries')}</SelectItem>
               {countries.map((country) => (
                 <SelectItem key={country} value={country}>
                   {country}
@@ -686,7 +688,11 @@ export default function ExplorePage() {
           <div className="text-sm text-muted-foreground flex items-center gap-2">
             {totalCount > 0 && (
               <span>
-                Showing {currentPage * ITEMS_PER_PAGE + 1} to {Math.min((currentPage + 1) * ITEMS_PER_PAGE, totalCount)} of {totalCount} items
+                {t('explore.showing_results', {
+                  start: currentPage * ITEMS_PER_PAGE + 1,
+                  end: Math.min((currentPage + 1) * ITEMS_PER_PAGE, totalCount),
+                  total: totalCount
+                })}
               </span>
             )}
           </div>
@@ -696,10 +702,10 @@ export default function ExplorePage() {
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <div className="overflow-x-auto">
           <TabsList className="inline-flex w-auto min-w-full justify-evenly h-10">
-            <TabsTrigger value="destinations" className="whitespace-nowrap">Destinations</TabsTrigger>
-            <TabsTrigger value="accommodations" className="whitespace-nowrap">Accommodations (Hotels)</TabsTrigger>
-            <TabsTrigger value="attractions" className="whitespace-nowrap">Attractions</TabsTrigger>
-            <TabsTrigger value="restaurants" className="whitespace-nowrap">Restaurants</TabsTrigger>
+            <TabsTrigger value="destinations" className="whitespace-nowrap">{t('explore.destinations')}</TabsTrigger>
+            <TabsTrigger value="accommodations" className="whitespace-nowrap">{t('explore.accommodations')}</TabsTrigger>
+            <TabsTrigger value="attractions" className="whitespace-nowrap">{t('explore.attractions')}</TabsTrigger>
+            <TabsTrigger value="restaurants" className="whitespace-nowrap">{t('explore.restaurants')}</TabsTrigger>
           </TabsList>
         </div>
 
