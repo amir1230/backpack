@@ -1,5 +1,3 @@
-import { useTranslation } from 'react-i18next';
-
 // Simple localization service with fallback mechanism
 export class LocalizationService {
   static getLocalizedName(item: any, locale: string = 'en'): string {
@@ -67,6 +65,8 @@ export class LocalizationService {
 }
 
 // React hook for easy access to localization
+import { useTranslation } from 'react-i18next';
+
 export function useLocalization() {
   const { i18n } = useTranslation();
   

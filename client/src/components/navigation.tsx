@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "../context/AuthContext.js";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
-import { queryClient } from "@/lib/queryClient";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "./ui/button.js";
+import { queryClient } from "../lib/queryClient.js";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar.js";
 import { AuthModal } from "./auth/AuthModal.js";
 import { LanguageToggle } from "./LanguageToggle.js";
 import {
@@ -13,10 +13,10 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useScrollDirection } from "@/hooks/useScrollDirection";
-import logoCompact from "@/assets/tripwise-logo-compact.svg";
+} from "./ui/dropdown-menu.js";
+import { useIsMobile } from "../hooks/use-mobile.js";
+import { useScrollDirection } from "../hooks/useScrollDirection.js";
+// import logoCompact from "../assets/tripwise-logo-compact.svg";
 import { 
   Compass, 
   Home, 
@@ -85,7 +85,7 @@ export default function Navigation() {
           <div className="px-4">
             <div className="flex justify-between items-center h-16">
               <Link href="/" className="flex items-center">
-                <img src={logoCompact} alt="TripWise" className="h-8" />
+                <div className="text-lg font-bold text-orange-600">TripWise</div>
               </Link>
               
               <div className="flex items-center space-x-4">
@@ -147,7 +147,7 @@ export default function Navigation() {
                         className="w-full flex items-center px-3 py-2 text-slate-600 hover:bg-gray-100 rounded-lg disabled:opacity-50"
                       >
                         <LogOut className="w-5 h-5 mr-3" />
-                        {isLoading ? "Signing Out..." : "Sign Out"}
+                        {isLoading ? t('common.loading') : t('auth.sign_out')}
                       </button>
                     </>
                   ) : null}
@@ -195,7 +195,6 @@ export default function Navigation() {
         <AuthModal 
           open={authModalOpen} 
           onOpenChange={setAuthModalOpen}
-          redirectTo={location}
         />
       </>
     );
@@ -209,7 +208,7 @@ export default function Navigation() {
         {/* Sidebar Header with Logo and Language Toggle */}
         <div className="p-6 border-b border-gray-200">
           <Link href="/" className="flex items-center justify-center mb-4">
-            <img src={logoCompact} alt="TripWise" className="h-10" />
+            <div className="text-xl font-bold text-orange-600">TripWise</div>
           </Link>
           <div className="flex justify-center">
             <LanguageToggle />
@@ -293,7 +292,6 @@ export default function Navigation() {
       <AuthModal 
         open={authModalOpen} 
         onOpenChange={setAuthModalOpen}
-        redirectTo={location}
       />
     </>
   );

@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import RTL support */
+@import './i18n/rtl.css';
+
 @import './styles/mobile-responsive.css';
 
 :root {

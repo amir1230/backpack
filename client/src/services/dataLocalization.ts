@@ -13,10 +13,8 @@ export class DataLocalizationService {
     
     try {
       // Fetch destinations from API
-      const destinations = await queryClient.fetchQuery({
-        queryKey: ['/api/places/destinations'],
-        staleTime: 5 * 60 * 1000, // 5 minutes
-      });
+      const response = await fetch('/api/places/destinations');
+      const destinations = await response.json();
 
       // Apply localization
       return destinations.map((destination: any) => ({
@@ -34,10 +32,8 @@ export class DataLocalizationService {
     const { locale = 'en' } = options;
     
     try {
-      const accommodations = await queryClient.fetchQuery({
-        queryKey: ['/api/places/accommodations'],
-        staleTime: 5 * 60 * 1000,
-      });
+      const response = await fetch('/api/places/accommodations');
+      const accommodations = await response.json();
 
       return accommodations.map((accommodation: any) => ({
         ...accommodation,

@@ -125,8 +125,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error: any) {
       console.error('Sign out error:', error);
       toast({
-        title: "שגיאה בהתנתקות",
-        description: error.message || "נסה שוב",
+        title: t('auth.login_error'),
+        description: error.message || t('auth.try_again_later'),
         variant: "destructive",
       });
     } finally {
