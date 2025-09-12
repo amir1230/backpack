@@ -67,6 +67,112 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.get('/api/health', (_req, res) => res.json({ ok: true, time: new Date().toISOString() }));
 
   // Database test endpoint
+  // Import admin middleware
+  const { requireAdmin } = await import('./lib/adminAuth.js');
+  const { I18nService } = await import('./lib/i18nService.js');
+
+  // Admin translation routes
+  app.get('/api/admin/translations/:entityType', requireAdmin, async (req, res) => {
+    try {
+      const { entityType } = req.params;
+      const { locale = 'en', search } = req.query;
+      
+      if (!['destinations', 'accommodations', 'attractions', 'restaurants'].includes(entityType)) {
+        return res.status(400).json({ error: 'Invalid entity type' });
+      }
+      
+      const results = await I18nService.getEntitiesWithTranslations(
+        entityType as any, 
+        locale as any, 
+        search as string
+      );
+      
+      res.json({ success: true, data: results });
+    } catch (error) {
+      console.error('Error fetching admin translations:', error);
+      res.status(500).json({ error: 'Failed to fetch translations' });
+    }
+  });
+
+  app.post('/api/admin/translations/:entityType/:entityId', requireAdmin, async (req, res) => {
+    try {
+      const { entityType, entityId } = req.params;
+      const { locale, name, description } = req.body;
+      
+      if (!['destinations', 'accommodations', 'attractions', 'restaurants'].includes(entityType)) {
+        return res.status(400).json({ error: 'Invalid entity type' });
+      }
+      
+      const result = await I18nService.saveTranslation(
+        entityType as any,
+        parseInt(entityId),
+        locale,
+        name,
+        description
+      );
+      
+      res.json({ success: true, data: result });
+    } catch (error) {
+      console.error('Error saving translation:', error);
+      res.status(500).json({ error: 'Failed to save translation' });
+    }
+  });
+
+  app.delete('/api/admin/translations/:entityType/:entityId/:locale', requireAdmin, async (req, res) => {
+    try {
+      const { entityType, entityId, locale } = req.params;
+      
+      if (!['destinations', 'accommodations', 'attractions', 'restaurants'].includes(entityType)) {
+        return res.status(400).json({ error: 'Invalid entity type' });
+      }
+      
+      const result = await I18nService.deleteTranslation(
+        entityType as any,
+        parseInt(entityId),
+        locale as any
+      );
+      
+      res.json({ success: true, data: result });
+    } catch (error) {
+      console.error('Error deleting translation:', error);
+      res.status(500).json({ error: 'Failed to delete translation' });
+    }
+  });
+
+  app.get('/api/admin/translations/stats/:locale', requireAdmin, async (req, res) => {
+    try {
+      const { locale } = req.params;
+      const stats = await I18nService.getTranslationStats(locale as any);
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      console.error('Error fetching translation stats:', error);
+      res.status(500).json({ error: 'Failed to fetch translation statistics' });
+    }
+  });
+
+  // Localized search endpoint
+  app.get('/api/search/localized', async (req, res) => {
+    try {
+      const { q: query, locale = 'en', types } = req.query;
+      
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ error: 'Query parameter required' });
+      }
+      
+      const entityTypes = types ? (types as string).split(',') : undefined;
+      const results = await I18nService.searchLocalized(
+        query,
+        locale as any,
+        entityTypes as any
+      );
+      
+      res.json({ success: true, data: results });
+    } catch (error) {
+      console.error('Error performing localized search:', error);
+      res.status(500).json({ error: 'Search failed' });
+    }
+  });
+
   app.get('/api/test-db', async (_req, res) => {
     try {
       const client = await pool.connect();

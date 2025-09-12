@@ -494,6 +494,55 @@ export const locationAncestors = pgTable("location_ancestors", {
   abbreviation: varchar("abbreviation"),
 });
 
+// i18n translation tables for admin editing
+export const destinationsI18n = pgTable("destinations_i18n", {
+  id: serial("id").primaryKey(),
+  destinationId: integer("destination_id").references(() => destinations.id).notNull(),
+  locale: varchar("locale", { length: 5 }).notNull(), // 'en', 'he'
+  name: varchar("name"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("destinations_i18n_destination_locale_idx").on(table.destinationId, table.locale),
+]);
+
+export const accommodationsI18n = pgTable("accommodations_i18n", {
+  id: serial("id").primaryKey(),
+  accommodationId: integer("accommodation_id").references(() => accommodations.id).notNull(),
+  locale: varchar("locale", { length: 5 }).notNull(), // 'en', 'he'
+  name: varchar("name"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("accommodations_i18n_accommodation_locale_idx").on(table.accommodationId, table.locale),
+]);
+
+export const attractionsI18n = pgTable("attractions_i18n", {
+  id: serial("id").primaryKey(),
+  attractionId: integer("attraction_id").references(() => attractions.id).notNull(),
+  locale: varchar("locale", { length: 5 }).notNull(), // 'en', 'he'
+  name: varchar("name"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("attractions_i18n_attraction_locale_idx").on(table.attractionId, table.locale),
+]);
+
+export const restaurantsI18n = pgTable("restaurants_i18n", {
+  id: serial("id").primaryKey(),
+  restaurantId: integer("restaurant_id").references(() => restaurants.id).notNull(),
+  locale: varchar("locale", { length: 5 }).notNull(), // 'en', 'he'
+  name: varchar("name"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("restaurants_i18n_restaurant_locale_idx").on(table.restaurantId, table.locale),
+]);
+
 // Itineraries table - stores saved trips with editable items
 export const itineraries = pgTable("itineraries", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -1004,6 +1053,31 @@ export const insertLocationAncestorSchema = createInsertSchema(locationAncestors
   id: true,
 });
 
+// i18n insert schemas
+export const insertDestinationI18nSchema = createInsertSchema(destinationsI18n).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAccommodationI18nSchema = createInsertSchema(accommodationsI18n).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAttractionI18nSchema = createInsertSchema(attractionsI18n).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertRestaurantI18nSchema = createInsertSchema(restaurantsI18n).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -1051,6 +1125,16 @@ export type LocationPhoto = typeof locationPhotos.$inferSelect;
 export type InsertLocationPhoto = z.infer<typeof insertLocationPhotoSchema>;
 export type LocationAncestor = typeof locationAncestors.$inferSelect;
 export type InsertLocationAncestor = z.infer<typeof insertLocationAncestorSchema>;
+
+// i18n types
+export type DestinationI18n = typeof destinationsI18n.$inferSelect;
+export type InsertDestinationI18n = z.infer<typeof insertDestinationI18nSchema>;
+export type AccommodationI18n = typeof accommodationsI18n.$inferSelect;
+export type InsertAccommodationI18n = z.infer<typeof insertAccommodationI18nSchema>;
+export type AttractionI18n = typeof attractionsI18n.$inferSelect;
+export type InsertAttractionI18n = z.infer<typeof insertAttractionI18nSchema>;
+export type RestaurantI18n = typeof restaurantsI18n.$inferSelect;
+export type InsertRestaurantI18n = z.infer<typeof insertRestaurantI18nSchema>;
 
 // Itinerary schemas and types
 export const insertItinerarySchema = createInsertSchema(itineraries).omit({
