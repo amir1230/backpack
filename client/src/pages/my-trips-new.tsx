@@ -1035,7 +1035,7 @@ export default function MyTripsNew() {
                 {itinerary.length > 0 && !isGeneratingItinerary && (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-xl font-bold text-slate-700">Your Day-by-Day Itinerary</h3>
+                      <h3 className="text-xl font-bold text-slate-700">{t('trips.your_day_by_day_itinerary')}</h3>
                       <div className="flex gap-2">
                         <TooltipProvider>
                           <Tooltip>
@@ -1051,7 +1051,7 @@ export default function MyTripsNew() {
                                 ) : (
                                   <Heart className="w-4 h-4 mr-2" />
                                 )}
-                                Save Itinerary
+                                {t('trips.save_itinerary')}
                               </Button>
                             </TooltipTrigger>
                             {!isAuthenticated && (
@@ -1063,7 +1063,7 @@ export default function MyTripsNew() {
                         </TooltipProvider>
                         <Button onClick={handleGenerateItinerary} variant="outline" size="sm">
                           <Route className="w-4 h-4 mr-2" />
-                          Generate New
+                          {t('trips.generate_new')}
                         </Button>
                       </div>
                     </div>
@@ -1073,7 +1073,7 @@ export default function MyTripsNew() {
                         <CardHeader className="pb-3">
                           <CardTitle className="flex items-center text-lg">
                             <Calendar className="w-5 h-5 mr-2 text-primary" />
-                            Day {day.day} – {day.location}
+{t('trips.day')} {day.day} – {day.location}
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -1081,7 +1081,7 @@ export default function MyTripsNew() {
                           <div>
                             <div className="flex items-center mb-2">
                               <ListChecks className="w-4 h-4 mr-2 text-blue-600" />
-                              <span className="font-semibold text-blue-800 text-sm">Activities</span>
+                              <span className="font-semibold text-blue-800 text-sm">{t('trips.activities')}</span>
                             </div>
                             <ul className="space-y-1">
                               {day.activities.map((activity, idx) => (
@@ -1097,7 +1097,7 @@ export default function MyTripsNew() {
                           <div className="bg-green-50 p-3 rounded-lg">
                             <div className="flex items-center mb-1">
                               <DollarSign className="w-4 h-4 mr-2 text-green-600" />
-                              <span className="font-semibold text-green-800 text-sm">Estimated Cost</span>
+                              <span className="font-semibold text-green-800 text-sm">{t('trips.estimated_cost')}</span>
                             </div>
                             <p className="text-green-700 font-bold">${day.estimatedCost}</p>
                           </div>
@@ -1106,7 +1106,7 @@ export default function MyTripsNew() {
                           <div>
                             <div className="flex items-center mb-2">
                               <Lightbulb className="w-4 h-4 mr-2 text-yellow-600" />
-                              <span className="font-semibold text-yellow-800 text-sm">Local Tips</span>
+                              <span className="font-semibold text-yellow-800 text-sm">{t('trips.local_tips')}</span>
                             </div>
                             <ul className="space-y-1">
                               {day.tips.map((tip, idx) => (
