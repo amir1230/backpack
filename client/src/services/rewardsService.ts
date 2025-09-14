@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../lib/supabase.js';
 
 // Types for rewards system
 export interface UserPointsSummary {
@@ -82,27 +82,27 @@ export interface LeaderboardEntry {
 export const ACHIEVEMENT_CONFIG = {
   'daily.checkin': { 
     points: 5, 
-    label: 'Daily Check-in',
+    labelKey: 'achievements.daily_checkin',
     action: 'daily.checkin' 
   },
   'review.create': { 
     points: 50, 
-    label: 'Write Review',
+    labelKey: 'achievements.write_review',
     action: 'review.create' 
   },
   'photo.upload': { 
     points: 10, 
-    label: 'Upload Photo',
+    labelKey: 'achievements.upload_photo',
     action: 'photo.upload' 
   },
   'itinerary.save': { 
     points: 10, 
-    label: 'Save Itinerary',
+    labelKey: 'achievements.save_itinerary',
     action: 'itinerary.save' 
   },
   'itinerary.share': { 
     points: 20, 
-    label: 'Share Itinerary',
+    labelKey: 'achievements.share_itinerary',
     action: 'itinerary.share' 
   },
 } as const;
@@ -179,7 +179,7 @@ export async function fetchWeeklyPoints(): Promise<number> {
 
   if (error) throw error;
 
-  return data?.reduce((sum, entry) => sum + entry.points, 0) || 0;
+  return data?.reduce((sum: number, entry: { points: number }) => sum + entry.points, 0) || 0;
 }
 
 // Fetch count of unlocked badges
@@ -216,7 +216,7 @@ export async function getAchievementValue(actionCode: string): Promise<{
     if (mission && mission.points_reward !== null) {
       return {
         points: mission.points_reward,
-        label: mission.name || ACHIEVEMENT_CONFIG[actionCode as keyof typeof ACHIEVEMENT_CONFIG]?.label || actionCode,
+        label: mission.name || ACHIEVEMENT_CONFIG[actionCode as keyof typeof ACHIEVEMENT_CONFIG]?.labelKey || actionCode,
         source: 'db_mission'
       };
     }
@@ -232,7 +232,7 @@ export async function getAchievementValue(actionCode: string): Promise<{
     if (achievement && achievement.points !== null) {
       return {
         points: achievement.points,
-        label: achievement.name || ACHIEVEMENT_CONFIG[actionCode as keyof typeof ACHIEVEMENT_CONFIG]?.label || actionCode,
+        label: achievement.name || ACHIEVEMENT_CONFIG[actionCode as keyof typeof ACHIEVEMENT_CONFIG]?.labelKey || actionCode,
         source: 'db_achievement'
       };
     }
@@ -242,7 +242,7 @@ export async function getAchievementValue(actionCode: string): Promise<{
     if (config) {
       return {
         points: config.points,
-        label: config.label,
+        label: config.labelKey,
         source: 'config'
       };
     }
@@ -261,7 +261,7 @@ export async function getAchievementValue(actionCode: string): Promise<{
     const config = ACHIEVEMENT_CONFIG[actionCode as keyof typeof ACHIEVEMENT_CONFIG];
     return config ? {
       points: config.points,
-      label: config.label,
+      label: config.labelKey,
       source: 'config'
     } : {
       points: 0,
@@ -297,7 +297,10 @@ export async function fetchMyAchievements() {
 
   if (error) throw error;
 
-  const achievements = (data as UserAchievement[]) || [];
+  const achievements = (data as any[])?.map(item => ({
+    ...item,
+    achievement: Array.isArray(item.achievement) ? item.achievement[0] : item.achievement
+  })) as UserAchievement[] || [];
   const unlocked = achievements.filter(a => a.isCompleted && a.unlockedAt);
   const inProgress = achievements.filter(a => !a.isCompleted && a.progress < a.progressMax);
 
