@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -71,6 +72,7 @@ export default function ItineraryDetail() {
   const { isAuthenticated, user, signInWithGoogle } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   // State
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -133,8 +135,8 @@ export default function ItineraryDetail() {
     },
     onSuccess: () => {
       toast({
-        title: "כותרת עודכנה",
-        description: "הכותרת נשמרה בהצלחה",
+        title: t("itinerary.title_updated"),
+        description: t("itinerary.title_saved_successfully"),
       });
       queryClient.invalidateQueries({ queryKey: ['itinerary', id] });
       queryClient.invalidateQueries({ queryKey: ['my-itineraries'] });
@@ -142,8 +144,8 @@ export default function ItineraryDetail() {
     },
     onError: (error) => {
       toast({
-        title: "שגיאה בעדכון",
-        description: "לא הצלחנו לעדכן את הכותרת",
+        title: t("itinerary.update_error"),
+        description: t("itinerary.could_not_update_title"),
         variant: "destructive",
       });
     },
@@ -164,15 +166,15 @@ export default function ItineraryDetail() {
     },
     onSuccess: () => {
       toast({
-        title: "איטינררי נמחק",
-        description: "האיטינררי נמחק בהצלחה",
+        title: t("itinerary.itinerary_deleted"),
+        description: t("itinerary.itinerary_deleted_successfully"),
       });
       setLocation("/my-trips");
     },
     onError: () => {
       toast({
-        title: "שגיאה במחיקה",
-        description: "לא הצלחנו למחוק את האיטינררי",
+        title: t("itinerary.delete_error"),
+        description: t("itinerary.could_not_delete_itinerary"),
         variant: "destructive",
       });
     },
@@ -201,15 +203,15 @@ export default function ItineraryDetail() {
     },
     onSuccess: () => {
       toast({
-        title: "שינויים נשמרו",
-        description: "השינויים נשמרו בהצלחה",
+        title: t("itinerary.changes_saved"),
+        description: t("itinerary.changes_saved_successfully"),
       });
       queryClient.invalidateQueries({ queryKey: ['itinerary', id] });
     },
     onError: () => {
       toast({
-        title: "שגיאה בשמירה",
-        description: "לא הצלחנו לשמור את השינויים",
+        title: t("itinerary.save_error"),
+        description: t("itinerary.could_not_save_changes"),
         variant: "destructive",
       });
     },
@@ -394,14 +396,14 @@ export default function ItineraryDetail() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-96">
           <CardHeader>
-            <CardTitle className="text-center">נדרשת התחברות</CardTitle>
+            <CardTitle className="text-center">{t("itinerary.authentication_required")}</CardTitle>
             <CardDescription className="text-center">
-              התחבר כדי לצפות באיטינררי שלך
+              {t("itinerary.sign_in_to_view_itinerary")}
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <Button onClick={() => signInWithGoogle()}>
-              התחבר עם Google
+              {t("auth.sign_in_with_google")}
             </Button>
           </CardContent>
         </Card>
@@ -415,7 +417,7 @@ export default function ItineraryDetail() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 mx-auto mb-4 animate-spin text-primary" />
-          <p>טוען איטינררי...</p>
+          <p>{t("itinerary.loading_itinerary")}</p>
         </div>
       </div>
     );
@@ -427,14 +429,14 @@ export default function ItineraryDetail() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-96">
           <CardHeader>
-            <CardTitle className="text-center text-red-600">שגיאה</CardTitle>
+            <CardTitle className="text-center text-red-600">{t("common.error")}</CardTitle>
             <CardDescription className="text-center">
-              לא הצלחנו לטעון את האיטינררי
+              {t("itinerary.could_not_load_itinerary")}
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <Button onClick={() => setLocation("/my-trips")} variant="outline">
-              חזור לרשימת איטינררים
+              {t("itinerary.return_to_itinerary_list")}
             </Button>
           </CardContent>
         </Card>
@@ -469,7 +471,7 @@ export default function ItineraryDetail() {
                 onClick={() => setLocation("/my-trips")}
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                חזור
+                {t("common.back")}
               </Button>
               
               {isEditingTitle ? (
@@ -514,7 +516,7 @@ export default function ItineraryDetail() {
                   onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  ייצוא
+                  {t("itinerary.export")}
                 </Button>
                 {isExportMenuOpen && (
                   <div className="absolute left-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-20">
@@ -524,28 +526,28 @@ export default function ItineraryDetail() {
                         className="w-full text-right px-4 py-2 text-sm hover:bg-gray-100 flex items-center"
                       >
                         <FileDown className="w-4 h-4 mr-2" />
-                        הורד JSON
+                        {t("itinerary.download_json")}
                       </button>
                       <button
                         onClick={() => { exportAsCSV(); setIsExportMenuOpen(false); }}
                         className="w-full text-right px-4 py-2 text-sm hover:bg-gray-100 flex items-center"
                       >
                         <FileDown className="w-4 h-4 mr-2" />
-                        הורד CSV
+                        {t("itinerary.download_csv")}
                       </button>
                       <button
                         onClick={() => { exportAsICS(); setIsExportMenuOpen(false); }}
                         className="w-full text-right px-4 py-2 text-sm hover:bg-gray-100 flex items-center"
                       >
                         <CalendarIcon className="w-4 h-4 mr-2" />
-                        הורד ICS
+                        {t("itinerary.download_ics")}
                       </button>
                       <button
                         onClick={() => { handlePrint(); setIsExportMenuOpen(false); }}
                         className="w-full text-right px-4 py-2 text-sm hover:bg-gray-100 flex items-center"
                       >
                         <Printer className="w-4 h-4 mr-2" />
-                        הדפס
+                        {t("itinerary.print")}
                       </button>
                     </div>
                   </div>
@@ -572,7 +574,7 @@ export default function ItineraryDetail() {
           <div className="w-64 flex-shrink-0">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">ימי הטיול</CardTitle>
+                <CardTitle className="text-lg">{t("itinerary.trip_days")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -586,10 +588,10 @@ export default function ItineraryDetail() {
                           : "bg-white hover:bg-gray-50 border-gray-200"
                       }`}
                     >
-                      <div className="font-medium">יום {day.day}</div>
+                      <div className="font-medium">{t("trips.day_number", { day: day.day })}</div>
                       <div className="text-sm opacity-80">{day.location}</div>
                       <div className="text-xs opacity-60 mt-1">
-                        {day.activities.length} פעילויות • ${day.estimatedCost}
+                        {day.activities.length} {t("itinerary.activities")} • ${day.estimatedCost}
                       </div>
                     </button>
                   ))}
@@ -611,11 +613,11 @@ export default function ItineraryDetail() {
                           <div>
                             <CardTitle className="flex items-center">
                               <MapPin className="w-5 h-5 mr-2 text-primary" />
-                              יום {day.day} - {day.location}
+                              {t("trips.day_number", { day: day.day })} - {day.location}
                             </CardTitle>
                             <CardDescription className="flex items-center mt-2">
                               <DollarSign className="w-4 h-4 mr-1" />
-                              עלות משוערת: ${day.estimatedCost}
+                              {t("trips.estimated_cost")}: ${day.estimatedCost}
                             </CardDescription>
                           </div>
                           <Button 
@@ -624,7 +626,7 @@ export default function ItineraryDetail() {
                             onClick={() => setIsAddingActivity(true)}
                           >
                             <Plus className="w-4 h-4 mr-2" />
-                            הוסף פעילות
+                            {t("itinerary.add_activity")}
                           </Button>
                         </div>
                       </CardHeader>
@@ -633,14 +635,14 @@ export default function ItineraryDetail() {
                         <DragDropContext onDragEnd={handleDragEnd}>
                           <div className="space-y-4">
                             <div>
-                              <h4 className="font-semibold mb-3">פעילויות</h4>
+                              <h4 className="font-semibold mb-3">{t("itinerary.activities")}</h4>
                               
                               {/* Add Activity Form */}
                               {isAddingActivity && selectedDay === day.day && (
                                 <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                   <div className="flex items-center space-x-2">
                                     <Input
-                                      placeholder="שם הפעילות החדשה..."
+                                      placeholder={t("itinerary.new_activity_name_placeholder")}
                                       value={newActivityName}
                                       onChange={(e) => setNewActivityName(e.target.value)}
                                       onKeyDown={(e) => {
@@ -661,7 +663,7 @@ export default function ItineraryDetail() {
                                       {updateActivitiesMutation.isPending ? (
                                         <Loader2 className="w-4 h-4 animate-spin" />
                                       ) : (
-                                        "הוסף"
+                                        t("common.add")
                                       )}
                                     </Button>
                                     <Button 
@@ -672,7 +674,7 @@ export default function ItineraryDetail() {
                                         setNewActivityName("");
                                       }}
                                     >
-                                      ביטול
+                                      {t("common.cancel")}
                                     </Button>
                                   </div>
                                 </div>
@@ -743,7 +745,7 @@ export default function ItineraryDetail() {
                                                       setEditActivityName("");
                                                     }}
                                                   >
-                                                    ביטול
+                                                    {t("common.cancel")}
                                                   </Button>
                                                 </div>
                                               ) : (
@@ -778,8 +780,8 @@ export default function ItineraryDetail() {
                                     
                                     {day.activities.length === 0 && (
                                       <div className="text-center py-8 text-gray-500">
-                                        <div className="text-lg mb-2">אין פעילויות ליום זה</div>
-                                        <div className="text-sm">לחץ על "הוסף פעילות" כדי להתחיל</div>
+                                        <div className="text-lg mb-2">{t("itinerary.no_activities_for_day")}</div>
+                                        <div className="text-sm">{t("itinerary.click_add_activity_to_start")}</div>
                                       </div>
                                     )}
                                   </div>
@@ -792,7 +794,7 @@ export default function ItineraryDetail() {
                         {/* Tips */}
                         {day.tips.length > 0 && (
                           <div className="mt-6">
-                            <h4 className="font-semibold mb-3">טיפים מקומיים</h4>
+                            <h4 className="font-semibold mb-3">{t("itinerary.local_tips")}</h4>
                             <div className="space-y-2">
                               {day.tips.map((tip, index) => (
                                 <div key={index} className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -815,10 +817,9 @@ export default function ItineraryDetail() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>מחיקת איטינררי</DialogTitle>
+            <DialogTitle>{t("itinerary.delete_itinerary")}</DialogTitle>
             <DialogDescription>
-              האם אתה בטוח שברצונך למחוק את האיטינררי "{itinerary.title}"?
-              פעולה זו אינה ניתנת לביטול.
+              {t("itinerary.confirm_delete_message", { title: itinerary.title })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -826,7 +827,7 @@ export default function ItineraryDetail() {
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
             >
-              ביטול
+              {t("common.cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -841,7 +842,7 @@ export default function ItineraryDetail() {
               ) : (
                 <Trash2 className="w-4 h-4 mr-2" />
               )}
-              מחק
+              {t("common.delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -582,8 +582,8 @@ export default function MyTripsNew() {
     } catch (error) {
       console.error('Sign in error:', error);
       toast({
-        title: "שגיאה בהתחברות",
-        description: "נסה שוב מאוחר יותר",
+        title: t('auth.login_error'),
+        description: t('auth.try_again_later'),
         variant: "destructive",
       });
     }
@@ -630,15 +630,15 @@ export default function MyTripsNew() {
     },
     onSuccess: () => {
       toast({
-        title: "נמחק בהצלחה",
-        description: "האיטינררי נמחק מהרשימה שלך",
+        title: t('trips.deleted_successfully'),
+        description: t('trips.itinerary_removed_from_list'),
       });
       queryClient.invalidateQueries({ queryKey: ['my-itineraries'] });
     },
     onError: (error) => {
       toast({
-        title: "שגיאה במחיקה",
-        description: "לא הצלחנו למחוק את האיטינררי, נסה שוב",
+        title: t('trips.delete_error'),
+        description: t('trips.failed_to_delete_try_again'),
         variant: "destructive",
       });
     },
@@ -1056,7 +1056,7 @@ export default function MyTripsNew() {
                             </TooltipTrigger>
                             {!isAuthenticated && (
                               <TooltipContent>
-                                <p>צריך להתחבר כדי לשמור. לחיצה תפתח מסך התחברות.</p>
+                                <p>{t('auth.need_to_sign_in_to_save')}</p>
                               </TooltipContent>
                             )}
                           </Tooltip>
@@ -1142,9 +1142,9 @@ export default function MyTripsNew() {
                 {!isAuthenticated ? (
                   <div className="text-center py-8">
                     <Save className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                    <p className="text-lg font-medium text-gray-700 mb-2">התחבר כדי לראות איטינררים</p>
+                    <p className="text-lg font-medium text-gray-700 mb-2">{t('auth.sign_in_to_view_itineraries')}</p>
                     <p className="text-sm text-gray-500 mb-4">
-                      צריך להתחבר כדי לגשת לאיטינררים השמורים שלך
+                      {t('auth.need_to_sign_in_to_access')}
                     </p>
                     <Button onClick={() => signInWithGoogle()} variant="outline">
                       <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
@@ -1153,29 +1153,29 @@ export default function MyTripsNew() {
                         <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                         <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                       </svg>
-                      התחבר עם Google
+                      {t('auth.sign_in_with_google')}
                     </Button>
                   </div>
                 ) : isLoadingItineraries ? (
                   <div className="text-center py-8">
                     <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin text-primary" />
-                    <p className="text-sm text-gray-600">Loading your saved itineraries...</p>
+                    <p className="text-sm text-gray-600">{t('trips.loading_saved_itineraries')}</p>
                   </div>
                 ) : savedItineraries.length === 0 ? (
                   <div className="text-center py-8 bg-gray-50 rounded-lg">
                     <Save className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                    <p className="text-gray-600 mb-2">אין איטינררים שמורים עדיין</p>
-                    <p className="text-sm text-gray-500 mb-4">האיטינררים שתשמור יופיעו כאן</p>
+                    <p className="text-gray-600 mb-2">{t('auth.no_saved_itineraries_yet')}</p>
+                    <p className="text-sm text-gray-500 mb-4">{t('auth.saved_itineraries_will_appear_here')}</p>
                     <Button onClick={() => setActiveTab("itinerary")} variant="outline">
                       <Route className="w-4 h-4 mr-2" />
-                      צור איטינררי חדש
+                      {t('auth.create_new_itinerary')}
                     </Button>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between mb-4">
                       <p className="text-sm text-gray-600">
-                        יש לך {savedItineraries.length} איטינררי{savedItineraries.length !== 1 ? 'ם' : ''} שמור{savedItineraries.length !== 1 ? 'ים' : ''}
+                        {t('trips.you_have_count_itineraries', { count: savedItineraries.length })}
                       </p>
                       <Badge variant="secondary">{savedItineraries.length}</Badge>
                     </div>
@@ -1198,7 +1198,7 @@ export default function MyTripsNew() {
                               </div>
                               <div className="flex items-center space-x-2">
                                 <Badge variant="outline" className="text-xs">
-                                  {planData?.totalDays || 0} ימים
+                                  {t('trips.days_count', { count: planData?.totalDays || 0 })}
                                 </Badge>
                                 <Button
                                   variant="ghost"
@@ -1220,25 +1220,25 @@ export default function MyTripsNew() {
                             <div className="space-y-2">
                               <div className="flex items-center text-sm text-gray-600">
                                 <MapPin className="w-4 h-4 mr-2" />
-                                {planData?.mainDestination || 'יעד לא ידוע'}
+                                {planData?.mainDestination || t('trips.unknown_destination')}
                               </div>
                               {planData?.totalCost && (
                                 <div className="flex items-center text-sm text-gray-600">
                                   <DollarSign className="w-4 h-4 mr-2" />
-                                  עלות משוערת: ${planData.totalCost}
+                                  {t('trips.estimated_cost')}: ${planData.totalCost}
                                 </div>
                               )}
                               {planData?.itinerary && planData.itinerary.length > 0 && (
                                 <div className="text-sm text-gray-600">
-                                  <span className="font-medium">{planData.itinerary.length} ימי פעילויות:</span>
+                                  <span className="font-medium">{t('trips.activity_days_count', { count: planData.itinerary.length })}:</span>
                                   <div className="mt-1 text-xs">
                                     {planData.itinerary.slice(0, 2).map((day: any, idx: number) => (
                                       <div key={idx} className="text-gray-500">
-                                        יום {day.day}: {day.location}
+                                        {t('trips.day_number')}: {day.day}: {day.location}
                                       </div>
                                     ))}
                                     {planData.itinerary.length > 2 && (
-                                      <div className="text-gray-400">ועוד {planData.itinerary.length - 2} ימים...</div>
+                                      <div className="text-gray-400">{t('trips.and_more_days', { count: planData.itinerary.length - 2 })}...</div>
                                     )}
                                   </div>
                                 </div>
@@ -1361,9 +1361,9 @@ export default function MyTripsNew() {
         <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-center">התחבר כדי לשמור את האיטינררי</DialogTitle>
+              <DialogTitle className="text-center">{t('trips.sign_in_to_save_itinerary')}</DialogTitle>
               <DialogDescription className="text-center">
-                כדי לשמור ולגשת לאיטינררי שלך מכל מכשיר, התחבר עם Google.
+                {t('trips.sign_in_to_save_and_access_description')}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -1378,12 +1378,12 @@ export default function MyTripsNew() {
                   <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                   <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-                התחבר עם Google
+                {t('auth.sign_in_with_google')}
               </Button>
             </div>
             <DialogFooter className="flex justify-center">
               <Button variant="outline" onClick={() => setIsAuthModalOpen(false)}>
-                ביטול
+                {t('common.cancel')}
               </Button>
             </DialogFooter>
           </DialogContent>

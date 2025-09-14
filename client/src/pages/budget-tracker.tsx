@@ -564,14 +564,14 @@ export default function BudgetTracker() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Lightbulb className="w-5 h-5 mr-2 text-primary" />
-                  AI Budget Insights
+                  {t('budget.ai_budget_insights')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8">
                   <Lightbulb className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-600 mb-2">AI Insights Coming Soon</h3>
-                  <p className="text-gray-500">Get personalized budget recommendations and spending insights powered by AI.</p>
+                  <h3 className="text-lg font-medium text-gray-600 mb-2">{t('budget.ai_insights_coming_soon')}</h3>
+                  <p className="text-gray-500">{t('budget.ai_budget_description')}</p>
                 </div>
               </CardContent>
             </Card>

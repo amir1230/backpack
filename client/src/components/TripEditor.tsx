@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,6 +63,7 @@ interface TripEditorProps {
 
 export function TripEditor({ itineraryId, onClose }: TripEditorProps) {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
     title: '',
@@ -91,13 +93,13 @@ export function TripEditor({ itineraryId, onClose }: TripEditorProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/itineraries/${itineraryId}`] });
-      toast({ title: "Changes saved", description: "Item updated successfully" });
+      toast({ title: t("editor.changes_saved"), description: t("editor.item_updated_successfully") });
       setEditingItem(null);
     },
     onError: () => {
       toast({ 
-        title: "Save failed", 
-        description: "Could not save changes. Please try again.",
+        title: t("editor.save_failed"), 
+        description: t("editor.could_not_save_changes"),
         variant: "destructive" 
       });
     }
@@ -113,12 +115,12 @@ export function TripEditor({ itineraryId, onClose }: TripEditorProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/itineraries/${itineraryId}`] });
-      toast({ title: "Item deleted", description: "Item removed from itinerary" });
+      toast({ title: t("editor.item_deleted"), description: t("editor.item_removed_from_itinerary") });
     },
     onError: () => {
       toast({ 
-        title: "Delete failed", 
-        description: "Could not delete item. Please try again.",
+        title: t("editor.delete_failed"), 
+        description: t("editor.could_not_delete_item"),
         variant: "destructive" 
       });
     }
@@ -169,7 +171,7 @@ export function TripEditor({ itineraryId, onClose }: TripEditorProps) {
   };
 
   const handleDelete = (itemId: string) => {
-    if (confirm('Delete this item from your itinerary?')) {
+    if (confirm(t("editor.delete_item_confirmation"))) {
       deleteItemMutation.mutate(itemId);
     }
   };
@@ -212,7 +214,7 @@ export function TripEditor({ itineraryId, onClose }: TripEditorProps) {
   if (isLoading) {
     return (
       <div className="p-8 text-center">
-        <div className="animate-pulse">Loading itinerary...</div>
+        <div className="animate-pulse">{t("editor.loading_itinerary")}</div>
       </div>
     );
   }
@@ -220,8 +222,8 @@ export function TripEditor({ itineraryId, onClose }: TripEditorProps) {
   if (!itinerary) {
     return (
       <div className="p-8 text-center">
-        <p className="text-red-600">Failed to load itinerary</p>
-        <Button onClick={onClose} className="mt-4">Close</Button>
+        <p className="text-red-600">{t("editor.failed_to_load_itinerary")}</p>
+        <Button onClick={onClose} className="mt-4">{t("editor.close")}</Button>
       </div>
     );
   }
@@ -239,7 +241,7 @@ export function TripEditor({ itineraryId, onClose }: TripEditorProps) {
         <div className="flex gap-2">
           <Button variant="outline" onClick={onClose}>
             <X className="w-4 h-4 mr-2" />
-            Close
+            {t("editor.close")}
           </Button>
         </div>
       </div>
@@ -251,7 +253,7 @@ export function TripEditor({ itineraryId, onClose }: TripEditorProps) {
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center">
                 <Calendar className="w-5 h-5 mr-2 text-blue-600" />
-                Day {day}
+                {t("trips.day_number", { day: day })}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -296,7 +298,7 @@ export function TripEditor({ itineraryId, onClose }: TripEditorProps) {
                           disabled={updateItemMutation.isPending}
                         >
                           <Save className="w-3 h-3 mr-1" />
-                          Save
+                          {t("common.save")}
                         </Button>
                         <Button 
                           size="sm" 
@@ -304,7 +306,7 @@ export function TripEditor({ itineraryId, onClose }: TripEditorProps) {
                           onClick={handleEditCancel}
                         >
                           <X className="w-3 h-3 mr-1" />
-                          Cancel
+                          {t("common.cancel")}
                         </Button>
                       </div>
                     </div>

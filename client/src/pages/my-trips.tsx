@@ -495,7 +495,7 @@ export default function MyTripsScreen() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Star className="w-6 h-6 mr-2 text-primary" />
-                  AI Trip Suggestions
+                  {t('trips.ai_trip_suggestions')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
