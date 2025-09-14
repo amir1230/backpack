@@ -686,7 +686,7 @@ export default function MyTripsNew() {
                   <Bot className={`w-6 h-6 text-primary ${i18n.language === 'he' ? 'ml-2 mr-0' : 'mr-2'}`} />
                   {t('trips.trip_preferences')}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className={i18n.language === 'he' ? 'text-right' : ''}>
                   {t('trips.tell_us_preferences')}
                 </CardDescription>
               </CardHeader>
@@ -838,7 +838,7 @@ export default function MyTripsNew() {
                   <Sparkles className={`w-6 h-6 text-primary ${i18n.language === 'he' ? 'ml-2 mr-0' : 'mr-2'}`} />
                   {t('trips.ai_trip_suggestions')}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className={i18n.language === 'he' ? 'text-right' : ''}>
                   {t('trips.personalized_recommendations')}
                 </CardDescription>
               </CardHeader>
@@ -1005,7 +1005,7 @@ export default function MyTripsNew() {
                   <Route className={`w-6 h-6 text-primary ${i18n.language === 'he' ? 'ml-2 mr-0' : 'mr-2'}`} />
                   {t('trips.daily_itinerary')}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className={i18n.language === 'he' ? 'text-right' : ''}>
                   {t('trips.detailed_day_by_day_plan')}
                 </CardDescription>
               </CardHeader>
@@ -1134,7 +1134,7 @@ export default function MyTripsNew() {
                   <Save className={`w-6 h-6 text-primary ${i18n.language === 'he' ? 'ml-2 mr-0' : 'mr-2'}`} />
                   {t('trips.my_saved_itineraries')}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className={i18n.language === 'he' ? 'text-right' : ''}>
                   {t('trips.view_manage_itineraries')}
                 </CardDescription>
               </CardHeader>
@@ -1262,7 +1262,7 @@ export default function MyTripsNew() {
                   <FolderOpen className={`w-6 h-6 text-primary ${i18n.language === 'he' ? 'ml-2 mr-0' : 'mr-2'}`} />
                   {t('trips.my_saved_trips')}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className={i18n.language === 'he' ? 'text-right' : ''}>
                   {t('trips.view_manage_trips')}
                 </CardDescription>
               </CardHeader>
