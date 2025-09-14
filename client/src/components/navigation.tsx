@@ -88,7 +88,8 @@ export default function Navigation() {
                 <div className="text-lg font-bold text-orange-600">TripWise</div>
               </Link>
               
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <LanguageToggle />
                 <Button
                   variant="ghost"
                   size="sm"
