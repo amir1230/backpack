@@ -77,6 +77,38 @@
     "track_expenses": "מעקב הוצאות",
     "find_travel_buddies": "מצא חברי נסיעה"
   },
+  "chat": {
+    "direct_messages": "הודעות פרטיות",
+    "no_conversations_yet": "עדיין אין שיחות",
+    "start_new_conversation": "התחל שיחה חדשה עם מישהו",
+    "new_dm": "הודעה פרטית חדשה",
+    "create_room": "צור חדר",
+    "no_chat_rooms": "אין חדרי צ'אט עדיין",
+    "join_first_room": "הצטרפו לחדר הראשון להתחיל שיחה!",
+    "search_conversations": "חפש שיחות...",
+    "select_chat_room": "בחר חדר צ'אט",
+    "choose_room_from_sidebar": "בחר חדר מהסייד-בר כדי להתחיל לצ'וטט",
+    "start_new_conversation_modal": "התחל שיחה חדשה",
+    "partner_name": "שם הפרטנר",
+    "enter_name_to_chat_placeholder": "הכנס שם לצ'וטט איתו...",
+    "chatting_as": "מצ'וטט בתור:",
+    "set_name_in_chat_room_first": "⚠️ קודם קבע את השם שלך בחדר צ'אט",
+    "creating": "יוצר...",
+    "start_chat": "התחל צ'אט",
+    "unable_to_load_dms": "לא ניתן לטעון הודעות פרטיות",
+    "try_refreshing_page": "נסה לרענן את הדף",
+    "recently": "לאחרונה",
+    "guest": "אורח",
+    "you_prefix": "אתה: ",
+    "dm_created": "הודעה פרטית נוצרה",
+    "started_conversation_with": "התחיל שיחה עם {{name}}",
+    "user_fallback": "משתמש",
+    "failed_to_create_dm": "נכשל ביצירת הודעה פרטית",
+    "partner_name_required": "שם פרטנר נדרש",
+    "enter_partner_name_error": "אנא הכנס שם עבור פרטנר השיחה שלך",
+    "your_name_required": "השם שלך נדרש",
+    "set_your_name_first_error": "אנא קבע את השם שלך בחדר צ'אט תחילה"
+  },
   "trips": {
     "my_trips": "הטיולים שלי",
     "my_trip_planner": "מתכנן הטיולים שלי",
@@ -839,5 +871,49 @@
     "booking_recommendations_for_your_trip": "המלצות להזמנה לפי הטיול שלך",
     "unknown_source": "מקור לא ידוע",
     "view_on_maps": "צפה במפות"
+  },
+  "weather": {
+    "climate_zones_title": "אזורי אקלים",
+    "travel_seasons_title": "עונות נסיעה",
+    "choose_destination": "בחר יעד",
+    "popular_destinations": "יעדים פופולריים", 
+    "search_custom_destination": "חיפוש יעד מותאם",
+    "select_country": "בחר מדינה",
+    "best_destinations": "יעדים מומלצים:",
+    "climate_zones": {
+      "coastal_desert": "מדבר חוף",
+      "coastal_desert_desc": "אזורי חוף יבשים עם טמפרטורות מתונות",
+      "tropical": "טרופי",
+      "tropical_desc": "חם ולח עם גשמים תכופים", 
+      "highland": "הררי",
+      "highland_desc": "אזורי הרים קרירים עם מזג אוויר משתנה",
+      "temperate": "ממוזג",
+      "temperate_desc": "אקלים מתון עם עונות מובהקות"
+    },
+    "seasons": {
+      "dry_season": "עונה יבשה",
+      "dry_season_desc": "פחות גשמים, אידיאלי לפעילויות חוץ",
+      "summer_season": "עונת קיץ",
+      "summer_season_desc": "מזג אוויר חם, עונת תיירות שיא", 
+      "year_round": "כל השנה",
+      "year_round_desc": "מזג אוויר טוב לאורך כל השנה"
+    },
+    "tips": {
+      "altitude_considerations": "שיקולי גובה",
+      "altitude_considerations_desc": "גבהים גבוהים עלולים לגרום למחלת גבהים"
+    },
+    "travel_tips_title": "טיפי נסיעה"
+  },
+  "chat": {
+    "direct_messages": "הודעות פרטיות",
+    "no_conversations_yet": "אין שיחות עדיין",
+    "start_new_conversation": "התחילו שיחה חדשה עם מישהו",
+    "new_dm": "הודעה חדשה",
+    "create_room": "צור חדר",
+    "no_chat_rooms": "אין חדרי צ'אט עדיין",
+    "join_first_room": "הצטרפו לחדר הראשונים להתחיל שיחה!",
+    "search_conversations": "חיפוש שיחות...",
+    "select_chat_room": "בחר חדר צ'אט",
+    "choose_room_from_sidebar": "בחר חדר מהסיידבאר כדי להתחיל לצ'טט"
   }
 }

@@ -12,6 +12,7 @@ import { MessageSquare, Plus, Search, Users2, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { apiRequest } from '../../lib/queryClient';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface DMRoom {
   id: number;
@@ -35,6 +36,7 @@ interface SidebarDMsProps {
 }
 
 export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsProps) {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNewDMModal, setShowNewDMModal] = useState(false);
   const [partnerInput, setPartnerInput] = useState('');
@@ -59,7 +61,7 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
   // Create DM mutation
   const createDMMutation = useMutation({
     mutationFn: async (partnerName: string) => {
-      const currentGuestName = localStorage.getItem('tripwise_guest_name') || 'Guest';
+      const currentGuestName = localStorage.getItem('tripwise_guest_name') || t('chat.guest');
       return apiRequest('/api/dm-rooms', {
         method: 'POST',
         body: JSON.stringify({
@@ -74,14 +76,14 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
       setShowNewDMModal(false);
       setPartnerInput('');
       toast({
-        title: "DM Created",
-        description: `Started conversation with ${newRoom.partnerName || 'user'}`,
+        title: t('chat.dm_created'),
+        description: t('chat.started_conversation_with', { name: newRoom.partnerName || t('chat.user_fallback') }),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create DM",
+        title: t('common.error'),
+        description: error.message || t('chat.failed_to_create_dm'),
         variant: "destructive",
       });
     }
@@ -90,8 +92,8 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
   const handleCreateDM = () => {
     if (!partnerInput.trim()) {
       toast({
-        title: "Partner Name Required",
-        description: "Please enter a name for your conversation partner",
+        title: t('chat.partner_name_required'),
+        description: t('chat.enter_partner_name_error'),
         variant: "destructive",
       });
       return;
@@ -101,8 +103,8 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
     const currentGuestName = localStorage.getItem('tripwise_guest_name');
     if (!currentGuestName || !currentGuestName.trim()) {
       toast({
-        title: "Your Name Required",
-        description: "Please set your name in a chat room first",
+        title: t('chat.your_name_required'),
+        description: t('chat.set_your_name_first_error'),
         variant: "destructive",
       });
       return;
@@ -124,7 +126,7 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
     try {
       return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
     } catch {
-      return 'Recently';
+      return t('chat.recently');
     }
   };
 
@@ -149,7 +151,7 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
-            Direct Messages
+            {t('chat.direct_messages')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -172,14 +174,14 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
-            Direct Messages
+            {t('chat.direct_messages')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-gray-500">
             <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p className="text-sm">Unable to load DMs</p>
-            <p className="text-xs text-gray-400">Try refreshing the page</p>
+            <p className="text-sm">{t('chat.unable_to_load_dms')}</p>
+            <p className="text-xs text-gray-400">{t('chat.try_refreshing_page')}</p>
           </div>
         </CardContent>
       </Card>
@@ -192,7 +194,7 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
-            Direct Messages
+            {t('chat.direct_messages')}
           </CardTitle>
           <Dialog open={showNewDMModal} onOpenChange={setShowNewDMModal}>
             <DialogTrigger asChild>
@@ -202,14 +204,14 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Start New Conversation</DialogTitle>
+                <DialogTitle>{t('chat.start_new_conversation_modal')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="partner-name">Partner Name</Label>
+                  <Label htmlFor="partner-name">{t('chat.partner_name')}</Label>
                   <Input
                     id="partner-name"
-                    placeholder="Enter name to chat with..."
+                    placeholder={t('chat.enter_name_to_chat_placeholder')}
                     value={partnerInput}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPartnerInput(e.target.value)}
                     onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleCreateDM()}
@@ -217,9 +219,9 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
                 </div>
                 <div className="text-sm text-gray-600">
                   {guestName ? (
-                    <p>Chatting as: <strong>{guestName}</strong></p>
+                    <p>{t('chat.chatting_as')} <strong>{guestName}</strong></p>
                   ) : (
-                    <p className="text-amber-600">⚠️ Set your name in a chat room first</p>
+                    <p className="text-amber-600">{t('chat.set_name_in_chat_room_first')}</p>
                   )}
                 </div>
                 <div className="flex gap-2">
@@ -228,13 +230,13 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
                     disabled={createDMMutation.isPending || !partnerInput.trim()}
                     className="flex-1"
                   >
-                    {createDMMutation.isPending ? 'Creating...' : 'Start Chat'}
+                    {createDMMutation.isPending ? t('chat.creating') : t('chat.start_chat')}
                   </Button>
                   <Button 
                     variant="outline" 
                     onClick={() => setShowNewDMModal(false)}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                 </div>
               </div>
@@ -246,7 +248,7 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search conversations..."
+            placeholder={t('chat.search_conversations')}
             value={searchTerm}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -260,9 +262,9 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
             {filteredRooms.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <Users2 className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p className="text-sm font-medium mb-2">No conversations yet</p>
+                <p className="text-sm font-medium mb-2">{t('chat.no_conversations_yet')}</p>
                 <p className="text-xs text-gray-400 mb-4">
-                  Start a new conversation with someone
+                  {t('chat.start_new_conversation')}
                 </p>
                 <Button 
                   variant="outline" 
@@ -270,7 +272,7 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
                   onClick={() => setShowNewDMModal(true)}
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  New DM
+                  {t('chat.new_dm')}
                 </Button>
               </div>
             ) : (
@@ -308,7 +310,7 @@ export function SidebarDMs({ selectedRoom, onRoomSelect, onNewDM }: SidebarDMsPr
                         {room.lastMessage && (
                           <p className="text-xs text-gray-600 truncate mb-1">
                             {room.lastMessage.authorName && room.lastMessage.authorName !== partnerName && (
-                              <span className="font-medium">You: </span>
+                              <span className="font-medium">{t('chat.you_prefix')}</span>
                             )}
                             {room.lastMessage.message}
                           </p>

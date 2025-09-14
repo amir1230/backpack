@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,15 +38,15 @@ import {
   Lightbulb
 } from "lucide-react";
 
-const tripFormSchema = z.object({
-  travelStyle: z.array(z.string()).min(1, "Select at least one travel style"),
-  budget: z.number().min(100, "Budget must be at least $100"),
-  duration: z.string().min(1, "Duration is required"),
-  interests: z.array(z.string()).min(1, "Select at least one interest"),
+const getTripFormSchema = (t: any) => z.object({
+  travelStyle: z.array(z.string()).min(1, t("trips.select_travel_style")),
+  budget: z.number().min(100, t("trips.budget_required")),
+  duration: z.string().min(1, t("trips.select_duration")),
+  interests: z.array(z.string()).min(1, t("trips.select_interests")),
   preferredCountries: z.array(z.string()).optional(),
 });
 
-type TripFormData = z.infer<typeof tripFormSchema>;
+type TripFormData = z.infer<ReturnType<typeof getTripFormSchema>>;
 
 interface RealPlace {
   title: string;
@@ -117,12 +118,14 @@ interface TripItineraryViewProps {
 }
 
 function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: TripItineraryViewProps) {
+  const { t } = useTranslation();
+  
   if (isGenerating) {
     return (
       <div className="text-center py-8">
         <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin text-primary" />
-        <p className="text-lg font-medium text-gray-700">Creating your detailed itinerary...</p>
-        <p className="text-sm text-gray-500 mt-2">This may take a few moments</p>
+        <p className="text-lg font-medium text-gray-700">{t("trips.creating_detailed_itinerary")}</p>
+        <p className="text-sm text-gray-500 mt-2">{t("trips.may_take_few_moments")}</p>
       </div>
     );
   }
@@ -131,13 +134,13 @@ function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: Tri
     return (
       <div className="text-center py-8">
         <Route className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-        <p className="text-lg font-medium text-gray-700 mb-2">No itinerary generated yet</p>
+        <p className="text-lg font-medium text-gray-700 mb-2">{t("trips.no_itinerary_generated")}</p>
         <p className="text-sm text-gray-500 mb-4">
-          Generate trip suggestions first, then create a detailed day-by-day itinerary
+          {t("trips.generate_suggestions_first")}
         </p>
         <Button onClick={onGenerateItinerary} variant="outline">
           <Route className="w-4 h-4 mr-2" />
-          Generate Sample Itinerary
+          {t("trips.generate_sample_itinerary")}
         </Button>
       </div>
     );
@@ -146,10 +149,10 @@ function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: Tri
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-bold text-slate-700">Your Day-by-Day Itinerary</h3>
+        <h3 className="text-xl font-bold text-slate-700">{t("trips.your_day_by_day_itinerary")}</h3>
         <Button onClick={onGenerateItinerary} variant="outline" size="sm">
           <Route className="w-4 h-4 mr-2" />
-          Generate New
+          {t("trips.generate_new")}
         </Button>
       </div>
       
@@ -166,7 +169,7 @@ function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: Tri
             <div>
               <div className="flex items-center mb-2">
                 <ListChecks className="w-4 h-4 mr-2 text-blue-600" />
-                <span className="font-semibold text-blue-800 text-sm">Activities</span>
+                <span className="font-semibold text-blue-800 text-sm">{t("trips.activities")}</span>
               </div>
               <ul className="space-y-1">
                 {day.activities.map((activity, idx) => (
@@ -182,7 +185,7 @@ function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: Tri
             <div className="bg-green-50 p-3 rounded-lg">
               <div className="flex items-center mb-1">
                 <DollarSign className="w-4 h-4 mr-2 text-green-600" />
-                <span className="font-semibold text-green-800 text-sm">Estimated Cost</span>
+                <span className="font-semibold text-green-800 text-sm">{t("trips.estimated_cost")}</span>
               </div>
               <p className="text-green-700 text-lg font-bold">${day.estimatedCost}</p>
             </div>
@@ -192,7 +195,7 @@ function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: Tri
               <div className="bg-yellow-50 p-3 rounded-lg">
                 <div className="flex items-center mb-2">
                   <Lightbulb className="w-4 h-4 mr-2 text-yellow-600" />
-                  <span className="font-semibold text-yellow-800 text-sm">Daily Tips</span>
+                  <span className="font-semibold text-yellow-800 text-sm">{t("trips.local_tips")}</span>
                 </div>
                 <ul className="space-y-1">
                   {day.tips.map((tip, idx) => (
@@ -212,6 +215,7 @@ function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: Tri
 }
 
 export default function TripBuilder() {
+  const { t } = useTranslation();
   const [budget, setBudget] = useState([2500]);
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
@@ -225,7 +229,7 @@ export default function TripBuilder() {
   const queryClient = useQueryClient();
 
   const form = useForm<TripFormData>({
-    resolver: zodResolver(tripFormSchema),
+    resolver: zodResolver(getTripFormSchema(t)),
     defaultValues: {
       travelStyle: [],
       budget: 2500,
@@ -247,8 +251,8 @@ export default function TripBuilder() {
       setAiSuggestions(data.suggestions || []);
       setIsGenerating(false);
       toast({
-        title: "Trip Suggestions Generated!",
-        description: "Your personalized South American trip suggestions are ready.",
+        title: t("trips.trip_suggestions_generated_title"),
+        description: t("trips.trip_suggestions_generated_desc"),
       });
     },
     onError: async (error) => {
@@ -257,8 +261,8 @@ export default function TripBuilder() {
       
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          title: t("trips.unauthorized"),
+          description: t("trips.you_are_logged_out"),
           variant: "destructive",
         });
         setTimeout(() => {
@@ -280,8 +284,8 @@ export default function TripBuilder() {
       }
       
       toast({
-        title: "Generation Failed",
-        description: errorMessage,
+        title: t("trips.generation_failed"),
+        description: errorMessage || t("trips.could_not_generate_trip"),
         variant: "destructive",
       });
     },
@@ -297,8 +301,8 @@ export default function TripBuilder() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/trips/user"] });
       toast({
-        title: "Trip Created!",
-        description: "Your trip has been saved successfully.",
+        title: t("trips.trip_created"),
+        description: t("trips.trip_saved_successfully"),
       });
       setAiSuggestions([]);
       form.reset();
@@ -310,8 +314,8 @@ export default function TripBuilder() {
     onError: (error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          title: t("trips.unauthorized"),
+          description: t("trips.you_are_logged_out"),
           variant: "destructive",
         });
         setTimeout(() => {
@@ -320,8 +324,8 @@ export default function TripBuilder() {
         return;
       }
       toast({
-        title: "Save Failed",
-        description: "Could not save trip. Please try again.",
+        title: t("trips.save_failed"),
+        description: t("trips.could_not_save_trip"),
         variant: "destructive",
       });
     },
@@ -340,8 +344,8 @@ export default function TripBuilder() {
     // Validation checks
     if (selectedStyles.length === 0) {
       toast({
-        title: "Missing Travel Style",
-        description: "Please select at least one travel style.",
+        title: t("trips.missing_travel_style"),
+        description: t("trips.please_select_travel_style"),
         variant: "destructive",
       });
       return;
@@ -349,8 +353,8 @@ export default function TripBuilder() {
 
     if (selectedInterests.length === 0) {
       toast({
-        title: "Missing Interests", 
-        description: "Please select at least one interest.",
+        title: t("trips.missing_interests"), 
+        description: t("trips.please_select_interest"),
         variant: "destructive",
       });
       return;
@@ -358,8 +362,8 @@ export default function TripBuilder() {
 
     if (!form.getValues("duration")) {
       toast({
-        title: "Missing Duration",
-        description: "Please select trip duration.",
+        title: t("trips.missing_duration"),
+        description: t("trips.please_select_duration"),
         variant: "destructive",
       });
       return;
@@ -446,14 +450,14 @@ export default function TripBuilder() {
       setActiveTab("itinerary");
       
       toast({
-        title: "Itinerary Generated!",
-        description: "Your detailed day-by-day itinerary is ready.",
+        title: t("trips.itinerary_generated_title"),
+        description: t("trips.detailed_itinerary_ready"),
       });
     } catch (error) {
       console.error("Itinerary generation error:", error);
       toast({
-        title: "Generation Failed",
-        description: "Could not generate itinerary. Please try again.",
+        title: t("trips.generation_failed"),
+        description: t("trips.could_not_generate_itinerary"),
         variant: "destructive",
       });
     } finally {
@@ -465,8 +469,8 @@ export default function TripBuilder() {
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 pb-20 md:pb-8">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4">AI Trip Builder</h1>
-          <p className="text-lg text-gray-600">Tell us your preferences and let our AI create personalized South American trip suggestions</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4">{t("trips.my_trip_planner")}</h1>
+          <p className="text-lg text-gray-600">{t("trips.planner_subtitle")}</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -474,15 +478,15 @@ export default function TripBuilder() {
             <TabsList className="inline-flex w-auto min-w-full justify-evenly h-10">
               <TabsTrigger value="preferences" className="flex items-center whitespace-nowrap">
                 <Bot className="w-4 h-4 mr-2" />
-                Preferences
+                {t("trips.preferences")}
               </TabsTrigger>
               <TabsTrigger value="suggestions" className="flex items-center whitespace-nowrap">
                 <Sparkles className="w-4 h-4 mr-2" />
-                Suggestions
+                {t("trips.suggestions")}
               </TabsTrigger>
               <TabsTrigger value="itinerary" className="flex items-center whitespace-nowrap">
                 <Route className="w-4 h-4 mr-2" />
-                Itinerary
+                {t("trips.itinerary")}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -494,18 +498,18 @@ export default function TripBuilder() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Bot className="w-6 h-6 mr-2 text-primary" />
-                AI Trip Builder
+                {t("trips.trip_preferences")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Destination */}
               <div>
                 <Label htmlFor="destination" className="text-sm font-medium text-slate-700 mb-2 block">
-                  Destination
+                  {t("trips.destination")}
                 </Label>
                 <Select onValueChange={(value) => form.setValue('destination', value)}>
                   <SelectTrigger className="w-full p-3">
-                    <SelectValue placeholder="Select destination" />
+                    <SelectValue placeholder={t("trips.select_destination")} />
                   </SelectTrigger>
                   <SelectContent>
                     {SOUTH_AMERICAN_COUNTRIES.map((country) => (
@@ -520,11 +524,11 @@ export default function TripBuilder() {
               {/* Duration */}
               <div>
                 <Label htmlFor="duration" className="text-sm font-medium text-slate-700 mb-2 block">
-                  Trip Duration
+                  {t("trips.trip_duration")}
                 </Label>
                 <Select onValueChange={(value) => form.setValue('duration', value)}>
                   <SelectTrigger className="w-full p-3">
-                    <SelectValue placeholder="How long do you want to travel?" />
+                    <SelectValue placeholder={t("trips.how_long_travel")} />
                   </SelectTrigger>
                   <SelectContent>
                     {DURATIONS.map((duration) => (
@@ -539,7 +543,7 @@ export default function TripBuilder() {
               {/* Budget */}
               <div>
                 <Label className="text-sm font-medium text-slate-700 mb-2 block">
-                  Budget Range
+                  {t("trips.budget_range")}
                 </Label>
                 <div className="px-4">
                   <Slider
@@ -564,7 +568,7 @@ export default function TripBuilder() {
               {/* Travel Style */}
               <div>
                 <Label className="text-sm font-medium text-slate-700 mb-2 block">
-                  Travel Style <span className="text-xs text-gray-500">(select multiple)</span>
+                  {t("trips.travel_style")} <span className="text-xs text-gray-500">({t("trips.select_multiple")})</span>
                 </Label>
                 <div className="grid grid-cols-2 gap-4">
                   {TRAVEL_STYLES.map((style) => (
@@ -592,7 +596,7 @@ export default function TripBuilder() {
               {/* Interests */}
               <div>
                 <Label className="text-sm font-medium text-slate-700 mb-2 block">
-                  Interests <span className="text-xs text-gray-500">(select multiple)</span>
+                  {t("trips.interests")} <span className="text-xs text-gray-500">({t("trips.select_multiple")})</span>
                 </Label>
                 <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
                   {INTERESTS.map((interest) => (
@@ -643,7 +647,7 @@ export default function TripBuilder() {
                 ) : (
                   <>
                     <Bot className="w-5 h-5 mr-2" />
-                    Generate AI Trip Suggestions
+                    {t("trips.generate_ai_suggestions")}
                   </>
                 )}
               </Button>
@@ -830,7 +834,7 @@ export default function TripBuilder() {
                           <div className="bg-blue-50 p-3 rounded-lg">
                             <div className="flex items-center mb-1">
                               <Calendar className="w-4 h-4 mr-2 text-blue-600" />
-                              <span className="font-semibold text-blue-800 text-sm">Duration</span>
+                              <span className="font-semibold text-blue-800 text-sm">{t("trips.duration")}</span>
                             </div>
                             <p className="text-blue-700 text-sm">{suggestion.duration}</p>
                           </div>
@@ -838,7 +842,7 @@ export default function TripBuilder() {
                           <div className="bg-green-50 p-3 rounded-lg">
                             <div className="flex items-center mb-1">
                               <DollarSign className="w-4 h-4 mr-2 text-green-600" />
-                              <span className="font-semibold text-green-800 text-sm">Budget</span>
+                              <span className="font-semibold text-green-800 text-sm">{t("trips.budget")}</span>
                             </div>
                             <p className="text-green-700 text-sm font-bold">
                               ${suggestion.estimatedBudget.low} - ${suggestion.estimatedBudget.high}
@@ -847,12 +851,12 @@ export default function TripBuilder() {
                         </div>
 
                         <div>
-                          <h4 className="font-semibold text-slate-700 mb-2 text-sm">Best Time to Visit</h4>
+                          <h4 className="font-semibold text-slate-700 mb-2 text-sm">{t("trips.best_time_to_visit")}</h4>
                           <p className="text-sm text-gray-600">{suggestion.bestTimeToVisit}</p>
                         </div>
 
                         <div>
-                          <h4 className="font-semibold text-slate-700 mb-2 text-sm">Highlights</h4>
+                          <h4 className="font-semibold text-slate-700 mb-2 text-sm">{t("trips.highlights")}</h4>
                           <div className="flex flex-wrap gap-2">
                             {suggestion.highlights?.map((highlight: string, idx: number) => (
                               <Badge key={idx} variant="secondary" className="text-xs">
@@ -863,7 +867,7 @@ export default function TripBuilder() {
                         </div>
 
                         <div>
-                          <h4 className="font-semibold text-slate-700 mb-2 text-sm">Travel Style</h4>
+                          <h4 className="font-semibold text-slate-700 mb-2 text-sm">{t("trips.travel_style")}</h4>
                           <div className="flex flex-wrap gap-2">
                             {suggestion.travelStyle?.map((style: string, idx: number) => (
                               <Badge key={idx} variant="outline" className="text-xs">
@@ -882,12 +886,12 @@ export default function TripBuilder() {
                             {createTripMutation.isPending ? (
                               <>
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                Saving...
+                                {t("trips.saving")}
                               </>
                             ) : (
                               <>
                                 <CheckCircle className="w-4 h-4 mr-2" />
-                                Save This Trip
+                                {t("trips.save_this_trip")}
                               </>
                             )}
                           </Button>
@@ -900,12 +904,12 @@ export default function TripBuilder() {
                             {isGeneratingItinerary ? (
                               <>
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                Generating...
+                                {t("trips.generating")}
                               </>
                             ) : (
                               <>
                                 <Route className="w-4 h-4 mr-2" />
-                                Create Itinerary
+                                {t("trips.create_itinerary")}
                               </>
                             )}
                           </Button>
@@ -919,7 +923,7 @@ export default function TripBuilder() {
                         onClick={handleGenerateAITrips}
                         disabled={isGenerating}
                       >
-                        Generate New Suggestions
+                        {t("trips.generate_new_suggestions")}
                       </Button>
                     </div>
                   </div>
@@ -928,13 +932,13 @@ export default function TripBuilder() {
                 {aiSuggestions.length === 0 && !isGenerating && (
                   <div className="text-center py-8">
                     <Bot className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                    <p className="text-lg font-medium text-gray-700 mb-2">Ready to plan your South American adventure?</p>
+                    <p className="text-lg font-medium text-gray-700 mb-2">{t("trips.ready_to_plan")}</p>
                     <p className="text-sm text-gray-500 mb-4">
-                      Go to Preferences tab, fill in your preferences and generate AI trip suggestions
+                      {t("trips.go_to_preferences_fill")}
                     </p>
                     <Button onClick={() => setActiveTab("preferences")} variant="outline">
                       <Bot className="w-4 h-4 mr-2" />
-                      Go to Preferences
+                      {t("trips.go_to_preferences")}
                     </Button>
                   </div>
                 )}
@@ -947,7 +951,7 @@ export default function TripBuilder() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Route className="w-6 h-6 mr-2 text-primary" />
-                  Day-by-Day Itinerary
+                  {t("trips.day_by_day_itinerary")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
