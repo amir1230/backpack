@@ -1,4 +1,28 @@
 {
+  "weather": {
+    "conditions": {
+      "clear sky": "שמיים בהירים",
+      "few clouds": "עננים ספורים", 
+      "scattered clouds": "עננים מפוזרים",
+      "broken clouds": "עננים שבורים",
+      "overcast clouds": "מעונן לחלוטין",
+      "light rain": "גשם קל",
+      "moderate rain": "גשם מתון",
+      "heavy rain": "גשם כבד",
+      "thunderstorm": "רעמים",
+      "snow": "שלג",
+      "mist": "ערפל",
+      "fog": "ערפל כבד",
+      "partly cloudy": "מעונן חלקית",
+      "sunny": "שטוף שמש"
+    },
+    "updated": "עודכן:",
+    "more_details": "פרטים נוספים",
+    "feels_like": "מרגיש כמו",
+    "humidity": "לחות",
+    "wind": "רוח",
+    "precipitation": "משקעים"
+  },
   "navigation": {
     "home": "בית",
     "my_trips": "הטיולים שלי",

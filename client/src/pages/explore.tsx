@@ -598,25 +598,25 @@ export default function ExplorePage() {
             </div>
           </div>
           
-          <div className="text-xs text-muted-foreground capitalize">
-            {weather.condition}
+          <div className={`text-xs text-muted-foreground capitalize ${i18n.language === 'he' ? 'text-right' : ''}`}>
+            {i18n.language === 'he' ? t(`weather.conditions.${weather.condition}`, weather.condition) : weather.condition}
           </div>
         </div>
         
         {/* Weather Details Tooltip */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="mt-1 text-xs text-muted-foreground cursor-help">
-              Updated: {formatTime()}
+            <div className={`mt-1 text-xs text-muted-foreground cursor-help ${i18n.language === 'he' ? 'text-right' : ''}`}>
+              {t('weather.updated')} {formatTime()}
             </div>
           </TooltipTrigger>
           <TooltipContent side="top" className="max-w-48">
             <div className="space-y-1 text-xs">
-              <div><strong>Feels like:</strong> {weather.feelsLike}°C</div>
-              <div><strong>Humidity:</strong> {weather.humidity}%</div>
-              <div><strong>Wind:</strong> {weather.windSpeed} km/h</div>
+              <div><strong>{t('weather.feels_like')}:</strong> {weather.feelsLike}°C</div>
+              <div><strong>{t('weather.humidity')}:</strong> {weather.humidity}%</div>
+              <div><strong>{t('weather.wind')}:</strong> {weather.windSpeed} km/h</div>
               {weather.precipitation > 0 && (
-                <div><strong>Precipitation:</strong> {weather.precipitation}mm</div>
+                <div><strong>{t('weather.precipitation')}:</strong> {weather.precipitation}mm</div>
               )}
               <div className="text-xs text-muted-foreground pt-1">
                 Weather data from OpenWeather
@@ -758,7 +758,7 @@ export default function ExplorePage() {
                           </div>
                           <Button size="sm" variant="outline" className="text-xs">
                             <Eye className="w-3 h-3 mr-1" />
-                            More Details
+                            {t('weather.more_details')}
                           </Button>
                         </div>
                       </div>
@@ -854,7 +854,7 @@ export default function ExplorePage() {
                           </div>
                           <Button size="sm" variant="outline" className="text-xs">
                             <Eye className="w-3 h-3 mr-1" />
-                            More Details
+                            {t('weather.more_details')}
                           </Button>
                         </div>
                       </div>
@@ -926,7 +926,7 @@ export default function ExplorePage() {
                         <div className="flex items-center justify-end pt-2">
                           <Button size="sm" variant="outline" className="text-xs">
                             <Eye className="w-3 h-3 mr-1" />
-                            More Details
+                            {t('weather.more_details')}
                           </Button>
                         </div>
                       </div>
@@ -1007,7 +1007,7 @@ export default function ExplorePage() {
                         <div className="flex items-center justify-end pt-2">
                           <Button size="sm" variant="outline" className="text-xs">
                             <Eye className="w-3 h-3 mr-1" />
-                            More Details
+                            {t('weather.more_details')}
                           </Button>
                         </div>
                       </div>

@@ -1,4 +1,28 @@
 {
+  "weather": {
+    "conditions": {
+      "clear sky": "Clear Sky",
+      "few clouds": "Few Clouds", 
+      "scattered clouds": "Scattered Clouds",
+      "broken clouds": "Broken Clouds",
+      "overcast clouds": "Overcast Clouds",
+      "light rain": "Light Rain",
+      "moderate rain": "Moderate Rain",
+      "heavy rain": "Heavy Rain",
+      "thunderstorm": "Thunderstorm",
+      "snow": "Snow",
+      "mist": "Mist",
+      "fog": "Fog",
+      "partly cloudy": "Partly Cloudy",
+      "sunny": "Sunny"
+    },
+    "updated": "Updated:",
+    "more_details": "More Details",
+    "feels_like": "Feels like",
+    "humidity": "Humidity",
+    "wind": "Wind",
+    "precipitation": "Precipitation"
+  },
   "navigation": {
     "home": "Home",
     "my_trips": "My Trips",

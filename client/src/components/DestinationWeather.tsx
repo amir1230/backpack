@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Badge } from "@/components/ui/badge";
 import { 
   Cloud, 
@@ -35,6 +36,7 @@ interface DestinationWeatherProps {
 }
 
 export default function DestinationWeather({ destination, country, compact = true }: DestinationWeatherProps) {
+  const { t, i18n } = useTranslation();
   // Fetch current weather
   const { data: weather, isLoading: weatherLoading } = useQuery({
     queryKey: [`/api/weather/${destination}`, { country }],
@@ -109,8 +111,8 @@ export default function DestinationWeather({ destination, country, compact = tru
                   <Thermometer className="w-3 h-3 text-gray-500" />
                   <span className="text-sm font-medium">{Math.round(weatherData.temperature)}°C</span>
                 </div>
-                <div className="text-xs text-gray-600 capitalize">
-                  {weatherData.condition}
+                <div className={`text-xs text-gray-600 capitalize ${i18n.language === 'he' ? 'text-right' : ''}`}>
+                  {i18n.language === 'he' ? t(`weather.conditions.${weatherData.condition}`, weatherData.condition) : weatherData.condition}
                 </div>
               </div>
             </div>
@@ -162,12 +164,14 @@ export default function DestinationWeather({ destination, country, compact = tru
             {getWeatherIcon(weather.condition)}
             <div>
               <div className="text-lg font-semibold">{Math.round(weather.temperature)}°C</div>
-              <div className="text-sm text-gray-600 capitalize">{weather.condition}</div>
+              <div className={`text-sm text-gray-600 capitalize ${i18n.language === 'he' ? 'text-right' : ''}`}>
+                {i18n.language === 'he' ? t(`weather.conditions.${weather.condition}`, weather.condition) : weather.condition}
+              </div>
             </div>
           </div>
           
           <div className="text-right">
-            <div className="text-sm text-gray-600">Humidity</div>
+            <div className={`text-sm text-gray-600 ${i18n.language === 'he' ? 'text-right' : ''}`}>{t('weather.humidity')}</div>
             <div className="font-medium">{weather.humidity}%</div>
           </div>
         </div>
@@ -187,13 +191,13 @@ export default function DestinationWeather({ destination, country, compact = tru
           )}
           
           <div>
-            <div className="text-sm font-medium text-gray-700 mb-1">Best Travel Months</div>
+            <div className={`text-sm font-medium text-gray-700 mb-1 ${i18n.language === 'he' ? 'text-right' : ''}`}>חודשים מומלצים לטיול</div>
             <div className="text-sm text-gray-600">{recommendations.bestMonths?.join(', ') || 'Year-round'}</div>
           </div>
           
           {recommendations.activities && recommendations.activities.length > 0 && (
             <div>
-              <div className="text-sm font-medium text-gray-700 mb-2">Recommended Activities</div>
+              <div className={`text-sm font-medium text-gray-700 mb-2 ${i18n.language === 'he' ? 'text-right' : ''}`}>פעילויות מומלצות</div>
               <div className="flex flex-wrap gap-1">
                 {recommendations.activities.map((activity, index) => (
                   <Badge key={index} variant="secondary" className="text-xs">
