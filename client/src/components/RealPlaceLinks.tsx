@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, ExternalLink, Building2, Camera } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface RealPlace {
   title: string;
@@ -32,6 +33,7 @@ interface RealPlaceLinksProps {
 }
 
 export function RealPlaceLinks({ suggestion }: RealPlaceLinksProps) {
+  const { t } = useTranslation();
   // If no real places, don't render anything
   if (!suggestion.realPlaces || suggestion.realPlaces.length === 0) {
     return null;
@@ -57,7 +59,7 @@ export function RealPlaceLinks({ suggestion }: RealPlaceLinksProps) {
   // If no matches found, show first few places under general section
   const hasGroupedPlaces = Object.keys(groupedPlaces).length > 0;
   if (!hasGroupedPlaces && suggestion.realPlaces.length > 0) {
-    groupedPlaces["מקומות מומלצים"] = suggestion.realPlaces.slice(0, 6);
+    groupedPlaces[t('places.recommended_places')] = suggestion.realPlaces.slice(0, 6);
   }
 
   const getSourceIcon = (source?: string) => {
@@ -90,7 +92,7 @@ export function RealPlaceLinks({ suggestion }: RealPlaceLinksProps) {
     <div className="mt-6 space-y-4">
       <div className="flex items-center gap-2 mb-4">
         <Building2 className="w-5 h-5 text-blue-600" />
-        <h3 className="text-lg font-semibold">המלצות להזמנה לפי הטיול שלך</h3>
+        <h3 className="text-lg font-semibold">{t('places.booking_recommendations_for_your_trip')}</h3>
       </div>
 
       {Object.entries(groupedPlaces).map(([highlight, places]) => (
@@ -137,7 +139,7 @@ export function RealPlaceLinks({ suggestion }: RealPlaceLinksProps) {
                       variant="secondary" 
                       className={`text-xs ${getSourceColor(place.source)}`}
                     >
-                      {getSourceIcon(place.source)} {place.source || "מקור לא ידוע"}
+                      {getSourceIcon(place.source)} {place.source || t('places.unknown_source')}
                     </Badge>
                     
                     {place.link && (
@@ -147,7 +149,7 @@ export function RealPlaceLinks({ suggestion }: RealPlaceLinksProps) {
                         rel="noopener noreferrer"
                         className="text-xs text-blue-600 hover:underline flex items-center gap-1"
                       >
-                        צפה במפות <ExternalLink className="w-3 h-3" />
+                        {t('places.view_on_maps')} <ExternalLink className="w-3 h-3" />
                       </a>
                     )}
                   </div>
@@ -158,7 +160,7 @@ export function RealPlaceLinks({ suggestion }: RealPlaceLinksProps) {
           
           {places.length > 4 && (
             <p className="text-xs text-gray-500 text-center">
-              ועוד {places.length - 4} מקומות נוספים...
+              {t('places.and_more_places', { count: places.length - 4 })}
             </p>
           )}
         </div>

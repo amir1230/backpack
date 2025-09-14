@@ -949,11 +949,14 @@ export default function MyTripsNew() {
                         */}
 
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {suggestion.travelStyle.map((style) => (
-                            <Badge key={style} variant="secondary" className="text-xs">
-                              {style}
-                            </Badge>
-                          ))}
+                          {suggestion.travelStyle.map((style) => {
+                            const styleConfig = TRAVEL_STYLES.find(ts => ts.id === style.trim().toLowerCase());
+                            return (
+                              <Badge key={style} variant="secondary" className="text-xs">
+                                {styleConfig ? styleConfig.label : style}
+                              </Badge>
+                            );
+                          })}
                         </div>
 
                         <div className="flex justify-between items-center pt-4 border-t">
@@ -1320,7 +1323,7 @@ export default function MyTripsNew() {
                               <span className="text-sm text-gray-600">
                                 {typeof trip.destinations === 'object' && trip.destinations?.name 
                                   ? trip.destinations.name 
-                                  : 'Multiple destinations'}
+                                  : t('trips.multiple_destinations')}
                               </span>
                             </div>
                             
@@ -1337,11 +1340,15 @@ export default function MyTripsNew() {
 
                           {trip.travelStyle && (
                             <div className="flex flex-wrap gap-1 mt-3">
-                              {trip.travelStyle.split(',').map((style, idx) => (
-                                <Badge key={idx} variant="secondary" className="text-xs">
-                                  {style.trim()}
-                                </Badge>
-                              ))}
+                              {trip.travelStyle.split(',').map((style, idx) => {
+                                const trimmedStyle = style.trim();
+                                const styleConfig = TRAVEL_STYLES.find(ts => ts.id === trimmedStyle.toLowerCase());
+                                return (
+                                  <Badge key={idx} variant="secondary" className="text-xs">
+                                    {styleConfig ? styleConfig.label : trimmedStyle}
+                                  </Badge>
+                                );
+                              })}
                             </div>
                           )}
                         </CardContent>

@@ -44,7 +44,15 @@
     "filter": "Filter",
     "sort": "Sort",
     "created": "Created",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "description": "Description"
+  },
+  "places": {
+    "and_more_places": "and {{count}} more {{count, plural, one {place} other {places}}}...",
+    "recommended_places": "Recommended Places",
+    "booking_recommendations_for_your_trip": "Booking Recommendations for Your Trip",
+    "unknown_source": "Unknown Source",
+    "view_on_maps": "View on Maps"
   },
   "trips": {
     "my_trips": "My Trips",
@@ -75,7 +83,8 @@
     "my_saved_itineraries": "My Saved Itineraries",
     "view_manage_itineraries": "View and manage your detailed itineraries",
     "generate_daily_itinerary": "Generate Daily Itinerary",
-    "generate_itinerary": "Generate Itinerary",
+    "generate_itinerary": "Generate Itinerary", 
+    "multiple_destinations": "Multiple destinations",
     "my_trip_planner": "My Trip Planner",
     "planner_subtitle": "Plan, discover and save your perfect South American adventure",
     "trip_preferences": "Trip Preferences", 
@@ -212,7 +221,84 @@
     "restaurants": "Restaurants",
     "accommodations": "Accommodations",
     "latest_reviews": "Latest Reviews",
-    "explore_places": "Explore places shared by our community"
+    "explore_places": "Explore places shared by our community",
+    "find_travel_buddy": "Find Your Travel Buddy",
+    "create_post_connect_travelers": "Create a post to connect with fellow travelers planning similar adventures",
+    "trip_title": "Trip Title",
+    "trip_title_placeholder": "e.g., Looking for hiking buddies in Patagonia!",
+    "select_destination_placeholder": "Select a South American destination",
+    "description_placeholder": "Describe your trip plans, what you're looking for in travel companions, and any important details...",
+    "pick_start_date": "Pick start date",
+    "pick_end_date": "Pick end date",
+    "group_size": "Group Size",
+    "people": "people",
+    "budget_low": "Budget (Under $50/day)",
+    "budget_mid": "Mid-range ($50-150/day)",
+    "budget_high": "Luxury ($150+/day)",
+    "add_travel_styles": "Add travel styles...",
+    "planned_activities": "Planned Activities",
+    "add_activities": "Add activities...",
+    "special_requirements_optional": "Special Requirements (Optional)",
+    "special_requirements_placeholder": "e.g., Age range 25-35, non-smokers preferred, experience with hiking required...",
+    "contact_information": "Contact Information",
+    "how_should_travelers_contact": "How should interested travelers contact you?",
+    "your_name": "Your Name",
+    "name_placeholder": "e.g., Sarah",
+    "contact_method": "Contact Method",
+    "contact_method_placeholder": "e.g., sarah@email.com or @sarahtravel",
+    "creating_post": "Creating Post...",
+    "create_post": "Create Post",
+    "post_created_successfully": "Post created successfully!",
+    "post_created_description": "Your travel buddy post is now live. You'll start receiving responses soon.",
+    "failed_to_create_post": "Failed to create post",
+    "check_connection_try_again": "Please check your connection and try again",
+    "missing_required_fields": "Missing required fields",
+    "fill_title_description_destination": "Please fill in title, description, and destination",
+    "missing_dates": "Missing dates",
+    "select_start_end_dates": "Please select both start and end dates",
+    "invalid_dates": "Invalid dates",
+    "end_date_after_start_date": "End date must be after start date",
+    "contact_info_required": "Contact information required",
+    "provide_name_contact_method": "Please provide your name and contact method so people can reach you",
+    "travel_styles": {
+      "backpacking": "Backpacking",
+      "luxury": "Luxury",
+      "mid_range": "Mid-range",
+      "adventure": "Adventure",
+      "cultural": "Cultural",
+      "relaxed": "Relaxed",
+      "party": "Party",
+      "solo_friendly": "Solo-friendly",
+      "family": "Family",
+      "photography": "Photography",
+      "nature": "Nature",
+      "city": "City",
+      "beach": "Beach",
+      "mountains": "Mountains",
+      "spiritual": "Spiritual"
+    },
+    "activities": {
+      "hiking": "Hiking",
+      "trekking": "Trekking",
+      "climbing": "Climbing",
+      "surfing": "Surfing",
+      "diving": "Diving",
+      "snorkeling": "Snorkeling",
+      "wildlife_watching": "Wildlife watching",
+      "photography": "Photography",
+      "cooking_classes": "Cooking classes",
+      "language_exchange": "Language exchange",
+      "volunteering": "Volunteering",
+      "festivals": "Festivals",
+      "nightlife": "Nightlife",
+      "museums": "Museums",
+      "architecture": "Architecture",
+      "shopping": "Shopping",
+      "food_tours": "Food tours",
+      "cycling": "Cycling",
+      "kayaking": "Kayaking",
+      "camping": "Camping"
+    }
   },
   "budget": {
     "title": "Budget Tracker",
@@ -244,7 +330,19 @@
     "progress_saved": "Progress saved",
     "quick_actions": "Quick Actions",
     "checking_in": "Checking in...",
-    "tracking": "Tracking..."
+    "tracking": "Tracking...",
+    "levels": {
+      "beginner": "Beginner",
+      "explorer": "Explorer",
+      "wanderer": "Wanderer",
+      "travel_expert": "Travel Expert",
+      "globetrotter": "Globetrotter"
+    },
+    "error_saving_progress": "Error saving progress",
+    "please_try_again": "Please try again",
+    "checkin_error": "Check-in error",
+    "first_trip": "First Trip",
+    "plan_first_trip": "Plan your first trip"
   },
   "language": {
     "english": "English",
@@ -278,7 +376,9 @@
     "invalid_file_type": "Invalid file type",
     "upload_failed": "Upload failed",
     "connection_error": "Connection error",
-    "permission_denied": "Permission denied"
+    "permission_denied": "Permission denied",
+    "page_not_found": "404 Page Not Found",
+    "check_url_or_contact_support": "The page you're looking for doesn't exist. Please check the URL or contact support."
   },
   "messages": {
     "uploading_files": "Uploading files...",
@@ -459,5 +559,11 @@
     "budget_1200_2000": "$1,200 - $2,000",
     "budget_800_1500": "$800 - $1,500",
     "budget_1500_2800": "$1,500 - $2,800"
+  },
+  "places": {
+    "recommended_places": "Recommended Places",
+    "booking_recommendations_for_your_trip": "Booking Recommendations for Your Trip",
+    "unknown_source": "Unknown source",
+    "view_on_maps": "View on maps"
   }
 }

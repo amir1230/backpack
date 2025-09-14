@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { useLocalizedDestinations } from '../../lib/localizedData';
 import { 
   Dialog, 
   DialogContent, 
@@ -33,26 +35,51 @@ interface NewBuddyPostModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const SOUTH_AMERICAN_COUNTRIES = [
-  'Peru', 'Colombia', 'Bolivia', 'Chile', 'Argentina', 
-  'Brazil', 'Ecuador', 'Venezuela', 'Uruguay', 'Paraguay',
-  'Guyana', 'Suriname', 'French Guiana'
-];
-
-const TRAVEL_STYLES = [
-  'backpacking', 'luxury', 'mid-range', 'adventure', 'cultural',
-  'relaxed', 'party', 'solo-friendly', 'family', 'photography',
-  'nature', 'city', 'beach', 'mountains', 'spiritual'
-];
-
-const ACTIVITIES = [
-  'hiking', 'trekking', 'climbing', 'surfing', 'diving', 'snorkeling',
-  'wildlife watching', 'photography', 'cooking classes', 'language exchange',
-  'volunteering', 'festivals', 'nightlife', 'museums', 'architecture',
-  'shopping', 'food tours', 'cycling', 'kayaking', 'camping'
-];
 
 export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps) {
+  const { t } = useTranslation();
+  const localizedDestinations = useLocalizedDestinations();
+
+  const TRAVEL_STYLES = [
+    { id: 'backpacking', label: t('community.travel_styles.backpacking') },
+    { id: 'luxury', label: t('community.travel_styles.luxury') },
+    { id: 'mid-range', label: t('community.travel_styles.mid_range') },
+    { id: 'adventure', label: t('community.travel_styles.adventure') },
+    { id: 'cultural', label: t('community.travel_styles.cultural') },
+    { id: 'relaxed', label: t('community.travel_styles.relaxed') },
+    { id: 'party', label: t('community.travel_styles.party') },
+    { id: 'solo-friendly', label: t('community.travel_styles.solo_friendly') },
+    { id: 'family', label: t('community.travel_styles.family') },
+    { id: 'photography', label: t('community.travel_styles.photography') },
+    { id: 'nature', label: t('community.travel_styles.nature') },
+    { id: 'city', label: t('community.travel_styles.city') },
+    { id: 'beach', label: t('community.travel_styles.beach') },
+    { id: 'mountains', label: t('community.travel_styles.mountains') },
+    { id: 'spiritual', label: t('community.travel_styles.spiritual') }
+  ];
+
+  const ACTIVITIES = [
+    { id: 'hiking', label: t('community.activities.hiking') },
+    { id: 'trekking', label: t('community.activities.trekking') },
+    { id: 'climbing', label: t('community.activities.climbing') },
+    { id: 'surfing', label: t('community.activities.surfing') },
+    { id: 'diving', label: t('community.activities.diving') },
+    { id: 'snorkeling', label: t('community.activities.snorkeling') },
+    { id: 'wildlife-watching', label: t('community.activities.wildlife_watching') },
+    { id: 'photography', label: t('community.activities.photography') },
+    { id: 'cooking-classes', label: t('community.activities.cooking_classes') },
+    { id: 'language-exchange', label: t('community.activities.language_exchange') },
+    { id: 'volunteering', label: t('community.activities.volunteering') },
+    { id: 'festivals', label: t('community.activities.festivals') },
+    { id: 'nightlife', label: t('community.activities.nightlife') },
+    { id: 'museums', label: t('community.activities.museums') },
+    { id: 'architecture', label: t('community.activities.architecture') },
+    { id: 'shopping', label: t('community.activities.shopping') },
+    { id: 'food-tours', label: t('community.activities.food_tours') },
+    { id: 'cycling', label: t('community.activities.cycling') },
+    { id: 'kayaking', label: t('community.activities.kayaking') },
+    { id: 'camping', label: t('community.activities.camping') }
+  ];
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -85,8 +112,8 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
     },
     onSuccess: () => {
       toast({
-        title: "Post created successfully!",
-        description: "Your travel buddy post is now live. You'll start receiving responses soon.",
+        title: t('community.post_created_successfully'),
+        description: t('community.post_created_description'),
       });
       queryClient.invalidateQueries({ queryKey: ['/api/travel-buddy-posts'] });
       onOpenChange(false);
@@ -95,8 +122,8 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
     onError: (error) => {
       console.error('Failed to create post:', error);
       toast({
-        title: "Failed to create post",
-        description: "Please check your connection and try again",
+        title: t('community.failed_to_create_post'),
+        description: t('community.check_connection_try_again'),
         variant: "destructive"
       });
     }
@@ -129,8 +156,8 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
     // Validation
     if (!formData.title.trim() || !formData.description.trim() || !formData.destination.trim()) {
       toast({
-        title: "Missing required fields",
-        description: "Please fill in title, description, and destination",
+        title: t('community.missing_required_fields'),
+        description: t('community.fill_title_description_destination'),
         variant: "destructive"
       });
       return;
@@ -138,8 +165,8 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
 
     if (!formData.startDate || !formData.endDate) {
       toast({
-        title: "Missing dates",
-        description: "Please select both start and end dates",
+        title: t('community.missing_dates'),
+        description: t('community.select_start_end_dates'),
         variant: "destructive"
       });
       return;
@@ -147,8 +174,8 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
 
     if (formData.startDate >= formData.endDate) {
       toast({
-        title: "Invalid dates",
-        description: "End date must be after start date",
+        title: t('community.invalid_dates'),
+        description: t('community.end_date_after_start_date'),
         variant: "destructive"
       });
       return;
@@ -157,8 +184,8 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
     // Guest mode validation
     if (!guestData.displayName.trim() || !guestData.contactMethod.trim()) {
       toast({
-        title: "Contact information required",
-        description: "Please provide your name and contact method so people can reach you",
+        title: t('community.contact_info_required'),
+        description: t('community.provide_name_contact_method'),
         variant: "destructive"
       });
       return;
@@ -186,35 +213,35 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
     createPostMutation.mutate(postData);
   };
 
-  const addTravelStyle = (style: string) => {
-    if (!formData.travelStyles.includes(style)) {
+  const addTravelStyle = (styleId: string) => {
+    if (!formData.travelStyles.includes(styleId)) {
       setFormData({
         ...formData,
-        travelStyles: [...formData.travelStyles, style]
+        travelStyles: [...formData.travelStyles, styleId]
       });
     }
   };
 
-  const removeTravelStyle = (style: string) => {
+  const removeTravelStyle = (styleId: string) => {
     setFormData({
       ...formData,
-      travelStyles: formData.travelStyles.filter(s => s !== style)
+      travelStyles: formData.travelStyles.filter(s => s !== styleId)
     });
   };
 
-  const addActivity = (activity: string) => {
-    if (!formData.activities.includes(activity)) {
+  const addActivity = (activityId: string) => {
+    if (!formData.activities.includes(activityId)) {
       setFormData({
         ...formData,
-        activities: [...formData.activities, activity]
+        activities: [...formData.activities, activityId]
       });
     }
   };
 
-  const removeActivity = (activity: string) => {
+  const removeActivity = (activityId: string) => {
     setFormData({
       ...formData,
-      activities: formData.activities.filter(a => a !== activity)
+      activities: formData.activities.filter(a => a !== activityId)
     });
   };
 
@@ -222,9 +249,9 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Find Your Travel Buddy</DialogTitle>
+          <DialogTitle>{t('community.find_travel_buddy')}</DialogTitle>
           <DialogDescription>
-            Create a post to connect with fellow travelers planning similar adventures
+            {t('community.create_post_connect_travelers')}
           </DialogDescription>
         </DialogHeader>
 
@@ -232,42 +259,44 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
           {/* Basic Information */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="title">Trip Title *</Label>
+              <Label htmlFor="title">{t('community.trip_title')} *</Label>
               <Input
                 id="title"
-                placeholder="e.g., Looking for hiking buddies in Patagonia!"
+                placeholder={t('community.trip_title_placeholder')}
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
+                data-testid="input-trip-title"
               />
             </div>
 
             <div>
-              <Label htmlFor="destination">Destination *</Label>
+              <Label htmlFor="destination">{t('trips.destination')} *</Label>
               <Select 
                 value={formData.destination} 
                 onValueChange={(value) => setFormData({ ...formData, destination: value })}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a South American destination" />
+                <SelectTrigger data-testid="select-destination">
+                  <SelectValue placeholder={t('community.select_destination_placeholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {SOUTH_AMERICAN_COUNTRIES.map(country => (
-                    <SelectItem key={country} value={country}>{country}</SelectItem>
+                  {Object.entries(localizedDestinations).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label htmlFor="description">Description *</Label>
+              <Label htmlFor="description">{t('common.description')} *</Label>
               <Textarea
                 id="description"
-                placeholder="Describe your trip plans, what you're looking for in travel companions, and any important details..."
+                placeholder={t('community.description_placeholder')}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={4}
                 required
+                data-testid="textarea-description"
               />
             </div>
           </div>
@@ -275,12 +304,12 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
           {/* Dates and Group Size */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label>Start Date *</Label>
+              <Label>{t('trips.start_date')} *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.startDate ? format(formData.startDate, 'PPP') : 'Pick start date'}
+                    {formData.startDate ? format(formData.startDate, 'PPP') : t('community.pick_start_date')}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -296,12 +325,12 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
             </div>
 
             <div>
-              <Label>End Date *</Label>
+              <Label>{t('trips.end_date')} *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.endDate ? format(formData.endDate, 'PPP') : 'Pick end date'}
+                    {formData.endDate ? format(formData.endDate, 'PPP') : t('community.pick_end_date')}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -320,7 +349,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
             </div>
 
             <div>
-              <Label htmlFor="groupSize">Group Size</Label>
+              <Label htmlFor="groupSize">{t('community.group_size')}</Label>
               <Select 
                 value={formData.groupSize.toString()} 
                 onValueChange={(value) => setFormData({ ...formData, groupSize: parseInt(value) })}
@@ -330,7 +359,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
                 </SelectTrigger>
                 <SelectContent>
                   {[2, 3, 4, 5, 6, 7, 8, 9, 10].map(size => (
-                    <SelectItem key={size} value={size.toString()}>{size} people</SelectItem>
+                    <SelectItem key={size} value={size.toString()}>{size} {t('community.people')}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -339,7 +368,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
 
           {/* Budget */}
           <div>
-            <Label>Budget Range</Label>
+            <Label>{t('trips.budget_range')}</Label>
             <Select 
               value={formData.budget} 
               onValueChange={(value: 'low' | 'mid' | 'high') => setFormData({ ...formData, budget: value })}
@@ -348,107 +377,116 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="low">💰 Budget (Under $50/day)</SelectItem>
-                <SelectItem value="mid">💰💰 Mid-range ($50-150/day)</SelectItem>
-                <SelectItem value="high">💰💰💰 Luxury ($150+/day)</SelectItem>
+                <SelectItem value="low">💰 {t('community.budget_low')}</SelectItem>
+                <SelectItem value="mid">💰💰 {t('community.budget_mid')}</SelectItem>
+                <SelectItem value="high">💰💰💰 {t('community.budget_high')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Travel Styles */}
           <div>
-            <Label>Travel Style</Label>
+            <Label>{t('trips.travel_style')}</Label>
             <Select onValueChange={addTravelStyle}>
               <SelectTrigger>
-                <SelectValue placeholder="Add travel styles..." />
+                <SelectValue placeholder={t('community.add_travel_styles')} />
               </SelectTrigger>
               <SelectContent>
-                {TRAVEL_STYLES.filter(style => !formData.travelStyles.includes(style)).map(style => (
-                  <SelectItem key={style} value={style}>{style}</SelectItem>
+                {TRAVEL_STYLES.filter(style => !formData.travelStyles.includes(style.id)).map(style => (
+                  <SelectItem key={style.id} value={style.id}>{style.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {formData.travelStyles.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
-                {formData.travelStyles.map(style => (
-                  <Badge key={style} variant="secondary" className="gap-1">
-                    {style}
-                    <X 
-                      className="w-3 h-3 cursor-pointer" 
-                      onClick={() => removeTravelStyle(style)}
-                    />
-                  </Badge>
-                ))}
+                {formData.travelStyles.map(styleId => {
+                  const styleConfig = TRAVEL_STYLES.find(ts => ts.id === styleId);
+                  return (
+                    <Badge key={styleId} variant="secondary" className="gap-1">
+                      {styleConfig ? styleConfig.label : styleId}
+                      <X 
+                        className="w-3 h-3 cursor-pointer" 
+                        onClick={() => removeTravelStyle(styleId)}
+                      />
+                    </Badge>
+                  );
+                })}
               </div>
             )}
           </div>
 
           {/* Activities */}
           <div>
-            <Label>Planned Activities</Label>
+            <Label>{t('community.planned_activities')}</Label>
             <Select onValueChange={addActivity}>
               <SelectTrigger>
-                <SelectValue placeholder="Add activities..." />
+                <SelectValue placeholder={t('community.add_activities')} />
               </SelectTrigger>
               <SelectContent>
-                {ACTIVITIES.filter(activity => !formData.activities.includes(activity)).map(activity => (
-                  <SelectItem key={activity} value={activity}>{activity}</SelectItem>
+                {ACTIVITIES.filter(activity => !formData.activities.includes(activity.id)).map(activity => (
+                  <SelectItem key={activity.id} value={activity.id}>{activity.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {formData.activities.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
-                {formData.activities.map(activity => (
-                  <Badge key={activity} variant="outline" className="gap-1">
-                    {activity}
-                    <X 
-                      className="w-3 h-3 cursor-pointer" 
-                      onClick={() => removeActivity(activity)}
-                    />
-                  </Badge>
-                ))}
+                {formData.activities.map(activityId => {
+                  const activityConfig = ACTIVITIES.find(a => a.id === activityId);
+                  return (
+                    <Badge key={activityId} variant="outline" className="gap-1">
+                      {activityConfig ? activityConfig.label : activityId}
+                      <X 
+                        className="w-3 h-3 cursor-pointer" 
+                        onClick={() => removeActivity(activityId)}
+                      />
+                    </Badge>
+                  );
+                })}
               </div>
             )}
           </div>
 
           {/* Requirements */}
           <div>
-            <Label htmlFor="requirements">Special Requirements (Optional)</Label>
+            <Label htmlFor="requirements">{t('community.special_requirements_optional')}</Label>
             <Textarea
               id="requirements"
-              placeholder="e.g., Age range 25-35, non-smokers preferred, experience with hiking required..."
+              placeholder={t('community.special_requirements_placeholder')}
               value={formData.requirements}
               onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
               rows={2}
+              data-testid="textarea-requirements"
             />
           </div>
 
           {/* Contact Information (Guest Mode) */}
           <div className="space-y-4 p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-medium text-blue-900">Contact Information</h3>
+            <h3 className="font-medium text-blue-900">{t('community.contact_information')}</h3>
             <p className="text-sm text-blue-700">
-              How should interested travelers contact you?
+              {t('community.how_should_travelers_contact')}
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="displayName">Your Name *</Label>
+                <Label htmlFor="displayName">{t('community.your_name')} *</Label>
                 <Input
                   id="displayName"
-                  placeholder="e.g., Sarah"
+                  placeholder={t('community.name_placeholder')}
                   value={guestData.displayName}
                   onChange={(e) => setGuestData({ ...guestData, displayName: e.target.value })}
                   required
+                  data-testid="input-display-name"
                 />
               </div>
               <div>
-                <Label htmlFor="contactMethod">Contact Method *</Label>
+                <Label htmlFor="contactMethod">{t('community.contact_method')} *</Label>
                 <Input
                   id="contactMethod"
-                  placeholder="e.g., sarah@email.com or @sarahtravel"
+                  placeholder={t('community.contact_method_placeholder')}
                   value={guestData.contactMethod}
                   onChange={(e) => setGuestData({ ...guestData, contactMethod: e.target.value })}
                   required
+                  data-testid="input-contact-method"
                 />
               </div>
             </div>
@@ -461,8 +499,9 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
               variant="outline" 
               onClick={() => onOpenChange(false)}
               disabled={createPostMutation.isPending}
+              data-testid="button-cancel"
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button 
               type="submit" 
@@ -472,12 +511,12 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
               {createPostMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating Post...
+                  {t('community.creating_post')}
                 </>
               ) : (
                 <>
                   <Plus className="w-4 h-4 mr-2" />
-                  Create Post
+                  {t('community.create_post')}
                 </>
               )}
             </Button>
