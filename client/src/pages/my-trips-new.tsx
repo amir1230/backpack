@@ -817,7 +817,7 @@ export default function MyTripsNew() {
                   {isGenerating ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Generating Your Perfect Trip...
+{t('trips.generating_perfect_trip')}
                     </>
                   ) : (
                     <>
@@ -836,10 +836,10 @@ export default function MyTripsNew() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Sparkles className="w-6 h-6 mr-2 text-primary" />
-                  AI Trip Suggestions
+                  {t('trips.ai_trip_suggestions')}
                 </CardTitle>
                 <CardDescription>
-                  Personalized recommendations based on your preferences
+                  {t('trips.personalized_recommendations')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -872,7 +872,7 @@ export default function MyTripsNew() {
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-gray-600">
-                        Found {aiSuggestions.length} suggestions for you
+{t('trips.found_suggestions', { count: aiSuggestions.length })}
                       </p>
                       <Button 
                         onClick={handleGenerateItinerary}
@@ -885,7 +885,7 @@ export default function MyTripsNew() {
                         ) : (
                           <Route className="w-4 h-4 mr-2" />
                         )}
-                        Generate Itinerary
+{t('trips.generate_itinerary')}
                       </Button>
                     </div>
 
@@ -972,7 +972,7 @@ export default function MyTripsNew() {
                             ) : (
                               <Route className="w-4 h-4 mr-2" />
                             )}
-                            Generate Daily Itinerary
+{t('trips.generate_daily_itinerary')}
                           </Button>
                           
                           <Button 
@@ -1003,10 +1003,10 @@ export default function MyTripsNew() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Route className="w-6 h-6 mr-2 text-primary" />
-                  Daily Itinerary
+                  {t('trips.daily_itinerary')}
                 </CardTitle>
                 <CardDescription>
-                  Detailed day-by-day plan for your trip
+                  {t('trips.detailed_day_by_day_plan')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1021,13 +1021,13 @@ export default function MyTripsNew() {
                 {itinerary.length === 0 && !isGeneratingItinerary && (
                   <div className="text-center py-8">
                     <Route className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                    <p className="text-lg font-medium text-gray-700 mb-2">No itinerary generated yet</p>
+                    <p className="text-lg font-medium text-gray-700 mb-2">{t('trips.no_itinerary_generated')}</p>
                     <p className="text-sm text-gray-500 mb-4">
-                      Generate trip suggestions first, then create a detailed day-by-day itinerary
+                      {t('trips.generate_suggestions_first')}
                     </p>
                     <Button onClick={handleGenerateItinerary} variant="outline">
                       <Route className="w-4 h-4 mr-2" />
-                      Generate Itinerary
+                      {t('trips.generate_itinerary')}
                     </Button>
                   </div>
                 )}
@@ -1132,10 +1132,10 @@ export default function MyTripsNew() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Save className="w-6 h-6 mr-2 text-primary" />
-                  My Saved Itineraries
+                  {t('trips.my_saved_itineraries')}
                 </CardTitle>
                 <CardDescription>
-                  View and manage your detailed itineraries
+                  {t('trips.view_manage_itineraries')}
                 </CardDescription>
               </CardHeader>
               <CardContent>

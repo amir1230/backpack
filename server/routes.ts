@@ -1347,6 +1347,13 @@ export async function registerRoutes(app: Express): Promise<void> {
     try {
       const { destination, travelStyle, budget, duration, interests, preferredCountries, language } = req.body;
       
+      // Normalize language parameter
+      const normalizedLanguage = (language || req.headers['accept-language'] || 'en').toString().toLowerCase();
+      const isHebrew = normalizedLanguage.startsWith('he');
+      const finalLanguage = isHebrew ? 'he' : 'en';
+      
+      console.log('Travel suggestions request - Language:', language, 'Normalized:', finalLanguage);
+      
       // Validate required inputs
       if (!travelStyle || !budget || !duration || !interests) {
         return res.status(400).json({ 
@@ -1364,7 +1371,7 @@ export async function registerRoutes(app: Express): Promise<void> {
         duration,
         interests,
         preferredCountries: Array.isArray(destination) ? destination : [destination],
-        language: language || 'en'
+        language: finalLanguage
       });
       
       console.log("Generated suggestions:", suggestions);
@@ -1399,6 +1406,13 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.post('/api/ai/itinerary', noAuth, async (req, res) => {
     try {
       const { destination, duration, interests, travelStyle, budget, language } = req.body;
+      
+      // Normalize language parameter
+      const normalizedLanguage = (language || req.headers['accept-language'] || 'en').toString().toLowerCase();
+      const isHebrew = normalizedLanguage.startsWith('he');
+      const finalLanguage = isHebrew ? 'he' : 'en';
+      
+      console.log('Itinerary request - Language:', language, 'Normalized:', finalLanguage);
       
       console.log('Generating itinerary with data:', {
         destination, duration, interests, travelStyle, budget
@@ -1435,7 +1449,7 @@ export async function registerRoutes(app: Express): Promise<void> {
         interests: cleanInterests,
         travelStyle: cleanTravelStyle,
         budget: cleanBudget,
-        language: language || 'en'
+        language: finalLanguage
       });
       
       console.log('Generated itinerary successfully:', itinerary.length, 'days');
