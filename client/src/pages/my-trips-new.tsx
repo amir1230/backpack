@@ -679,17 +679,17 @@ export default function MyTripsNew() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Bot className="w-6 h-6 mr-2 text-primary" />
-                  Trip Preferences
+                  {t('trips.trip_preferences')}
                 </CardTitle>
                 <CardDescription>
-                  Tell us your travel preferences to get personalized recommendations
+                  {t('trips.tell_us_preferences')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Destination */}
                 <div>
                   <Label htmlFor="destination" className="text-sm font-medium text-slate-700 mb-2 block">
-                    Destination
+                    {t('trips.destination')}
                   </Label>
                   <Select onValueChange={(value) => {
                     form.setValue('destination', value);
@@ -711,14 +711,14 @@ export default function MyTripsNew() {
                 {/* Duration */}
                 <div>
                   <Label htmlFor="duration" className="text-sm font-medium text-slate-700 mb-2 block">
-                    Trip Duration
+                    {t('trips.trip_duration')}
                   </Label>
                   <Select onValueChange={(value) => {
                     form.setValue('duration', value);
                     console.log('Duration set to:', value);
                   }}>
                     <SelectTrigger className="w-full p-3">
-                      <SelectValue placeholder="How long do you want to travel?" />
+                      <SelectValue placeholder={t('trips.how_long_travel')} />
                     </SelectTrigger>
                     <SelectContent>
                       {DURATIONS.map((duration) => (
@@ -733,7 +733,7 @@ export default function MyTripsNew() {
                 {/* Budget */}
                 <div>
                   <Label className="text-sm font-medium text-slate-700 mb-2 block">
-                    Budget Range
+                    {t('trips.budget_range')}
                   </Label>
                   <div className="px-4">
                     <Slider
