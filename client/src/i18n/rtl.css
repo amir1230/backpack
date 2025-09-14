@@ -93,28 +93,71 @@
   text-align: right;
 }
 
-/* Card title flex alignment for RTL - most important fix */
-[dir="rtl"] .card-title {
-  justify-content: flex-end !important;
-  text-align: right;
-  direction: rtl;
-}
+@layer utilities {
+  /* RTL FIXES TARGETING ACTUAL SHADCN DOM STRUCTURE */
 
-/* All heading flex containers for RTL */
-[dir="rtl"] h1.flex,
-[dir="rtl"] h2.flex,
-[dir="rtl"] h3.flex,
-[dir="rtl"] h4.flex,
-[dir="rtl"] h5.flex,
-[dir="rtl"] h6.flex {
-  justify-content: flex-end !important;
-  text-align: right;
-  direction: rtl;
-}
+  /* Force text alignment flips with !important to beat Tailwind utilities */
+  [dir="rtl"] .text-left {
+    text-align: right !important;
+  }
 
-/* Any element with flex and items-center (common pattern for card titles) */
-[dir="rtl"] .flex.items-center:not(.justify-center):not(.justify-between) {
-  justify-content: flex-end !important;
+  [dir="rtl"] .text-right {
+    text-align: left !important;
+  }
+
+  /* All headings in cards */
+  [dir="rtl"] .card h1,
+  [dir="rtl"] .card h2,
+  [dir="rtl"] .card h3,
+  [dir="rtl"] .card h4,
+  [dir="rtl"] .card h5,
+  [dir="rtl"] .card h6 {
+    text-align: right !important;
+    direction: rtl !important;
+  }
+
+  /* Shadcn CardHeader structure - targets p-6 flex containers */
+  [dir="rtl"] .card .p-6.flex {
+    justify-content: flex-end !important;
+    align-items: center !important;
+  }
+
+  /* Card content flex containers */
+  [dir="rtl"] .card .flex.items-center {
+    justify-content: flex-end !important;
+    direction: rtl !important;
+  }
+
+  /* Keep specific layouts intact */
+  [dir="rtl"] .card .flex.justify-between {
+    justify-content: space-between !important;
+    flex-direction: row-reverse;
+  }
+
+  [dir="rtl"] .card .flex.justify-center {
+    justify-content: center !important;
+  }
+
+  /* Global heading alignment */
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3,
+  [dir="rtl"] h4,
+  [dir="rtl"] h5,
+  [dir="rtl"] h6 {
+    text-align: right !important;
+    direction: rtl !important;
+  }
+
+  /* Flex heading containers */
+  [dir="rtl"] h1.flex,
+  [dir="rtl"] h2.flex,
+  [dir="rtl"] h3.flex,
+  [dir="rtl"] h4.flex,
+  [dir="rtl"] h5.flex,
+  [dir="rtl"] h6.flex {
+    justify-content: flex-end !important;
+  }
 }
 
 /* Margin and padding adjustments */
