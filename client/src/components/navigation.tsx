@@ -81,7 +81,7 @@ export default function Navigation() {
     return (
       <>
         {/* Mobile Top Navigation */}
-        <nav className="bg-white shadow-lg sticky top-0 z-50 md:hidden">
+        <nav className="bg-white shadow-lg sticky top-0 z-[60] md:hidden">
           <div className="px-4">
             <div className="flex justify-between items-center h-16">
               <Link href="/" className="flex items-center">
@@ -160,7 +160,7 @@ export default function Navigation() {
 
         {/* Mobile Bottom Navigation - Sliding */}
         <div 
-          className={`fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 md:hidden z-50 transition-transform duration-300 ease-in-out ${
+          className={`fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 md:hidden z-[60] transition-transform duration-300 ease-in-out ${
             isVisible ? 'translate-y-0' : 'translate-y-full'
           }`}
           style={{
@@ -205,7 +205,7 @@ export default function Navigation() {
   return (
     <>
       {/* Desktop Right Sidebar */}
-      <aside className="fixed top-0 right-0 h-full w-64 bg-white shadow-2xl border-l border-gray-200 z-50 hidden md:flex flex-col">
+      <aside className="fixed top-0 right-0 h-full w-64 bg-white shadow-2xl border-l border-gray-200 z-[60] hidden md:flex flex-col">
         {/* Sidebar Header with Logo and Language Toggle */}
         <div className="p-6 border-b border-gray-200">
           <Link href="/" className="flex items-center justify-center mb-4">

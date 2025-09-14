@@ -39,7 +39,6 @@ import {
   LogOut
 } from "lucide-react";
 import { useTranslation } from 'react-i18next';
-import { LanguageToggle } from '../components/LanguageToggle.js';
 
 export default function Landing() {
   const { t } = useTranslation();
@@ -97,37 +96,6 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-lg sticky top-0 z-50 mobile-nav">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center">
-                <div className="text-xl font-bold text-orange-600">TripWise</div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2 nav-buttons">
-              <LanguageToggle />
-              {user ? (
-                <>
-                  <span className="hidden sm:block text-slate-600 text-sm">{t('landing.welcome')}</span>
-                  <Button onClick={handleLogout} variant="outline" className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
-                    <LogOut className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    <span className="hidden sm:inline">{t('landing.logout')}</span>
-                    <span className="sm:hidden">{t('landing.out')}</span>
-                  </Button>
-                </>
-              ) : (
-                <Button onClick={handleLogin} variant="outline" className="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
-                  <LogIn className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">{t('landing.login')}</span>
-                  <span className="sm:hidden">{t('landing.in')}</span>
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
 
       {/* Hero Section */}
       <section className="gradient-bg py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
