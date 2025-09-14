@@ -1345,7 +1345,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   // AI-powered travel suggestions (guest-friendly)
   app.post('/api/ai/travel-suggestions', async (req, res) => {
     try {
-      const { destination, travelStyle, budget, duration, interests, preferredCountries } = req.body;
+      const { destination, travelStyle, budget, duration, interests, preferredCountries, language } = req.body;
       
       // Validate required inputs
       if (!travelStyle || !budget || !duration || !interests) {
@@ -1363,7 +1363,8 @@ export async function registerRoutes(app: Express): Promise<void> {
         budget,
         duration,
         interests,
-        preferredCountries: Array.isArray(destination) ? destination : [destination]
+        preferredCountries: Array.isArray(destination) ? destination : [destination],
+        language: language || 'en'
       });
       
       console.log("Generated suggestions:", suggestions);
@@ -1397,7 +1398,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   // AI-powered itinerary generation
   app.post('/api/ai/itinerary', noAuth, async (req, res) => {
     try {
-      const { destination, duration, interests, travelStyle, budget } = req.body;
+      const { destination, duration, interests, travelStyle, budget, language } = req.body;
       
       console.log('Generating itinerary with data:', {
         destination, duration, interests, travelStyle, budget
@@ -1433,7 +1434,8 @@ export async function registerRoutes(app: Express): Promise<void> {
         duration: durationDays,
         interests: cleanInterests,
         travelStyle: cleanTravelStyle,
-        budget: cleanBudget
+        budget: cleanBudget,
+        language: language || 'en'
       });
       
       console.log('Generated itinerary successfully:', itinerary.length, 'days');

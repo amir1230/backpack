@@ -81,6 +81,8 @@
     "trip_duration": "משך הטיול",
     "how_long_travel": "כמה זמן תרצה לטייל?",
     "budget_range": "טווח תקציב",
+    "select_multiple": "בחר מספר אפשרויות",
+    "generate_ai_suggestions": "צור הצעות טיול מה-AI",
     "create_trip": "צור טיול חדש",
     "trip_name": "שם הטיול",
     "destination": "יעד",

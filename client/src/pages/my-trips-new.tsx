@@ -114,7 +114,7 @@ interface SavedTrip {
 }
 
 export default function MyTripsNew() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { formatCurrency, formatDate } = useLocalizedFormatting();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -209,6 +209,7 @@ export default function MyTripsNew() {
             budget: data.budget,
             duration: data.duration,
             interests: data.interests,
+            language: i18n.language,
           }),
         });
         const jsonData = await response.json();
@@ -281,7 +282,10 @@ export default function MyTripsNew() {
       
       const response = await apiRequest('/api/ai/itinerary', {
         method: 'POST',
-        body: JSON.stringify(requestData),
+        body: JSON.stringify({
+          ...requestData,
+          language: i18n.language,
+        }),
       });
       
       if (!response.ok) {
@@ -517,6 +521,7 @@ export default function MyTripsNew() {
           destination: suggestion.destination,
           duration: durationDays,
           interests: suggestion.highlights || [], // Use highlights as interests
+          language: i18n.language,
           travelStyle: suggestion.travelStyle,
           budget: suggestion.estimatedBudget.low || 1000,
         }),
@@ -786,7 +791,7 @@ export default function MyTripsNew() {
                 {/* Interests */}
                 <div>
                   <Label className="text-sm font-medium text-slate-700 mb-2 block">
-                    Interests <span className="text-xs text-gray-500">(select multiple)</span>
+{t('trips.interests')} <span className="text-xs text-gray-500">({t('trips.select_multiple')})</span>
                   </Label>
                   <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
                     {INTERESTS.map((interest) => (
@@ -817,7 +822,7 @@ export default function MyTripsNew() {
                   ) : (
                     <>
                       <Sparkles className="w-5 h-5 mr-2" />
-                      Generate AI Trip Suggestions
+{t('trips.generate_ai_suggestions')}
                     </>
                   )}
                 </Button>

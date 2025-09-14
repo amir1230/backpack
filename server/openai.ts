@@ -73,6 +73,7 @@ export async function generateTravelSuggestions(
     duration?: string;
     interests?: string[];
     preferredCountries?: string[];
+    language?: string;
   }
 ): Promise<TripSuggestion[]> {
   try {
@@ -90,8 +91,12 @@ export async function generateTravelSuggestions(
     const interestsStr = preferences.interests?.join(', ') || 'General exploration';
     const countriesStr = preferences.preferredCountries?.join(', ') || 'Any South American country';
 
+    const isHebrew = preferences.language === 'he';
+    
     const prompt = `You are TripWise – a smart, friendly, and social travel planner built for Gen Z and solo travelers.  
 Your mission is to help travelers discover personalized, exciting, and budget-conscious trips across South America.
+
+${isHebrew ? 'IMPORTANT: Respond in Hebrew. All text fields (destination, country, description, bestTimeToVisit, highlights) must be in Hebrew.' : ''}
 
 Using the following preferences:
 - Travel Style: ${travelStylesStr}
@@ -136,7 +141,7 @@ Return ONLY a JSON object with this exact structure:
       messages: [
         {
           role: "system",
-          content: "You are TripWise, a smart and friendly travel planner for Gen Z and solo travelers exploring South America. Provide exciting, personalized trip suggestions in JSON format. Be authentic, inspiring, and speak like a travel buddy, not a formal guide."
+          content: `You are TripWise, a smart and friendly travel planner for Gen Z and solo travelers exploring South America. Provide exciting, personalized trip suggestions in JSON format. Be authentic, inspiring, and speak like a travel buddy, not a formal guide.${preferences.language === 'he' ? ' Respond in Hebrew - all descriptions, highlights, and text must be in Hebrew.' : ''}`
         },
         {
           role: "user",

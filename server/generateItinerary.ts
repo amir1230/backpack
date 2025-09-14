@@ -21,12 +21,13 @@ export interface ItineraryRequest {
   interests: string[];
   travelStyle: string[];
   budget: number;
+  language?: string;
 }
 
 export async function generateItinerary(request: ItineraryRequest): Promise<ItineraryDay[]> {
   console.log('generateItinerary called with request:', request);
   
-  const { destination, duration, interests, travelStyle, budget } = request;
+  const { destination, duration, interests, travelStyle, budget, language } = request;
   
   // Validate inputs
   if (!destination) {
@@ -39,7 +40,11 @@ export async function generateItinerary(request: ItineraryRequest): Promise<Itin
   
   console.log('Input validation passed. Creating prompt...');
   
+  const isHebrew = language === 'he';
+  
   const prompt = `You are TripWise – an AI travel planner helping solo travelers build day-by-day itineraries.
+
+${isHebrew ? 'IMPORTANT: Respond in Hebrew. All text fields (location, activities, tips) must be in Hebrew.' : ''}
 
 Using the user's preferences:
 - Destination: ${destination}
@@ -55,16 +60,18 @@ Create a full travel itinerary. For each day, include:
 - estimatedCost in USD
 - 1 helpful local tip
 
-Return the itinerary as a JSON array, like this:
-[
-  {
-    "day": 1,
-    "location": "Medellín",
-    "activities": ["Comuna 13 tour", "Coffee tasting", "Cable car ride"],
-    "estimatedCost": 40,
-    "tips": ["Use the metro to save money"]
-  }
-]`;
+Return the itinerary as a JSON object with an itinerary array, like this:
+{
+  "itinerary": [
+    {
+      "day": 1,
+      "location": "Medellín",
+      "activities": ["Comuna 13 tour", "Coffee tasting", "Cable car ride"],
+      "estimatedCost": 40,
+      "tips": ["Use the metro to save money"]
+    }
+  ]
+}`;
 
   try {
     console.log('Calling OpenAI API...');
@@ -73,7 +80,7 @@ Return the itinerary as a JSON array, like this:
       messages: [
         {
           role: "system", 
-          content: "You are TripWise, an expert South American travel planner. Always respond with valid JSON only."
+          content: `You are TripWise, an expert South American travel planner. Always respond with valid JSON only.${isHebrew ? ' Respond in Hebrew - all location, activities, and tips must be in Hebrew.' : ''}`
         },
         {
           role: "user",
