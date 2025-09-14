@@ -65,6 +65,8 @@
     "activity_days_count": "{{count}} activity {{count, plural, one {day} other {days}}}",
     "day_number": "Day {{day}}",
     "and_more_days": "and {{count}} more {{count, plural, one {day} other {days}}}",
+    "ai_trip_suggestions": "AI Trip Suggestions",
+    "personalized_recommendations": "Personalized recommendations tailored to your preferences", 
     "my_trip_planner": "My Trip Planner",
     "planner_subtitle": "Plan, discover and save your perfect South American adventure",
     "trip_preferences": "Trip Preferences", 

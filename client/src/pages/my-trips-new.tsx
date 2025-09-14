@@ -858,9 +858,6 @@ export default function MyTripsNew() {
                     <p className="text-sm text-gray-500 mb-4">
                       {t('trips.create_suggestions_first')}
                     </p>
-                    <p className="text-xs text-gray-400 mb-4">
-                      Debug: isGenerating={String(isGenerating)}, suggestions length={aiSuggestions.length}
-                    </p>
                     <Button onClick={() => setActiveTab("preferences")} variant="outline">
                       <Bot className="w-4 h-4 mr-2" />
                       {t('trips.go_to_preferences')}
