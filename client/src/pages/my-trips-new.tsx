@@ -368,7 +368,7 @@ export default function MyTripsNew() {
         .from('itineraries')
         .insert({
           user_id: user.id,
-          title: `${mainDestination} Itinerary - ${formatDate(new Date())}`,
+          title: `${mainDestination} ${t('trips.itinerary')} - ${formatDate(new Date())}`,
           plan_json: {
             mainDestination,
             totalDays: itinerary.length,
@@ -643,8 +643,8 @@ export default function MyTripsNew() {
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 pb-20 md:pb-8">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4">My Trip Planner</h1>
-          <p className="text-lg text-gray-600">Plan, explore, and save your perfect South American adventure</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4">{t('trips.my_trip_planner')}</h1>
+          <p className="text-lg text-gray-600">{t('trips.planner_subtitle')}</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -654,21 +654,21 @@ export default function MyTripsNew() {
                 <Bot className="w-4 h-4 mr-2" />
                 {t('trips.preferences')}
               </TabsTrigger>
-              <TabsTrigger value="suggestions" className="flex items-center whitespace-nowrap">
+              <TabsTrigger value="suggestions" className="flex items-center whitespace-nowrap" data-testid="tab-suggestions">
                 <Sparkles className="w-4 h-4 mr-2" />
-                Suggestions
+                {t('trips.suggestions')}
               </TabsTrigger>
-              <TabsTrigger value="itinerary" className="flex items-center whitespace-nowrap">
+              <TabsTrigger value="itinerary" className="flex items-center whitespace-nowrap" data-testid="tab-itinerary">
                 <Route className="w-4 h-4 mr-2" />
-                Itinerary
+                {t('trips.itinerary')}
               </TabsTrigger>
-              <TabsTrigger value="my-itineraries" className="flex items-center whitespace-nowrap">
+              <TabsTrigger value="my-itineraries" className="flex items-center whitespace-nowrap" data-testid="tab-my-itineraries">
                 <Save className="w-4 h-4 mr-2" />
-                My Itineraries
+                {t('trips.my_itineraries')}
               </TabsTrigger>
-              <TabsTrigger value="saved" className="flex items-center whitespace-nowrap">
+              <TabsTrigger value="saved" className="flex items-center whitespace-nowrap" data-testid="tab-saved">
                 <FolderOpen className="w-4 h-4 mr-2" />
-                My Trips
+                {t('trips.my_trips')}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -1255,30 +1255,30 @@ export default function MyTripsNew() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <FolderOpen className="w-6 h-6 mr-2 text-primary" />
-                  My Saved Trips
+                  {t('trips.my_saved_trips')}
                 </CardTitle>
                 <CardDescription>
-                  View and manage your saved travel plans
+                  {t('trips.view_manage_trips')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {isLoadingSavedTrips && (
                   <div className="text-center py-8">
                     <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin text-primary" />
-                    <p className="text-lg font-medium text-gray-700">Loading your trips...</p>
+                    <p className="text-lg font-medium text-gray-700">{t('trips.loading_trips')}</p>
                   </div>
                 )}
 
                 {savedTrips.length === 0 && !isLoadingSavedTrips && (
                   <div className="text-center py-8">
                     <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                    <p className="text-lg font-medium text-gray-700 mb-2">No saved trips yet</p>
+                    <p className="text-lg font-medium text-gray-700 mb-2">{t('trips.no_saved_trips')}</p>
                     <p className="text-sm text-gray-500 mb-4">
-                      Create your first trip using our AI-powered suggestions
+                      {t('trips.create_first_trip_ai')}
                     </p>
                     <Button onClick={() => setActiveTab("preferences")} variant="outline">
                       <Bot className="w-4 h-4 mr-2" />
-                      Start Planning
+                      {t('trips.start_planning')}
                     </Button>
                   </div>
                 )}
@@ -1286,7 +1286,7 @@ export default function MyTripsNew() {
                 {savedTrips.length > 0 && !isLoadingSavedTrips && (
                   <div className="space-y-4">
                     <p className="text-sm text-gray-600 mb-4">
-                      You have {savedTrips.length} saved trip{savedTrips.length !== 1 ? 's' : ''}
+                      {t('trips.you_have_trips', { count: savedTrips.length })}
                     </p>
 
                     {savedTrips.map((trip) => (
@@ -1325,10 +1325,10 @@ export default function MyTripsNew() {
                             <div className="flex space-x-2">
                               <Button variant="outline" size="sm">
                                 <ExternalLink className="w-4 h-4 mr-1" />
-                                View
+                                {t('common.view')}
                               </Button>
                               <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                                Delete
+                                {t('common.delete')}
                               </Button>
                             </div>
                           </div>
