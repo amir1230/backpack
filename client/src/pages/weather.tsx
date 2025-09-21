@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { Search, MapPin, Calendar, Thermometer, Info } from 'lucide-react';
 import { SOUTH_AMERICAN_COUNTRIES } from "@/lib/constants";
+import { useLocalizedPlaceNames } from "@/hooks/useLocalization";
 
 const getSouthAmericanDestinations = (t: any) => [
   { name: 'Lima', country: 'Peru', description: t('weather.destinations.lima_desc') },
@@ -50,6 +51,7 @@ const getTravelSeasons = (t: any) => [
 
 export default function WeatherPage() {
   const { t } = useTranslation();
+  const { getPlaceName } = useLocalizedPlaceNames();
   const [selectedDestination, setSelectedDestination] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
   const [customDestination, setCustomDestination] = useState('');
@@ -107,8 +109,8 @@ export default function WeatherPage() {
                     onClick={() => handleDestinationSelect(dest.name)}
                   >
                     <MapPin className="w-4 h-4" />
-                    <span className="text-sm font-medium">{dest.name}</span>
-                    <span className="text-xs text-gray-500">{dest.country}</span>
+                    <span className="text-sm font-medium">{getPlaceName(dest.name, dest.name, 'destinations')}</span>
+                    <span className="text-xs text-gray-500">{getPlaceName(dest.country, dest.country, 'destinations')}</span>
                   </Button>
                 ))}
               </div>
@@ -131,7 +133,7 @@ export default function WeatherPage() {
                   <SelectContent>
                     {SOUTH_AMERICAN_COUNTRIES.map((country) => (
                       <SelectItem key={country} value={country}>
-                        {country}
+                        {getPlaceName(country, country, 'destinations')}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -175,7 +177,7 @@ export default function WeatherPage() {
                     <div className="flex flex-wrap gap-1">
                       {season.destinations.map((dest, i) => (
                         <span key={i} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                          {dest}
+                          {getPlaceName(dest, dest, 'destinations')}
                         </span>
                       ))}
                     </div>
@@ -198,22 +200,22 @@ export default function WeatherPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2 p-4 bg-blue-50 rounded-lg">
                 <h4 className="font-semibold text-blue-800">{t('weather.climate_zones.coastal_desert')}</h4>
-                <p className="text-sm text-blue-700">Lima, Ica</p>
+                <p className="text-sm text-blue-700">{getPlaceName('Lima', 'Lima', 'destinations')}, {getPlaceName('Ica', 'Ica', 'destinations')}</p>
                 <p className="text-xs text-blue-600">{t('weather.climate_zones.coastal_desert_desc')}</p>
               </div>
               <div className="space-y-2 p-4 bg-green-50 rounded-lg">
                 <h4 className="font-semibold text-green-800">{t('weather.climate_zones.tropical')}</h4>
-                <p className="text-sm text-green-700">Amazon, Cartagena</p>
+                <p className="text-sm text-green-700">אמזונס, {getPlaceName('Cartagena', 'Cartagena', 'destinations')}</p>
                 <p className="text-xs text-green-600">{t('weather.climate_zones.tropical_desc')}</p>
               </div>
               <div className="space-y-2 p-4 bg-purple-50 rounded-lg">
                 <h4 className="font-semibold text-purple-800">{t('weather.climate_zones.highland')}</h4>
-                <p className="text-sm text-purple-700">Cusco, Quito, La Paz</p>
+                <p className="text-sm text-purple-700">{getPlaceName('Cusco', 'Cusco', 'destinations')}, {getPlaceName('Quito', 'Quito', 'destinations')}, {getPlaceName('La Paz', 'La Paz', 'destinations')}</p>
                 <p className="text-xs text-purple-600">{t('weather.climate_zones.highland_desc')}</p>
               </div>
               <div className="space-y-2 p-4 bg-orange-50 rounded-lg">
                 <h4 className="font-semibold text-orange-800">{t('weather.climate_zones.temperate')}</h4>
-                <p className="text-sm text-orange-700">Buenos Aires, Santiago</p>
+                <p className="text-sm text-orange-700">{getPlaceName('Buenos Aires', 'Buenos Aires', 'destinations')}, {getPlaceName('Santiago', 'Santiago', 'destinations')}</p>
                 <p className="text-xs text-orange-600">{t('weather.climate_zones.temperate_desc')}</p>
               </div>
             </div>
