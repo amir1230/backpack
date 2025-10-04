@@ -93,17 +93,22 @@ export async function generateTravelSuggestions(
 
     const isHebrew = preferences.language === 'he';
     
+    console.log('Countries string for OpenAI prompt:', countriesStr);
+    
     const prompt = `You are GlobeMate – a smart, friendly, and social travel planner built for Gen Z and solo travelers.  
 Your mission is to help travelers discover personalized, exciting, and budget-conscious trips across the world.
 
 ${isHebrew ? 'IMPORTANT: Respond in Hebrew. All text fields (destination, country, description, bestTimeToVisit, highlights) must be in Hebrew.' : ''}
+
+CRITICAL: The user has selected these specific countries: ${countriesStr}
+You MUST provide trip suggestions ONLY for destinations within these countries. Do NOT suggest destinations in other countries.
 
 Using the following preferences:
 - Travel Style: ${travelStylesStr}
 - Budget: ${budgetStr}
 - Duration: ${durationStr}
 - Interests: ${interestsStr}
-- Preferred Countries: ${countriesStr}
+- Target Countries (REQUIRED): ${countriesStr}
 
 Provide 3 trip suggestions in a JSON format.  
 Each suggestion should feel exciting and tailored, not generic.
