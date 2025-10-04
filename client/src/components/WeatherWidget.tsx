@@ -272,7 +272,7 @@ export function WeatherWidget({ destination, country = 'Peru', showRecommendatio
                     <Wind className="w-5 h-5 text-gray-500" />
                     <div>
                       <p className="text-sm text-gray-600">{t('weather.wind')}</p>
-                      <p className="font-semibold">{weatherData.windSpeed} km/h</p>
+                      <p className="font-semibold">{weatherData.windSpeed} {i18n.language === 'he' ? 'ק״מ/שעה' : 'km/h'}</p>
                     </div>
                   </div>
                 </div>
