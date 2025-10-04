@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { useLocalization } from '@/hooks/useLocalization';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -74,6 +75,7 @@ interface WeatherWidgetProps {
 export function WeatherWidget({ destination, country = 'Peru', showRecommendations = true }: WeatherWidgetProps) {
   const [activeTab, setActiveTab] = useState('current');
   const { t, i18n } = useTranslation();
+  const { translateCity } = useLocalization();
 
   const { data: weatherData, isLoading: weatherLoading, error: weatherError } = useQuery<WeatherData>({
     queryKey: ['/api/weather', destination, country],
@@ -175,7 +177,7 @@ export function WeatherWidget({ destination, country = 'Peru', showRecommendatio
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MapPin className="w-5 h-5" />
-          {destination} {t('weather.weather_travel_guide')}
+          {translateCity(destination)} {t('weather.weather_travel_guide')}
         </CardTitle>
       </CardHeader>
       <CardContent>

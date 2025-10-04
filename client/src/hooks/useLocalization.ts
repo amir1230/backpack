@@ -229,6 +229,89 @@ const PLACE_TRANSLATIONS: Record<string, string> = {
   // Suriname
   'Paramaribo': 'פרמריבו',
 
+  // Asia Cities
+  'Tokyo': 'טוקיו',
+  'Kyoto': 'קיוטו',
+  'Osaka': 'אוסקה',
+  'Bangkok': 'בנגקוק',
+  'Phuket': 'פוקט',
+  'Chiang Mai': 'צ\'אנג מאי',
+  'Seoul': 'סיאול',
+  'Busan': 'בוסן',
+  'Shanghai': 'שנחאי',
+  'Beijing': 'בייג\'ינג',
+  'Hong Kong': 'הונג קונג',
+  'Dubai': 'דובאי',
+  'Abu Dhabi': 'אבו דאבי',
+  'Delhi': 'דלהי',
+  'Mumbai': 'מומבאי',
+  'Bali': 'באלי',
+  'Jakarta': 'ג\'קרטה',
+  'Hanoi': 'האנוי',
+  'Ho Chi Minh City': 'הו צ\'י מין',
+  'Kuala Lumpur': 'קואלה לומפור',
+
+  // Europe Cities
+  'Paris': 'פריז',
+  'London': 'לונדון',
+  'Rome': 'רומא',
+  'Barcelona': 'ברצלונה',
+  'Madrid': 'מדריד',
+  'Amsterdam': 'אמסטרדם',
+  'Berlin': 'ברלין',
+  'Vienna': 'וינה',
+  'Prague': 'פראג',
+  'Athens': 'אתונה',
+  'Lisbon': 'ליסבון',
+  'Istanbul': 'איסטנבול',
+  'Budapest': 'בודפשט',
+  'Warsaw': 'ורשה',
+  'Copenhagen': 'קופנהגן',
+  'Stockholm': 'סטוקהולם',
+  'Oslo': 'אוסלו',
+  'Helsinki': 'הלסינקי',
+  'Dublin': 'דבלין',
+  'Edinburgh': 'אדינבורו',
+  'Brussels': 'בריסל',
+  'Zurich': 'ציריך',
+  'Geneva': 'ז\'נבה',
+  'Milan': 'מילאנו',
+  'Venice': 'ונציה',
+  'Florence': 'פירנצה',
+  'Naples': 'נאפולי',
+
+  // North America Cities
+  'New York': 'ניו יורק',
+  'Los Angeles': 'לוס אנג\'לס',
+  'Chicago': 'שיקגו',
+  'Miami': 'מיאמי',
+  'Las Vegas': 'לאס וגאס',
+  'San Francisco': 'סן פרנסיסקו',
+  'Washington': 'וושינגטון',
+  'Boston': 'בוסטון',
+  'Toronto': 'טורונטו',
+  'Vancouver': 'ונקובר',
+  'Montreal': 'מונטריאול',
+  'Mexico City': 'מקסיקו סיטי',
+  'Cancún': 'קנקון',
+  'Cancun': 'קנקון',
+
+  // Oceania Cities
+  'Sydney': 'סידני',
+  'Melbourne': 'מלבורן',
+  'Brisbane': 'בריסביין',
+  'Perth': 'פרת\'',
+  'Auckland': 'אוקלנד',
+  'Wellington': 'וולינגטון',
+
+  // Africa Cities
+  'Cairo': 'קהיר',
+  'Cape Town': 'קייפטאון',
+  'Johannesburg': 'יוהנסבורג',
+  'Marrakech': 'מרקש',
+  'Casablanca': 'קזבלנקה',
+  'Nairobi': 'ניירובי',
+
   // Common location types/words
   'Airport': 'נמל תעופה',
   'Hotel': 'מלון',
@@ -369,5 +452,26 @@ export function useLocalizedPlaceNames() {
     getPlaceName,
     isLoading: false, // Don't block on loading since we have fallbacks
     error: null // Don't show errors since we have fallbacks
+  };
+}
+
+// Simple hook for translating city/country names
+export function useLocalization() {
+  const { i18n } = useTranslation();
+  const isHebrew = i18n.language === 'he';
+
+  const translateCity = (cityName: string): string => {
+    if (!isHebrew) return cityName;
+    return PLACE_TRANSLATIONS[cityName] || cityName;
+  };
+
+  const translateCountry = (countryName: string): string => {
+    if (!isHebrew) return countryName;
+    return PLACE_TRANSLATIONS[countryName] || countryName;
+  };
+
+  return {
+    translateCity,
+    translateCountry
   };
 }
