@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
+// Force reload of translation files
 import en from './locales/en.json';
 import he from './locales/he.json';
 
@@ -21,6 +22,9 @@ i18n
     resources,
     fallbackLng: 'en',
     debug: !window.location.hostname.includes('replit.app'),
+    cache: {
+      enabled: false
+    },
     
     // Log missing translation keys in development
     missingKeyHandler: (lngs: readonly string[], ns: string, key: string, fallbackValue: string, updateMissing: boolean, options: any) => {
