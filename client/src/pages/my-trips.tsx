@@ -16,7 +16,58 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { TripEditor } from "@/components/TripEditor";
 import { Loader2, MapPin, DollarSign, Calendar, Star, Users, ExternalLink, Camera, Mountain, Utensils, Save, Eye, Merge, Edit, Trash2 } from "lucide-react";
 import { RealPlaceLinks } from "@/components/RealPlaceLinks";
-import { SOUTH_AMERICAN_COUNTRIES } from "@/lib/constants";
+import { SOUTH_AMERICAN_COUNTRIES, WORLD_COUNTRIES } from "@/lib/constants";
+
+const getWorldDestinations = () => ({
+  // Europe
+  'France': ['Paris', 'Lyon', 'Nice', 'Marseille', 'Bordeaux'],
+  'Italy': ['Rome', 'Venice', 'Florence', 'Milan', 'Naples'],
+  'Spain': ['Barcelona', 'Madrid', 'Seville', 'Valencia', 'Granada'],
+  'Germany': ['Berlin', 'Munich', 'Hamburg', 'Frankfurt', 'Cologne'],
+  'United Kingdom': ['London', 'Edinburgh', 'Manchester', 'Liverpool', 'Oxford'],
+  'Greece': ['Athens', 'Santorini', 'Mykonos', 'Crete', 'Rhodes'],
+  'Portugal': ['Lisbon', 'Porto', 'Faro', 'Madeira', 'Azores'],
+  'Netherlands': ['Amsterdam', 'Rotterdam', 'The Hague', 'Utrecht', 'Eindhoven'],
+  'Switzerland': ['Zurich', 'Geneva', 'Bern', 'Lucerne', 'Interlaken'],
+  'Austria': ['Vienna', 'Salzburg', 'Innsbruck', 'Graz', 'Hallstatt'],
+  
+  // Asia
+  'Japan': ['Tokyo', 'Kyoto', 'Osaka', 'Hiroshima', 'Nara'],
+  'Thailand': ['Bangkok', 'Phuket', 'Chiang Mai', 'Pattaya', 'Krabi'],
+  'China': ['Beijing', 'Shanghai', 'Hong Kong', 'Guangzhou', 'Chengdu'],
+  'South Korea': ['Seoul', 'Busan', 'Jeju', 'Incheon', 'Gyeongju'],
+  'India': ['Delhi', 'Mumbai', 'Jaipur', 'Agra', 'Goa'],
+  'Indonesia': ['Bali', 'Jakarta', 'Yogyakarta', 'Lombok', 'Sumatra'],
+  'Vietnam': ['Hanoi', 'Ho Chi Minh City', 'Ha Long Bay', 'Hoi An', 'Da Nang'],
+  'Singapore': ['Singapore City', 'Sentosa', 'Marina Bay', 'Orchard Road', 'Clarke Quay'],
+  'Malaysia': ['Kuala Lumpur', 'Penang', 'Langkawi', 'Malacca', 'Kota Kinabalu'],
+  
+  // North America
+  'United States': ['New York', 'Los Angeles', 'Miami', 'Las Vegas', 'San Francisco'],
+  'Canada': ['Toronto', 'Vancouver', 'Montreal', 'Quebec City', 'Calgary'],
+  'Mexico': ['Cancun', 'Mexico City', 'Playa del Carmen', 'Puerto Vallarta', 'Cabo San Lucas'],
+  
+  // South America
+  'Peru': ['Lima', 'Cusco', 'Machu Picchu', 'Arequipa', 'Iquitos'],
+  'Colombia': ['Bogota', 'Cartagena', 'Medellin', 'Cali', 'Santa Marta'],
+  'Argentina': ['Buenos Aires', 'Mendoza', 'Bariloche', 'Salta', 'Cordoba'],
+  'Brazil': ['Rio de Janeiro', 'Sao Paulo', 'Salvador', 'Brasilia', 'Florianopolis'],
+  'Chile': ['Santiago', 'Valparaiso', 'Valdivia', 'Puerto Varas', 'Punta Arenas'],
+  'Bolivia': ['La Paz', 'Uyuni', 'Sucre', 'Potosi', 'Copacabana'],
+  'Ecuador': ['Quito', 'Guayaquil', 'Cuenca', 'Galapagos', 'Montanita'],
+  'Uruguay': ['Montevideo', 'Punta del Este', 'Colonia', 'Salto', 'Piriapolis'],
+  'Paraguay': ['Asuncion', 'Ciudad del Este', 'Encarnacion', 'San Bernardino', 'Villarrica'],
+  
+  // Oceania
+  'Australia': ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Gold Coast'],
+  'New Zealand': ['Auckland', 'Wellington', 'Queenstown', 'Christchurch', 'Rotorua'],
+  
+  // Africa
+  'Egypt': ['Cairo', 'Luxor', 'Aswan', 'Alexandria', 'Hurghada'],
+  'Morocco': ['Marrakech', 'Casablanca', 'Fes', 'Rabat', 'Tangier'],
+  'South Africa': ['Cape Town', 'Johannesburg', 'Durban', 'Pretoria', 'Port Elizabeth'],
+  'Kenya': ['Nairobi', 'Mombasa', 'Masai Mara', 'Nakuru', 'Kisumu']
+});
 
 interface RealPlace {
   title: string;
@@ -82,6 +133,7 @@ interface SavedTripWithItems {
 
 interface TripFormData {
   destination: string;
+  specificCity: string;
   dailyBudget: number;
   travelStyle: string[];
   interests: string[];
@@ -105,11 +157,19 @@ export default function MyTripsScreen() {
   const [activeTab, setActiveTab] = useState("generate");
   const [formData, setFormData] = useState<TripFormData>({
     destination: "",
+    specificCity: "",
     dailyBudget: 50,
     travelStyle: [],
     interests: [],
     duration: ""
   });
+  
+  const WORLD_DESTINATIONS = getWorldDestinations();
+  
+  // Get available cities for selected country
+  const availableCities = formData.destination 
+    ? (WORLD_DESTINATIONS[formData.destination as keyof typeof WORLD_DESTINATIONS] || [])
+    : [];
   const [suggestions, setSuggestions] = useState<TripSuggestion[]>([]);
   const [selectedTripForEditor, setSelectedTripForEditor] = useState<string | null>(null);
   const [selectedTripForMerge, setSelectedTripForMerge] = useState<TripSuggestion | null>(null);
@@ -372,12 +432,15 @@ export default function MyTripsScreen() {
                         <Label htmlFor="destination" className="text-sm font-medium text-slate-700">
                           {t('trips.where_do_you_want_to_go')}
                         </Label>
-                        <Select value={formData.destination} onValueChange={(value: string) => setFormData(prev => ({ ...prev, destination: value }))}>
-                          <SelectTrigger className="w-full p-3 h-12">
+                        <Select 
+                          value={formData.destination} 
+                          onValueChange={(value: string) => setFormData(prev => ({ ...prev, destination: value, specificCity: "" }))}
+                        >
+                          <SelectTrigger className="w-full p-3 h-12" data-testid="select-country">
                             <SelectValue placeholder={t('trips.select_destination')} />
                           </SelectTrigger>
                           <SelectContent>
-                            {SOUTH_AMERICAN_COUNTRIES.map((destination: string) => (
+                            {WORLD_COUNTRIES.map((destination: string) => (
                               <SelectItem key={destination} value={destination}>
                                 {destination}
                               </SelectItem>
@@ -386,6 +449,31 @@ export default function MyTripsScreen() {
                         </Select>
                       </div>
 
+                      <div className="space-y-2">
+                        <Label htmlFor="specificCity" className="text-sm font-medium text-slate-700">
+                          {t('trips.select_specific_city')}
+                        </Label>
+                        <Select 
+                          value={formData.specificCity} 
+                          onValueChange={(value: string) => setFormData(prev => ({ ...prev, specificCity: value }))}
+                          disabled={!formData.destination || availableCities.length === 0}
+                        >
+                          <SelectTrigger className="w-full p-3 h-12" data-testid="select-city">
+                            <SelectValue placeholder={formData.destination ? t('trips.choose_city') : t('trips.select_country_first')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">{t('trips.any_city_in_country')}</SelectItem>
+                            {availableCities.map((city: string) => (
+                              <SelectItem key={city} value={city}>
+                                {city}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="duration" className="text-sm font-medium text-slate-700">
                           {t('trips.trip_duration')}
