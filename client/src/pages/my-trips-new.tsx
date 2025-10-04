@@ -653,27 +653,27 @@ export default function MyTripsNew() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="overflow-x-auto">
-            <TabsList className="inline-flex w-auto min-w-full justify-evenly h-10">
-              <TabsTrigger value="preferences" className="flex items-center whitespace-nowrap" data-testid="tab-preferences">
-                <Bot className="w-4 h-4 mr-2" />
-                {t('trips.preferences')}
+          <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full sm:w-full justify-start sm:justify-evenly h-auto sm:h-10 gap-1 sm:gap-2 p-1">
+              <TabsTrigger value="preferences" className="flex flex-col sm:flex-row items-center justify-center whitespace-nowrap px-2 sm:px-4 py-2 sm:py-0 min-w-[70px] sm:min-w-0" data-testid="tab-preferences">
+                <Bot className="w-4 h-4 sm:w-4 sm:h-4 sm:mr-2 mb-1 sm:mb-0" />
+                <span className="text-[10px] sm:text-sm">{t('trips.preferences')}</span>
               </TabsTrigger>
-              <TabsTrigger value="suggestions" className="flex items-center whitespace-nowrap" data-testid="tab-suggestions">
-                <Sparkles className="w-4 h-4 mr-2" />
-                {t('trips.suggestions')}
+              <TabsTrigger value="suggestions" className="flex flex-col sm:flex-row items-center justify-center whitespace-nowrap px-2 sm:px-4 py-2 sm:py-0 min-w-[70px] sm:min-w-0" data-testid="tab-suggestions">
+                <Sparkles className="w-4 h-4 sm:w-4 sm:h-4 sm:mr-2 mb-1 sm:mb-0" />
+                <span className="text-[10px] sm:text-sm">{t('trips.suggestions')}</span>
               </TabsTrigger>
-              <TabsTrigger value="itinerary" className="flex items-center whitespace-nowrap" data-testid="tab-itinerary">
-                <Route className="w-4 h-4 mr-2" />
-                {t('trips.itinerary')}
+              <TabsTrigger value="itinerary" className="flex flex-col sm:flex-row items-center justify-center whitespace-nowrap px-2 sm:px-4 py-2 sm:py-0 min-w-[70px] sm:min-w-0" data-testid="tab-itinerary">
+                <Route className="w-4 h-4 sm:w-4 sm:h-4 sm:mr-2 mb-1 sm:mb-0" />
+                <span className="text-[10px] sm:text-sm">{t('trips.itinerary')}</span>
               </TabsTrigger>
-              <TabsTrigger value="my-itineraries" className="flex items-center whitespace-nowrap" data-testid="tab-my-itineraries">
-                <Save className="w-4 h-4 mr-2" />
-                {t('trips.my_itineraries')}
+              <TabsTrigger value="my-itineraries" className="flex flex-col sm:flex-row items-center justify-center whitespace-nowrap px-2 sm:px-4 py-2 sm:py-0 min-w-[70px] sm:min-w-0" data-testid="tab-my-itineraries">
+                <Save className="w-4 h-4 sm:w-4 sm:h-4 sm:mr-2 mb-1 sm:mb-0" />
+                <span className="text-[10px] sm:text-sm">{t('trips.my_itineraries')}</span>
               </TabsTrigger>
-              <TabsTrigger value="saved" className="flex items-center whitespace-nowrap" data-testid="tab-saved">
-                <FolderOpen className="w-4 h-4 mr-2" />
-                {t('trips.my_trips')}
+              <TabsTrigger value="saved" className="flex flex-col sm:flex-row items-center justify-center whitespace-nowrap px-2 sm:px-4 py-2 sm:py-0 min-w-[70px] sm:min-w-0" data-testid="tab-saved">
+                <FolderOpen className="w-4 h-4 sm:w-4 sm:h-4 sm:mr-2 mb-1 sm:mb-0" />
+                <span className="text-[10px] sm:text-sm">{t('trips.my_trips')}</span>
               </TabsTrigger>
             </TabsList>
           </div>
