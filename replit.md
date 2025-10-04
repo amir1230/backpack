@@ -10,6 +10,7 @@ GlobeMate is a full-stack web application designed for global travel planning an
 - **Destination Data**: Expanded from 7 South American countries to 18 countries with detailed climate and travel timing data (South America, Europe, Asia, Oceania, North America)
 - **Services Updated**: Weather Service, Travel Timing Service, and Python Collector now support global destinations
 - **Type Safety**: Preserved literal tuple types for SOUTH_AMERICAN_COUNTRIES to maintain existing type contracts
+- **Enhanced Weather Page (Oct 2025)**: Complete redesign with 200+ cities across 40+ countries, three-tier continent→country→city selection, seasonal information for all continents (best months, peak/off seasons), weather tips, and general travel advice. Includes quick-select popular cities feature and detailed climate insights per continent.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

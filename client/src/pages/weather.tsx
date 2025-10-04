@@ -143,7 +143,7 @@ export default function WeatherPage() {
   
   // Get available countries for selected continent
   const availableCountries = selectedContinent 
-    ? getCountriesByContinent(selectedContinent).filter(country => WORLD_DESTINATIONS[country as keyof typeof WORLD_DESTINATIONS])
+    ? getCountriesByContinent(selectedContinent).filter((country: string) => WORLD_DESTINATIONS[country as keyof typeof WORLD_DESTINATIONS])
     : [];
   
   // Get available cities for selected country
@@ -153,8 +153,8 @@ export default function WeatherPage() {
 
   // Get popular cities from selected continent (for quick select)
   const popularCities = selectedContinent
-    ? availableCountries.slice(0, 3).flatMap(country => 
-        (WORLD_DESTINATIONS[country as keyof typeof WORLD_DESTINATIONS] || []).slice(0, 2).map(city => ({
+    ? availableCountries.slice(0, 3).flatMap((country: string) => 
+        (WORLD_DESTINATIONS[country as keyof typeof WORLD_DESTINATIONS] || []).slice(0, 2).map((city: string) => ({
           name: city,
           country
         }))
@@ -217,7 +217,7 @@ export default function WeatherPage() {
                       <SelectValue placeholder={t('trips.select_continent')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {CONTINENTS.map((continent) => (
+                      {CONTINENTS.map((continent: Continent) => (
                         <SelectItem key={continent} value={continent}>
                           {t(`trips.continents.${continent.toLowerCase().replace(/ /g, '_')}`)}
                         </SelectItem>
@@ -240,7 +240,7 @@ export default function WeatherPage() {
                       <SelectValue placeholder={t('trips.select_country')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {availableCountries.map((country) => (
+                      {availableCountries.map((country: string) => (
                         <SelectItem key={country} value={country}>
                           {getPlaceName(country, country, 'destinations')}
                         </SelectItem>
@@ -263,7 +263,7 @@ export default function WeatherPage() {
                       <SelectValue placeholder={t('weather.select_city')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {availableCities.map((city) => (
+                      {availableCities.map((city: string) => (
                         <SelectItem key={city} value={city}>
                           {city}
                         </SelectItem>
@@ -279,7 +279,7 @@ export default function WeatherPage() {
               <div className="space-y-3">
                 <h3 className="font-semibold text-gray-700">{t('weather.popular_cities')}</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                  {popularCities.map((dest) => (
+                  {popularCities.map((dest: { name: string; country: string }) => (
                     <Button
                       key={`${dest.name}-${dest.country}`}
                       variant={selectedCity === dest.name ? "default" : "outline"}
