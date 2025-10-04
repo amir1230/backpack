@@ -10,7 +10,7 @@ import { useAuth } from "../context/AuthContext.js";
 import { useLocation, Link } from "wouter";
 import { AuthModal } from "../components/auth/AuthModal.js";
 import { queryClient } from "../lib/queryClient.js";
-import { CONTINENTS, CONTINENT_COUNTRY_MAP, getCountriesByContinent, type Continent } from "../lib/constants.js";
+import { CONTINENTS, CONTINENT_COUNTRY_MAP, getCountriesByContinent, getContinentByCountry, type Continent } from "../lib/constants.js";
 import globeMateLogo from "../assets/globemate-logo.png";
 import { 
   Compass, 
