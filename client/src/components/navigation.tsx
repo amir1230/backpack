@@ -84,9 +84,8 @@ export default function Navigation() {
         <nav className="bg-white shadow-lg sticky top-0 z-[60] md:hidden">
           <div className="px-4">
             <div className="flex justify-between items-center h-16">
-              <Link href="/" className="flex items-center gap-2">
-                <img src={globeMateLogo} alt="GlobeMate" className="h-10 w-10 rounded-lg" />
-                <span className="text-lg font-bold text-orange-600">GlobeMate</span>
+              <Link href="/" className="flex items-center justify-center">
+                <img src={globeMateLogo} alt="GlobeMate" className="h-14 w-14 rounded-lg" />
               </Link>
               
               <div className="flex items-center gap-2">
@@ -265,9 +264,8 @@ export default function Navigation() {
       <aside className="fixed top-0 right-0 h-full w-64 bg-white shadow-2xl border-l border-gray-200 z-[60] hidden md:flex flex-col">
         {/* Sidebar Header with Logo and Language Toggle */}
         <div className="p-6 border-b border-gray-200">
-          <Link href="/" className="flex flex-col items-center justify-center mb-4 gap-2">
-            <img src={globeMateLogo} alt="GlobeMate" className="h-16 w-16 rounded-xl shadow-md" />
-            <span className="text-xl font-bold text-orange-600">GlobeMate</span>
+          <Link href="/" className="flex items-center justify-center mb-6">
+            <img src={globeMateLogo} alt="GlobeMate" className="h-24 w-24 rounded-xl shadow-md" />
           </Link>
           <div className="flex justify-center">
             <LanguageToggle />

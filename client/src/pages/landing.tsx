@@ -382,9 +382,8 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center gap-3 mb-6">
-                <img src={globeMateLogo} alt="GlobeMate" className="h-12 w-12 rounded-lg" />
-                <span className="text-lg font-bold text-orange-600">GlobeMate</span>
+              <div className="flex items-center justify-start mb-6">
+                <img src={globeMateLogo} alt="GlobeMate" className="h-16 w-16 rounded-lg" />
               </div>
               <p className="text-gray-300 mb-4">{t('landing.footer_tagline')}</p>
               <div className="flex space-x-4">
