@@ -110,3 +110,17 @@
     }
   }
 }
+
+/* Fix mobile tabs text truncation */
+@media (max-width: 640px) {
+  [role="tab"], 
+  [role="tab"] span,
+  button[data-state] {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+  }
+}
