@@ -11,6 +11,7 @@ import { MessageItem } from './MessageItem';
 import { FileUpload } from './FileUpload';
 import { apiRequest } from '../../lib/queryClient';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface Message {
   id: number;
@@ -50,6 +51,7 @@ interface RoomViewProps {
 }
 
 export function RoomView({ roomId, roomName, roomDescription, isPrivate, onNavigateToDM }: RoomViewProps) {
+  const { t } = useTranslation();
   const [newMessage, setNewMessage] = useState('');
   const [guestName, setGuestName] = useState('');
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -146,8 +148,8 @@ export function RoomView({ roomId, roomName, roomDescription, isPrivate, onNavig
       console.error('Failed to send message:', error);
       setUploading(false);
       toast({
-        title: "Can't send message",
-        description: "Please check your connection and try again",
+        title: t('chat.errors.cant_send_message'),
+        description: t('chat.errors.check_connection'),
         variant: "destructive"
       });
     }
@@ -171,8 +173,8 @@ export function RoomView({ roomId, roomName, roomDescription, isPrivate, onNavig
     // Anti-spam check
     if (trimmedMessage && trimmedMessage.length > 2000) {
       toast({
-        title: "Message too long",
-        description: "Please keep messages under 2000 characters",
+        title: t('chat.errors.message_too_long'),
+        description: t('chat.errors.character_limit'),
         variant: "destructive"
       });
       return;
@@ -227,8 +229,8 @@ export function RoomView({ roomId, roomName, roomDescription, isPrivate, onNavig
         <CardContent>
           <div className="text-center">
             <Hash className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <h3 className="text-lg font-medium text-gray-600 mb-2">Select a chat room</h3>
-            <p className="text-gray-500">Choose a room from the sidebar to start chatting</p>
+            <h3 className="text-lg font-medium text-gray-600 mb-2">{t('chat.select_chat_room')}</h3>
+            <p className="text-gray-500">{t('chat.choose_room_from_sidebar')}</p>
           </div>
         </CardContent>
       </Card>
@@ -243,16 +245,16 @@ export function RoomView({ roomId, roomName, roomDescription, isPrivate, onNavig
           <div>
             <CardTitle className="flex items-center gap-2">
               {isPrivate ? <Lock className="w-5 h-5" /> : <Hash className="w-5 h-5" />}
-              {roomName || `Room ${roomId}`}
+              {roomName || t('community.room_number', { number: roomId })}
               {isPrivate && (
-                <Badge variant="outline" className="text-xs">Private</Badge>
+                <Badge variant="outline" className="text-xs">{t('chat.private')}</Badge>
               )}
             </CardTitle>
             {roomDescription && (
               <p className="text-sm text-gray-600 mt-1">{roomDescription}</p>
             )}
             {isPrivate && (
-              <p className="text-xs text-gray-500 mt-1">🔒 Only invited members can see messages</p>
+              <p className="text-xs text-gray-500 mt-1">{t('chat.private_room_notice')}</p>
             )}
           </div>
           <Button 
@@ -275,17 +277,17 @@ export function RoomView({ roomId, roomName, roomDescription, isPrivate, onNavig
             </div>
           ) : error ? (
             <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">Unable to load messages</p>
+              <p className="text-gray-500 mb-4">{t('chat.errors.unable_to_load_messages')}</p>
               <Button onClick={() => refetch()} variant="outline" size="sm">
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Try Again
+                {t('chat.errors.try_again')}
               </Button>
             </div>
           ) : messages.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">👋</div>
-              <h3 className="text-lg font-medium text-gray-600 mb-2">No messages yet</h3>
-              <p className="text-gray-500">Be the first to say hi!</p>
+              <h3 className="text-lg font-medium text-gray-600 mb-2">{t('chat.no_messages_yet')}</h3>
+              <p className="text-gray-500">{t('chat.be_first_to_say_hi')}</p>
             </div>
           ) : (
             <div className="py-4 space-y-4">
@@ -301,7 +303,7 @@ export function RoomView({ roomId, roomName, roomDescription, isPrivate, onNavig
                     {isLoadingMore ? (
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
                     ) : null}
-                    Load Earlier Messages
+                    {t('chat.load_earlier_messages')}
                   </Button>
                 </div>
               )}
@@ -347,13 +349,13 @@ export function RoomView({ roomId, roomName, roomDescription, isPrivate, onNavig
               <div className="flex items-center justify-between mt-2">
                 <div className="text-xs text-gray-500">
                   {guestName ? (
-                    <span>Posting as: <strong>{guestName}</strong></span>
+                    <span>{t('chat.posting_as')}: <strong>{guestName}</strong></span>
                   ) : (
-                    <span>You'll be asked for your name when sending</span>
+                    <span>{t('chat.name_prompt')}</span>
                   )}
                 </div>
                 <div className="text-xs text-gray-500">
-                  Press Enter to send, Shift+Enter for new line
+                  {t('chat.keyboard_shortcuts')}
                 </div>
               </div>
             </div>

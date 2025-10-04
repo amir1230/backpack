@@ -138,7 +138,7 @@ export function ChatSidebar({ selectedRoom, onRoomSelect, onCreateRoom }: ChatSi
                 {onCreateRoom && (
                   <Button onClick={onCreateRoom} variant="outline" size="sm">
                     <Plus className="w-4 h-4 mr-2" />
-                    Create Room
+                    {t('community.chat_rooms.create_room')}
                   </Button>
                 )}
               </div>

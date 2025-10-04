@@ -132,7 +132,23 @@
     "partner_name_required": "שם פרטנר נדרש",
     "enter_partner_name_error": "אנא הכנס שם עבור פרטנר השיחה שלך",
     "your_name_required": "השם שלך נדרש",
-    "set_your_name_first_error": "אנא קבע את השם שלך בחדר צ'אט תחילה"
+    "set_your_name_first_error": "אנא קבע את השם שלך בחדר צ'אט תחילה",
+    "private": "פרטי",
+    "private_room_notice": "🔒 רק חברים מוזמנים יכולים לראות הודעות",
+    "no_messages_yet": "עדיין אין הודעות",
+    "be_first_to_say_hi": "היה הראשון לומר שלום!",
+    "load_earlier_messages": "טען הודעות קודמות",
+    "posting_as": "מפרסם בשם",
+    "name_prompt": "תתבקש לציין את שמך בעת השליחה",
+    "keyboard_shortcuts": "לחץ Enter לשליחה, Shift+Enter לשורה חדשה",
+    "errors": {
+      "cant_send_message": "לא ניתן לשלוח הודעה",
+      "check_connection": "אנא בדוק את החיבור ונסה שוב",
+      "message_too_long": "ההודעה ארוכה מדי",
+      "character_limit": "אנא שמור על הודעות מתחת ל-2000 תווים",
+      "unable_to_load_messages": "לא ניתן לטעון הודעות",
+      "try_again": "נסה שוב"
+    }
   },
   "trips": {
     "my_trips": "הטיולים שלי",
@@ -949,17 +965,5 @@
     "booking_recommendations_for_your_trip": "המלצות להזמנה לפי הטיול שלך",
     "unknown_source": "מקור לא ידוע",
     "view_on_maps": "צפה במפות"
-  },
-  "chat": {
-    "direct_messages": "הודעות פרטיות",
-    "no_conversations_yet": "אין שיחות עדיין",
-    "start_new_conversation": "התחילו שיחה חדשה עם מישהו",
-    "new_dm": "הודעה חדשה",
-    "create_room": "צור חדר",
-    "no_chat_rooms": "אין חדרי צ'אט עדיין",
-    "join_first_room": "הצטרפו לחדר הראשונים להתחיל שיחה!",
-    "search_conversations": "חיפוש שיחות...",
-    "select_chat_room": "בחר חדר צ'אט",
-    "choose_room_from_sidebar": "בחר חדר מהסיידבאר כדי להתחיל לצ'טט"
   }
 }

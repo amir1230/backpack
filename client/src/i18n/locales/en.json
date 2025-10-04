@@ -141,7 +141,23 @@
     "partner_name_required": "Partner Name Required",
     "enter_partner_name_error": "Please enter a name for your conversation partner",
     "your_name_required": "Your Name Required",
-    "set_your_name_first_error": "Please set your name in a chat room first"
+    "set_your_name_first_error": "Please set your name in a chat room first",
+    "private": "Private",
+    "private_room_notice": "🔒 Only invited members can see messages",
+    "no_messages_yet": "No messages yet",
+    "be_first_to_say_hi": "Be the first to say hi!",
+    "load_earlier_messages": "Load Earlier Messages",
+    "posting_as": "Posting as",
+    "name_prompt": "You'll be asked for your name when sending",
+    "keyboard_shortcuts": "Press Enter to send, Shift+Enter for new line",
+    "errors": {
+      "cant_send_message": "Can't send message",
+      "check_connection": "Please check your connection and try again",
+      "message_too_long": "Message too long",
+      "character_limit": "Please keep messages under 2000 characters",
+      "unable_to_load_messages": "Unable to load messages",
+      "try_again": "Try Again"
+    }
   },
   "trips": {
     "my_trips": "My Trips",
