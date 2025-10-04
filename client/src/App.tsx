@@ -34,8 +34,8 @@ function Router() {
   return (
     <div className="min-h-screen">
       <Navigation />
-      {/* Main content area adjusted for right sidebar */}
-      <main className="md:pr-64">
+      {/* Main content area adjusted for right sidebar on desktop, bottom padding for mobile nav */}
+      <main className="pb-20 md:pb-0 md:pr-64">
         <Switch>
           <Route path="/" component={Landing} />
           <Route path="/home" component={Home} />

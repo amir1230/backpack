@@ -84,29 +84,29 @@ export default function Community() {
   const displayReviews = placeReviews;
 
   return (
-    <div className="container mx-auto py-6 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+    <div className="container mx-auto py-4 sm:py-6 px-4 sm:px-6 max-w-7xl">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
           {t('community.title')}
         </h1>
-        <p className="text-gray-600">
+        <p className="text-sm sm:text-base text-gray-600">
           {t('community.description')}
         </p>
       </div>
 
-      {/* Search and Filters */}
-      <div className="flex gap-4 mb-6">
+      {/* Search and Filters - Responsive */}
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder={t('community.search_placeholder')}
             value={searchTerm}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-11"
           />
         </div>
         <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-full sm:w-48 h-11">
             <SelectValue placeholder={t('community.filter_by_location')} />
           </SelectTrigger>
           <SelectContent>
@@ -153,12 +153,12 @@ export default function Community() {
           </div>
           
           {reviewsLoading ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {[...Array(6)].map((_, i) => (
-                <Card key={i} className="animate-pulse">
+                <Card key={i} className="animate-pulse w-full">
                   <CardHeader>
                     <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2 mt-2"></div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
@@ -170,18 +170,18 @@ export default function Community() {
               ))}
             </div>
           ) : isDatabaseInitializing ? (
-            <div className="text-center py-12">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-2xl mx-auto">
-                <h3 className="text-lg font-semibold text-blue-900 mb-2">
+            <div className="text-center py-8 sm:py-12">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 max-w-2xl mx-auto">
+                <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-2">
                   {t('community.reviews.database_setup_title')}
                 </h3>
-                <p className="text-blue-700">
+                <p className="text-sm sm:text-base text-blue-700">
                   {t('community.reviews.database_setup_description')}
                 </p>
               </div>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {displayReviews && displayReviews.length > 0 ? (displayReviews || []).map((review: any) => (
                 <Card key={review.id} className="w-full">
                   <CardHeader>
