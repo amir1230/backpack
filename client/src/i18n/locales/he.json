@@ -73,7 +73,8 @@
     "view": "צפה",
     "view_all": "צפה בהכל",
     "description": "תיאור",
-    "language": "שפה"
+    "language": "שפה",
+    "points_short": "נק'"
   },
   "places": {
     "and_more_places": "ועוד {{count}} {{count, plural, one {מקום נוסף} other {מקומות נוספים}}}...",

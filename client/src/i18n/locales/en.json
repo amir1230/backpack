@@ -73,7 +73,8 @@
     "view": "View",
     "view_all": "View All",
     "description": "Description",
-    "language": "Language"
+    "language": "Language",
+    "points_short": "pts"
   },
   "places": {
     "and_more_places": "and {{count}} more {{count, plural, one {place} other {places}}}...",

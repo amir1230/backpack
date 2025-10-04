@@ -351,7 +351,7 @@ export default function Achievements() {
                   <Calendar className="w-4 h-4" />
                   {dailyCheckInMutation.isPending ? t('achievements.checking_in') : 
                     dailyCheckinValue ? 
-                      t('achievements.daily_checkin_with_points', { label: dailyCheckinValue.label, points: dailyCheckinValue.points }) :
+                      `${t(dailyCheckinValue.label)} (+${dailyCheckinValue.points} ${t('common.points_short', {defaultValue: 'pts'})})` :
                       t('achievements.daily_checkin_default', { points: POINT_VALUES.DAILY_CHECKIN })
                   }
                 </Button>
@@ -366,7 +366,7 @@ export default function Achievements() {
                   <MessageSquare className="w-4 h-4" />
                   {awardReviewPointsMutation.isPending ? t('achievements.tracking') : 
                     reviewValue ? 
-                      t('achievements.review_with_points', { label: reviewValue.label, points: reviewValue.points }) :
+                      `${t(reviewValue.label)} (+${reviewValue.points} ${t('common.points_short', {defaultValue: 'pts'})})` :
                       t('achievements.write_review_default', { points: POINT_VALUES.WRITE_REVIEW })
                   }
                 </Button>
@@ -381,7 +381,7 @@ export default function Achievements() {
                   <Camera className="w-4 h-4" />
                   {awardPhotoPointsMutation.isPending ? t('achievements.tracking') : 
                     photoValue ? 
-                      t('achievements.photo_with_points', { label: photoValue.label, points: photoValue.points }) :
+                      `${t(photoValue.label)} (+${photoValue.points} ${t('common.points_short', {defaultValue: 'pts'})})` :
                       t('achievements.upload_photo_default', { points: POINT_VALUES.UPLOAD_PHOTO })
                   }
                 </Button>
@@ -396,7 +396,7 @@ export default function Achievements() {
                   <MapPin className="w-4 h-4" />
                   {awardItineraryPointsMutation.isPending ? t('achievements.tracking') : 
                     itineraryValue ? 
-                      t('achievements.itinerary_with_points', { label: itineraryValue.label, points: itineraryValue.points }) :
+                      `${t(itineraryValue.label)} (+${itineraryValue.points} ${t('common.points_short', {defaultValue: 'pts'})})` :
                       t('achievements.share_itinerary_default', { points: POINT_VALUES.SHARE_ITINERARY })
                   }
                 </Button>
@@ -817,7 +817,7 @@ export default function Achievements() {
                               : entry.user?.email?.split('@')[0] || t('achievements.anonymous_user')
                             }
                           </div>
-                          <div className="text-sm text-gray-600">Level {calculateLevel(entry.totalPoints)} • {getLevelName(calculateLevel(entry.totalPoints))}</div>
+                          <div className="text-sm text-gray-600">Level {calculateLevel(entry.totalPoints)} • {getLevelName(calculateLevel(entry.totalPoints), t)}</div>
                         </div>
                         
                         <div className="text-right">
