@@ -54,8 +54,10 @@ interface ClimateData {
   };
 }
 
-// South American climate data for travel recommendations
-const SOUTH_AMERICA_CLIMATE: ClimateData = {
+// Global climate data for travel recommendations
+// Note: Live weather data is fetched from OpenWeather API
+// This static data is used for historical climate patterns and best time to visit recommendations
+const GLOBAL_CLIMATE_DATA: ClimateData = {
   'lima': {
     'jan': { avgTemp: 25, rainfall: 0.5, humidity: 77, sunnyDays: 15 },
     'feb': { avgTemp: 26, rainfall: 0.3, humidity: 76, sunnyDays: 16 },
@@ -139,6 +141,77 @@ const SOUTH_AMERICA_CLIMATE: ClimateData = {
     'oct': { avgTemp: 15, rainfall: 15, humidity: 61, sunnyDays: 18 },
     'nov': { avgTemp: 18, rainfall: 5, humidity: 55, sunnyDays: 22 },
     'dec': { avgTemp: 20, rainfall: 2, humidity: 52, sunnyDays: 26 }
+  },
+  // Global destinations added below
+  'paris': {
+    'jan': { avgTemp: 5, rainfall: 50, humidity: 84, sunnyDays: 8 },
+    'feb': { avgTemp: 6, rainfall: 40, humidity: 80, sunnyDays: 10 },
+    'mar': { avgTemp: 10, rainfall: 45, humidity: 75, sunnyDays: 14 },
+    'apr': { avgTemp: 13, rainfall: 50, humidity: 72, sunnyDays: 16 },
+    'may': { avgTemp: 17, rainfall: 65, humidity: 70, sunnyDays: 18 },
+    'jun': { avgTemp: 20, rainfall: 55, humidity: 68, sunnyDays: 20 },
+    'jul': { avgTemp: 22, rainfall: 60, humidity: 67, sunnyDays: 22 },
+    'aug': { avgTemp: 22, rainfall: 50, humidity: 68, sunnyDays: 21 },
+    'sep': { avgTemp: 18, rainfall: 55, humidity: 73, sunnyDays: 17 },
+    'oct': { avgTemp: 14, rainfall: 60, humidity: 78, sunnyDays: 13 },
+    'nov': { avgTemp: 9, rainfall: 55, humidity: 83, sunnyDays: 9 },
+    'dec': { avgTemp: 6, rainfall: 55, humidity: 85, sunnyDays: 7 }
+  },
+  'tokyo': {
+    'jan': { avgTemp: 6, rainfall: 50, humidity: 52, sunnyDays: 19 },
+    'feb': { avgTemp: 7, rainfall: 60, humidity: 53, sunnyDays: 18 },
+    'mar': { avgTemp: 10, rainfall: 100, humidity: 60, sunnyDays: 16 },
+    'apr': { avgTemp: 15, rainfall: 125, humidity: 65, sunnyDays: 15 },
+    'may': { avgTemp: 19, rainfall: 140, humidity: 68, sunnyDays: 14 },
+    'jun': { avgTemp: 22, rainfall: 165, humidity: 75, sunnyDays: 11 },
+    'jul': { avgTemp: 26, rainfall: 155, humidity: 77, sunnyDays: 12 },
+    'aug': { avgTemp: 27, rainfall: 170, humidity: 75, sunnyDays: 13 },
+    'sep': { avgTemp: 23, rainfall: 210, humidity: 73, sunnyDays: 11 },
+    'oct': { avgTemp: 18, rainfall: 165, humidity: 68, sunnyDays: 14 },
+    'nov': { avgTemp: 13, rainfall: 90, humidity: 62, sunnyDays: 17 },
+    'dec': { avgTemp: 8, rainfall: 50, humidity: 56, sunnyDays: 19 }
+  },
+  'bangkok': {
+    'jan': { avgTemp: 27, rainfall: 10, humidity: 67, sunnyDays: 28 },
+    'feb': { avgTemp: 29, rainfall: 20, humidity: 68, sunnyDays: 26 },
+    'mar': { avgTemp: 30, rainfall: 35, humidity: 69, sunnyDays: 26 },
+    'apr': { avgTemp: 31, rainfall: 65, humidity: 71, sunnyDays: 24 },
+    'may': { avgTemp: 30, rainfall: 220, humidity: 75, sunnyDays: 18 },
+    'jun': { avgTemp: 29, rainfall: 150, humidity: 76, sunnyDays: 20 },
+    'jul': { avgTemp: 29, rainfall: 160, humidity: 76, sunnyDays: 19 },
+    'aug': { avgTemp: 29, rainfall: 195, humidity: 76, sunnyDays: 18 },
+    'sep': { avgTemp: 28, rainfall: 320, humidity: 78, sunnyDays: 15 },
+    'oct': { avgTemp: 28, rainfall: 240, humidity: 77, sunnyDays: 17 },
+    'nov': { avgTemp: 27, rainfall: 50, humidity: 73, sunnyDays: 24 },
+    'dec': { avgTemp: 26, rainfall: 10, humidity: 68, sunnyDays: 27 }
+  },
+  'sydney': {
+    'jan': { avgTemp: 23, rainfall: 100, humidity: 65, sunnyDays: 18 },
+    'feb': { avgTemp: 23, rainfall: 120, humidity: 66, sunnyDays: 17 },
+    'mar': { avgTemp: 21, rainfall: 130, humidity: 67, sunnyDays: 18 },
+    'apr': { avgTemp: 18, rainfall: 120, humidity: 68, sunnyDays: 19 },
+    'may': { avgTemp: 15, rainfall: 100, humidity: 69, sunnyDays: 20 },
+    'jun': { avgTemp: 13, rainfall: 130, humidity: 68, sunnyDays: 19 },
+    'jul': { avgTemp: 12, rainfall: 80, humidity: 66, sunnyDays: 21 },
+    'aug': { avgTemp: 13, rainfall: 75, humidity: 63, sunnyDays: 22 },
+    'sep': { avgTemp: 16, rainfall: 65, humidity: 61, sunnyDays: 22 },
+    'oct': { avgTemp: 18, rainfall: 75, humidity: 62, sunnyDays: 22 },
+    'nov': { avgTemp: 20, rainfall: 85, humidity: 63, sunnyDays: 20 },
+    'dec': { avgTemp: 22, rainfall: 75, humidity: 64, sunnyDays: 19 }
+  },
+  'london': {
+    'jan': { avgTemp: 5, rainfall: 55, humidity: 85, sunnyDays: 8 },
+    'feb': { avgTemp: 6, rainfall: 40, humidity: 83, sunnyDays: 9 },
+    'mar': { avgTemp: 8, rainfall: 42, humidity: 79, sunnyDays: 12 },
+    'apr': { avgTemp: 11, rainfall: 43, humidity: 73, sunnyDays: 15 },
+    'may': { avgTemp: 14, rainfall: 50, humidity: 71, sunnyDays: 18 },
+    'jun': { avgTemp: 17, rainfall: 45, humidity: 70, sunnyDays: 19 },
+    'jul': { avgTemp: 19, rainfall: 45, humidity: 71, sunnyDays: 20 },
+    'aug': { avgTemp: 19, rainfall: 50, humidity: 73, sunnyDays: 18 },
+    'sep': { avgTemp: 16, rainfall: 50, humidity: 77, sunnyDays: 15 },
+    'oct': { avgTemp: 12, rainfall: 70, humidity: 82, sunnyDays: 11 },
+    'nov': { avgTemp: 8, rainfall: 65, humidity: 85, sunnyDays: 8 },
+    'dec': { avgTemp: 6, rainfall: 55, humidity: 86, sunnyDays: 7 }
   }
 };
 
@@ -234,7 +307,7 @@ export class WeatherService {
 
   generateTravelRecommendation(destination: string, currentWeather?: WeatherData): TravelRecommendation {
     const destKey = destination.toLowerCase().replace(' ', '_');
-    const climate = SOUTH_AMERICA_CLIMATE[destKey];
+    const climate = GLOBAL_CLIMATE_DATA[destKey];
     const currentMonth = new Date().toLocaleString('en', { month: 'short' }).toLowerCase();
     
     if (!climate) {

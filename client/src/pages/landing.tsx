@@ -10,7 +10,7 @@ import { useAuth } from "../context/AuthContext.js";
 import { useLocation, Link } from "wouter";
 import { AuthModal } from "../components/auth/AuthModal.js";
 import { queryClient } from "../lib/queryClient.js";
-import { SOUTH_AMERICAN_COUNTRIES } from "../lib/constants.js";
+import { WORLD_COUNTRIES } from "../lib/constants.js";
 import globeMateLogo from "../assets/globemate-logo.png";
 import { 
   Compass, 
@@ -145,7 +145,7 @@ export default function Landing() {
                       <SelectValue placeholder={t('landing.select_country')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {SOUTH_AMERICAN_COUNTRIES.map((country) => (
+                      {WORLD_COUNTRIES.map((country) => (
                         <SelectItem key={country} value={country}>
                           {t(`trips.countries.${country}`) || country}
                         </SelectItem>

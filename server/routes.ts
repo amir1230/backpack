@@ -1028,9 +1028,9 @@ export async function registerRoutes(app: Express): Promise<void> {
   // ===== COLLECTOR DATA API ENDPOINTS =====
   registerCollectorRoutes(app);
 
-  // ===== ENHANCED SOUTH AMERICAN DATA ENDPOINTS =====
+  // ===== ENHANCED GLOBAL TRAVEL DATA ENDPOINTS =====
   
-  // Seed database with comprehensive South American data
+  // Seed database with comprehensive travel data (includes South America and other regions)
   app.post('/api/data/seed', async (req: any, res) => {
     try {
       const result = await seedSouthAmericanData();
@@ -1243,8 +1243,9 @@ export async function registerRoutes(app: Express): Promise<void> {
         });
       }
       
-      // Enhanced destination-specific trip data
+      // Enhanced destination-specific trip data (Global destinations)
       const destinationData = {
+        // South America
         'Peru': {
           activities: ['Machu Picchu trek', 'Sacred Valley exploration', 'Cusco city tour', 'Amazon rainforest adventure', 'Lima food tour'],
           description: 'Discover ancient Inca civilization, stunning mountain landscapes, and rich cultural heritage in Peru.',
@@ -1279,6 +1280,64 @@ export async function registerRoutes(app: Express): Promise<void> {
           activities: ['Galápagos wildlife tour', 'Quito colonial exploration', 'Amazon lodge stay', 'Cotopaxi volcano hike', 'Otavalo market visit'],
           description: 'Discover unique wildlife, colonial architecture, and diverse ecosystems from coast to jungle.',
           highlights: ['Galápagos islands', 'Equatorial monuments', 'Cloud forests', 'Indigenous markets', 'Active volcanoes']
+        },
+        // Europe
+        'France': {
+          activities: ['Eiffel Tower visit', 'Louvre Museum tour', 'French Riviera beaches', 'Loire Valley châteaux', 'Wine tasting in Bordeaux'],
+          description: 'Experience world-class art, exquisite cuisine, iconic landmarks, and romantic ambiance in France.',
+          highlights: ['Eiffel Tower', 'Versailles Palace', 'Provence lavender fields', 'French cuisine', 'Wine regions']
+        },
+        'Italy': {
+          activities: ['Colosseum tour', 'Venice gondola rides', 'Tuscan countryside', 'Amalfi Coast', 'Vatican City'],
+          description: 'Immerse yourself in ancient history, Renaissance art, stunning coastlines, and world-renowned cuisine.',
+          highlights: ['Roman ruins', 'Vatican Museums', 'Leaning Tower of Pisa', 'Gelato tasting', 'Italian vineyards']
+        },
+        'Spain': {
+          activities: ['Sagrada Familia', 'Flamenco shows', 'Tapas tours', 'Alhambra Palace', 'Beach clubs in Ibiza'],
+          description: 'Discover vibrant culture, stunning architecture, passionate music, and Mediterranean beaches.',
+          highlights: ['Gaudi architecture', 'La Tomatina festival', 'Camino de Santiago', 'Paella', 'Running of the Bulls']
+        },
+        'United Kingdom': {
+          activities: ['British Museum', 'Buckingham Palace', 'Scottish Highlands', 'Stonehenge', 'Afternoon tea'],
+          description: 'Explore royal history, diverse landscapes, iconic landmarks, and charming countryside.',
+          highlights: ['Tower of London', 'Edinburgh Castle', 'Lake District', 'Harry Potter sites', 'English pubs']
+        },
+        'Greece': {
+          activities: ['Acropolis tour', 'Santorini sunsets', 'Island hopping', 'Ancient Delphi', 'Greek cooking class'],
+          description: 'Experience ancient mythology, stunning islands, crystal-clear waters, and Mediterranean cuisine.',
+          highlights: ['Parthenon', 'Mykonos beaches', 'Meteora monasteries', 'Greek islands', 'Olive groves']
+        },
+        // Asia
+        'Japan': {
+          activities: ['Tokyo city tour', 'Mt. Fuji visit', 'Kyoto temples', 'Cherry blossom viewing', 'Sushi making class'],
+          description: 'Discover ancient traditions, cutting-edge technology, serene temples, and exquisite cuisine.',
+          highlights: ['Bullet trains', 'Geisha districts', 'Anime culture', 'Hot springs', 'Zen gardens']
+        },
+        'Thailand': {
+          activities: ['Bangkok temples', 'Island beach hopping', 'Thai cooking class', 'Elephant sanctuary', 'Night markets'],
+          description: 'Experience tropical paradise, ornate temples, delicious street food, and warm hospitality.',
+          highlights: ['Floating markets', 'Phi Phi Islands', 'Full moon parties', 'Thai massage', 'Tuk-tuk rides']
+        },
+        'China': {
+          activities: ['Great Wall hike', 'Forbidden City', 'Terracotta Warriors', 'Li River cruise', 'Dim sum tour'],
+          description: 'Explore ancient wonders, modern megacities, diverse landscapes, and rich cultural heritage.',
+          highlights: ['Great Wall', 'Beijing skyline', 'Pandas', 'Chinese cuisine', 'Silk Road']
+        },
+        'India': {
+          activities: ['Taj Mahal visit', 'Varanasi Ganges ceremony', 'Kerala backwaters', 'Jaipur palaces', 'Street food tours'],
+          description: 'Immerse yourself in vibrant colors, spiritual traditions, diverse landscapes, and aromatic cuisine.',
+          highlights: ['Taj Mahal', 'Holi festival', 'Bollywood', 'Yoga retreats', 'Spice markets']
+        },
+        // Oceania
+        'Australia': {
+          activities: ['Great Barrier Reef diving', 'Sydney Opera House', 'Outback adventure', 'Uluru sunset', 'Beach surfing'],
+          description: 'Discover unique wildlife, stunning coastlines, vibrant cities, and vast wilderness.',
+          highlights: ['Great Barrier Reef', 'Sydney Harbour', 'Kangaroos', 'Beach culture', 'Aboriginal heritage']
+        },
+        'New Zealand': {
+          activities: ['Milford Sound cruise', 'Hobbit movie sites', 'Queenstown adventure sports', 'Maori cultural experience', 'Glacier hiking'],
+          description: 'Experience breathtaking landscapes, adventure activities, Maori culture, and Middle-earth scenery.',
+          highlights: ['Lord of the Rings locations', 'Fjords', 'Bungee jumping', 'Geothermal areas', 'Hiking trails']
         }
       };
 

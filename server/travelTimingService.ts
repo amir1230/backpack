@@ -25,7 +25,8 @@ interface TravelTimingInfo {
   };
 }
 
-// Comprehensive travel timing data for South American destinations
+// Comprehensive travel timing data for global destinations
+// Note: Easily extensible to add more worldwide destinations
 const TRAVEL_TIMING_DATABASE: { [key: string]: TravelTimingInfo } = {
   'lima': {
     destination: 'Lima',

@@ -59,67 +59,77 @@ class Review(Base):
 # Create tables
 Base.metadata.create_all(engine)
 
-# Search queries for South America
-SOUTH_AMERICA_QUERIES = [
-    # Peru
-    "hostels cusco peru",
-    "backpacker hostels lima peru", 
-    "budget hostels arequipa peru",
-    "hostels huacachina peru",
-    "hostels iquitos peru",
+# Global search queries - easily extensible for any region
+# Note: This file was originally south_america focused but now supports global destinations
+GLOBAL_SEARCH_QUERIES = [
+    # Europe
+    "hostels paris france",
+    "budget hotels london uk",
+    "hostels rome italy",
+    "hostels barcelona spain",
+    "hostels amsterdam netherlands",
+    "hostels berlin germany",
+    "hostels prague czech republic",
+    "hostels athens greece",
     
-    # Colombia
+    # Asia
+    "hostels tokyo japan",
+    "hostels bangkok thailand",
+    "hostels singapore",
+    "hostels bali indonesia",
+    "hostels ho chi minh vietnam",
+    "hostels seoul south korea",
+    "hostels mumbai india",
+    "hostels dubai uae",
+    "hostels tel aviv israel",
+    
+    # North America
+    "hostels new york usa",
+    "hostels san francisco usa",
+    "hostels toronto canada",
+    "hostels mexico city mexico",
+    "hostels playa del carmen mexico",
+    
+    # South America (preserved from original)
+    "hostels cusco peru",
+    "backpacker hostels lima peru",
     "hostels bogota colombia",
     "backpacker hostels medellin colombia",
     "hostels cartagena colombia",
-    "hostels santa marta colombia",
-    "hostels cali colombia",
-    
-    # Ecuador
     "hostels quito ecuador",
-    "hostels guayaquil ecuador",
-    "hostels banos ecuador",
-    "hostels cuenca ecuador",
-    
-    # Bolivia
     "hostels la paz bolivia",
-    "hostels sucre bolivia",
-    "hostels cochabamba bolivia",
-    "hostels uyuni bolivia",
-    
-    # Chile
     "hostels santiago chile",
     "hostels valparaiso chile",
-    "hostels atacama chile",
-    "hostels patagonia chile",
-    
-    # Argentina
     "hostels buenos aires argentina",
     "hostels mendoza argentina",
-    "hostels bariloche argentina",
-    "hostels salta argentina",
-    
-    # Brazil
     "hostels rio de janeiro brazil",
     "hostels sao paulo brazil",
-    "hostels salvador brazil",
-    "hostels florianopolis brazil",
-    
-    # Uruguay
     "hostels montevideo uruguay",
-    "hostels punta del este uruguay",
     
-    # Paraguay
-    "hostels asuncion paraguay",
+    # Oceania
+    "hostels sydney australia",
+    "hostels melbourne australia",
+    "hostels auckland new zealand",
+    "hostels queenstown new zealand",
     
-    # Activities & Attractions
+    # Africa & Middle East
+    "hostels cape town south africa",
+    "hostels marrakech morocco",
+    "hostels cairo egypt",
+    
+    # Global Activities & Attractions
+    "tours eiffel tower paris",
+    "tours colosseum rome",
+    "tours great wall china",
     "tours machu picchu peru",
     "amazon tours colombia",
     "patagonia tours chile argentina",
     "galapagos tours ecuador",
-    "wine tours mendoza argentina",
-    "coffee tours colombia"
+    "wine tours mendoza argentina"
 ]
+
+# Legacy alias for backward compatibility
+SOUTH_AMERICA_QUERIES = [q for q in GLOBAL_SEARCH_QUERIES if any(country in q.lower() for country in ['peru', 'colombia', 'ecuador', 'bolivia', 'chile', 'argentina', 'brazil', 'uruguay', 'paraguay'])]
 
 def google_text_search(text_query, limit=20):
     """Search Google Places using text query"""
@@ -216,14 +226,14 @@ def save_to_database(place_data):
         session.close()
 
 def main():
-    print("🗺️  Starting South America data collection...")
-    print(f"📊 Will collect data for {len(SOUTH_AMERICA_QUERIES)} queries")
+    print("🗺️  Starting global travel data collection...")
+    print(f"📊 Will collect data for {len(GLOBAL_SEARCH_QUERIES)} queries")
     
     total_found = 0
     total_saved = 0
     
-    for i, query in enumerate(SOUTH_AMERICA_QUERIES, 1):
-        print(f"\n[{i}/{len(SOUTH_AMERICA_QUERIES)}] Searching: {query}")
+    for i, query in enumerate(GLOBAL_SEARCH_QUERIES, 1):
+        print(f"\n[{i}/{len(GLOBAL_SEARCH_QUERIES)}] Searching: {query}")
         
         # Search places
         places = google_text_search(query, limit=10)
