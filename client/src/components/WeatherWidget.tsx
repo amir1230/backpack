@@ -75,7 +75,65 @@ interface WeatherWidgetProps {
 export function WeatherWidget({ destination, country = 'Peru', showRecommendations = true }: WeatherWidgetProps) {
   const [activeTab, setActiveTab] = useState('current');
   const { t, i18n } = useTranslation();
-  const { translateCity } = useLocalization();
+  const { translateCity, translateCountry } = useLocalization();
+
+  // Translate weather condition
+  const translateCondition = (condition: string): string => {
+    if (i18n.language !== 'he') return condition;
+    const lowerCondition = condition.toLowerCase();
+    const translationKey = `weather.conditions.${lowerCondition}`;
+    const translated = t(translationKey);
+    return translated !== translationKey ? translated : condition;
+  };
+
+  // Translate month names
+  const translateMonth = (month: string): string => {
+    if (i18n.language !== 'he') return month;
+    const monthTranslations: Record<string, string> = {
+      'January': 'ינואר',
+      'February': 'פברואר',
+      'March': 'מרץ',
+      'April': 'אפריל',
+      'May': 'מאי',
+      'June': 'יוני',
+      'July': 'יולי',
+      'August': 'אוגוסט',
+      'September': 'ספטמבר',
+      'October': 'אוקטובר',
+      'November': 'נובמבר',
+      'December': 'דצמבר'
+    };
+    return monthTranslations[month] || month;
+  };
+
+  // Translate activities
+  const translateActivity = (activity: string): string => {
+    if (i18n.language !== 'he') return activity;
+    const activityTranslations: Record<string, string> = {
+      'Sightseeing': 'סיורים',
+      'Cultural activities': 'פעילויות תרבות',
+      'Photography': 'צילום',
+      'Beach activities': 'פעילויות חוף',
+      'Hiking': 'טיולי רגל',
+      'Wildlife watching': 'צפייה בחיות בר',
+      'Water sports': 'ספורט מים',
+      'City tours': 'סיורים בעיר',
+      'Adventure sports': 'ספורט אתגרי',
+      'Outdoor activities': 'פעילויות חוץ',
+      'Weather-appropriate clothing': 'ביגוד מתאים למזג אוויר',
+      'Comfortable walking shoes': 'נעלי הליכה נוחות',
+      'Sun protection': 'הגנה מהשמש',
+      'Rain gear': 'ציוד לגשם',
+      'Light layers': 'שכבות קלות',
+      'Warm clothing': 'בגדים חמים',
+      'Check vaccination requirements': 'בדוק דרישות חיסון',
+      'Travel insurance recommended': 'מומלץ ביטוח נסיעות',
+      'Stay hydrated': 'שתה הרבה מים',
+      'Use sunscreen': 'השתמש בקרם הגנה',
+      'General South American travel season': 'עונת נסיעות כללית בדרום אמריקה'
+    };
+    return activityTranslations[activity] || activity;
+  };
 
   const { data: weatherData, isLoading: weatherLoading, error: weatherError } = useQuery<WeatherData>({
     queryKey: ['/api/weather', destination, country],
@@ -197,8 +255,8 @@ export function WeatherWidget({ destination, country = 'Peru', showRecommendatio
                   {getWeatherIcon(weatherData.condition)}
                   <div>
                     <h3 className="text-2xl font-bold">{weatherData.temperature}°C</h3>
-                    <p className="text-gray-600 capitalize">{weatherData.condition}</p>
-                    <p className="text-sm text-gray-500">{weatherData.location}, {weatherData.country}</p>
+                    <p className="text-gray-600 capitalize">{translateCondition(weatherData.condition)}</p>
+                    <p className="text-sm text-gray-500">{translateCity(weatherData.location)}, {translateCountry(weatherData.country)}</p>
                   </div>
                 </div>
 
@@ -233,7 +291,7 @@ export function WeatherWidget({ destination, country = 'Peru', showRecommendatio
                     {getWeatherIcon(day.condition)}
                     <div className="text-center mt-2">
                       <p className="font-semibold">{day.tempMax}°/{day.tempMin}°</p>
-                      <p className="text-xs text-gray-500 capitalize">{day.condition}</p>
+                      <p className="text-xs text-gray-500 capitalize">{translateCondition(day.condition)}</p>
                       <p className="text-xs text-blue-600">{day.precipitationChance}% {t('weather.rain')}</p>
                     </div>
                   </div>
@@ -257,7 +315,7 @@ export function WeatherWidget({ destination, country = 'Peru', showRecommendatio
                     <div className={`w-4 h-4 rounded-full ${getConditionColor(recommendations.currentCondition)}`}></div>
                     <div>
                       <h3 className="font-semibold">{getConditionText(recommendations.currentCondition)}</h3>
-                      <p className="text-sm text-gray-600">{recommendations.reasons.join(', ')}</p>
+                      <p className="text-sm text-gray-600">{recommendations.reasons.map(translateActivity).join(', ')}</p>
                     </div>
                   </div>
 
@@ -271,7 +329,7 @@ export function WeatherWidget({ destination, country = 'Peru', showRecommendatio
                       <div className="flex flex-wrap gap-2">
                         {recommendations.bestMonths.map((month, index) => (
                           <Badge key={index} variant="secondary" className="bg-green-100 text-green-800">
-                            {month}
+                            {translateMonth(month)}
                           </Badge>
                         ))}
                       </div>
@@ -285,7 +343,7 @@ export function WeatherWidget({ destination, country = 'Peru', showRecommendatio
                       <div className="flex flex-wrap gap-2">
                         {recommendations.avoidMonths.map((month, index) => (
                           <Badge key={index} variant="secondary" className="bg-red-100 text-red-800">
-                            {month}
+                            {translateMonth(month)}
                           </Badge>
                         ))}
                       </div>
@@ -303,7 +361,7 @@ export function WeatherWidget({ destination, country = 'Peru', showRecommendatio
                         {recommendations.activities.recommended.map((activity, index) => (
                           <li key={index} className="flex items-center gap-2">
                             <CheckCircle className="w-3 h-3 text-green-500" />
-                            {activity}
+                            {translateActivity(activity)}
                           </li>
                         ))}
                       </ul>
@@ -318,7 +376,7 @@ export function WeatherWidget({ destination, country = 'Peru', showRecommendatio
                         {recommendations.packingTips.map((tip, index) => (
                           <li key={index} className="flex items-center gap-2">
                             <Info className="w-3 h-3 text-blue-500" />
-                            {tip}
+                            {translateActivity(tip)}
                           </li>
                         ))}
                       </ul>
@@ -330,7 +388,7 @@ export function WeatherWidget({ destination, country = 'Peru', showRecommendatio
                     <Alert>
                       <AlertTriangle className="w-4 h-4" />
                       <AlertDescription>
-                        <strong>{t('weather.health_safety')}:</strong> {recommendations.healthWarnings.join(', ')}
+                        <strong>{t('weather.health_safety')}:</strong> {recommendations.healthWarnings.map(translateActivity).join(', ')}
                       </AlertDescription>
                     </Alert>
                   )}
