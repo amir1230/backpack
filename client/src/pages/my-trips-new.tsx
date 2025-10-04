@@ -655,25 +655,25 @@ export default function MyTripsNew() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto min-w-full sm:w-full justify-start sm:justify-evenly h-auto sm:h-10 gap-0.5 sm:gap-2 p-1">
-              <TabsTrigger value="preferences" className="flex flex-col sm:flex-row items-center justify-center px-1.5 sm:px-4 py-2 sm:py-0 min-w-[72px] sm:min-w-0 flex-1 sm:flex-initial" data-testid="tab-preferences">
-                <Bot className="w-4 h-4 sm:w-4 sm:h-4 sm:mr-2 mb-0.5 sm:mb-0" />
-                <span className="text-[9px] sm:text-sm leading-tight text-center">{t('trips.preferences')}</span>
+              <TabsTrigger value="preferences" className="flex flex-col sm:flex-row items-center justify-center px-1 sm:px-4 py-1.5 sm:py-0 w-[19%] sm:w-auto h-auto sm:h-10" data-testid="tab-preferences">
+                <Bot className="w-4 h-4 sm:mr-2 mb-0.5 sm:mb-0 flex-shrink-0" />
+                <span className="text-[8px] sm:text-sm leading-[1.1] text-center w-full">{t('trips.preferences')}</span>
               </TabsTrigger>
-              <TabsTrigger value="suggestions" className="flex flex-col sm:flex-row items-center justify-center px-1.5 sm:px-4 py-2 sm:py-0 min-w-[72px] sm:min-w-0 flex-1 sm:flex-initial" data-testid="tab-suggestions">
-                <Sparkles className="w-4 h-4 sm:w-4 sm:h-4 sm:mr-2 mb-0.5 sm:mb-0" />
-                <span className="text-[9px] sm:text-sm leading-tight text-center">{t('trips.suggestions')}</span>
+              <TabsTrigger value="suggestions" className="flex flex-col sm:flex-row items-center justify-center px-1 sm:px-4 py-1.5 sm:py-0 w-[19%] sm:w-auto h-auto sm:h-10" data-testid="tab-suggestions">
+                <Sparkles className="w-4 h-4 sm:mr-2 mb-0.5 sm:mb-0 flex-shrink-0" />
+                <span className="text-[8px] sm:text-sm leading-[1.1] text-center w-full">{t('trips.suggestions')}</span>
               </TabsTrigger>
-              <TabsTrigger value="itinerary" className="flex flex-col sm:flex-row items-center justify-center px-1.5 sm:px-4 py-2 sm:py-0 min-w-[72px] sm:min-w-0 flex-1 sm:flex-initial" data-testid="tab-itinerary">
-                <Route className="w-4 h-4 sm:w-4 sm:h-4 sm:mr-2 mb-0.5 sm:mb-0" />
-                <span className="text-[9px] sm:text-sm leading-tight text-center">{t('trips.itinerary')}</span>
+              <TabsTrigger value="itinerary" className="flex flex-col sm:flex-row items-center justify-center px-1 sm:px-4 py-1.5 sm:py-0 w-[19%] sm:w-auto h-auto sm:h-10" data-testid="tab-itinerary">
+                <Route className="w-4 h-4 sm:mr-2 mb-0.5 sm:mb-0 flex-shrink-0" />
+                <span className="text-[8px] sm:text-sm leading-[1.1] text-center w-full">{t('trips.itinerary')}</span>
               </TabsTrigger>
-              <TabsTrigger value="my-itineraries" className="flex flex-col sm:flex-row items-center justify-center px-1.5 sm:px-4 py-2 sm:py-0 min-w-[72px] sm:min-w-0 flex-1 sm:flex-initial" data-testid="tab-my-itineraries">
-                <Save className="w-4 h-4 sm:w-4 sm:h-4 sm:mr-2 mb-0.5 sm:mb-0" />
-                <span className="text-[9px] sm:text-sm leading-tight text-center">{t('trips.my_itineraries')}</span>
+              <TabsTrigger value="my-itineraries" className="flex flex-col sm:flex-row items-center justify-center px-1 sm:px-4 py-1.5 sm:py-0 w-[19%] sm:w-auto h-auto sm:h-10" data-testid="tab-my-itineraries">
+                <Save className="w-4 h-4 sm:mr-2 mb-0.5 sm:mb-0 flex-shrink-0" />
+                <span className="text-[8px] sm:text-sm leading-[1.1] text-center w-full break-words">{t('trips.my_itineraries')}</span>
               </TabsTrigger>
-              <TabsTrigger value="saved" className="flex flex-col sm:flex-row items-center justify-center px-1.5 sm:px-4 py-2 sm:py-0 min-w-[72px] sm:min-w-0 flex-1 sm:flex-initial" data-testid="tab-saved">
-                <FolderOpen className="w-4 h-4 sm:w-4 sm:h-4 sm:mr-2 mb-0.5 sm:mb-0" />
-                <span className="text-[9px] sm:text-sm leading-tight text-center break-words hyphens-auto">{t('trips.my_trips')}</span>
+              <TabsTrigger value="saved" className="flex flex-col sm:flex-row items-center justify-center px-1 sm:px-4 py-1.5 sm:py-0 w-[19%] sm:w-auto h-auto sm:h-10" data-testid="tab-saved">
+                <FolderOpen className="w-4 h-4 sm:mr-2 mb-0.5 sm:mb-0 flex-shrink-0" />
+                <span className="text-[8px] sm:text-sm leading-[1.1] text-center w-full break-words">{t('trips.my_trips')}</span>
               </TabsTrigger>
             </TabsList>
           </div>
