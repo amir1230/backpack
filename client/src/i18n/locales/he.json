@@ -317,7 +317,7 @@
   },
   "community": {
     "title": "קהילת TripWise",
-    "description": "התחברו לחברי נסיעה, שתפו חוויות ומצאו בני לוויה לטיול",
+    "description": "התחברו לחברי נסיעה, שתפו חוויות ומצאו שותף לדרך לטיול",
     "room_number": "חדר {{number}}",
     "search_placeholder": "חיפוש ביקורות, חדרי צ'אט או יעדים...",
     "filter_by_location": "סינון לפי מיקום",
@@ -335,7 +335,7 @@
       "reviews": "ביקורות מקומות",
       "chat": "חדרי צ'אט",
       "direct_messages": "הודעות פרטיות",
-      "travel_buddies": "בני לוויה לטיול"
+      "travel_buddies": "שותף לדרך לטיול"
     },
     "reviews": {
       "authentic_title": "ביקורות מקומות אמיתיות",
@@ -408,7 +408,7 @@
       "with_user": "הודעה פרטית עם {{user}}"
     },
     "travel_buddies": {
-      "title": "מצאו בני לוויה לטיול",
+      "title": "מצאו שותף לדרך לטיול",
       "description": "התחברו לנוסעים בעלי חשיבה דומה המתכננים הרפתקאות דומות",
       "new_post": "פוסט חדש",
       "search_placeholder": "חיפוש יעדים, פעילויות או פרטי טיול...",
@@ -419,13 +419,13 @@
       "budget_low": "💰 תקציבי",
       "budget_mid": "💰💰 בינוני",
       "budget_high": "💰💰💰 יוקרה",
-      "unable_to_load": "לא ניתן לטעון פוסטי בני לוויה",
+      "unable_to_load": "לא ניתן לטעון פוסטי שותף לדרך",
       "being_setup": "לוח בני הלוויה מוגדר כעת",
       "check_connection": "אנא בדקו את החיבור ונסו שוב",
       "posts_will_appear": "פוסטים יופיעו כאן לאחר שבסיס הנתונים יהיה מוכן",
       "create_first_post": "צור פוסט ראשון",
       "no_matching_posts": "לא נמצאו פוסטים מתאימים",
-      "adjust_search": "נסו לשנות את החיפוש או המסננים, או צרו פוסט חדש למצוא בני לוויה",
+      "adjust_search": "נסו לשנות את החיפוש או המסננים, או צרו פוסט חדש למצוא שותף לדרך",
       "create_new_post": "צור פוסט חדש",
       "posted": "פורסם",
       "contact": "צור קשר",
