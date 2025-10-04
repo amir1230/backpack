@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { WeatherWidget } from "@/components/WeatherWidget";
-import { Search, MapPin, Calendar, Thermometer, Info } from 'lucide-react';
+import { Search, MapPin, Calendar, Thermometer, Info, Sun, Cloud, CloudRain, Snowflake, Wind, Umbrella, Plane, TrendingUp } from 'lucide-react';
 import { CONTINENTS, getCountriesByContinent, getContinentByCountry, type Continent } from "@/lib/constants";
 import { useLocalizedPlaceNames } from "@/hooks/useLocalization";
 
@@ -69,6 +69,69 @@ const getWorldDestinations = () => ({
   'Bahamas': ['Nassau', 'Paradise Island', 'Freeport', 'Exuma', 'Grand Bahama']
 });
 
+// Best time to visit data by continent
+const getContinentSeasonalInfo = (continent: Continent, t: any) => {
+  const info: Record<Continent, any> = {
+    'Europe': {
+      bestMonths: t('weather.seasonal_info.europe.best_months'),
+      peakSeason: t('weather.seasonal_info.europe.peak_season'),
+      offSeason: t('weather.seasonal_info.europe.off_season'),
+      weatherTips: t('weather.seasonal_info.europe.weather_tips'),
+      icon: Sun,
+      color: 'text-blue-600'
+    },
+    'Asia': {
+      bestMonths: t('weather.seasonal_info.asia.best_months'),
+      peakSeason: t('weather.seasonal_info.asia.peak_season'),
+      offSeason: t('weather.seasonal_info.asia.off_season'),
+      weatherTips: t('weather.seasonal_info.asia.weather_tips'),
+      icon: Sun,
+      color: 'text-orange-600'
+    },
+    'North America': {
+      bestMonths: t('weather.seasonal_info.north_america.best_months'),
+      peakSeason: t('weather.seasonal_info.north_america.peak_season'),
+      offSeason: t('weather.seasonal_info.north_america.off_season'),
+      weatherTips: t('weather.seasonal_info.north_america.weather_tips'),
+      icon: Snowflake,
+      color: 'text-blue-500'
+    },
+    'South America': {
+      bestMonths: t('weather.seasonal_info.south_america.best_months'),
+      peakSeason: t('weather.seasonal_info.south_america.peak_season'),
+      offSeason: t('weather.seasonal_info.south_america.off_season'),
+      weatherTips: t('weather.seasonal_info.south_america.weather_tips'),
+      icon: Sun,
+      color: 'text-green-600'
+    },
+    'Oceania': {
+      bestMonths: t('weather.seasonal_info.oceania.best_months'),
+      peakSeason: t('weather.seasonal_info.oceania.peak_season'),
+      offSeason: t('weather.seasonal_info.oceania.off_season'),
+      weatherTips: t('weather.seasonal_info.oceania.weather_tips'),
+      icon: Sun,
+      color: 'text-teal-600'
+    },
+    'Africa': {
+      bestMonths: t('weather.seasonal_info.africa.best_months'),
+      peakSeason: t('weather.seasonal_info.africa.peak_season'),
+      offSeason: t('weather.seasonal_info.africa.off_season'),
+      weatherTips: t('weather.seasonal_info.africa.weather_tips'),
+      icon: Sun,
+      color: 'text-yellow-600'
+    },
+    'Caribbean': {
+      bestMonths: t('weather.seasonal_info.caribbean.best_months'),
+      peakSeason: t('weather.seasonal_info.caribbean.peak_season'),
+      offSeason: t('weather.seasonal_info.caribbean.off_season'),
+      weatherTips: t('weather.seasonal_info.caribbean.weather_tips'),
+      icon: Sun,
+      color: 'text-cyan-600'
+    }
+  };
+  return info[continent];
+};
+
 export default function WeatherPage() {
   const { t } = useTranslation();
   const { getPlaceName } = useLocalizedPlaceNames();
@@ -117,6 +180,9 @@ export default function WeatherPage() {
       setSelectedContinent(detectedContinent);
     }
   };
+
+  const seasonalInfo = selectedContinent ? getContinentSeasonalInfo(selectedContinent, t) : null;
+  const SeasonIcon = seasonalInfo?.icon || Sun;
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -219,6 +285,7 @@ export default function WeatherPage() {
                       variant={selectedCity === dest.name ? "default" : "outline"}
                       className="h-auto p-3 flex flex-col items-center gap-1"
                       onClick={() => handleCitySelect(dest.name, dest.country)}
+                      data-testid={`quick-city-${dest.name}`}
                     >
                       <MapPin className="w-4 h-4" />
                       <span className="text-sm font-medium">{dest.name}</span>
@@ -230,6 +297,100 @@ export default function WeatherPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Seasonal Info (if continent selected) */}
+        {selectedContinent && seasonalInfo && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Best Time to Visit */}
+            <Card className="border-l-4 border-l-green-500">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-green-600" />
+                  {t('weather.best_time_to_visit')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <SeasonIcon className={`w-6 h-6 mt-1 ${seasonalInfo.color}`} />
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{t('weather.best_months')}</h4>
+                      <p className="text-gray-700">{seasonalInfo.bestMonths}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <TrendingUp className="w-6 h-6 mt-1 text-red-600" />
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{t('weather.peak_season')}</h4>
+                      <p className="text-gray-700">{seasonalInfo.peakSeason}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <Cloud className="w-6 h-6 mt-1 text-gray-600" />
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{t('weather.off_season')}</h4>
+                      <p className="text-gray-700">{seasonalInfo.offSeason}</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Weather Tips */}
+            <Card className="border-l-4 border-l-blue-500">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Umbrella className="w-5 h-5 text-blue-600" />
+                  {t('weather.weather_tips_title')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 leading-relaxed">{seasonalInfo.weatherTips}</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* General Travel Tips (if no continent selected) */}
+        {!selectedContinent && (
+          <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Info className="w-5 h-5 text-blue-600" />
+                {t('weather.general_tips_title')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex items-start gap-3 p-4 bg-white rounded-lg">
+                  <Plane className="w-6 h-6 text-blue-600 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">{t('weather.tip_1_title')}</h4>
+                    <p className="text-sm text-gray-600">{t('weather.tip_1_desc')}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3 p-4 bg-white rounded-lg">
+                  <Thermometer className="w-6 h-6 text-orange-600 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">{t('weather.tip_2_title')}</h4>
+                    <p className="text-sm text-gray-600">{t('weather.tip_2_desc')}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3 p-4 bg-white rounded-lg">
+                  <CloudRain className="w-6 h-6 text-gray-600 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">{t('weather.tip_3_title')}</h4>
+                    <p className="text-sm text-gray-600">{t('weather.tip_3_desc')}</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Weather Widget */}
         {selectedCity && selectedCountry && (

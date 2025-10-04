@@ -95,6 +95,62 @@
     "page_title": "Weather & Climate",
     "page_subtitle": "Check real-time weather and climate information for destinations worldwide",
     "best_destinations": "Best Destinations",
+    "best_time_to_visit": "Best Time to Visit",
+    "best_months": "Best Months",
+    "peak_season": "Peak Season",
+    "off_season": "Off Season",
+    "weather_tips_title": "Weather Tips",
+    "general_tips_title": "Travel Weather Guide",
+    "tip_1_title": "Research Climate Patterns",
+    "tip_1_desc": "Check historical weather data to plan your trip during the most suitable season for your activities",
+    "tip_2_title": "Pack Smart",
+    "tip_2_desc": "Bring appropriate clothing for local climate - layers work best for variable weather conditions",
+    "tip_3_title": "Consider Rainy Seasons",
+    "tip_3_desc": "Off-peak seasons may have lower prices but check if they coincide with monsoons or heavy rainfall",
+    "seasonal_info": {
+      "europe": {
+        "best_months": "May-September: Warm weather, long daylight hours, ideal for sightseeing",
+        "peak_season": "June-August: High tourist traffic, premium prices, crowded attractions",
+        "off_season": "November-March: Cold weather, fewer tourists, better deals on accommodation",
+        "weather_tips": "Pack layers for variable weather. Northern Europe stays cool even in summer. Mediterranean regions are hot and dry in peak season. Winter brings snow to mountains and central/northern areas."
+      },
+      "asia": {
+        "best_months": "October-April: Cool and dry weather across most regions, perfect for exploration",
+        "peak_season": "December-February: Comfortable temperatures, major festivals, higher prices",
+        "off_season": "June-September: Monsoon season in South/Southeast Asia, fewer tourists, lower prices",
+        "weather_tips": "Avoid monsoon months unless you enjoy rain. Pack light breathable clothes for tropical areas. Higher altitudes in Himalayas require warm clothing. Check local festivals for unique experiences."
+      },
+      "north_america": {
+        "best_months": "April-October: Pleasant weather, accessible attractions, outdoor activities",
+        "peak_season": "June-August: Summer vacation season, national parks peak, higher accommodation costs",
+        "off_season": "November-March: Cold winter weather, ski season in mountains, lower prices except holidays",
+        "weather_tips": "Weather varies dramatically by region. Southern areas stay warm year-round while northern regions have harsh winters. Hurricane season (June-November) affects coastal areas. Desert regions are extremely hot in summer."
+      },
+      "south_america": {
+        "best_months": "September-November & March-May: Shoulder seasons with good weather and fewer crowds",
+        "peak_season": "December-February: Summer in southern hemisphere, beaches popular, Carnival season",
+        "off_season": "June-August: Winter in southern regions, rainy season in some areas, budget-friendly",
+        "weather_tips": "Seasons are opposite to northern hemisphere. Andean regions have distinct wet/dry seasons. Amazon basin is hot and humid year-round. Patagonia is best visited December-March. Altitude can affect weather significantly."
+      },
+      "oceania": {
+        "best_months": "September-May: Spring and summer, warm weather, perfect for beaches and outdoor activities",
+        "peak_season": "December-February: Australian summer, school holidays, premium prices",
+        "off_season": "June-August: Winter season, cooler weather, great for skiing in New Zealand",
+        "weather_tips": "Summer (Dec-Feb) can be very hot in Australia. Northern regions are tropical with wet season Nov-April. New Zealand weather changes quickly - pack for all conditions. UV rays are strong - bring sunscreen."
+      },
+      "africa": {
+        "best_months": "May-October: Dry season, best wildlife viewing, comfortable temperatures",
+        "peak_season": "July-October: Safari peak season, migration viewing, higher costs",
+        "off_season": "November-April: Wet season, hot and humid, fewer tourists, budget prices",
+        "weather_tips": "Dry season (May-Oct) is best for safaris as animals gather at water sources. North Africa is hot in summer, pleasant in spring/fall. Coastal areas have Mediterranean climates. Bring sun protection and insect repellent."
+      },
+      "caribbean": {
+        "best_months": "December-April: Dry season, warm temperatures, calm seas, ideal beach weather",
+        "peak_season": "December-March: Winter escape season, high demand, premium prices",
+        "off_season": "June-November: Hurricane season, hot and humid, significant discounts",
+        "weather_tips": "Hurricane season (June-Nov) brings risk of storms but also lowest prices. Trade winds provide cooling breezes. Tropical showers are brief but intense. Pack light summer clothes and rain gear. Water temperature stays warm year-round."
+      }
+    },
     "climate_zones": {
       "coastal_desert": "Coastal Desert",
       "coastal_desert_desc": "Dry coastal regions with mild temperatures",
