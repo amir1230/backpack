@@ -315,7 +315,7 @@ export function WeatherWidget({ destination, country = 'Peru', showRecommendatio
                     <div className={`w-4 h-4 rounded-full ${getConditionColor(recommendations.currentCondition)}`}></div>
                     <div>
                       <h3 className="font-semibold">{getConditionText(recommendations.currentCondition)}</h3>
-                      <p className="text-sm text-gray-600">{recommendations.reasons.map(translateActivity).join(', ')}</p>
+                      <p className="text-sm text-gray-600">{recommendations.reasons.map(r => translateActivity(r)).join(', ')}</p>
                     </div>
                   </div>
 
@@ -357,14 +357,18 @@ export function WeatherWidget({ destination, country = 'Peru', showRecommendatio
                         <Heart className="w-4 h-4 text-blue-500" />
                         {t('weather.recommended_activities')}
                       </h4>
-                      <ul className="text-sm space-y-1">
-                        {recommendations.activities.recommended.map((activity, index) => (
-                          <li key={index} className="flex items-center gap-2">
-                            <CheckCircle className="w-3 h-3 text-green-500" />
-                            {translateActivity(activity)}
-                          </li>
-                        ))}
-                      </ul>
+                      {recommendations.activities?.recommended && recommendations.activities.recommended.length > 0 ? (
+                        <ul className="text-sm space-y-1">
+                          {recommendations.activities.recommended.map((activity, index) => (
+                            <li key={index} className="flex items-center gap-2">
+                              <CheckCircle className="w-3 h-3 text-green-500" />
+                              {translateActivity(activity)}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-gray-500">אין פעילויות זמינות</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -372,23 +376,27 @@ export function WeatherWidget({ destination, country = 'Peru', showRecommendatio
                         <Backpack className="w-4 h-4 text-purple-500" />
                         {t('weather.packing_tips')}
                       </h4>
-                      <ul className="text-sm space-y-1">
-                        {recommendations.packingTips.map((tip, index) => (
-                          <li key={index} className="flex items-center gap-2">
-                            <Info className="w-3 h-3 text-blue-500" />
-                            {translateActivity(tip)}
-                          </li>
-                        ))}
-                      </ul>
+                      {recommendations.packingTips && recommendations.packingTips.length > 0 ? (
+                        <ul className="text-sm space-y-1">
+                          {recommendations.packingTips.map((tip, index) => (
+                            <li key={index} className="flex items-center gap-2">
+                              <Info className="w-3 h-3 text-blue-500" />
+                              {translateActivity(tip)}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-gray-500">אין טיפים זמינים</p>
+                      )}
                     </div>
                   </div>
 
                   {/* Health Warnings */}
-                  {recommendations.healthWarnings.length > 0 && (
+                  {recommendations.healthWarnings && recommendations.healthWarnings.length > 0 && (
                     <Alert>
                       <AlertTriangle className="w-4 h-4" />
                       <AlertDescription>
-                        <strong>{t('weather.health_safety')}:</strong> {recommendations.healthWarnings.map(translateActivity).join(', ')}
+                        <strong>{t('weather.health_safety')}:</strong> {recommendations.healthWarnings.map(w => translateActivity(w)).join(', ')}
                       </AlertDescription>
                     </Alert>
                   )}
