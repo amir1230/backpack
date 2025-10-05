@@ -16,12 +16,13 @@ import DestinationWeather from "@/components/DestinationWeather";
 import { BestTimeInfo } from "@/components/BestTimeInfo";
 import { resolveCityCountry, type BaseEntity, type DestinationMini } from "@/utils/locationResolve";
 import { weatherClient, type WeatherData } from "@/utils/weatherUtils";
-import { useLocalizedPlaceNames } from "@/hooks/useLocalization";
+import { useLocalizedPlaceNames, useLocalization } from "@/hooks/useLocalization";
 
 // Updated types to match actual Supabase schema
 interface Destination {
   id: string; // Changed to string (UUID)
   name: string;
+  city?: string;
   country: string;
   lat?: number;
   lon?: number;
@@ -106,6 +107,7 @@ interface DetailModalState {
 export default function ExplorePage() {
   const { t, i18n } = useTranslation();
   const { getPlaceName } = useLocalizedPlaceNames();
+  const { translateCity, translateCountry } = useLocalization();
   
   // Hebrew weather condition translations
   const getWeatherTranslation = (condition: string): string => {
@@ -132,6 +134,7 @@ export default function ExplorePage() {
   };
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("all");
+  const [selectedCity, setSelectedCity] = useState("all");
   const [weatherFilter, setWeatherFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("destinations");
   const [currentPage, setCurrentPage] = useState(0);
@@ -164,7 +167,7 @@ export default function ExplorePage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('destinations')
-        .select('id, name, country, lat, lon')
+        .select('id, name, city, country, lat, lon')
         .order('name');
       
       if (error) {
@@ -175,6 +178,7 @@ export default function ExplorePage() {
       return (data || []).map(d => ({
         id: d.id.toString(),
         name: d.name,
+        city: d.city || null,
         country: d.country,
         lat: d.lat ? parseFloat(d.lat) : null,
         lon: d.lon ? parseFloat(d.lon) : null
@@ -190,12 +194,12 @@ export default function ExplorePage() {
 
   // Fetch destinations from Supabase
   const { data: destinations = [], isLoading: destinationsLoading } = useQuery({
-    queryKey: ['supabase-destinations', currentPage, searchQuery, selectedCountry],
+    queryKey: ['supabase-destinations', currentPage, searchQuery, selectedCountry, selectedCity],
     queryFn: async () => {
       const pageStart = currentPage * ITEMS_PER_PAGE;
       const pageEnd = pageStart + ITEMS_PER_PAGE - 1;
       
-      const selectFields = 'id, name, country, lat, lon, source, external_id, inserted_at, updated_at';
+      const selectFields = 'id, name, city, country, lat, lon, source, external_id, inserted_at, updated_at';
       
       let query = supabase
         .from('destinations')
@@ -208,6 +212,10 @@ export default function ExplorePage() {
       }
       if (selectedCountry !== 'all') {
         query = query.eq('country', selectedCountry);
+      }
+      if (selectedCity !== 'all') {
+        // Filter by city field, or by name if city is null
+        query = query.or(`city.eq.${selectedCity},and(city.is.null,name.eq.${selectedCity})`);
       }
       
       const { data, error, count } = await query;
@@ -446,6 +454,16 @@ export default function ExplorePage() {
   }, [activeTab, destinations, accommodations, attractions, restaurants, currentPage]);
 
   const countries = [...new Set(destinations.map((dest: Destination) => dest.country))];
+  
+  // Get unique cities for the selected country
+  const cities = selectedCountry === 'all' 
+    ? [] 
+    : [...new Set(
+        destinationsMiniData
+          .filter(d => d.country === selectedCountry)
+          .map(d => d.city || d.name) // Use city field, fallback to name if city is null
+          .filter(Boolean)
+      )].sort();
 
   const renderStars = (rating: string | number | undefined) => {
     const numRating = typeof rating === 'string' ? parseFloat(rating) : (rating || 0);
@@ -466,8 +484,16 @@ export default function ExplorePage() {
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedCountry('all');
+    setSelectedCity('all');
     setCurrentPage(0);
     queryClient.invalidateQueries({ queryKey: [`supabase-${activeTab}`] });
+  };
+  
+  // Reset city selection when country changes
+  const handleCountryChange = (country: string) => {
+    setSelectedCountry(country);
+    setSelectedCity('all');
+    setCurrentPage(0);
   };
   
   const runSupabaseHealth = async () => {
@@ -517,14 +543,14 @@ export default function ExplorePage() {
   // Helper function to format location subtitle
   const formatLocationSubtitle = (entity: any, isDestination: boolean = false): string => {
     if (isDestination) {
-      // For destinations, show only country
-      return entity.country || '';
+      // For destinations, show only country (translated)
+      return entity.country ? translateCountry(entity.country) : '';
     } else {
       // For other entities, resolve city/country
       const { city, country } = getCityCountryForEntity(entity);
       const parts = [];
-      if (city) parts.push(city);
-      if (country) parts.push(country);
+      if (city) parts.push(translateCity(city));
+      if (country) parts.push(translateCountry(country));
       return parts.join(', ');
     }
   };
@@ -697,7 +723,7 @@ export default function ExplorePage() {
             </Button>
           </div>
           
-          <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+          <Select value={selectedCountry} onValueChange={handleCountryChange} key={`country-${i18n.language}`}>
             <SelectTrigger className="w-full md:w-48">
               <SelectValue placeholder={t('explore.select_country')} />
             </SelectTrigger>
@@ -705,11 +731,27 @@ export default function ExplorePage() {
               <SelectItem value="all">{t('explore.all_countries')}</SelectItem>
               {countries.map((country) => (
                 <SelectItem key={country} value={country}>
-                  {country}
+                  {translateCountry(country)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+
+          {selectedCountry !== 'all' && cities.length > 0 && (
+            <Select value={selectedCity} onValueChange={(value: string) => { setSelectedCity(value); setCurrentPage(0); }} key={`city-${i18n.language}-${selectedCountry}`}>
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder={i18n.language === 'he' ? 'בחר עיר' : 'Select city'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{i18n.language === 'he' ? 'כל הערים' : 'All cities'}</SelectItem>
+                {cities.map((city) => (
+                  <SelectItem key={city} value={city}>
+                    {translateCity(city)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
 
           <div className="text-sm text-muted-foreground flex items-center gap-2">
             {totalCount > 0 && (

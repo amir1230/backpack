@@ -12,6 +12,7 @@ export type BaseEntity = {
 export type DestinationMini = {
   id: string;
   name: string | null;
+  city: string | null;
   country: string | null;
   lat: number | null;
   lon: number | null;
@@ -43,13 +44,13 @@ export function nearestDestinationNameCountry(
   maxKm = 80
 ): { city?: string; country?: string } {
   if (e.lat == null || e.lon == null || dests.length === 0) return {};
-  let best: { d: number; name?: string | null; country?: string | null } = { d: 1e12 };
+  let best: { d: number; city?: string | null; name?: string | null; country?: string | null } = { d: 1e12 };
   for (const d of dests) {
     if (d.lat == null || d.lon == null) continue;
     const dist = haversineKm({ lat: e.lat, lon: e.lon }, { lat: d.lat, lon: d.lon });
-    if (dist < best.d) best = { d: dist, name: d.name ?? undefined, country: d.country ?? undefined };
+    if (dist < best.d) best = { d: dist, city: d.city ?? undefined, name: d.name ?? undefined, country: d.country ?? undefined };
   }
-  if (best.d <= maxKm) return { city: best.name || undefined, country: best.country || undefined };
+  if (best.d <= maxKm) return { city: best.city || best.name || undefined, country: best.country || undefined };
   return {};
 }
 
