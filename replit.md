@@ -1,16 +1,7 @@
 # GlobeMate - Global Travel Platform
 
 ## Overview
-GlobeMate is a full-stack web application designed for global travel planning and community building. Its core purpose is to provide an AI-powered platform for trip recommendations, itinerary generation, expense tracking, and real-time communication among travelers. The project aims to be a comprehensive resource for exploring destinations worldwide, combining advanced AI capabilities with robust social features to simplify travel logistics and foster a vibrant travel community.
-
-### Global Expansion (Oct 2025)
-- **Geographic Coverage**: Expanded from South America-only to worldwide destinations covering 70+ countries across all continents
-- **Country Constants**: Maintained SOUTH_AMERICAN_COUNTRIES as literal tuple for backward compatibility, added WORLD_COUNTRIES for global coverage
-- **Multilingual Support**: Complete bilingual support (Hebrew/English) for all 70+ countries with instant language toggle
-- **Destination Data**: Expanded from 7 South American countries to 18 countries with detailed climate and travel timing data (South America, Europe, Asia, Oceania, North America)
-- **Services Updated**: Weather Service, Travel Timing Service, and Python Collector now support global destinations
-- **Type Safety**: Preserved literal tuple types for SOUTH_AMERICAN_COUNTRIES to maintain existing type contracts
-- **Enhanced Weather Page (Oct 2025)**: Complete redesign with 200+ cities across 40+ countries, three-tier continent→country→city selection, seasonal information for all continents (best months, peak/off seasons), weather tips, and general travel advice. Includes quick-select popular cities feature and detailed climate insights per continent.
+GlobeMate is a full-stack web application for global travel planning and community building. It provides an AI-powered platform for trip recommendations, itinerary generation, expense tracking, and real-time communication among travelers. The project aims to be a comprehensive, AI-driven resource for exploring worldwide destinations, combining advanced AI capabilities with robust social features to simplify travel logistics and foster a vibrant global travel community. It supports over 70 countries globally with multilingual support (Hebrew/English) and detailed destination data, including climate and travel timing information.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -28,7 +19,7 @@ Preferred communication style: Simple, everyday language.
 - **Runtime**: Node.js with TypeScript
 - **Framework**: Express.js (REST API)
 - **Database**: Supabase (PostgreSQL) with Drizzle ORM
-- **Authentication**: Replit Auth with OpenID Connect
+- **Authentication**: Google OAuth via Supabase
 - **Session Management**: Express sessions with PostgreSQL store
 - **Real-time Communication**: WebSocket support
 
@@ -36,95 +27,42 @@ Preferred communication style: Simple, everyday language.
 - **Framework**: FastAPI with Python 3.11
 - **Purpose**: Google Places API data collection and processing
 - **Location**: `/globemate/` directory
-- **Features**: Interactive Google Maps, place search, data export
-- **APIs**: Google Places API integration, place details retrieval
 
 ### Database Design
 - **ORM**: Drizzle with PostgreSQL
-- **Key Tables**: Users, Sessions, Trips, Reviews, Expenses, Chat (rooms & messages), User Connections.
-- **TripAdvisor-Style Data**: Dedicated tables for destinations, accommodations, attractions, restaurants, location_reviews, location_photos, location_ancestors for detailed travel data.
+- **Key Tables**: Users, Sessions, Trips, Reviews, Expenses, Chat (rooms & messages), User Connections. Includes detailed tables for destinations, accommodations, attractions, restaurants, location_reviews, location_photos, location_ancestors.
 
 ### Core Features & Technical Implementations
-- **Authentication**: Replit Auth integration with PostgreSQL-backed sessions and route-level protection.
+- **Authentication**: Google OAuth via Supabase for secure authentication.
 - **AI-Powered Trip Planning**: Utilizes OpenAI for personalized trip recommendations, itinerary generation, budget analysis, and an interactive travel assistant. Integrates Google Places API for real-world booking suggestions.
-- **Community Features**: Reviews system, user connections, WebSocket-based real-time chat, and content sharing.
+- **Community Features**: Reviews system, user connections, WebSocket-based real-time chat, content sharing, and a gamified achievements system with point tracking and leaderboards.
 - **Budget Tracking**: Expense categorization, trip association, visual analytics, and multi-currency support.
-- **Gamified Achievements**: Tracks user activity (e.g., trips planned, expenses recorded, reviews written) to unlock achievements with different rarity levels.
-- **User Onboarding & Personalization**: Multi-step registration and onboarding process to collect detailed user preferences (interests, travel styles, budget, group size) for personalized recommendations and dynamic content adaptation.
-- **Multi-API Travel Data Integration**: Combines Google Places API for real-time search and place details, a comprehensive seeded South American database, and a TripAdvisor-ready infrastructure for future integration.
-- **Weather Integration & Travel Timing System**: Real-time weather data (OpenWeather API) and historical climate analysis. Provides "Best Time to Travel" recommendations based on climate patterns, tourist density, and pricing cycles for specific South American destinations.
-- **Real Places Booking Integration**: Automatically enriches AI-generated trip suggestions with real, bookable locations from Google Places API, including links, ratings, addresses, and photos.
-- **UI/UX Decisions**: Consistent use of shadcn/ui components, custom styling with Tailwind CSS, fixed dimensions and responsive text styling for cards, unified trip planning interface with tabbed navigation, and visual indicators for weather and travel timing.
+- **User Onboarding & Personalization**: Multi-step registration to collect user preferences for personalized recommendations.
+- **Multi-API Travel Data Integration**: Combines Google Places API for real-time search, a comprehensive seeded database, and a TripAdvisor-ready infrastructure.
+- **Weather Integration & Travel Timing System**: Real-time weather data (OpenWeather API) and historical climate analysis, providing "Best Time to Travel" recommendations.
+- **Real Places Booking Integration**: Enriches AI-generated suggestions with bookable locations from Google Places API.
+- **UI/UX Decisions**: Consistent use of shadcn/ui components, Tailwind CSS for custom styling, responsive design, and unified interfaces with tabbed navigation. Features a continent-based trip selection system for improved UX.
+- **Destinations Hub**: Comprehensive destination discovery system with search, filters, sorting, and detailed destination pages including weather cards, attractions, and interactive maps. Features a robust feature flag system for external providers.
+- **Global Expansion & Multilingual Support**: Worldwide destination coverage with full Hebrew/English bilingual support across all features, including instant language toggling and RTL support.
 
 ## External Dependencies
-- **PostgreSQL**: Primary database.
-- **Replit Auth**: Authentication provider.
-- **OpenAI API**: For AI-powered trip planning, itinerary generation, and conversational AI.
+- **PostgreSQL**: Primary database (managed by Supabase).
+- **Supabase**: Backend-as-a-service providing PostgreSQL, Authentication (Google OAuth), and storage.
+- **OpenAI API**: For AI trip planning and conversational features.
 - **Google Places API**: For real-world location data, booking suggestions, and enriching AI outputs.
 - **OpenWeather API**: For real-time weather data and forecasts.
-- **Facebook Graph API**: For social media content collection with FB_PAGE_TOKEN.
-- **@neondatabase/serverless**: PostgreSQL connection.
-- **drizzle-orm**: ORM.
+- **@neondatabase/serverless**: PostgreSQL connection (historical, now via Supabase).
+- **drizzle-orm**: ORM for database interaction.
 - **@tanstack/react-query**: Server state management.
 - **wouter**: Client-side routing.
 - **@radix-ui/**: Accessible UI primitives.
-- **openid-client**: OpenID Connect implementation.
-- **passport**: Authentication middleware.
+- **openid-client**: OpenID Connect implementation (historical, superseded by Supabase OAuth).
+- **passport**: Authentication middleware (historical, superseded by Supabase OAuth).
 - **connect-pg-simple**: PostgreSQL session store.
-
-## Python Collector Service
-- **FastAPI**: Modern Python web framework with SQLAlchemy ORM
-- **Uvicorn**: ASGI server for FastAPI
-- **Requests**: HTTP library for API calls
-- **Jinja2**: Template engine for HTML rendering
-- **SQLAlchemy**: Database ORM with SQLite backend
-- **Google Maps JavaScript API**: For interactive maps
-- **Google Places API**: For detailed place information and automated collection
-- **Facebook Graph API**: For social media content extraction
-
-## Recent Migration to Supabase (Aug 2025)
-- **Migration Prepared**: Updated database connection from Neon to Supabase PostgreSQL
-- **Connection Setup**: Updated server/db.ts to use standard PostgreSQL driver instead of Neon serverless
-- **Database Configuration**: Ready for Supabase with proper SSL and connection pooling
-- **Migration Scripts**: Created comprehensive SQL scripts and migration guides for Supabase setup
-- **Community Platform**: Full social platform with place reviews, chat rooms, and travel buddy matching
-- **Data Preservation**: All 392 places and 1,943 reviews prepared for Supabase migration
-- **Network Challenge**: Replit → Supabase direct connection blocked, requires Connection Pooler or Vercel deployment
-- **Schema Compatibility**: Maintained all existing table structures and relationships for seamless migration
-- **Migration Completed**: Successfully migrated to Supabase PostgreSQL via Transaction Pooler
-- **Connection Fixed**: Resolved "getaddrinfo ENOTFOUND" error by updating server/db.ts to use Transaction Pooler address (aws-1-sa-east-1.pooler.supabase.com:6543)
-- **Database API**: Added basic /api/places endpoint that combines destinations, accommodations, attractions, and restaurants  
-- **Replit Secrets Issue**: Bypassed Replit Secrets refresh problem by hardcoding Transaction Pooler URL in db.ts with fallback logic
-- **Current Status**: Server running successfully with Supabase Transaction Pooler connection and OpenAI API integration. Supabase connectivity issue fully resolved.
-- **Community Page Fixed**: Resolved "placeReviews.map is not a function" error by adding proper array validation and error handling
-- **API Stability**: Health endpoint confirms all services operational (database connected, OpenAI configured, storage operational)
-- **Server Stability Issues Resolved (Aug 2025)**: Fixed critical TypeScript compilation errors in server/storage.ts that were preventing Express server from handling HTTP requests
-- **Drizzle ORM Query Fixes**: Corrected multiple query chaining issues causing server startup failures, including "Property 'where' does not exist" errors in chat rooms and travel buddy posts
-- **Database Error Handling**: Improved API endpoints to show clear messages when tables haven't been created yet, guiding users to run schema migration
-- **User Experience Enhancement**: Community page now displays helpful initialization messages instead of crashing when database is empty
-- **Supabase Connection Fully Operational (Aug 21, 2025)**: Successfully established direct connection to existing Supabase tables with 5 South American destinations and authentic reviews
-- **API Endpoints Working**: All core APIs now serve real data from Supabase - /api/places (5 destinations), /api/place-reviews (5 authentic reviews), /api/community (combined data)
-- **Real South American Travel Data**: Database contains verified destinations (Machu Picchu, Christ the Redeemer, Salar de Uyuni, Angel Falls, Torres del Paine) with ratings and authentic user reviews
-- **Frontend-Backend Integration**: Fixed Community.tsx to properly handle new API response format, eliminated TypeScript errors, ready for deployment
-- **Rewards System Migration (Sep 2025)**: Successfully migrated achievements system from mock API endpoints to direct Supabase integration
-- **Comprehensive Gamification**: Full rewards service with real-time point tracking, achievements progress, missions, leaderboard, and history
-- **Enhanced User Experience**: Added daily check-in functionality, achievement unlock notifications, and progress tracking across all user actions
-- **Database Integration**: Connected all 6 rewards tables (achievements, user_achievements, points_ledger, missions, user_mission_progress, user_points_summary) with proper queries and relations
-- **Schema Field Alignment (Sep 2025)**: Updated all database tables to match Supabase schema requirements - destinations, accommodations, attractions, restaurants use lat/lon fields instead of latitude/longitude; achievements table uses points_reward field instead of points
-- **Database Error Handling**: Implemented robust error categorization system (network, authorization, schema, data errors) with specialized error types and user-friendly messages
-- **Authentication Cleanup**: Completely removed Replit Auth dependency, maintaining only Google OAuth via Supabase for simplified and secure authentication flow
-- **Query Hardening**: Updated all database queries to use proper count options instead of selecting count columns, added pagination safety, and implemented comprehensive health checks
-- **Health Monitoring**: Added /health/db endpoint and smoke test suite with 5 comprehensive tests validating schema alignment, field mappings, and query safety
-- **UI Language Standardization**: Converted all interface text from Hebrew to English for consistent user experience
-- **Logo Enhancement (Oct 2025)**: Increased logo sizes across all UI locations for better visibility - mobile navigation (56x56px), desktop sidebar (96x96px), landing page footer (64x64px). Removed "GlobeMate" text labels next to logos for cleaner, more visual-focused branding
-- **Continent-Based Trip Selection (Oct 2025)**: Implemented two-step cascading selection system (continent → country) for improved UX in trip planning. Users now select a continent first, which filters available countries. Includes automatic continent detection for backward compatibility, complete Hebrew/English translations for all 7 continents, and maintains SOUTH_AMERICAN_COUNTRIES export for legacy code. Updated landing.tsx and my-trips-new.tsx with CONTINENTS array, CONTINENT_COUNTRY_MAP, and helper functions (getCountriesByContinent, getContinentByCountry)
-- **Destinations Hub (Oct 2025)**: Complete destination discovery system with advanced provider integration framework. Features include:
-  - **Feature Flags System**: Environment-based provider toggles (ENABLE_GOOGLE_PLACES, ENABLE_OPENWEATHER, ENABLE_GEONAMES, ENABLE_TRIPADVISOR, ENABLE_TBO) in server/config/featureFlags.ts
-  - **Stub Services**: Prepared integration points for weatherService, geoService, tripAdvisorService, and tboService with mock data ready for real API connections
-  - **Hub Page** (/destinations): Full-featured listing with search, filters (budget, activities, climate), sorting (popular, rating, alphabetical), and destination cards with quick stats
-  - **Detail Pages** (/destinations/:slug): Comprehensive destination pages with hero images, weather cards (real-time when enabled), attractions from Google Places, interactive maps, and booking sections
-  - **API Routes**: GET /api/destinations/feature-flags (returns enabled providers), GET /api/destinations/weather?lat=X&lon=Y (OpenWeather integration when enabled)
-  - **Smart UI States**: Weather section shows "Soon" message when provider disabled (no fake data), loading states with spinners, proper error handling
-  - **Integrations Demo** (/integrations-demo/destinations): Testing page for provider connections with real-time status indicators
-  - **Navigation Integration**: Added to main menu with Globe icon, full RTL support for Hebrew
-  - **Provider Defaults**: Conservative approach - all providers default to false to prevent showing incorrect "live" status on API failures
+- **FastAPI**: Python web framework used in the Collector microservice.
+- **Uvicorn**: ASGI server.
+- **Requests**: HTTP library.
+- **Jinja2**: Template engine.
+- **SQLAlchemy**: ORM used in Collector microservice.
+- **Google Maps JavaScript API**: For interactive maps.
+- **Facebook Graph API**: For social media content collection.
