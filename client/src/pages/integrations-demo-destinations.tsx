@@ -33,6 +33,17 @@ export default function IntegrationsDemoDestinations() {
   const [responseTime, setResponseTime] = useState<number | null>(null);
   const [cacheHit, setCacheHit] = useState<boolean>(false);
 
+  // Fetch feature flags
+  const { data: featureFlags } = useQuery<{
+    googlePlaces: boolean;
+    openWeather: boolean;
+    geoNames: boolean;
+    tripAdvisor: boolean;
+    tbo: boolean;
+  }>({
+    queryKey: ["/api/destinations/feature-flags"],
+  });
+
   // Fetch attractions mutation
   const attractionsMutation = useMutation({
     mutationFn: async (dest: DemoDestination) => {
@@ -154,43 +165,59 @@ export default function IntegrationsDemoDestinations() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <div className={`flex items-center justify-between p-3 rounded-lg ${featureFlags?.googlePlaces ? 'bg-green-50' : 'bg-amber-50'}`}>
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  {featureFlags?.googlePlaces ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-amber-600" />
+                  )}
                   <span className="font-medium">Google Places API</span>
                 </div>
-                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
-                  {t("destinations.states.live_badge")}
+                <Badge variant="outline" className={featureFlags?.googlePlaces ? "bg-green-100 text-green-700 border-green-200" : "bg-amber-100 text-amber-700 border-amber-200"}>
+                  {featureFlags?.googlePlaces ? t("destinations.states.live_badge") : t("destinations.states.soon_badge")}
                 </Badge>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+              <div className={`flex items-center justify-between p-3 rounded-lg ${featureFlags?.openWeather ? 'bg-green-50' : 'bg-amber-50'}`}>
                 <div className="flex items-center gap-3">
-                  <XCircle className="h-5 w-5 text-amber-600" />
+                  {featureFlags?.openWeather ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-amber-600" />
+                  )}
                   <span className="font-medium">OpenWeather API</span>
                 </div>
-                <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-200">
-                  {t("destinations.states.soon_badge")}
+                <Badge variant="outline" className={featureFlags?.openWeather ? "bg-green-100 text-green-700 border-green-200" : "bg-amber-100 text-amber-700 border-amber-200"}>
+                  {featureFlags?.openWeather ? t("destinations.states.live_badge") : t("destinations.states.soon_badge")}
                 </Badge>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+              <div className={`flex items-center justify-between p-3 rounded-lg ${featureFlags?.tripAdvisor ? 'bg-green-50' : 'bg-amber-50'}`}>
                 <div className="flex items-center gap-3">
-                  <XCircle className="h-5 w-5 text-amber-600" />
+                  {featureFlags?.tripAdvisor ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-amber-600" />
+                  )}
                   <span className="font-medium">TripAdvisor API</span>
                 </div>
-                <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-200">
-                  {t("destinations.states.soon_badge")}
+                <Badge variant="outline" className={featureFlags?.tripAdvisor ? "bg-green-100 text-green-700 border-green-200" : "bg-amber-100 text-amber-700 border-amber-200"}>
+                  {featureFlags?.tripAdvisor ? t("destinations.states.live_badge") : t("destinations.states.soon_badge")}
                 </Badge>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+              <div className={`flex items-center justify-between p-3 rounded-lg ${featureFlags?.tbo ? 'bg-green-50' : 'bg-amber-50'}`}>
                 <div className="flex items-center gap-3">
-                  <XCircle className="h-5 w-5 text-amber-600" />
+                  {featureFlags?.tbo ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-amber-600" />
+                  )}
                   <span className="font-medium">TBO Booking API</span>
                 </div>
-                <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-200">
-                  {t("destinations.states.soon_badge")}
+                <Badge variant="outline" className={featureFlags?.tbo ? "bg-green-100 text-green-700 border-green-200" : "bg-amber-100 text-amber-700 border-amber-200"}>
+                  {featureFlags?.tbo ? t("destinations.states.live_badge") : t("destinations.states.soon_badge")}
                 </Badge>
               </div>
             </div>

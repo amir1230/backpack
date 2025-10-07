@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Cloud, Star, Calendar, DollarSign, Languages, Clock, ArrowLeft, Bookmark, Share2, Navigation } from "lucide-react";
+import { MapPin, Cloud, Star, Calendar, DollarSign, Languages, Clock, ArrowLeft, Bookmark, Share2, Navigation, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -45,26 +45,43 @@ export default function DestinationDetail() {
     enabled: !!destination.name,
   });
 
-  const weatherData = {
-    current: {
-      temp: 22,
-      description: "Partly cloudy",
-      humidity: 65,
-      wind: 12,
-    },
-    forecast: [
-      { day: "Today", high: 24, low: 18, icon: "☀️" },
-      { day: "Tomorrow", high: 23, low: 17, icon: "🌤️" },
-      { day: "Day 3", high: 25, low: 19, icon: "☁️" },
-    ],
+  // Fetch feature flags
+  const { data: featureFlags } = useQuery<{
+    googlePlaces: boolean;
+    openWeather: boolean;
+    geoNames: boolean;
+    tripAdvisor: boolean;
+    tbo: boolean;
+  }>({
+    queryKey: ["/api/destinations/feature-flags"],
+  });
+
+  // Fetch weather data
+  const { data: weatherData, isLoading: weatherLoading } = useQuery({
+    queryKey: ["/api/destinations/weather", { lat: destination.lat, lon: destination.lon }],
+    enabled: !!destination.lat && !!destination.lon && featureFlags?.openWeather === true,
+  });
+
+  // Default weather data for display
+  const displayWeather = weatherData || {
+    temperature: 22,
+    description: "Partly cloudy",
+    humidity: 65,
+    wind_speed: 12,
   };
 
-  // Feature flags for providers
+  const forecastData = [
+    { day: "Today", high: 24, low: 18, icon: "☀️" },
+    { day: "Tomorrow", high: 23, low: 17, icon: "🌤️" },
+    { day: "Day 3", high: 25, low: 19, icon: "☁️" },
+  ];
+
+  // Provider status (default to false when flags not loaded)
   const providers = {
-    googlePlaces: true,
-    weather: false, // Will show "Soon" badge
-    tripadvisor: false,
-    booking: false,
+    googlePlaces: featureFlags?.googlePlaces ?? false,
+    weather: featureFlags?.openWeather ?? false,
+    tripadvisor: featureFlags?.tripAdvisor ?? false,
+    booking: featureFlags?.tbo ?? false,
   };
 
   return (
@@ -196,41 +213,62 @@ export default function DestinationDetail() {
                     <Cloud className="h-5 w-5" />
                     {t("destinations.detail.weather")}
                   </CardTitle>
-                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                    {t("destinations.states.soon_badge")}
-                  </Badge>
+                  {providers.weather ? (
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      {t("destinations.states.live_badge")}
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                      {t("destinations.states.soon_badge")}
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-6 mb-6">
-                  <div className="text-5xl">☀️</div>
-                  <div>
-                    <div className="text-4xl font-bold">{weatherData.current.temp}°C</div>
-                    <p className="text-gray-600">{weatherData.current.description}</p>
+                {weatherLoading ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-400" />
+                    <p className="text-sm text-gray-500 mt-2">Loading weather...</p>
                   </div>
-                  <div className="flex-1 grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-gray-500">Humidity</p>
-                      <p className="font-medium">{weatherData.current.humidity}%</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Wind</p>
-                      <p className="font-medium">{weatherData.current.wind} km/h</p>
-                    </div>
+                ) : !providers.weather ? (
+                  <div className="text-center py-12">
+                    <Cloud className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500 font-medium">{t("destinations.states.soon_badge")}</p>
+                    <p className="text-sm text-gray-400 mt-1">Weather data will be available soon</p>
                   </div>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  {weatherData.forecast.map((day, idx) => (
-                    <div key={idx} className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-500 mb-2">{day.day}</p>
-                      <div className="text-2xl mb-2">{day.icon}</div>
-                      <p className="text-sm">
-                        <span className="font-medium">{day.high}°</span>
-                        <span className="text-gray-400"> / {day.low}°</span>
-                      </p>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-6 mb-6">
+                      <div className="text-5xl">☀️</div>
+                      <div>
+                        <div className="text-4xl font-bold">{displayWeather.temperature}°C</div>
+                        <p className="text-gray-600">{displayWeather.description}</p>
+                      </div>
+                      <div className="flex-1 grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-500">Humidity</p>
+                          <p className="font-medium">{displayWeather.humidity}%</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Wind</p>
+                          <p className="font-medium">{displayWeather.wind_speed} km/h</p>
+                        </div>
+                      </div>
                     </div>
-                  ))}
-                </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      {forecastData.map((day, idx) => (
+                        <div key={idx} className="text-center p-3 bg-gray-50 rounded-lg">
+                          <p className="text-sm text-gray-500 mb-2">{day.day}</p>
+                          <div className="text-2xl mb-2">{day.icon}</div>
+                          <p className="text-sm">
+                            <span className="font-medium">{day.high}°</span>
+                            <span className="text-gray-400"> / {day.low}°</span>
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
