@@ -1,0 +1,111 @@
+בצע את המשימות הבאות בפרויקט GlobeMate. אל תציג קוד בתשובה — רק תיישם בקבצים.
+
+מטרות
+
+מיפוי השירות הקיים של OpenWeather לשכבת שירות אחידה: src/services/destinations/weatherService.
+
+חיבור ה־Weather ל־UI של /destinations/:slug (כותרת “מזג אוויר”).
+
+קאשינג, יחידות, i18n, וטיפול שגיאות עקביים.
+
+1) שימוש בקיים (Reuse)
+
+אל תכתוב אינטגרציה חדשה. עשה import ליכולות שכבר קיימות (current + forecast) מהמודול בעמוד מזג האוויר.
+
+עטוף אותן בשירות מאוחד: weatherService.getByLatLng(lat, lng, { lang, units }).
+
+2) חוזה נתונים (Contract) לשירות המאוחד
+
+קבע ש־weatherService מחזיר אובייקט בפורמט:
+
+{
+  current: {
+    temp, feelsLike, description, icon, humidity, windSpeed, windDeg, pressure, visibility,
+    sunrise, sunset
+  },
+  forecast: [
+    { dt, tempMin, tempMax, pop, description, icon, windSpeed }
+  ],
+  meta: { units, provider: "openweather", cacheHit: boolean, fetchedAt }
+}
+
+
+units: "metric" כברירת מחדל.
+
+lang: he/en לפי i18n.
+
+3) קאשינג ושכבת גישה
+
+השתמש במנגנון הקאשינג הקיים (אם מוגדר) או הוסף קאשינג של 30–60 דקות ל-forecast ו-10 דקות ל-current.
+
+מפתח קאש: weather:<lat>:<lng>:<units>:<lang>.
+
+לוג: provider=openweather, endpoint=current|forecast, latencyMs, cacheHit.
+
+4) ENV ו-Feature Flags
+
+ודא שקיימים: OPENWEATHER_API_KEY, CACHE_TTL_SECONDS (אם משותף), ENABLE_OPENWEATHER=true.
+
+אם ENABLE_OPENWEATHER=false — UI יציג בלוק עם Badge “Soon” ו-Stub (ללא קריאות).
+
+5) חיבור ל-UI — /destinations/:slug
+
+הוסף בלוק “מזג אוויר” מתחת לכותרת היעד.
+
+שלוף lat/lng של היעד (מה־slug או מה-Geo service/Places שנשמרו). אם אין עדיין Geo service, השתמש ב-lat/lng שמועברים מהעמוד/חיפוש.
+
+הצג:
+
+Current: טמפ’ גדולה, תיאור, אייקון, “מרגיש כמו”, רוח/לחות.
+
+Forecast (3–5 ימים): כרטיסים קטנים של tempMin/tempMax + icon + pop.
+
+תמוך ב-units (מתג °C/°F) ו-lang (he/en). העדף metric כ-default בישראל.
+
+6) i18n + RTL
+
+כל מחרוזות ה-Weather דרך i18n:
+
+destination.weather.title, destination.weather.current, destination.weather.forecast,
+
+destination.weather.feelsLike, destination.weather.humidity, destination.weather.wind.
+
+RTL מופעל אוטומטית בעברית, אין לשבור Layout בכרטיסים.
+
+7) שגיאות/מצבי ביניים
+
+Skeleton לטעינה.
+
+Error state ידידותי (503 מהשרת): “לא ניתן לטעון מזג אוויר כעת”, עם provider: "openweather" ו-retryAfter אם קיים.
+
+Empty state אם אין lat/lng: “בחר יעד להצגת מזג אוויר”.
+
+8) נגישות וביצועים
+
+Alt לטקסט האייקון: תיאור תחזית.
+
+אל תבצע קריאות כפולות כשמשנים לשונית בעמוד — Memoization ל-(lat,lng,units,lang).
+
+קריאות current ו-forecast יכולות לרוץ במקביל, אך יחלקו קאש.
+
+9) דף דמו פנימי
+
+עדכן /integrations-demo/destinations:
+
+טופס לבחירת יעד (“Tel Aviv”, “Barcelona”, “Tokyo”) ➜ מזין lat/lng.
+
+כפתור “Fetch Weather” ➜ מציג JSON גולמי + latencyMs ו-cacheHit.
+
+מתג Units (°C/°F) + מתג Language (he/en).
+
+10) קבלה (Acceptance)
+
+בכניסה ל-/destinations/:slug עם lat/lng חוקיים, בלוק ה-Weather מוצג עם נתונים חיים.
+
+החלפת units משנה תצוגה ומביאה נתונים מתאימים (מ-cache או מהספק).
+
+לוגים מראים cacheHit=true בקריאה חוזרת.
+
+כש-ENABLE_OPENWEATHER=false — בלוק מציג “Soon” ללא קריאות.
+
+שגיאה מהספק => הודעת 503 ידידותית.

@@ -4201,7 +4201,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   // Weather service route
   app.get('/api/destinations/weather', async (req, res) => {
     try {
-      const { lat, lon } = req.query;
+      const { lat, lon, lang, units } = req.query;
       
       if (!lat || !lon) {
         return res.status(400).json({ error: 'lat and lon parameters required' });
@@ -4211,18 +4211,38 @@ export async function registerRoutes(app: Express): Promise<void> {
       if (process.env.ENABLE_OPENWEATHER !== 'true') {
         return res.status(503).json({ 
           error: 'Weather service not available',
-          message: 'OpenWeather API is not enabled' 
+          message: 'OpenWeather API is not enabled',
+          provider: 'openweather'
         });
       }
       
-      // Import and use weather service
-      const { weatherService: weatherSvc } = await import('./services/weatherService.js');
-      const weather = await weatherSvc.getCurrentWeather(Number(lat), Number(lon));
+      // Import and use destinations weather service
+      const { weatherService } = await import('./services/destinations/weatherService.js');
+      const weather = await weatherService.getByLatLng(
+        Number(lat),
+        Number(lon),
+        {
+          lang: (lang as string) || 'en',
+          units: (units as 'metric' | 'imperial') || 'metric'
+        }
+      );
       
       res.json(weather);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching weather:', error);
-      res.status(500).json({ error: 'Failed to fetch weather' });
+      
+      if (error.message?.includes('not enabled')) {
+        return res.status(503).json({ 
+          error: 'Weather service not available',
+          message: error.message,
+          provider: 'openweather'
+        });
+      }
+      
+      res.status(500).json({ 
+        error: 'Failed to fetch weather',
+        message: error.message 
+      });
     }
   });
 
