@@ -1,5 +1,6 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
+// Updated media adapters
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer } from 'http';

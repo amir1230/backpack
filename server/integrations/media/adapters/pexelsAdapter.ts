@@ -8,7 +8,7 @@ export class PexelsAdapter implements MediaAdapter {
   }
 
   isEnabled(): boolean {
-    return !!this.apiKey && process.env.ENABLE_MEDIA_PEXELS === 'true';
+    return !!this.apiKey;
   }
 
   async fetchImage(params: { id?: string; query?: string; size?: string }): Promise<ImageResult> {

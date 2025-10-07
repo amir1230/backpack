@@ -1421,6 +1421,30 @@
         "error": "שגיאה בטעינת תמונות"
       }
     },
+    "gallery": {
+      "fullView": "תצוגה מלאה",
+      "viewSource": "צפה במקור",
+      "attractions": "אטרקציות",
+      "noImages": "אין תמונות זמינות"
+    },
+    "destination": {
+      "detail": {
+        "gallery": {
+          "title": "גלריית תמונות",
+          "fullView": "תצוגה מלאה",
+          "viewSource": "צפה במקור",
+          "attractions": "אטרקציות",
+          "noImages": "אין תמונות זמינות"
+        }
+      },
+      "gallery": {
+        "title": "גלריית תמונות",
+        "fullView": "תצוגה מלאה",
+        "viewSource": "צפה במקור",
+        "attractions": "אטרקציות",
+        "noImages": "אין תמונות זמינות"
+      }
+    },
     "states": {
       "loading": "טוען...",
       "no_results": "לא נמצאו תוצאות",

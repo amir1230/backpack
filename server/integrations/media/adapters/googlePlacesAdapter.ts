@@ -9,7 +9,7 @@ export class GooglePlacesAdapter implements MediaAdapter {
   }
 
   isEnabled(): boolean {
-    return !!this.apiKey && process.env.ENABLE_MEDIA_GOOGLE === 'true';
+    return !!this.apiKey;
   }
 
   async fetchImage(params: { ref: string; maxwidth?: number; maxheight?: number }): Promise<ImageResult> {

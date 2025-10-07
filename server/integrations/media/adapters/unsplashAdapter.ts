@@ -8,7 +8,7 @@ export class UnsplashAdapter implements MediaAdapter {
   }
 
   isEnabled(): boolean {
-    return !!this.accessKey && process.env.ENABLE_MEDIA_UNSPLASH === 'true';
+    return !!this.accessKey;
   }
 
   async fetchImage(params: { id?: string; query?: string; width?: number }): Promise<ImageResult> {
