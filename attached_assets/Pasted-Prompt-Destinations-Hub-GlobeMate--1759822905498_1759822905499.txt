@@ -1,0 +1,162 @@
+Prompt לרפליט — Destinations Hub (ללא קוד)
+
+בצע את המשימות הבאות בפרויקט GlobeMate. אל תציג קוד כאן — רק תיישם בקבצים.
+מטרה: יצירת “מרכז יעדים” גלובלי שמאגד מידע ממספר ספקים, עם תמיכה ב־he/en ו־RTL, ומתחבר בהדרגה ל־APIs (Google Places ראשון, השאר כ־stubs).
+
+1) ניווט וראוטינג
+
+הוסף מסך חדש בשם Destinations Hub בנתיב:
+
+/destinations — עמוד רשימה/חיפוש/סינון
+
+/destinations/:slug — עמוד פרטי יעד (עיר/אזור/מדינה)
+
+וודא שקיים קישור בתפריט הראשי (Sidebar/Topbar), ושכללי ה־i18n מעדכנים dir (RTL/LTR) ו־lang.
+
+2) מבנה ותצוגה (UI/UX)
+
+/destinations
+
+חיפוש חכם בראש העמוד (אוטוקומפליט מדינות/ערים).
+
+מסננים צדדיים (Facet Sidebar):
+
+יבשת/אזור (Continent/Region)
+
+מדינה (Country)
+
+סוג יעד (City / Beach / Nature / Culture / Adventure)
+
+מזג אוויר מועדף (Warm / Mild / Cold)
+
+עונה מומלצת (Spring/Summer/Autumn/Winter)
+
+תצוגת כרטיסים (Grid) לכל יעד עם: שם, מדינה/דגל, תקציר, דירוג/טרנד, תמונה, תגיות.
+
+סרגל סידור (Sort): Trending, Rating, Popularity, A–Z, Z–A.
+
+פאג’ינציה/Infinite Scroll.
+
+/destinations/:slug
+
+כותרת: שם יעד + מדינה + דגל.
+
+אזור מידע על:
+
+Weather (נוכחי + תחזית קצרה)
+
+Top Attractions (מ־Google Places)
+
+Inspiration / Trending (TripAdvisor – בהמשך כ־stub)
+
+Basics (מטבע, שפות, אזור זמן – RestCountries/GeoNames בהמשך)
+
+Booking (Hotels/Flights/Packages – TBO בהמשך כ־stub)
+
+מפה קטנה עם סימון נקודות עניין (Marker Cluster).
+
+“Quick Actions”: שמירת יעד, הוספה למסלול, שיתוף.
+
+3) אינטגרציות (הדרגה)
+
+בשלב זה חבר בפועל רק ל־Google Places (כבר יש API Key).
+
+שימוש בנקודות קצה:
+
+/api/places/nearby להצגת Top Attractions סביב מרכז היעד
+
+/api/places/details לכרטיסי פירוט
+
+/api/places/photo לפרוקסי תמונות
+
+הכן Connectors Stubs לשאר הספקים עם חוזה נתונים קבוע (ממשק/DTO) כדי שה־UI יעבוד עם נתונים דמויים עד שהאינטגרציה האמיתית תושלם:
+
+weatherService (OpenWeather)
+
+geoService (RestCountries/GeoNames)
+
+tripAdvisorService (RapidAPI)
+
+tboService (TBO)
+
+הוסף Feature Flags (ENV או config) כדי להדליק/לכבות ספקים: ENABLE_GOOGLE_PLACES=true, ENABLE_OPENWEATHER=false וכו’.
+
+4) i18n + RTL
+
+כל הטקסטים דרך i18n (he/en).
+
+ודא ש־RTL מופעל אוטומטית לעברית.
+
+הוסף קובצי מפתחות עם קבוצות:
+
+destinations.list.title, destinations.filters.region, destinations.filters.country, destinations.sort.trending, destinations.card.readMore,
+
+destination.header.weather, destination.header.attractions, destination.header.basics, destination.header.booking.
+
+5) מצבי טעינה/שגיאה/ריקנות
+
+Skeletons לכל בלוק (רשת כרטיסים, דף יעד, מפה).
+
+Empty State עם טקסט ידידותי והצעות חיפוש.
+
+Error State לכל ספק (כולל provider ו־retryAfter אם קיים).
+
+הצג Badge “Live” ליד בלוקים שמוזנים מספקים פעילים, ו“Soon” ליד Stubs.
+
+6) ביצועים וקאשינג
+
+השתמש בקאשינג הקיים של /api/places/*.
+
+בצד לקוח: Aggressive memoization לנתוני עמוד יעד ו־NearBy.
+
+תמונות דרך /api/places/photo בלבד (ללא חשיפת מפתח).
+
+7) נגישות (A11y)
+
+מקשי מקלדת מלאים (Tab/Enter/Space) עבור חיפוש, מסננים, ומפתחות פעולה.
+
+Alt text לתמונות יעד/אטרקציות.
+
+ניגודיות מספקת ותמיכה בקריאת מסך.
+
+8) טלמטריה (Analytics & Logs)
+
+לוגים קליינטים (א־סינכרוני): page_view, filter_change, sort_change, open_destination, poi_click.
+
+מדד latencyMs ו־cacheHit מוצגים במצב Debug (toggle פנימי).
+
+9) קבלה (Acceptance)
+
+ניווט תקין ל־/destinations ו־/destinations/:slug.
+
+חיפוש+מסננים עובדים ומחזירים כרטיסים.
+
+עמוד יעד מציג: כותרת + מפה + בלוק “Top Attractions” (Google Places) עם תמונות דרך הפרוקסי.
+
+כש־Feature Flags עבור שאר הספקים = false — הכותרות מוצגות עם Badge “Soon” ודאטה דמה לא שובר את ה־UI.
+
+i18n עובד: מעבר he/en משנה טקסטים, כיווניות, ותוויות.
+
+מצבי Skeleton/Empty/Error קיימים ונבדקים.
+
+10) תוכן ממשק (placeholders, ללא קוד)
+
+כותרות/טקסטים (he):
+
+“מרכז יעדים”, “סינון לפי אזור”, “עונה מומלצת”, “אטרקציות מובילות”, “מזג אוויר”, “מידע בסיסי”, “השראה”, “הזמנות”, “טרנדי”, “שמור יעד”, “הוסף למסלול”, “שתף”.
+
+כותרות/טקסטים (en):
+
+“Destinations Hub”, “Filter by Region”, “Best Season”, “Top Attractions”, “Weather”, “Basics”, “Inspiration”, “Bookings”, “Trending”, “Save”, “Add to Trip”, “Share”.
+
+11) דף דמו פנימי
+
+הוסף /integrations-demo/destinations עם:
+
+טופס Query (“Barcelona”, “Tokyo”, “New York”, “Tel Aviv”).
+
+כפתור “Fetch Attractions” → קורא /api/places/nearby למרכז יעד קבוע לכל אחד.
+
+כפתור “Open Destination Page” → ניווט ל־/destinations/:slug.
+
+הצגת מדדי Response time ו־cacheHit.
