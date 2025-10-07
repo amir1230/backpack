@@ -39,9 +39,11 @@ import {
   LogOut
 } from "lucide-react";
 import { useTranslation } from 'react-i18next';
+import { useLocalization } from '../hooks/useLocalization.js';
 
 export default function Landing() {
   const { t } = useTranslation();
+  const { translateCountry } = useLocalization();
   const [budget, setBudget] = useState([2500]);
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [selectedContinent, setSelectedContinent] = useState<Continent | "">("");
@@ -447,11 +449,11 @@ export default function Landing() {
             <div>
               <h3 className="text-lg font-semibold mb-4">{t('landing.destinations_nav')}</h3>
               <ul className="space-y-2 text-gray-300">
-                <li><Link href="/explore?country=Japan" className="hover:text-white">Japan</Link></li>
-                <li><Link href="/explore?country=France" className="hover:text-white">France</Link></li>
-                <li><Link href="/explore?country=Thailand" className="hover:text-white">Thailand</Link></li>
-                <li><Link href="/explore?country=Italy" className="hover:text-white">Italy</Link></li>
-                <li><Link href="/explore?country=Australia" className="hover:text-white">Australia</Link></li>
+                <li><Link href="/explore?country=Japan" className="hover:text-white">{translateCountry('Japan')}</Link></li>
+                <li><Link href="/explore?country=France" className="hover:text-white">{translateCountry('France')}</Link></li>
+                <li><Link href="/explore?country=Thailand" className="hover:text-white">{translateCountry('Thailand')}</Link></li>
+                <li><Link href="/explore?country=Italy" className="hover:text-white">{translateCountry('Italy')}</Link></li>
+                <li><Link href="/explore?country=Australia" className="hover:text-white">{translateCountry('Australia')}</Link></li>
               </ul>
             </div>
             
