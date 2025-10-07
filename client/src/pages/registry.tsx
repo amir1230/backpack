@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { User, MapPin, Calendar, Heart, Users, DollarSign } from "lucide-react";
-import { SOUTH_AMERICAN_COUNTRIES } from "@/lib/constants";
+import { WORLD_COUNTRIES } from "@/lib/constants";
 
 const registrySchema = z.object({
   bio: z.string().min(10, "Bio must be at least 10 characters").max(500, "Bio must be less than 500 characters"),
@@ -82,7 +82,7 @@ export default function Registry() {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
         title: "Registration Complete!",
-        description: "Welcome to GlobeMate! Let's start planning your South American adventure.",
+        description: "Welcome to GlobeMate! Let's start planning your global adventure.",
       });
       setLocation("/");
     },
@@ -115,7 +115,7 @@ export default function Registry() {
           </div>
           <CardTitle className="text-3xl font-bold">Complete Your Profile</CardTitle>
           <CardDescription className="text-lg">
-            Tell us about yourself to get personalized South American travel recommendations
+            Tell us about yourself to get personalized global travel recommendations
           </CardDescription>
         </CardHeader>
 
@@ -134,7 +134,7 @@ export default function Registry() {
                     </FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Tell us about yourself, your travel experiences, and what excites you about exploring South America..."
+                        placeholder="Tell us about yourself, your travel experiences, and what excites you about exploring the world..."
                         className="min-h-[100px] resize-none"
                         {...field}
                       />
@@ -161,7 +161,7 @@ export default function Registry() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {SOUTH_AMERICAN_COUNTRIES.map((country) => (
+                        {WORLD_COUNTRIES.map((country) => (
                           <SelectItem key={country} value={country}>
                             {country}
                           </SelectItem>

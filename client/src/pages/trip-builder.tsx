@@ -37,6 +37,7 @@ import {
   ListChecks,
   Lightbulb
 } from "lucide-react";
+import { WORLD_COUNTRIES } from "@/lib/constants";
 
 const getTripFormSchema = (t: any) => z.object({
   travelStyle: z.array(z.string()).min(1, t("trips.select_travel_style")),
@@ -80,10 +81,6 @@ interface ItineraryDay {
   estimatedCost: number;
   tips: string[];
 }
-
-const SOUTH_AMERICAN_COUNTRIES = [
-  "Peru", "Colombia", "Bolivia", "Chile", "Argentina", "Brazil", "Ecuador", "Uruguay", "Paraguay", "Venezuela", "Guyana", "Suriname", "French Guiana"
-];
 
 const DURATIONS = [
   { value: "1-2 weeks", label: "1-2 weeks" },
@@ -512,7 +509,7 @@ export default function TripBuilder() {
                     <SelectValue placeholder={t("trips.select_destination")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {SOUTH_AMERICAN_COUNTRIES.map((country) => (
+                    {WORLD_COUNTRIES.map((country) => (
                       <SelectItem key={country} value={country}>
                         {country}
                       </SelectItem>
@@ -619,7 +616,7 @@ export default function TripBuilder() {
                   Preferred Countries <span className="text-xs text-gray-500">(optional)</span>
                 </Label>
                 <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
-                  {SOUTH_AMERICAN_COUNTRIES.map((country) => (
+                  {WORLD_COUNTRIES.map((country) => (
                     <Button
                       key={country}
                       type="button"

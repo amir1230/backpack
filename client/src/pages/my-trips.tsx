@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { TripEditor } from "@/components/TripEditor";
 import { Loader2, MapPin, DollarSign, Calendar, Star, Users, ExternalLink, Camera, Mountain, Utensils, Save, Eye, Merge, Edit, Trash2 } from "lucide-react";
 import { RealPlaceLinks } from "@/components/RealPlaceLinks";
-import { SOUTH_AMERICAN_COUNTRIES, WORLD_COUNTRIES } from "@/lib/constants";
+import { WORLD_COUNTRIES } from "@/lib/constants";
 
 const getWorldDestinations = () => ({
   // Europe

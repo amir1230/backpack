@@ -282,34 +282,34 @@ export default function Landing() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 card-grid">
             {[
               {
-                title: t('landing.peru_explorer'),
-                route: t('landing.route_lima_cusco'),
+                title: t('landing.route_one_title'),
+                route: t('landing.route_one_path'),
                 duration: t('landing.duration_2_3_weeks'),
                 budget: t('landing.budget_1200_2000'),
                 rating: 4.9,
                 reviews: 234,
                 travelers: 15,
-                image: "https://images.unsplash.com/photo-1526392060635-9d6019884377?w=400&h=250&fit=crop"
+                image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=250&fit=crop"
               },
               {
-                title: t('landing.colombian_coast'),
-                route: t('landing.route_bogota_cartagena'),
+                title: t('landing.route_two_title'),
+                route: t('landing.route_two_path'),
                 duration: t('landing.duration_3_4_weeks'),
                 budget: t('landing.budget_800_1500'),
                 rating: 4.8,
                 reviews: 189,
                 travelers: 12,
-                image: "https://images.unsplash.com/photo-1551009175-8a68da93d5f9?w=400&h=250&fit=crop"
+                image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=250&fit=crop"
               },
               {
-                title: t('landing.patagonia_trek'),
-                route: t('landing.route_santiago_buenos_aires'),
+                title: t('landing.route_three_title'),
+                route: t('landing.route_three_path'),
                 duration: t('landing.duration_4_6_weeks'),
                 budget: t('landing.budget_1500_2800'),
                 rating: 4.7,
                 reviews: 156,
                 travelers: 8,
-                image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=250&fit=crop"
+                image: "https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?w=400&h=250&fit=crop"
               }
             ].map((route, index) => (
               <Card key={index} className="overflow-hidden card-hover">
