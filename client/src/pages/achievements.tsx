@@ -280,8 +280,8 @@ export default function Achievements() {
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-blue-50" dir="ltr">
-        <div className="max-w-7xl mx-auto p-6">
-          <Card className="text-center max-w-md mx-auto mt-20">
+        <div className="flex justify-center items-center p-6 min-h-screen">
+          <Card className="text-center max-w-md">
             <CardHeader>
               <CardTitle className="flex items-center justify-center gap-2 text-2xl">
                 <Trophy className="w-8 h-8 text-orange-500" />
@@ -316,8 +316,106 @@ export default function Achievements() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-blue-50" dir="ltr">
-      {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+      {/* Two-column layout: Left sidebar + Main content */}
+      <div className="flex gap-6 p-6">
+        {/* Left Sidebar - Hidden on mobile, visible on desktop */}
+        <aside className="hidden lg:block w-80 space-y-6 flex-shrink-0">
+          {/* User Profile Card */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-orange-500" />
+                {t('achievements.my_profile')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-3">
+                  {user?.email?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <h3 className="font-semibold text-gray-900">
+                  {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
+                </h3>
+                <p className="text-sm text-gray-600">{t('achievements.level')} {currentLevel} • {levelName}</p>
+              </div>
+              
+              <div className="pt-3 border-t border-gray-100">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-600">{t('achievements.total_points')}</span>
+                  <span className="font-semibold text-orange-600">{formatNumber(totalPoints)}</span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-600">{t('achievements.badges_unlocked')}</span>
+                  <span className="font-semibold text-blue-600">{(achievements as any)?.unlocked?.length || 0}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">{t('achievements.current_rank')}</span>
+                  <span className="font-semibold text-purple-600">#1</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Stats */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-green-500" />
+                {t('achievements.this_week')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">{t('achievements.points_earned')}</span>
+                  <span className="font-semibold text-green-600">+{formatNumber(weeklyPoints || 0)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">{t('achievements.missions_completed')}</span>
+                  <span className="font-semibold text-blue-600">{(missions as any)?.filter((m: any) => m.completed_at)?.length || 0}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">{t('achievements.rank_change')}</span>
+                  <span className="font-semibold text-orange-600">↑ 2</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Next Level Progress */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Star className="w-5 h-5 text-yellow-500" />
+                {t('achievements.level_progress')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">{t('achievements.level')} {currentLevel}</span>
+                  <span className="text-gray-900 font-semibold">{t('achievements.level')} {currentLevel + 1}</span>
+                </div>
+                {pointsToNext > 0 ? (
+                  <>
+                    <Progress value={((totalPoints % 100) / 100) * 100} className="h-3" />
+                    <p className="text-sm text-gray-600 text-center">
+                      {formatNumber(pointsToNext)} {t('achievements.points_to_next_level')}
+                    </p>
+                  </>
+                ) : (
+                  <div className="text-center">
+                    <Crown className="w-8 h-8 mx-auto text-yellow-500 mb-2" />
+                    <p className="text-sm font-semibold text-yellow-700">{t('achievements.max_level_reached')}</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </aside>
+
+        {/* Main Content Area */}
+        <div className="flex-1 space-y-6 min-w-0">
           {/* Header */}
           <div className="text-left">
             <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
@@ -879,6 +977,7 @@ export default function Achievements() {
               </Card>
             </TabsContent>
           </Tabs>
+        </div>
       </div>
     </div>
   );
