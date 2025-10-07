@@ -17,6 +17,7 @@ interface Attraction {
   rating?: number;
   user_ratings_total?: number;
   types: string[];
+  photos?: Array<{ photo_reference: string }>;
 }
 
 export default function DestinationDetail() {
@@ -164,7 +165,7 @@ export default function DestinationDetail() {
             {/* Photo Gallery */}
             <Card>
               <CardHeader>
-                <CardTitle>{t("destination.detail.gallery.title")}</CardTitle>
+                <CardTitle>{t("destinations.detail.gallery.title")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <DestinationGallery
@@ -174,11 +175,14 @@ export default function DestinationDetail() {
                     { source: 'pexels', query: destination.name, alt: `${destination.name} view` }
                   ]}
                   poiImages={
-                    attractions?.slice(0, 3).map((attr) => ({
-                      source: 'google',
-                      ref: (attr as any).photos?.[0]?.photo_reference || '',
-                      alt: attr.name
-                    })).filter(img => img.ref) || []
+                    attractions
+                      ?.filter(attr => attr.photos && attr.photos.length > 0)
+                      .slice(0, 3)
+                      .map((attr) => ({
+                        source: 'google' as const,
+                        ref: attr.photos![0].photo_reference,
+                        alt: attr.name
+                      })) || []
                   }
                   isLoading={attractionsLoading}
                 />
