@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Clock, Database, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { MapPin, Clock, Database, CheckCircle2, XCircle, Loader2, Cloud } from "lucide-react";
 
 interface DemoDestination {
   id: string;
@@ -32,6 +32,9 @@ export default function IntegrationsDemoDestinations() {
   const [selectedDestination, setSelectedDestination] = useState<DemoDestination>(DEMO_DESTINATIONS[0]);
   const [responseTime, setResponseTime] = useState<number | null>(null);
   const [cacheHit, setCacheHit] = useState<boolean>(false);
+  const [weatherResponseTime, setWeatherResponseTime] = useState<number | null>(null);
+  const [weatherCacheHit, setWeatherCacheHit] = useState<boolean>(false);
+  const [units, setUnits] = useState<'metric' | 'imperial'>('metric');
 
   // Fetch feature flags
   const { data: featureFlags } = useQuery<{
@@ -65,8 +68,42 @@ export default function IntegrationsDemoDestinations() {
     },
   });
 
+  // Fetch weather mutation
+  const weatherMutation = useMutation({
+    mutationFn: async ({ dest, units: u, lang }: { dest: DemoDestination; units: 'metric' | 'imperial'; lang: string }) => {
+      const startTime = Date.now();
+      
+      const response = await fetch(
+        `/api/destinations/weather?lat=${dest.lat}&lon=${dest.lon}&units=${u}&lang=${lang}`
+      );
+      
+      const endTime = Date.now();
+      setWeatherResponseTime(endTime - startTime);
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch weather');
+      }
+      
+      const data = await response.json();
+      
+      // Check cache hit from response meta
+      setWeatherCacheHit(data.meta?.cacheHit || false);
+      
+      return data;
+    },
+  });
+
   const handleFetchAttractions = () => {
     attractionsMutation.mutate(selectedDestination);
+  };
+
+  const handleFetchWeather = () => {
+    weatherMutation.mutate({ 
+      dest: selectedDestination, 
+      units, 
+      lang: i18n.language 
+    });
   };
 
   const handleOpenDestinationPage = () => {
@@ -128,6 +165,65 @@ export default function IntegrationsDemoDestinations() {
                 {t("destinations.demo.open_page")}
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Weather Testing */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Cloud className="h-5 w-5" />
+              Weather API Testing
+            </CardTitle>
+            <CardDescription>Test OpenWeather API with different units and languages</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium">Units:</span>
+              <div className="flex items-center gap-1 text-xs bg-gray-100 rounded-full p-1">
+                <button
+                  onClick={() => setUnits('metric')}
+                  className={`px-3 py-1 rounded-full transition ${
+                    units === 'metric' ? 'bg-white shadow-sm' : 'text-gray-500'
+                  }`}
+                  data-testid="button-metric"
+                >
+                  °C (Metric)
+                </button>
+                <button
+                  onClick={() => setUnits('imperial')}
+                  className={`px-3 py-1 rounded-full transition ${
+                    units === 'imperial' ? 'bg-white shadow-sm' : 'text-gray-500'
+                  }`}
+                  data-testid="button-imperial"
+                >
+                  °F (Imperial)
+                </button>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleFetchWeather}
+              disabled={weatherMutation.isPending || !featureFlags?.openWeather}
+              className="w-full"
+              data-testid="button-fetch-weather"
+            >
+              {weatherMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Fetch Weather
+            </Button>
+
+            {weatherResponseTime !== null && (
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                <div className="p-3 bg-blue-50 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1">Latency</p>
+                  <p className="text-lg font-bold text-blue-700">{weatherResponseTime}ms</p>
+                </div>
+                <div className="p-3 bg-purple-50 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1">Cache Hit</p>
+                  <p className="text-lg font-bold text-purple-700">{weatherCacheHit ? "Yes" : "No"}</p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -265,13 +361,92 @@ export default function IntegrationsDemoDestinations() {
         )}
 
         {attractionsMutation.isError && (
-          <Card className="border-red-200 bg-red-50">
+          <Card className="border-red-200 bg-red-50 mb-6">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3 text-red-700">
                 <XCircle className="h-6 w-6" />
                 <div>
                   <p className="font-medium">Error fetching attractions</p>
                   <p className="text-sm">{attractionsMutation.error?.message}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Weather Results */}
+        {weatherMutation.isSuccess && weatherMutation.data && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>API Response - Weather</CardTitle>
+              <CardDescription>
+                Weather data for {selectedDestination.name} ({units === 'metric' ? 'Celsius' : 'Fahrenheit'})
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* Current Weather */}
+                <div className="p-4 border border-gray-200 rounded-lg bg-gradient-to-br from-blue-50 to-purple-50">
+                  <h4 className="font-medium text-lg mb-3">Current Weather</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Temperature</p>
+                      <p className="text-2xl font-bold">{weatherMutation.data.current.temp}°{units === 'metric' ? 'C' : 'F'}</p>
+                      <p className="text-sm text-gray-600 capitalize">{weatherMutation.data.current.description}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Feels Like</p>
+                      <p className="text-xl font-semibold">{weatherMutation.data.current.feelsLike}°</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Humidity</p>
+                      <p className="text-xl font-semibold">{weatherMutation.data.current.humidity}%</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Wind Speed</p>
+                      <p className="text-xl font-semibold">{weatherMutation.data.current.windSpeed} {units === 'metric' ? 'm/s' : 'mph'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Forecast */}
+                <div className="p-4 border border-gray-200 rounded-lg">
+                  <h4 className="font-medium text-lg mb-3">5-Day Forecast</h4>
+                  <div className="grid grid-cols-5 gap-2">
+                    {weatherMutation.data.forecast.map((day: any, idx: number) => (
+                      <div key={idx} className="text-center p-2 bg-gray-50 rounded">
+                        <p className="text-xs text-gray-500 mb-1">
+                          {new Date(day.dt * 1000).toLocaleDateString('en', { weekday: 'short' })}
+                        </p>
+                        <p className="text-sm font-medium">{day.tempMax}° / {day.tempMin}°</p>
+                        {day.pop > 0 && (
+                          <p className="text-xs text-blue-600 mt-1">💧 {day.pop}%</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Raw JSON */}
+                <details className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <summary className="cursor-pointer font-medium">View Raw JSON</summary>
+                  <pre className="mt-2 text-xs overflow-auto">
+                    {JSON.stringify(weatherMutation.data, null, 2)}
+                  </pre>
+                </details>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {weatherMutation.isError && (
+          <Card className="border-red-200 bg-red-50 mb-6">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 text-red-700">
+                <XCircle className="h-6 w-6" />
+                <div>
+                  <p className="font-medium">Error fetching weather</p>
+                  <p className="text-sm">{weatherMutation.error?.message}</p>
                 </div>
               </div>
             </CardContent>
