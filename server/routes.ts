@@ -4185,11 +4185,11 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.get('/api/destinations/feature-flags', (_req, res) => {
     try {
       const featureFlags = {
-        googlePlaces: process.env.ENABLE_GOOGLE_PLACES === 'true',
-        openWeather: process.env.ENABLE_OPENWEATHER === 'true',
-        geoNames: process.env.ENABLE_GEONAMES === 'true',
-        tripAdvisor: process.env.ENABLE_TRIPADVISOR === 'true',
-        tbo: process.env.ENABLE_TBO === 'true',
+        googlePlaces: !!process.env.GOOGLE_PLACES_API_KEY,
+        openWeather: !!process.env.OPENWEATHER_API_KEY,
+        geoNames: !!process.env.GEONAMES_USERNAME,
+        tripAdvisor: !!process.env.TRIPADVISOR_API_KEY,
+        tbo: !!process.env.TBO_API_KEY,
       };
       res.json(featureFlags);
     } catch (error) {
