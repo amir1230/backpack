@@ -118,3 +118,13 @@ Preferred communication style: Simple, everyday language.
 - **UI Language Standardization**: Converted all interface text from Hebrew to English for consistent user experience
 - **Logo Enhancement (Oct 2025)**: Increased logo sizes across all UI locations for better visibility - mobile navigation (56x56px), desktop sidebar (96x96px), landing page footer (64x64px). Removed "GlobeMate" text labels next to logos for cleaner, more visual-focused branding
 - **Continent-Based Trip Selection (Oct 2025)**: Implemented two-step cascading selection system (continent → country) for improved UX in trip planning. Users now select a continent first, which filters available countries. Includes automatic continent detection for backward compatibility, complete Hebrew/English translations for all 7 continents, and maintains SOUTH_AMERICAN_COUNTRIES export for legacy code. Updated landing.tsx and my-trips-new.tsx with CONTINENTS array, CONTINENT_COUNTRY_MAP, and helper functions (getCountriesByContinent, getContinentByCountry)
+- **Destinations Hub (Oct 2025)**: Complete destination discovery system with advanced provider integration framework. Features include:
+  - **Feature Flags System**: Environment-based provider toggles (ENABLE_GOOGLE_PLACES, ENABLE_OPENWEATHER, ENABLE_GEONAMES, ENABLE_TRIPADVISOR, ENABLE_TBO) in server/config/featureFlags.ts
+  - **Stub Services**: Prepared integration points for weatherService, geoService, tripAdvisorService, and tboService with mock data ready for real API connections
+  - **Hub Page** (/destinations): Full-featured listing with search, filters (budget, activities, climate), sorting (popular, rating, alphabetical), and destination cards with quick stats
+  - **Detail Pages** (/destinations/:slug): Comprehensive destination pages with hero images, weather cards (real-time when enabled), attractions from Google Places, interactive maps, and booking sections
+  - **API Routes**: GET /api/destinations/feature-flags (returns enabled providers), GET /api/destinations/weather?lat=X&lon=Y (OpenWeather integration when enabled)
+  - **Smart UI States**: Weather section shows "Soon" message when provider disabled (no fake data), loading states with spinners, proper error handling
+  - **Integrations Demo** (/integrations-demo/destinations): Testing page for provider connections with real-time status indicators
+  - **Navigation Integration**: Added to main menu with Globe icon, full RTL support for Hebrew
+  - **Provider Defaults**: Conservative approach - all providers default to false to prevent showing incorrect "live" status on API failures
