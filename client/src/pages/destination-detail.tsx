@@ -42,8 +42,14 @@ export default function DestinationDetail() {
 
   // Fetch attractions from Google Places
   const { data: attractions, isLoading: attractionsLoading } = useQuery<Attraction[]>({
-    queryKey: ["/api/places/search", { query: destination.name, limit: 6 }],
-    enabled: !!destination.name,
+    queryKey: ["/api/places/search", destination.name],
+    queryFn: async () => {
+      const response = await fetch(`/api/places/search?query=${encodeURIComponent(destination.name)}&limit=6`);
+      if (!response.ok) throw new Error('Failed to fetch attractions');
+      const data = await response.json();
+      return data.results || [];
+    },
+    enabled: !!destination.name && featureFlags?.googlePlaces === true,
   });
 
   // Fetch feature flags
