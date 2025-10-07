@@ -1326,5 +1326,91 @@
     "budget_1200_2000": "$1,200 - $2,000",
     "budget_800_1500": "$800 - $1,500",
     "budget_1500_2800": "$1,500 - $2,800"
+  },
+  "destinations": {
+    "hub_title": "מרכז יעדים",
+    "hub_subtitle": "גלו יעדי נסיעה מרתקים מכל רחבי העולם",
+    "search_placeholder": "חפשו מדינה או עיר...",
+    "filters": {
+      "title": "סינון יעדים",
+      "region": "יבשת/אזור",
+      "country": "מדינה",
+      "type": "סוג יעד",
+      "weather": "מזג אוויר מועדף",
+      "season": "עונה מומלצת",
+      "clear_all": "נקה הכל"
+    },
+    "types": {
+      "city": "עיר",
+      "beach": "חוף",
+      "nature": "טבע",
+      "culture": "תרבות",
+      "adventure": "הרפתקה"
+    },
+    "weather_prefs": {
+      "warm": "חם",
+      "mild": "ממוזג",
+      "cold": "קר"
+    },
+    "seasons": {
+      "spring": "אביב",
+      "summer": "קיץ",
+      "autumn": "סתיו",
+      "winter": "חורף"
+    },
+    "sort": {
+      "label": "מיין לפי",
+      "trending": "טרנדי",
+      "rating": "דירוג",
+      "popularity": "פופולרי",
+      "a_z": "א-ת",
+      "z_a": "ת-א"
+    },
+    "card": {
+      "read_more": "קרא עוד",
+      "view_details": "פרטים נוספים",
+      "save": "שמור",
+      "add_to_trip": "הוסף למסלול",
+      "share": "שתף"
+    },
+    "detail": {
+      "overview": "סקירה",
+      "weather": "מזג אוויר",
+      "attractions": "אטרקציות מובילות",
+      "basics": "מידע בסיסי",
+      "inspiration": "השראה",
+      "booking": "הזמנות",
+      "top_attractions": "אטרקציות מובילות",
+      "weather_now": "מזג אוויר נוכחי",
+      "forecast": "תחזית",
+      "currency": "מטבע",
+      "languages": "שפות",
+      "timezone": "אזור זמן",
+      "best_time": "זמן מומלץ לביקור",
+      "hotels": "מלונות",
+      "flights": "טיסות",
+      "packages": "חבילות",
+      "view_on_map": "הצג במפה",
+      "get_directions": "קבל הוראות הגעה"
+    },
+    "states": {
+      "loading": "טוען...",
+      "no_results": "לא נמצאו תוצאות",
+      "no_results_desc": "נסה לשנות את הסינון או החיפוש",
+      "error": "שגיאה בטעינת נתונים",
+      "try_again": "נסה שוב",
+      "live_badge": "Live",
+      "soon_badge": "בקרוב"
+    },
+    "demo": {
+      "title": "דמו - אינטגרציית Destinations",
+      "subtitle": "בדיקת חיבורים לספקי נתונים",
+      "query_label": "בחר יעד לבדיקה",
+      "fetch_attractions": "טען אטרקציות",
+      "open_page": "פתח עמוד יעד",
+      "response_time": "זמן תגובה",
+      "cache_hit": "מטמון",
+      "provider": "ספק"
+    }
   }
 }

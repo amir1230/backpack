@@ -1188,5 +1188,91 @@
     "failed_to_load_itinerary": "Failed to load itinerary",
     "close": "Close",
     "delete_item_confirmation": "Delete this item from your itinerary?"
+  },
+  "destinations": {
+    "hub_title": "Destinations Hub",
+    "hub_subtitle": "Discover amazing travel destinations from around the world",
+    "search_placeholder": "Search for a country or city...",
+    "filters": {
+      "title": "Filter Destinations",
+      "region": "Continent/Region",
+      "country": "Country",
+      "type": "Destination Type",
+      "weather": "Preferred Weather",
+      "season": "Best Season",
+      "clear_all": "Clear All"
+    },
+    "types": {
+      "city": "City",
+      "beach": "Beach",
+      "nature": "Nature",
+      "culture": "Culture",
+      "adventure": "Adventure"
+    },
+    "weather_prefs": {
+      "warm": "Warm",
+      "mild": "Mild",
+      "cold": "Cold"
+    },
+    "seasons": {
+      "spring": "Spring",
+      "summer": "Summer",
+      "autumn": "Autumn",
+      "winter": "Winter"
+    },
+    "sort": {
+      "label": "Sort By",
+      "trending": "Trending",
+      "rating": "Rating",
+      "popularity": "Popularity",
+      "a_z": "A-Z",
+      "z_a": "Z-A"
+    },
+    "card": {
+      "read_more": "Read More",
+      "view_details": "View Details",
+      "save": "Save",
+      "add_to_trip": "Add to Trip",
+      "share": "Share"
+    },
+    "detail": {
+      "overview": "Overview",
+      "weather": "Weather",
+      "attractions": "Top Attractions",
+      "basics": "Basics",
+      "inspiration": "Inspiration",
+      "booking": "Bookings",
+      "top_attractions": "Top Attractions",
+      "weather_now": "Current Weather",
+      "forecast": "Forecast",
+      "currency": "Currency",
+      "languages": "Languages",
+      "timezone": "Timezone",
+      "best_time": "Best Time to Visit",
+      "hotels": "Hotels",
+      "flights": "Flights",
+      "packages": "Packages",
+      "view_on_map": "View on Map",
+      "get_directions": "Get Directions"
+    },
+    "states": {
+      "loading": "Loading...",
+      "no_results": "No results found",
+      "no_results_desc": "Try adjusting your filters or search",
+      "error": "Error loading data",
+      "try_again": "Try Again",
+      "live_badge": "Live",
+      "soon_badge": "Soon"
+    },
+    "demo": {
+      "title": "Demo - Destinations Integration",
+      "subtitle": "Test connections to data providers",
+      "query_label": "Select destination to test",
+      "fetch_attractions": "Fetch Attractions",
+      "open_page": "Open Destination Page",
+      "response_time": "Response Time",
+      "cache_hit": "Cache",
+      "provider": "Provider"
+    }
   }
 }
