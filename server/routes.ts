@@ -4207,15 +4207,6 @@ export async function registerRoutes(app: Express): Promise<void> {
         return res.status(400).json({ error: 'lat and lon parameters required' });
       }
       
-      // Check if weather provider is enabled
-      if (process.env.ENABLE_OPENWEATHER !== 'true') {
-        return res.status(503).json({ 
-          error: 'Weather service not available',
-          message: 'OpenWeather API is not enabled',
-          provider: 'openweather'
-        });
-      }
-      
       // Import and use destinations weather service
       const { weatherService } = await import('./services/destinations/weatherService.js');
       const weather = await weatherService.getByLatLng(

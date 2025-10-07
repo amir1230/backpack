@@ -92,7 +92,7 @@ class DestinationsWeatherService {
     const { lang = 'en', units = 'metric' } = options;
 
     // Check if OpenWeather is enabled
-    if (!this.apiKey || process.env.ENABLE_OPENWEATHER !== 'true') {
+    if (!this.apiKey) {
       throw new Error('OpenWeather API is not enabled');
     }
 

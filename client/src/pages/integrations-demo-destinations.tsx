@@ -128,7 +128,7 @@ export default function IntegrationsDemoDestinations() {
           <CardContent className="space-y-4">
             <Select
               value={selectedDestination.id}
-              onValueChange={(id) => {
+              onValueChange={(id: string) => {
                 const dest = DEMO_DESTINATIONS.find((d) => d.id === id);
                 if (dest) setSelectedDestination(dest);
               }}
