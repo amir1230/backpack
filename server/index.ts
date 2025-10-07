@@ -430,6 +430,7 @@ async function startServer() {
     console.log(`[server] GlobeMate listening on http://0.0.0.0:${process.env.PORT || 5000}`);
     console.log(`[server] Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`[server] Health check: http://0.0.0.0:${process.env.PORT || 5000}/health`);
+    console.log(`[server] Media proxy enabled`);
   });
   
   // Graceful shutdown
