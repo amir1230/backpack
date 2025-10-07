@@ -198,18 +198,16 @@ export default function MyTripsScreen() {
     duration: ""
   });
   
-  const WORLD_DESTINATIONS = getWorldDestinations();
-  
-  // Get available cities for selected country
+  // Get available cities for selected country - recalculate every time
   const availableCities = formData.destination 
-    ? (WORLD_DESTINATIONS[formData.destination as keyof typeof WORLD_DESTINATIONS] || [])
+    ? (getWorldDestinations()[formData.destination as keyof ReturnType<typeof getWorldDestinations>] || [])
     : [];
   
-  // Debug log to verify cities are loaded
+  // Debug log to verify cities are loaded (Version 2.0)
   if (formData.destination) {
-    console.log('Selected destination:', formData.destination);
-    console.log('Available cities:', availableCities);
-    console.log('Cities count:', availableCities.length);
+    console.log('🌍 DEBUG v2.0 - Selected destination:', formData.destination);
+    console.log('🏙️ DEBUG v2.0 - Available cities:', availableCities);
+    console.log('🔢 DEBUG v2.0 - Cities count:', availableCities.length);
   }
   const [suggestions, setSuggestions] = useState<TripSuggestion[]>([]);
   const [selectedTripForEditor, setSelectedTripForEditor] = useState<string | null>(null);
