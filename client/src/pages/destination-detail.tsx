@@ -40,6 +40,17 @@ export default function DestinationDetail() {
     lon: slug === "paris" ? 2.3522 : slug === "tokyo" ? 139.6503 : slug === "barcelona" ? 2.1686 : 0,
   };
 
+  // Fetch feature flags (must be first!)
+  const { data: featureFlags } = useQuery<{
+    googlePlaces: boolean;
+    openWeather: boolean;
+    geoNames: boolean;
+    tripAdvisor: boolean;
+    tbo: boolean;
+  }>({
+    queryKey: ["/api/destinations/feature-flags"],
+  });
+
   // Fetch attractions from Google Places
   const { data: attractions, isLoading: attractionsLoading } = useQuery<Attraction[]>({
     queryKey: ["/api/places/search", destination.name],
@@ -50,17 +61,6 @@ export default function DestinationDetail() {
       return data.results || [];
     },
     enabled: !!destination.name && featureFlags?.googlePlaces === true,
-  });
-
-  // Fetch feature flags
-  const { data: featureFlags } = useQuery<{
-    googlePlaces: boolean;
-    openWeather: boolean;
-    geoNames: boolean;
-    tripAdvisor: boolean;
-    tbo: boolean;
-  }>({
-    queryKey: ["/api/destinations/feature-flags"],
   });
 
   // Fetch weather data
