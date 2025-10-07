@@ -204,6 +204,13 @@ export default function MyTripsScreen() {
   const availableCities = formData.destination 
     ? (WORLD_DESTINATIONS[formData.destination as keyof typeof WORLD_DESTINATIONS] || [])
     : [];
+  
+  // Debug log to verify cities are loaded
+  if (formData.destination) {
+    console.log('Selected destination:', formData.destination);
+    console.log('Available cities:', availableCities);
+    console.log('Cities count:', availableCities.length);
+  }
   const [suggestions, setSuggestions] = useState<TripSuggestion[]>([]);
   const [selectedTripForEditor, setSelectedTripForEditor] = useState<string | null>(null);
   const [selectedTripForMerge, setSelectedTripForMerge] = useState<TripSuggestion | null>(null);
