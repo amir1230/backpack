@@ -1327,6 +1327,14 @@
     "budget_800_1500": "$800 - $1,500",
     "budget_1500_2800": "$1,500 - $2,800"
   },
+  "destination": {
+    "gallery": {
+      "fullView": "תצוגה מלאה",
+      "viewSource": "צפה במקור",
+      "attractions": "אטרקציות",
+      "noImages": "אין תמונות זמינות"
+    }
+  },
   "destinations": {
     "hub_title": "מרכז יעדים",
     "hub_subtitle": "גלו יעדי נסיעה מרתקים מכל רחבי העולם",
@@ -1426,24 +1434,6 @@
       "viewSource": "צפה במקור",
       "attractions": "אטרקציות",
       "noImages": "אין תמונות זמינות"
-    },
-    "destination": {
-      "detail": {
-        "gallery": {
-          "title": "גלריית תמונות",
-          "fullView": "תצוגה מלאה",
-          "viewSource": "צפה במקור",
-          "attractions": "אטרקציות",
-          "noImages": "אין תמונות זמינות"
-        }
-      },
-      "gallery": {
-        "title": "גלריית תמונות",
-        "fullView": "תצוגה מלאה",
-        "viewSource": "צפה במקור",
-        "attractions": "אטרקציות",
-        "noImages": "אין תמונות זמינות"
-      }
     },
     "states": {
       "loading": "טוען...",

@@ -46,8 +46,6 @@ export default function DestinationGallery({
   const [lightboxImage, setLightboxImage] = useState<GalleryImage | null>(null);
   const [imageAttributions, setImageAttributions] = useState<Record<string, any>>({});
 
-  const internalApiKey = import.meta.env.VITE_INTERNAL_API_KEY;
-
   const getProxyUrl = (image: GalleryImage, maxwidth?: number): string => {
     const params = new URLSearchParams({
       source: image.source,
@@ -57,7 +55,6 @@ export default function DestinationGallery({
       ...(image.query && { query: image.query }),
       ...(maxwidth && { maxwidth: maxwidth.toString() }),
       lang: i18n.language,
-      ...(internalApiKey && { key: internalApiKey }),
     });
 
     return `/api/media/proxy?${params}`;
@@ -65,9 +62,7 @@ export default function DestinationGallery({
 
   const fetchImageWithAttribution = async (image: GalleryImage, imageKey: string) => {
     try {
-      const response = await fetch(getProxyUrl(image, 1200), {
-        headers: { 'x-globemate-key': internalApiKey || '' }
-      });
+      const response = await fetch(getProxyUrl(image, 1200));
 
       const attributionHeader = response.headers.get('X-Attribution');
       if (attributionHeader) {
