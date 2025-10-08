@@ -27,19 +27,33 @@ export default function DestinationDetail() {
   const [units, setUnits] = useState<'metric' | 'imperial'>('metric');
 
   // Mock destination data (in real app, fetch from API)
-  const destination = {
+  const destinationMap: Record<string, any> = {
+    paris: { name: "Paris", country: "France", continent: "Europe", flag: "🇫🇷", lat: 48.8566, lon: 2.3522, currency: "EUR (€)", languages: ["French"], timezone: "UTC+1", bestTime: "April-June, September-October" },
+    tokyo: { name: "Tokyo", country: "Japan", continent: "Asia", flag: "🇯🇵", lat: 35.6762, lon: 139.6503, currency: "JPY (¥)", languages: ["Japanese"], timezone: "UTC+9", bestTime: "March-May, September-November" },
+    barcelona: { name: "Barcelona", country: "Spain", continent: "Europe", flag: "🇪🇸", lat: 41.3874, lon: 2.1686, currency: "EUR (€)", languages: ["Spanish", "Catalan"], timezone: "UTC+1", bestTime: "May-June, September-October" },
+    bali: { name: "Bali", country: "Indonesia", continent: "Asia", flag: "🇮🇩", lat: -8.3405, lon: 115.0920, currency: "IDR (Rp)", languages: ["Indonesian"], timezone: "UTC+8", bestTime: "April-October" },
+    newyork: { name: "New York", country: "United States", continent: "North America", flag: "🇺🇸", lat: 40.7128, lon: -74.0060, currency: "USD ($)", languages: ["English"], timezone: "UTC-5", bestTime: "April-June, September-November" },
+    rome: { name: "Rome", country: "Italy", continent: "Europe", flag: "🇮🇹", lat: 41.9028, lon: 12.4964, currency: "EUR (€)", languages: ["Italian"], timezone: "UTC+1", bestTime: "April-June, September-October" },
+    dubai: { name: "Dubai", country: "United Arab Emirates", continent: "Asia", flag: "🇦🇪", lat: 25.2048, lon: 55.2708, currency: "AED (د.إ)", languages: ["Arabic"], timezone: "UTC+4", bestTime: "November-March" },
+    sydney: { name: "Sydney", country: "Australia", continent: "Oceania", flag: "🇦🇺", lat: -33.8688, lon: 151.2093, currency: "AUD ($)", languages: ["English"], timezone: "UTC+10", bestTime: "September-November, March-May" },
+    capetown: { name: "Cape Town", country: "South Africa", continent: "Africa", flag: "🇿🇦", lat: -33.9249, lon: 18.4241, currency: "ZAR (R)", languages: ["English", "Afrikaans"], timezone: "UTC+2", bestTime: "November-March" },
+    rio: { name: "Rio de Janeiro", country: "Brazil", continent: "South America", flag: "🇧🇷", lat: -22.9068, lon: -43.1729, currency: "BRL (R$)", languages: ["Portuguese"], timezone: "UTC-3", bestTime: "December-March" },
+    puntacana: { name: "Punta Cana", country: "Dominican Republic", continent: "Caribbean", flag: "🇩🇴", lat: 18.5601, lon: -68.3725, currency: "DOP ($)", languages: ["Spanish"], timezone: "UTC-4", bestTime: "December-April" },
+    reykjavik: { name: "Reykjavik", country: "Iceland", continent: "Europe", flag: "🇮🇸", lat: 64.1466, lon: -21.9426, currency: "ISK (kr)", languages: ["Icelandic"], timezone: "UTC+0", bestTime: "June-August" },
+  };
+
+  const destination = destinationMap[slug || ""] || {
     id: slug,
-    name: slug === "paris" ? "Paris" : slug === "tokyo" ? "Tokyo" : slug === "barcelona" ? "Barcelona" : "Destination",
-    country: slug === "paris" ? "France" : slug === "tokyo" ? "Japan" : slug === "barcelona" ? "Spain" : "Country",
-    continent: slug === "paris" ? "Europe" : slug === "tokyo" ? "Asia" : slug === "barcelona" ? "Europe" : "Unknown",
-    description: "An amazing travel destination with rich culture and beautiful sights",
-    flag: slug === "paris" ? "🇫🇷" : slug === "tokyo" ? "🇯🇵" : slug === "barcelona" ? "🇪🇸" : "🌍",
-    currency: slug === "paris" ? "EUR (€)" : slug === "tokyo" ? "JPY (¥)" : slug === "barcelona" ? "EUR (€)" : "USD",
-    languages: slug === "paris" ? ["French"] : slug === "tokyo" ? ["Japanese"] : slug === "barcelona" ? ["Spanish", "Catalan"] : ["English"],
-    timezone: slug === "paris" ? "UTC+1" : slug === "tokyo" ? "UTC+9" : slug === "barcelona" ? "UTC+1" : "UTC",
-    bestTime: slug === "paris" ? "April-June, September-October" : slug === "tokyo" ? "March-May, September-November" : "May-June, September-October",
-    lat: slug === "paris" ? 48.8566 : slug === "tokyo" ? 35.6762 : slug === "barcelona" ? 41.3874 : 0,
-    lon: slug === "paris" ? 2.3522 : slug === "tokyo" ? 139.6503 : slug === "barcelona" ? 2.1686 : 0,
+    name: "Destination",
+    country: "Country",
+    continent: "Unknown",
+    flag: "🌍",
+    lat: 0,
+    lon: 0,
+    currency: "USD",
+    languages: ["English"],
+    timezone: "UTC",
+    bestTime: "Year-round"
   };
 
   // Fetch feature flags (must be first!)
