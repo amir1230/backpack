@@ -204,33 +204,6 @@ export default function DestinationDetail() {
               </CardContent>
             </Card>
 
-            {/* Photo Gallery */}
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("destinations.detail.gallery.title")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <DestinationGallery
-                  destinationName={destination.name}
-                  heroImages={[
-                    { source: 'unsplash', query: `${destination.name} cityscape`, alt: destination.name },
-                    { source: 'pexels', query: destination.name, alt: `${destination.name} view` }
-                  ]}
-                  poiImages={
-                    attractions
-                      ?.filter(attr => attr.photos && attr.photos.length > 0)
-                      .slice(0, 3)
-                      .map((attr) => ({
-                        source: 'google' as const,
-                        ref: attr.photos![0].photo_reference,
-                        alt: attr.name
-                      })) || []
-                  }
-                  isLoading={attractionsLoading}
-                />
-              </CardContent>
-            </Card>
-
             {/* Top Attractions */}
             <Card>
               <CardHeader>
@@ -425,6 +398,33 @@ export default function DestinationDetail() {
                     </div>
                   </>
                 ) : null}
+              </CardContent>
+            </Card>
+
+            {/* Photo Gallery */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("destinations.detail.gallery.title")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DestinationGallery
+                  destinationName={destination.name}
+                  heroImages={[
+                    { source: 'unsplash', query: `${destination.name} cityscape`, alt: destination.name },
+                    { source: 'pexels', query: destination.name, alt: `${destination.name} view` }
+                  ]}
+                  poiImages={
+                    attractions
+                      ?.filter(attr => attr.photos && attr.photos.length > 0)
+                      .slice(0, 3)
+                      .map((attr) => ({
+                        source: 'google' as const,
+                        ref: attr.photos![0].photo_reference,
+                        alt: attr.name
+                      })) || []
+                  }
+                  isLoading={attractionsLoading}
+                />
               </CardContent>
             </Card>
           </div>
