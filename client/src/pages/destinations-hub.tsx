@@ -302,9 +302,6 @@ export default function DestinationsHub() {
                           {t(`trips.continents.${destination.continent}`)}
                         </Badge>
                       </div>
-                      <div className="absolute bottom-4 left-4">
-                        <span className="text-6xl">{destination.flag}</span>
-                      </div>
                     </div>
                     <CardHeader>
                       <CardTitle className="flex items-center justify-between">
