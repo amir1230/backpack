@@ -3,3 +3,4 @@ workflows:
     script: npm run dev
   "TripWise Collector":
     script: cd tripwise && PYTHONPATH=/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages python3 -m uvicorn server:app --host 0.0.0.0 --port 8000
+# Updated for Unsplash integration

@@ -1,1 +1,1 @@
-{"name": "Start application", "run": "tsx server/index.ts", "env": {"NODE_ENV": "development"}}
+{"name": "Start application", "run": "tsx watch server/index.ts", "env": {"NODE_ENV": "development"}}
