@@ -121,6 +121,17 @@ export default function DestinationsHub() {
   const hasActiveFilters =
     searchQuery || selectedContinent !== "all" || selectedCountry !== "all" || selectedType !== "all" || selectedSeason !== "all";
 
+  // Get destination image URL
+  const getDestinationImageUrl = (destinationName: string) => {
+    const params = new URLSearchParams({
+      source: 'unsplash',
+      query: `${destinationName} cityscape`,
+      maxwidth: '600',
+      lang: i18n.language,
+    });
+    return `/api/media/proxy?${params}`;
+  };
+
   return (
     <div className={`min-h-screen bg-gray-50 ${isRTL ? "rtl" : "ltr"}`} dir={isRTL ? "rtl" : "ltr"}>
       <div className="container mx-auto px-4 py-8">
@@ -273,7 +284,14 @@ export default function DestinationsHub() {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredDestinations.map((destination) => (
                   <Card key={destination.id} className="overflow-hidden hover:shadow-lg transition-shadow" data-testid={`card-destination-${destination.id}`}>
-                    <div className="h-48 bg-gradient-to-br from-blue-400 to-purple-500 relative">
+                    <div className="h-48 relative overflow-hidden">
+                      <img 
+                        src={getDestinationImageUrl(destination.name)}
+                        alt={destination.name}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-black/20" />
                       <div className="absolute top-4 right-4 flex gap-2">
                         {destination.trending && (
                           <Badge className="bg-red-500 text-white">
