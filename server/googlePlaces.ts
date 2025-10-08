@@ -1,4 +1,4 @@
-import { storage } from './storage';
+import { storage } from './storage.js';
 
 interface GooglePlaceResult {
   place_id: string;

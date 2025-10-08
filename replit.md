@@ -6,6 +6,20 @@ GlobeMate is a full-stack web application for global travel planning and communi
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (October 8, 2025)
+- **Destinations Hub - Google Places Integration**: Replaced hardcoded 12 destinations with dynamic data from Google Places API
+  - Created `/api/destinations/popular` endpoint fetching 30+ major global cities
+  - Updated `destinations-hub.tsx` to use TanStack Query for data fetching
+  - Added proper loading states, error handling, and skeleton screens
+  - Implemented country-to-continent mapping for filtering
+  - Note: **Server must be manually started** via Workflows UI (see below)
+
+## Important Setup Notes
+- **Starting the Development Server**: 
+  - The `.replit.yaml` defines workflows but they must be registered in the Replit UI
+  - To start: Open Workflows tool → Create "Start application" → Add shell command `npm run dev` → Click Run
+  - Or simply click the Run button if the workflow is already configured
+
 ## System Architecture
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript
@@ -42,7 +56,7 @@ Preferred communication style: Simple, everyday language.
 - **Weather Integration & Travel Timing System**: Real-time weather data (OpenWeather API) and historical climate analysis, providing "Best Time to Travel" recommendations.
 - **Real Places Booking Integration**: Enriches AI-generated suggestions with bookable locations from Google Places API.
 - **UI/UX Decisions**: Consistent use of shadcn/ui components, Tailwind CSS for custom styling, responsive design, and unified interfaces with tabbed navigation. Features a continent-based trip selection system for improved UX.
-- **Destinations Hub**: Comprehensive destination discovery system with search, filters, sorting, and detailed destination pages including weather cards, attractions, and interactive maps. Features a robust feature flag system for external providers.
+- **Destinations Hub**: Comprehensive destination discovery system with search, filters, sorting, and detailed destination pages including weather cards, attractions, and interactive maps. Features a robust feature flag system for external providers. **Updated (Oct 2025)**: Now displays real destinations from Google Places API across 30+ major global cities instead of hardcoded data. Uses dynamic data fetching with TanStack Query and proper loading states.
 - **Global Expansion & Multilingual Support**: Worldwide destination coverage with full Hebrew/English bilingual support across all features, including instant language toggling and RTL support.
 
 ## External Dependencies
