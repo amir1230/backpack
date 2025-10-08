@@ -1344,5 +1344,12 @@
       "puntacana": "Paradise beaches and all-inclusive resorts",
       "reykjavik": "Gateway to natural wonders like Northern Lights and hot springs"
     }
+  },
+  "media": {
+    "unsplash": {
+      "attributionPrefix": "Photo by",
+      "onUnsplash": "on",
+      "usePhoto": "Use this photo"
+    }
   }
 }

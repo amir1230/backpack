@@ -1482,5 +1482,12 @@
       "puntacana": "חופי גן עדן ואתרי נופש הכל כלול",
       "reykjavik": "שער לפלאי הטבע כמו זוהר הצפון ומעיינות חמים"
     }
+  },
+  "media": {
+    "unsplash": {
+      "attributionPrefix": "צילום מאת",
+      "onUnsplash": "ב",
+      "usePhoto": "השתמש בתמונה"
+    }
   }
 }
