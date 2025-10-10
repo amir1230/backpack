@@ -224,17 +224,17 @@ export default function DestinationDetail() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Overview */}
-            <Card>
+            <Card dir={isRTL ? "rtl" : "ltr"}>
               <CardHeader>
                 <CardTitle>{t("destinations.detail.overview")}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700">{t(`destinations.city_descriptions.${slug}`)}</p>
+                <p className="text-gray-700" dir={isRTL ? "rtl" : "ltr"}>{t(`destinations.city_descriptions.${slug}`)}</p>
               </CardContent>
             </Card>
 
             {/* Top Attractions */}
-            <Card>
+            <Card dir={isRTL ? "rtl" : "ltr"}>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
@@ -248,7 +248,7 @@ export default function DestinationDetail() {
                   )}
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent dir={isRTL ? "rtl" : "ltr"}>
                 {attractionsLoading ? (
                   <div className="space-y-4">
                     {[1, 2, 3].map((i) => (
@@ -307,7 +307,7 @@ export default function DestinationDetail() {
             </Card>
 
             {/* Weather */}
-            <Card>
+            <Card dir={isRTL ? "rtl" : "ltr"}>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
@@ -436,11 +436,11 @@ export default function DestinationDetail() {
             </Card>
 
             {/* Photo Gallery */}
-            <Card>
+            <Card dir={isRTL ? "rtl" : "ltr"}>
               <CardHeader>
                 <CardTitle>{t("destinations.detail.gallery.title")}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent dir={isRTL ? "rtl" : "ltr"}>
                 <DestinationGallery
                   destinationName={destination.name}
                   heroImages={[
@@ -466,11 +466,11 @@ export default function DestinationDetail() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Basics */}
-            <Card>
+            <Card dir={isRTL ? "rtl" : "ltr"}>
               <CardHeader>
                 <CardTitle>{t("destinations.detail.basics")}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4" dir={isRTL ? "rtl" : "ltr"}>
                 <div className="flex items-start gap-3">
                   <DollarSign className="h-5 w-5 text-gray-400 mt-0.5" />
                   <div>
@@ -503,14 +503,14 @@ export default function DestinationDetail() {
             </Card>
 
             {/* Map */}
-            <Card>
+            <Card dir={isRTL ? "rtl" : "ltr"}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MapPin className="h-5 w-5" />
                   {t("destinations.detail.view_on_map")}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent dir={isRTL ? "rtl" : "ltr"}>
                 <div className="aspect-square bg-gray-200 rounded-lg flex items-center justify-center">
                   <div className="text-center">
                     <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
@@ -530,7 +530,7 @@ export default function DestinationDetail() {
             </Card>
 
             {/* Booking (Stub) */}
-            <Card>
+            <Card dir={isRTL ? "rtl" : "ltr"}>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>{t("destinations.detail.booking")}</CardTitle>
@@ -539,7 +539,7 @@ export default function DestinationDetail() {
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3" dir={isRTL ? "rtl" : "ltr"}>
                 <Button className="w-full" variant="outline" disabled>
                   {t("destinations.detail.hotels")}
                 </Button>
