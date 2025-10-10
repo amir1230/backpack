@@ -237,7 +237,7 @@ export default function DestinationDetail() {
             <Card>
               <CardHeader>
                 <div className={`flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
-                  <CardTitle className={`flex items-center gap-2 ${isRTL ? "text-right" : "text-left"}`}>
+                  <CardTitle className={`flex items-center gap-2 ${isRTL ? "text-right w-full" : "text-left"}`}>
                     <Star className="h-5 w-5" />
                     {t("destinations.detail.top_attractions")}
                   </CardTitle>
@@ -310,7 +310,7 @@ export default function DestinationDetail() {
             <Card>
               <CardHeader>
                 <div className={`flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
-                  <CardTitle className={`flex items-center gap-2 ${isRTL ? "text-right" : "text-left"}`}>
+                  <CardTitle className={`flex items-center gap-2 ${isRTL ? "text-right w-full" : "text-left"}`}>
                     <Cloud className="h-5 w-5" />
                     {t("destinations.detail.weather")}
                   </CardTitle>
@@ -533,7 +533,7 @@ export default function DestinationDetail() {
             <Card>
               <CardHeader>
                 <div className={`flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
-                  <CardTitle className={isRTL ? "text-right" : "text-left"}>{t("destinations.detail.booking")}</CardTitle>
+                  <CardTitle className={isRTL ? "text-right w-full" : "text-left"}>{t("destinations.detail.booking")}</CardTitle>
                   <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
                     {t("destinations.states.soon_badge")}
                   </Badge>
