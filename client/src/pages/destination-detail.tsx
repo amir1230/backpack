@@ -21,6 +21,47 @@ interface Attraction {
   photos?: Array<{ photo_reference: string }>;
 }
 
+// Google Map Embed Component
+function GoogleMapEmbed({ lat, lng, name }: { lat: number; lng: number; name: string }) {
+  const { data: mapsKey, isLoading } = useQuery<{ apiKey: string }>({
+    queryKey: ['/api/maps/key'],
+  });
+
+  if (isLoading) {
+    return (
+      <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  if (!mapsKey?.apiKey) {
+    return (
+      <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
+        <p className="text-sm text-gray-500">Map unavailable</p>
+      </div>
+    );
+  }
+
+  const embedUrl = `https://www.google.com/maps/embed/v1/place?key=${mapsKey.apiKey}&q=${lat},${lng}&zoom=14&language=en`;
+
+  return (
+    <div className="w-full aspect-video rounded-lg overflow-hidden shadow-sm border border-gray-200">
+      <iframe
+        width="100%"
+        height="100%"
+        style={{ border: 0 }}
+        loading="lazy"
+        allowFullScreen
+        referrerPolicy="no-referrer-when-downgrade"
+        src={embedUrl}
+        title={`Map of ${name}`}
+        data-testid="google-map-embed"
+      />
+    </div>
+  );
+}
+
 export default function DestinationDetail() {
   const { slug } = useParams();
   const { t, i18n } = useTranslation();
@@ -640,30 +681,47 @@ export default function DestinationDetail() {
               </CardContent>
             </Card>
 
-            {/* Map */}
+            {/* Interactive Map */}
             <Card>
               <CardHeader>
                 <CardTitle className={`flex items-center gap-2 ${isRTL ? "text-right" : "text-left"}`}>
                   <MapPin className="h-5 w-5" />
-                  {t("destinations.detail.view_on_map")}
+                  {t("destinations.detail.interactive_map")}
                 </CardTitle>
               </CardHeader>
               <CardContent className={isRTL ? "text-right" : "text-left"}>
-                <div className="aspect-square bg-gray-200 rounded-lg flex items-center justify-center">
-                  <div className="text-center">
-                    <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">Map view</p>
-                    {lat && lng && (
-                      <p className="text-xs text-gray-400 mt-1">
-                        {lat.toFixed(4)}, {lng.toFixed(4)}
-                      </p>
-                    )}
+                {lat && lng ? (
+                  <>
+                    <GoogleMapEmbed 
+                      lat={lat} 
+                      lng={lng} 
+                      name={destination?.name || 'Destination'}
+                    />
+                    <Button 
+                      className="w-full mt-4" 
+                      variant="default"
+                      asChild
+                      data-testid="button-directions"
+                    >
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center"
+                      >
+                        <Navigation className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
+                        {t("destinations.detail.get_directions")}
+                      </a>
+                    </Button>
+                  </>
+                ) : (
+                  <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                      <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-500">{t("destinations.detail.no_location")}</p>
+                    </div>
                   </div>
-                </div>
-                <Button className="w-full mt-4" variant="outline" data-testid="button-directions">
-                  <Navigation className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
-                  {t("destinations.detail.get_directions")}
-                </Button>
+                )}
               </CardContent>
             </Card>
 

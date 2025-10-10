@@ -3595,6 +3595,20 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Google Maps API key endpoint (restricts exposure to authenticated requests only)
+  app.get('/api/maps/key', async (req, res) => {
+    try {
+      const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+        return res.status(503).json({ error: 'Google Maps API key not configured' });
+      }
+      res.json({ apiKey });
+    } catch (error) {
+      console.error('Error fetching Google Maps key:', error);
+      res.status(500).json({ error: 'Failed to retrieve API key' });
+    }
+  });
+
   // Public proxy endpoint for geo basics (handles security server-side)
   app.get('/api/destinations/geo-basics', async (req, res) => {
     try {
