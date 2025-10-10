@@ -4567,4 +4567,95 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Geo API middleware - require x-globemate-key header
+  const requireGlobeMateKey = (req: any, res: any, next: any) => {
+    const apiKey = req.headers['x-globemate-key'];
+    
+    if (!apiKey || apiKey !== config.globemate.apiKey) {
+      return res.status(401).json({ error: 'Unauthorized: Invalid or missing x-globemate-key' });
+    }
+    
+    next();
+  };
+
+  // Geo API endpoints
+  app.get('/api/geo/country', requireGlobeMateKey, async (req, res) => {
+    try {
+      const { getBasics } = await import('./services/destinations/geoService.js');
+      const { code, name, lang = 'en' } = req.query;
+
+      if (!code && !name) {
+        return res.status(400).json({ error: 'Either code or name parameter is required' });
+      }
+
+      const result = await getBasics({
+        countryCode: code as string,
+        countryName: name as string,
+        lang: lang as 'en' | 'he',
+      });
+
+      if (!result) {
+        return res.status(404).json({ error: 'Country not found' });
+      }
+
+      res.json(result);
+    } catch (error) {
+      console.error('Geo country error:', error);
+      res.status(500).json({ error: 'Failed to fetch country data' });
+    }
+  });
+
+  app.get('/api/geo/city/search', requireGlobeMateKey, async (req, res) => {
+    try {
+      const { getBasics } = await import('./services/destinations/geoService.js');
+      const { q, country, lang = 'en' } = req.query;
+
+      if (!q) {
+        return res.status(400).json({ error: 'Query parameter q is required' });
+      }
+
+      const result = await getBasics({
+        cityName: q as string,
+        countryCode: country as string,
+        lang: lang as 'en' | 'he',
+      });
+
+      if (!result) {
+        return res.status(404).json({ error: 'City not found' });
+      }
+
+      res.json(result);
+    } catch (error) {
+      console.error('Geo city search error:', error);
+      res.status(500).json({ error: 'Failed to search city' });
+    }
+  });
+
+  app.get('/api/geo/city/by-coords', requireGlobeMateKey, async (req, res) => {
+    try {
+      const { getBasics } = await import('./services/destinations/geoService.js');
+      const { lat, lng, country, lang = 'en' } = req.query;
+
+      if (!lat || !lng) {
+        return res.status(400).json({ error: 'Both lat and lng parameters are required' });
+      }
+
+      const result = await getBasics({
+        lat: parseFloat(lat as string),
+        lng: parseFloat(lng as string),
+        countryCode: country as string,
+        lang: lang as 'en' | 'he',
+      });
+
+      if (!result) {
+        return res.status(404).json({ error: 'Location not found' });
+      }
+
+      res.json(result);
+    } catch (error) {
+      console.error('Geo coords error:', error);
+      res.status(500).json({ error: 'Failed to fetch location data' });
+    }
+  });
+
 }

@@ -24,6 +24,16 @@ const Env = z.object({
   // Optional APIs
   OPENAI_API_KEY: z.string().optional(),
   SESSION_SECRET: z.string().default('dev-secret-change-in-production'),
+  
+  // Geo APIs configuration
+  RESTCOUNTRIES_BASE_URL: z.string().url().default('https://restcountries.com/v3.1'),
+  GEONAMES_BASE_URL: z.string().url().default('https://api.geonames.org'),
+  GEONAMES_USERNAME: z.string().optional(),
+  ENABLE_GEO: z.string().transform(val => val === 'true').default('true'),
+  CACHE_TTL_SECONDS: z.string().transform(Number).default('3600'),
+  
+  // GlobeMate API key for internal endpoints
+  GLOBEMATE_API_KEY: z.string().default('dev-globemate-key-change-in-production'),
 });
 
 export const env = Env.parse(process.env);
@@ -62,5 +72,15 @@ export const config = {
   },
   session: {
     secret: env.SESSION_SECRET,
+  },
+  geo: {
+    restCountriesBaseUrl: env.RESTCOUNTRIES_BASE_URL,
+    geoNamesBaseUrl: env.GEONAMES_BASE_URL,
+    geoNamesUsername: env.GEONAMES_USERNAME,
+    enabled: env.ENABLE_GEO,
+    cacheTtlSeconds: env.CACHE_TTL_SECONDS,
+  },
+  globemate: {
+    apiKey: env.GLOBEMATE_API_KEY,
   },
 } as const;
