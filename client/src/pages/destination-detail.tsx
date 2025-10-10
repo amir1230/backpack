@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { MapPin, Cloud, Star, Calendar, DollarSign, Languages, Clock, ArrowLeft, Bookmark, Share2, Navigation, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,7 +33,8 @@ export default function DestinationDetail() {
   });
 
   // Find the destination by slug
-  const destination = allDestinations?.find(d => d.id === slug) || {
+  const foundDestination = allDestinations?.find(d => d.id === slug);
+  const destination = foundDestination || {
     id: slug,
     name: "Destination",
     country: "Country",
@@ -50,6 +52,9 @@ export default function DestinationDetail() {
     types: [],
     photoRefs: []
   };
+  
+  // Check if we have a real destination (not the fallback)
+  const hasRealDestination = !!foundDestination;
 
   // Use lng instead of lon for consistency with API
   const lat = destination.lat || 0;
@@ -62,6 +67,7 @@ export default function DestinationDetail() {
     geoNames: boolean;
     tripAdvisor: boolean;
     tbo: boolean;
+    geo: boolean;
   }>({
     queryKey: ["/api/destinations/feature-flags"],
   });
@@ -105,12 +111,33 @@ export default function DestinationDetail() {
     enabled: !!lat && !!lng && featureFlags?.openWeather === true,
   });
 
+  // Fetch geo basics data  
+  const { data: geoData, isLoading: geoLoading } = useQuery({
+    queryKey: ['/api/destinations/geo-basics', destination.country, destination.name, i18n.language],
+    queryFn: async () => {
+      // Guard: only fetch if we have valid data
+      if (!destination.country || !destination.name) {
+        return null;
+      }
+      
+      const params = new URLSearchParams({
+        country: destination.country,
+        city: destination.name,
+        lang: i18n.language,
+      });
+      const response = await apiRequest(`/api/destinations/geo-basics?${params}`);
+      return response.json();
+    },
+    enabled: hasRealDestination && featureFlags?.geo === true,
+  });
+
   // Provider status (default to false when flags not loaded)
   const providers = {
     googlePlaces: featureFlags?.googlePlaces ?? false,
     weather: featureFlags?.openWeather ?? false,
     tripadvisor: featureFlags?.tripAdvisor ?? false,
     booking: featureFlags?.tbo ?? false,
+    geo: featureFlags?.geo ?? false,
   };
 
   // Get hero image URL
@@ -467,38 +494,146 @@ export default function DestinationDetail() {
           <div className="space-y-6">
             {/* Basics */}
             <Card>
-              <CardHeader>
-                <CardTitle className={isRTL ? "text-right" : "text-left"}>{t("destinations.detail.basics")}</CardTitle>
+              <CardHeader className={isRTL ? "text-right" : "text-left"}>
+                <div className={`flex items-center justify-between gap-4 ${isRTL ? "flex-row-reverse" : ""}`}>
+                  {providers.geo ? (
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex-shrink-0">
+                      {t("destinations.states.live_badge")}
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 flex-shrink-0">
+                      {t("destinations.states.soon_badge")}
+                    </Badge>
+                  )}
+                  <CardTitle className={isRTL ? "text-right" : "text-left"}>{t("destinations.detail.basics")}</CardTitle>
+                </div>
               </CardHeader>
               <CardContent className={`space-y-4 ${isRTL ? "text-right" : "text-left"}`}>
-                <div className="flex items-start gap-3">
-                  <DollarSign className="h-5 w-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <p className="font-medium">{t("destinations.detail.currency")}</p>
-                    <p className="text-sm text-gray-600">{destination.currency || "USD"}</p>
+                {geoLoading ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
                   </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Languages className="h-5 w-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <p className="font-medium">{t("destinations.detail.languages")}</p>
-                    <p className="text-sm text-gray-600">{destination.languages?.join(", ") || "English"}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Clock className="h-5 w-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <p className="font-medium">{t("destinations.detail.timezone")}</p>
-                    <p className="text-sm text-gray-600">{destination.timezone || "UTC"}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <p className="font-medium">{t("destinations.detail.best_time")}</p>
-                    <p className="text-sm text-gray-600">{destination.bestTime || t("destinations.detail.year_round", "Year-round")}</p>
-                  </div>
-                </div>
+                ) : geoData && providers.geo ? (
+                  <>
+                    {/* Country */}
+                    <div className="flex items-start gap-3" data-testid="geo-country">
+                      <div className="text-2xl mt-0.5">{geoData.country.flagUrl ? <img src={geoData.country.flagUrl} alt={geoData.country.name} className="w-6 h-6" /> : "🌍"}</div>
+                      <div className="flex-1">
+                        <p className="font-medium">{t("destinations.detail.country")}</p>
+                        <p className="text-sm text-gray-600">{geoData.country.name} ({geoData.country.code})</p>
+                      </div>
+                    </div>
+
+                    {/* Currencies */}
+                    {geoData.country.currencies?.length > 0 && (
+                      <div className="flex items-start gap-3" data-testid="geo-currencies">
+                        <DollarSign className="h-5 w-5 text-gray-400 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="font-medium">{t("destinations.detail.currencies")}</p>
+                          <p className="text-sm text-gray-600">
+                            {geoData.country.currencies.map((c: any) => `${c.name} (${c.symbol})`).join(", ")}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Languages */}
+                    {geoData.country.languages?.length > 0 && (
+                      <div className="flex items-start gap-3" data-testid="geo-languages">
+                        <Languages className="h-5 w-5 text-gray-400 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="font-medium">{t("destinations.detail.languages")}</p>
+                          <p className="text-sm text-gray-600">{geoData.country.languages.join(", ")}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Timezones */}
+                    {geoData.country.timezones?.length > 0 && (
+                      <div className="flex items-start gap-3" data-testid="geo-timezones">
+                        <Clock className="h-5 w-5 text-gray-400 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="font-medium">{t("destinations.detail.timezones")}</p>
+                          <p className="text-sm text-gray-600">{geoData.country.timezones.join(", ")}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Calling Code */}
+                    {geoData.country.callingCode && (
+                      <div className="flex items-start gap-3" data-testid="geo-calling-code">
+                        <Navigation className="h-5 w-5 text-gray-400 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="font-medium">{t("destinations.detail.calling_code")}</p>
+                          <p className="text-sm text-gray-600">{geoData.country.callingCode}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* City Info */}
+                    {geoData.city && (
+                      <>
+                        <div className="border-t pt-4 mt-4">
+                          <div className="flex items-start gap-3" data-testid="geo-city">
+                            <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
+                            <div className="flex-1">
+                              <p className="font-medium">{t("destinations.detail.city")}</p>
+                              <p className="text-sm text-gray-600">{geoData.city.name}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {geoData.city.population && (
+                          <div className="flex items-start gap-3" data-testid="geo-population">
+                            <div className="h-5 w-5 text-gray-400 mt-0.5 flex items-center justify-center">👥</div>
+                            <div className="flex-1">
+                              <p className="font-medium">{t("destinations.detail.population")}</p>
+                              <p className="text-sm text-gray-600">{geoData.city.population.toLocaleString()}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {geoData.city.lat && geoData.city.lng && (
+                          <div className="flex items-start gap-3" data-testid="geo-coordinates">
+                            <Navigation className="h-5 w-5 text-gray-400 mt-0.5" />
+                            <div className="flex-1">
+                              <p className="font-medium">{t("destinations.detail.coordinates")}</p>
+                              <p className="text-sm text-gray-600 font-mono">
+                                {geoData.city.lat.toFixed(4)}, {geoData.city.lng.toFixed(4)}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-start gap-3">
+                      <DollarSign className="h-5 w-5 text-gray-400 mt-0.5" />
+                      <div>
+                        <p className="font-medium">{t("destinations.detail.currency")}</p>
+                        <p className="text-sm text-gray-600">{destination.currency || "USD"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Languages className="h-5 w-5 text-gray-400 mt-0.5" />
+                      <div>
+                        <p className="font-medium">{t("destinations.detail.languages")}</p>
+                        <p className="text-sm text-gray-600">{destination.languages?.join(", ") || "English"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Clock className="h-5 w-5 text-gray-400 mt-0.5" />
+                      <div>
+                        <p className="font-medium">{t("destinations.detail.timezone")}</p>
+                        <p className="text-sm text-gray-600">{destination.timezone || "UTC"}</p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 

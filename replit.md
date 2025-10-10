@@ -6,7 +6,17 @@ GlobeMate is a full-stack web application for global travel planning and communi
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes (October 8, 2025)
+## Recent Changes (October 10, 2025)
+- **Geo Basics Integration**: Added RestCountries + GeoNames API integration for destination basic information
+  - Server endpoints: /api/destinations/geo-basics (public proxy), /api/geo/* (internal with x-globemate-key)
+  - Integration layer: src/integrations/geo/restCountries.ts + geoNames.ts with structured logging
+  - Unified service: server/services/destinations/geoService.ts with caching (24h country, 6h city)
+  - UI: Enhanced Basics card in destination detail with country flag, currencies, languages, timezones, calling code, city info
+  - i18n: Full Hebrew/English translations for all geo-related content
+  - Security: API key managed server-side only, never exposed to client
+  - Feature flag: config.geo.enabled based on ENABLE_GEO env var
+
+## Previous Changes (October 8, 2025)
 - **Destinations Hub - Tabbed Interface Implementation**: Restructured destinations hub with four categories
   - **Destinations Tab**: Shows popular worldwide destinations from database (30+ major cities)
   - **Accommodations Tab**: Google Places API results filtered by type "lodging" with infinite scroll
