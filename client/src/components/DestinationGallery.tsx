@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import AttributionUnsplash from './AttributionUnsplash.js';
+import OptimizedImage from './OptimizedImage';
 
 interface UnsplashPhotoData {
   id: string;
@@ -169,12 +170,14 @@ export default function DestinationGallery({
       {/* Hero Section */}
       {heroImages.length > 0 && (
         <div className="relative w-full h-96 rounded-lg overflow-hidden group" data-testid="gallery-hero">
-          <img
+          <OptimizedImage
             src={getProxyUrl(heroImages[currentHeroIndex], 1600)}
             alt={heroImages[currentHeroIndex].alt}
-            className="w-full h-full object-cover"
-            loading="lazy"
-            data-testid={`hero-image-${currentHeroIndex}`}
+            className="absolute inset-0"
+            aspectRatio="h-96"
+            priority={true}
+            maxRetries={3}
+            testId={`hero-image-${currentHeroIndex}`}
           />
 
           {/* Navigation Arrows */}
@@ -278,12 +281,16 @@ export default function DestinationGallery({
                 onClick={() => openLightbox(image)}
                 data-testid={`poi-image-${index}`}
               >
-                <img
-                  src={getProxyUrl(image, 600)}
-                  alt={image.alt}
-                  className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                  loading="lazy"
-                />
+                <div className="w-full h-full transition-transform group-hover:scale-110">
+                  <OptimizedImage
+                    src={getProxyUrl(image, 600)}
+                    alt={image.alt}
+                    aspectRatio="aspect-video"
+                    priority={index < 3}
+                    maxRetries={2}
+                    testId={`poi-image-${index}`}
+                  />
+                </div>
                 
                 {/* Attribution Overlay */}
                 {image.unsplashData ? (
@@ -320,10 +327,14 @@ export default function DestinationGallery({
         <DialogContent className="max-w-6xl p-0" data-testid="gallery-lightbox">
           {lightboxImage && (
             <div className="relative">
-              <img
+              <OptimizedImage
                 src={getProxyUrl(lightboxImage, 2400)}
                 alt={lightboxImage.alt}
-                className="w-full max-h-[90vh] object-contain"
+                className="w-full"
+                aspectRatio="max-h-[90vh]"
+                priority={true}
+                maxRetries={3}
+                testId="lightbox-image"
               />
               <Button
                 variant="ghost"

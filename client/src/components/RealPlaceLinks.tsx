@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, ExternalLink, Building2, Camera } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import OptimizedImage from "./OptimizedImage";
 
 interface RealPlace {
   title: string;
@@ -110,11 +111,16 @@ export function RealPlaceLinks({ suggestion }: RealPlaceLinksProps) {
                       <div className="flex items-start justify-between">
                         <h5 className="font-medium text-sm leading-tight">{place.title}</h5>
                         {place.photoUrl && (
-                          <img 
-                            src={place.photoUrl} 
-                            alt={place.title}
-                            className="w-12 h-12 rounded object-cover ml-2 flex-shrink-0"
-                          />
+                          <div className="ml-2 flex-shrink-0">
+                            <OptimizedImage
+                              src={place.photoUrl} 
+                              alt={place.title}
+                              className="w-12 h-12 rounded"
+                              aspectRatio="w-12 h-12"
+                              maxRetries={2}
+                              testId={`place-photo-${idx}`}
+                            />
+                          </div>
                         )}
                       </div>
                       
