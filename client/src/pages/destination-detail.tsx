@@ -188,15 +188,15 @@ export default function DestinationDetail() {
           </div>
 
           {/* Title */}
-          <div className="text-white" dir={isRTL ? "rtl" : "ltr"}>
-            <div className={`flex items-center gap-4 mb-4 ${isRTL ? "flex-row-reverse" : ""}`}>
-              <span className="text-8xl">{destination.flag}</span>
-              <div className={isRTL ? "text-right" : "text-left"}>
+          <div className="text-white">
+            <div className={`flex items-center gap-4 mb-4 ${isRTL ? "flex-row-reverse justify-end" : ""}`}>
+              <div className={`flex-1 ${isRTL ? "text-right" : "text-left"}`}>
                 <h1 className="text-5xl font-bold mb-2">{t(`destinations.cities.${slug}`, destination.name)}</h1>
                 <p className="text-xl opacity-90">
                   {t(`trips.countries.${destination.country}`, destination.country)} • {t(`trips.continents.${destination.continent}`, destination.continent)}
                 </p>
               </div>
+              <span className="text-8xl">{destination.flag}</span>
             </div>
           </div>
 
@@ -225,19 +225,19 @@ export default function DestinationDetail() {
           <div className="lg:col-span-2 space-y-6">
             {/* Overview */}
             <Card>
-              <CardHeader className={isRTL ? "text-right" : "text-left"}>
-                <CardTitle>{t("destinations.detail.overview")}</CardTitle>
+              <CardHeader>
+                <CardTitle className={isRTL ? "text-right w-full" : "text-left"}>{t("destinations.detail.overview")}</CardTitle>
               </CardHeader>
-              <CardContent className={isRTL ? "text-right" : "text-left"}>
-                <p className="text-gray-700">{t(`destinations.city_descriptions.${slug}`)}</p>
+              <CardContent>
+                <p className={`text-gray-700 ${isRTL ? "text-right" : "text-left"}`}>{t(`destinations.city_descriptions.${slug}`)}</p>
               </CardContent>
             </Card>
 
             {/* Top Attractions */}
             <Card>
-              <CardHeader className={isRTL ? "text-right" : "text-left"}>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
+              <CardHeader>
+                <div className={`flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
+                  <CardTitle className={`flex items-center gap-2 ${isRTL ? "text-right" : "text-left"}`}>
                     <Star className="h-5 w-5" />
                     {t("destinations.detail.top_attractions")}
                   </CardTitle>
@@ -308,9 +308,9 @@ export default function DestinationDetail() {
 
             {/* Weather */}
             <Card>
-              <CardHeader style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
+              <CardHeader>
+                <div className={`flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
+                  <CardTitle className={`flex items-center gap-2 ${isRTL ? "text-right" : "text-left"}`}>
                     <Cloud className="h-5 w-5" />
                     {t("destinations.detail.weather")}
                   </CardTitle>
@@ -437,10 +437,10 @@ export default function DestinationDetail() {
 
             {/* Photo Gallery */}
             <Card>
-              <CardHeader style={{ textAlign: isRTL ? 'right' : 'left' }}>
-                <CardTitle>{t("destinations.detail.gallery.title")}</CardTitle>
+              <CardHeader>
+                <CardTitle className={`${isRTL ? "text-right w-full" : "text-left"}`}>{t("destinations.detail.gallery.title")}</CardTitle>
               </CardHeader>
-              <CardContent style={{ textAlign: isRTL ? 'right' : 'left' }}>
+              <CardContent className={isRTL ? "text-right" : "text-left"}>
                 <DestinationGallery
                   destinationName={destination.name}
                   heroImages={[
@@ -467,8 +467,8 @@ export default function DestinationDetail() {
           <div className="space-y-6">
             {/* Basics */}
             <Card>
-              <CardHeader className={isRTL ? "text-right" : "text-left"}>
-                <CardTitle>{t("destinations.detail.basics")}</CardTitle>
+              <CardHeader>
+                <CardTitle className={`${isRTL ? "text-right w-full" : "text-left"}`}>{t("destinations.detail.basics")}</CardTitle>
               </CardHeader>
               <CardContent className={`space-y-4 ${isRTL ? "text-right" : "text-left"}`}>
                 <div className="flex items-start gap-3">
@@ -504,8 +504,8 @@ export default function DestinationDetail() {
 
             {/* Map */}
             <Card>
-              <CardHeader className={isRTL ? "text-right" : "text-left"}>
-                <CardTitle className="flex items-center gap-2">
+              <CardHeader>
+                <CardTitle className={`flex items-center gap-2 ${isRTL ? "text-right w-full" : "text-left"}`}>
                   <MapPin className="h-5 w-5" />
                   {t("destinations.detail.view_on_map")}
                 </CardTitle>
@@ -531,9 +531,9 @@ export default function DestinationDetail() {
 
             {/* Booking (Stub) */}
             <Card>
-              <CardHeader className={isRTL ? "text-right" : "text-left"}>
-                <div className="flex items-center justify-between">
-                  <CardTitle>{t("destinations.detail.booking")}</CardTitle>
+              <CardHeader>
+                <div className={`flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
+                  <CardTitle className={isRTL ? "text-right" : "text-left"}>{t("destinations.detail.booking")}</CardTitle>
                   <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
                     {t("destinations.states.soon_badge")}
                   </Badge>
