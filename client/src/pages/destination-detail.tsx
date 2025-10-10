@@ -356,7 +356,7 @@ export default function DestinationDetail() {
                     <p className="text-gray-500 font-medium">{t("destinations.states.soon_badge")}</p>
                     <p className="text-sm text-gray-400 mt-1">{t("destinations.detail.weather_unavailable")}</p>
                   </div>
-                ) : !destination.lat || !destination.lon ? (
+                ) : !lat || !lng ? (
                   <div className="text-center py-12">
                     <MapPin className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                     <p className="text-gray-500 font-medium">{t("destinations.detail.no_location")}</p>
@@ -510,9 +510,11 @@ export default function DestinationDetail() {
                   <div className="text-center">
                     <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                     <p className="text-sm text-gray-500">Map view</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {destination.lat.toFixed(4)}, {destination.lon.toFixed(4)}
-                    </p>
+                    {lat && lng && (
+                      <p className="text-xs text-gray-400 mt-1">
+                        {lat.toFixed(4)}, {lng.toFixed(4)}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <Button className="w-full mt-4" variant="outline" data-testid="button-directions">
