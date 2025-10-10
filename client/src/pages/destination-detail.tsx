@@ -470,28 +470,28 @@ export default function DestinationDetail() {
                   <DollarSign className="h-5 w-5 text-gray-400 mt-0.5" />
                   <div>
                     <p className="font-medium">{t("destinations.detail.currency")}</p>
-                    <p className="text-sm text-gray-600">{destination.currency}</p>
+                    <p className="text-sm text-gray-600">{destination.currency || "USD"}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Languages className="h-5 w-5 text-gray-400 mt-0.5" />
                   <div>
                     <p className="font-medium">{t("destinations.detail.languages")}</p>
-                    <p className="text-sm text-gray-600">{destination.languages.join(", ")}</p>
+                    <p className="text-sm text-gray-600">{destination.languages?.join(", ") || "English"}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Clock className="h-5 w-5 text-gray-400 mt-0.5" />
                   <div>
                     <p className="font-medium">{t("destinations.detail.timezone")}</p>
-                    <p className="text-sm text-gray-600">{destination.timezone}</p>
+                    <p className="text-sm text-gray-600">{destination.timezone || "UTC"}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
                   <div>
                     <p className="font-medium">{t("destinations.detail.best_time")}</p>
-                    <p className="text-sm text-gray-600">{destination.bestTime}</p>
+                    <p className="text-sm text-gray-600">{destination.bestTime || t("destinations.detail.year_round", "Year-round")}</p>
                   </div>
                 </div>
               </CardContent>
