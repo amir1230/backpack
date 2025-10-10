@@ -226,7 +226,7 @@ export default function DestinationDetail() {
             {/* Overview */}
             <Card>
               <CardHeader>
-                <CardTitle className={isRTL ? "text-right w-full" : "text-left"}>{t("destinations.detail.overview")}</CardTitle>
+                <CardTitle className={isRTL ? "text-right" : "text-left"}>{t("destinations.detail.overview")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className={`text-gray-700 ${isRTL ? "text-right" : "text-left"}`}>{t(`destinations.city_descriptions.${slug}`)}</p>
@@ -438,7 +438,7 @@ export default function DestinationDetail() {
             {/* Photo Gallery */}
             <Card>
               <CardHeader>
-                <CardTitle className={`${isRTL ? "text-right w-full" : "text-left"}`}>{t("destinations.detail.gallery.title")}</CardTitle>
+                <CardTitle className={isRTL ? "text-right" : "text-left"}>{t("destinations.detail.gallery.title")}</CardTitle>
               </CardHeader>
               <CardContent className={isRTL ? "text-right" : "text-left"}>
                 <DestinationGallery
@@ -468,7 +468,7 @@ export default function DestinationDetail() {
             {/* Basics */}
             <Card>
               <CardHeader>
-                <CardTitle className={`${isRTL ? "text-right w-full" : "text-left"}`}>{t("destinations.detail.basics")}</CardTitle>
+                <CardTitle className={isRTL ? "text-right" : "text-left"}>{t("destinations.detail.basics")}</CardTitle>
               </CardHeader>
               <CardContent className={`space-y-4 ${isRTL ? "text-right" : "text-left"}`}>
                 <div className="flex items-start gap-3">
@@ -505,7 +505,7 @@ export default function DestinationDetail() {
             {/* Map */}
             <Card>
               <CardHeader>
-                <CardTitle className={`flex items-center gap-2 ${isRTL ? "text-right w-full" : "text-left"}`}>
+                <CardTitle className={`flex items-center gap-2 ${isRTL ? "text-right" : "text-left"}`}>
                   <MapPin className="h-5 w-5" />
                   {t("destinations.detail.view_on_map")}
                 </CardTitle>
