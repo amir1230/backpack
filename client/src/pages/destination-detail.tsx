@@ -308,7 +308,7 @@ export default function DestinationDetail() {
 
             {/* Weather */}
             <Card>
-              <CardHeader className={isRTL ? "text-right" : "text-left"}>
+              <CardHeader style={{ textAlign: isRTL ? 'right' : 'left' }}>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <Cloud className="h-5 w-5" />
@@ -437,10 +437,10 @@ export default function DestinationDetail() {
 
             {/* Photo Gallery */}
             <Card>
-              <CardHeader className={isRTL ? "text-right" : "text-left"}>
+              <CardHeader style={{ textAlign: isRTL ? 'right' : 'left' }}>
                 <CardTitle>{t("destinations.detail.gallery.title")}</CardTitle>
               </CardHeader>
-              <CardContent className={isRTL ? "text-right" : "text-left"}>
+              <CardContent style={{ textAlign: isRTL ? 'right' : 'left' }}>
                 <DestinationGallery
                   destinationName={destination.name}
                   heroImages={[
