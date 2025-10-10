@@ -7,7 +7,26 @@ GlobeMate is a full-stack web application for global travel planning and communi
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (October 10, 2025)
-- **Geo Basics Integration**: Added RestCountries + GeoNames API integration for destination basic information
+- **Interactive Google Maps Integration**: Added embedded Google Maps to destination detail pages
+  - Server endpoint: /api/maps/key for secure API key delivery
+  - GoogleMapEmbed component with iframe embed and directions button
+  - Fully responsive design for mobile and desktop
+  - i18n: Hebrew/English support for map labels and buttons
+  
+- **Optimized Image Loading System**: Comprehensive image loading improvements across all galleries
+  - **OptimizedImage Component** (client/src/components/OptimizedImage.tsx):
+    - Automatic retry mechanism with cache-busting (up to 3 attempts)
+    - Smart lazy loading using Intersection Observer (starts 50px before viewport)
+    - Loading skeleton states with smooth fade-in transitions
+    - Error handling with user-friendly retry button
+    - Priority loading support for above-the-fold images
+    - Fallback image support
+  - **Implementation**: Integrated in DestinationGallery (hero, POI, lightbox) and RealPlaceLinks (place photos)
+  - **Verified**: E2E tested with Paris destination - all images load successfully
+  
+- **Geo Basics Enhancements**: 
+  - Fixed timezone display to show max 2 zones + count (e.g., "UTC+01:00, UTC+02:00 +13")
+  - Added country code mapping (UK→United Kingdom, USA→United States, etc.)
   - Server endpoints: /api/destinations/geo-basics (public proxy), /api/geo/* (internal with x-globemate-key)
   - Integration layer: src/integrations/geo/restCountries.ts + geoNames.ts with structured logging
   - Unified service: server/services/destinations/geoService.ts with caching (24h country, 6h city)

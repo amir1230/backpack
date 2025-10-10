@@ -43,6 +43,22 @@ export default function OptimizedImage({
     setRetryCount(0);
   }, [src]);
 
+  // Update src for non-priority images when currentSrc changes (for retries/fallback)
+  useEffect(() => {
+    if (!priority && imgRef.current) {
+      // Check if image has an explicit src attribute (already observed/loaded)
+      const hasExplicitSrc = imgRef.current.getAttribute('src') !== null;
+      
+      if (hasExplicitSrc || hasError) {
+        // If image was already loaded or in error state, update src directly for retry/fallback
+        imgRef.current.src = currentSrc;
+      } else {
+        // Otherwise update data-src for intersection observer to pick up
+        imgRef.current.dataset.src = currentSrc;
+      }
+    }
+  }, [currentSrc, priority, hasError]);
+
   // Intersection Observer for lazy loading
   useEffect(() => {
     if (priority || !imgRef.current) return;
@@ -72,7 +88,7 @@ export default function OptimizedImage({
         observerRef.current.disconnect();
       }
     };
-  }, [priority]);
+  }, [priority, hasError]);
 
   const handleLoad = () => {
     setIsLoading(false);
