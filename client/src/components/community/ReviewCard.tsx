@@ -73,17 +73,7 @@ export function ReviewCard({ review, onEdit, onDeleted, onHelpfulToggle }: Revie
   };
 
   const handlePlaceClick = () => {
-    // Navigate to /explore with proper tab and search
-    const entityTypeMap: Record<string, string> = {
-      destinations: 'destinations',
-      accommodations: 'accommodations', 
-      attractions: 'attractions',
-      restaurants: 'restaurants'
-    };
-    
-    const tab = entityTypeMap[review.entity_type] || 'destinations';
-    const placeName = review.place_name || '';
-    setLocation(`/explore?tab=${tab}&q=${encodeURIComponent(placeName)}`);
+    // Place navigation disabled
   };
 
   // Render star rating

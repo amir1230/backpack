@@ -15,7 +15,6 @@ import Community from "./pages/Community.js";
 import BudgetTracker from "./pages/budget-tracker.js";
 import Achievements from "./pages/achievements.js";
 import TripAdvisorData from "./pages/tripadvisor-data.js";
-import Explore from "./pages/explore.js";
 import Weather from "./pages/weather.js";
 import MyTripsNew from "./pages/my-trips-new.js";
 import ItineraryDetail from "./pages/itinerary-detail.js";
@@ -50,7 +49,6 @@ function Router() {
           <Route path="/budget-tracker" component={BudgetTracker} />
           <Route path="/achievements" component={Achievements} />
           <Route path="/tripadvisor-data" component={TripAdvisorData} />
-          <Route path="/explore" component={Explore} />
           <Route path="/weather" component={Weather} />
           <Route path="/onboarding" component={Onboarding} />
           <Route path="/registry" component={Registry} />

@@ -138,12 +138,6 @@ export default function Landing() {
                   {t('landing.start_planning')}
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full sm:w-auto border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold hover:bg-white hover:text-primary">
-                <Link href="/explore">
-                  <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                  {t('landing.learn_more')}
-                </Link>
-              </Button>
             </div>
           </div>
         </div>
@@ -443,17 +437,6 @@ export default function Landing() {
                 <li><Link href="/community" className="hover:text-white">{t('landing.community_nav')}</Link></li>
                 <li><Link href="/community" className="hover:text-white">{t('landing.reviews_nav')}</Link></li>
                 <li><Link href="/community" className="hover:text-white">{t('landing.live_chat_nav')}</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-semibold mb-4">{t('landing.destinations_nav')}</h3>
-              <ul className="space-y-2 text-gray-300">
-                <li><Link href="/explore?country=Japan" className="hover:text-white">{translateCountry('Japan')}</Link></li>
-                <li><Link href="/explore?country=France" className="hover:text-white">{translateCountry('France')}</Link></li>
-                <li><Link href="/explore?country=Thailand" className="hover:text-white">{translateCountry('Thailand')}</Link></li>
-                <li><Link href="/explore?country=Italy" className="hover:text-white">{translateCountry('Italy')}</Link></li>
-                <li><Link href="/explore?country=Australia" className="hover:text-white">{translateCountry('Australia')}</Link></li>
               </ul>
             </div>
             

@@ -6,7 +6,16 @@ GlobeMate is a full-stack web application for global travel planning and communi
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes (October 10, 2025)
+## Recent Changes (October 11, 2025)
+- **Explore Page Removal**: Completely removed the /explore page and all related functionality
+  - Deleted client/src/pages/explore.tsx (1251 lines)
+  - Removed route from App.tsx
+  - Removed navigation menu item from navigation.tsx
+  - Removed "Learn More" button from landing page
+  - Removed destination quick links from landing page footer
+  - Disabled place navigation in ReviewCard component
+
+## Previous Changes (October 10, 2025)
 - **Interactive Google Maps Integration**: Added embedded Google Maps to destination detail pages
   - Server endpoint: /api/maps/key for secure API key delivery
   - GoogleMapEmbed component with iframe embed and directions button

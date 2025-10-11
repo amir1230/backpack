@@ -41,7 +41,6 @@ const getNavigationItems = (t: any) => [
   { href: "/", label: t('navigation.home'), icon: Home },
   { href: "/my-trips", label: t('navigation.my_trips'), icon: Calendar },
   { href: "/destinations", label: t('destinations.hub_title'), icon: Globe },
-  { href: "/explore", label: t('navigation.explore'), icon: MapPin },
   { href: "/weather", label: t('navigation.weather'), icon: Cloud },
   { href: "/community", label: t('navigation.community'), icon: Users },
   { href: "/achievements", label: t('navigation.achievements'), icon: Trophy },
