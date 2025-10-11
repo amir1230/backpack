@@ -12,8 +12,12 @@ Preferred communication style: Simple, everyday language.
   - Removed route from App.tsx
   - Removed navigation menu item from navigation.tsx
   - Removed "Learn More" button from landing page
-  - Removed destination quick links from landing page footer
   - Disabled place navigation in ReviewCard component
+  
+- **Footer Destinations Links Update**: Added destination quick links to landing page footer
+  - Each country link navigates to the most attractive destination in that country
+  - Links: Tokyo (Japan), Paris (France), Bangkok (Thailand), Rome (Italy), Sydney (Australia)
+  - All links navigate to destination detail pages (/destinations/:slug)
 
 ## Previous Changes (October 10, 2025)
 - **Interactive Google Maps Integration**: Added embedded Google Maps to destination detail pages

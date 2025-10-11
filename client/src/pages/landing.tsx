@@ -441,6 +441,17 @@ export default function Landing() {
             </div>
             
             <div>
+              <h3 className="text-lg font-semibold mb-4">{t('landing.destinations_nav')}</h3>
+              <ul className="space-y-2 text-gray-300">
+                <li><Link href="/destinations/tokyo" className="hover:text-white">{translateCountry('Japan')}</Link></li>
+                <li><Link href="/destinations/paris" className="hover:text-white">{translateCountry('France')}</Link></li>
+                <li><Link href="/destinations/bangkok" className="hover:text-white">{translateCountry('Thailand')}</Link></li>
+                <li><Link href="/destinations/rome" className="hover:text-white">{translateCountry('Italy')}</Link></li>
+                <li><Link href="/destinations/sydney" className="hover:text-white">{translateCountry('Australia')}</Link></li>
+              </ul>
+            </div>
+            
+            <div>
               <h3 className="text-lg font-semibold mb-4">{t('landing.support_nav')}</h3>
               <ul className="space-y-2 text-gray-300">
                 <li><Button type="button" className="hover:text-white bg-transparent p-0 h-auto text-gray-300">{t('landing.help_center')}</Button></li>
