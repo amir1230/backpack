@@ -44,6 +44,7 @@ Preferred communication style: Simple, everyday language.
   - **Duration Mapping**: 1-2 weeks = 14 days, 2-4 weeks = 28 days, 1-2 months = 60 days, 3+ months = 90 days
   - **Backend Integration**: Frontend now sends exact number of days to AI endpoints
   - **AI Response**: OpenAI generates itineraries with the correct number of days (e.g., 28-day itinerary for 2-4 weeks selection)
+  - **Suggestion-Based Itinerary**: When generating itinerary from AI suggestion, correctly parses duration ranges (e.g., "20-25 days" → 25-day itinerary)
 
 ## System Architecture
 ### Frontend Architecture
