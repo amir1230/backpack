@@ -200,20 +200,19 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
       title: formData.title.trim(),
       description: formData.description.trim(),
       destination: formData.destination.trim(),
-      start_date: formData.startDate.toISOString(),
-      end_date: formData.endDate.toISOString(),
-      group_size: formData.groupSize,
+      startDate: formData.startDate.toISOString(),
+      endDate: formData.endDate.toISOString(),
+      groupSize: formData.groupSize,
       adults: formData.adults,
       children: formData.children,
       budget: formData.budget,
-      travel_style: formData.travelStyles,
+      travelStyle: formData.travelStyles,
       activities: formData.activities,
       requirements: formData.requirements.trim() || null,
-      contact_info: {
-        display_name: guestData.displayName.trim(),
-        contact_method: guestData.contactMethod.trim()
-      },
-      author_name: guestData.displayName.trim() // For guest mode
+      contactInfo: {
+        displayName: guestData.displayName.trim(),
+        contactMethod: guestData.contactMethod.trim()
+      }
     };
 
     createPostMutation.mutate(postData);

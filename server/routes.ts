@@ -4264,7 +4264,7 @@ export async function registerRoutes(app: Express): Promise<void> {
 
   app.post('/api/travel-buddy-posts', noAuth, async (req: any, res) => {
     try {
-      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id;
+      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id || 'guest';
       const postData = { ...req.body, userId };
       const post = await storage.createTravelBuddyPost(postData);
       res.status(201).json(post);
