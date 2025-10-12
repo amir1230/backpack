@@ -787,7 +787,7 @@ export default function MyTripsNew() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-teal-50 to-blue-50 py-8 px-4 sm:px-6 lg:px-8 pb-20 md:pb-8">
+    <div className="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-8 pb-20 md:pb-8">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4">{t('trips.my_trip_planner')}</h1>
@@ -831,7 +831,7 @@ export default function MyTripsNew() {
                 {t('trips.travelers_and_trip_type_desc')}
               </p>
             </div>
-            <Card className="shadow-lg bg-white/80 backdrop-blur-sm border-none">
+            <Card className="shadow-lg bg-gradient-to-r from-orange-50 to-teal-50 border-none">
               <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Trip Type */}
@@ -953,7 +953,7 @@ export default function MyTripsNew() {
                 {t('trips.tell_us_preferences')}
               </p>
             </div>
-            <Card className="shadow-lg bg-white/80 backdrop-blur-sm border-none">
+            <Card className="shadow-lg bg-gradient-to-br from-orange-50 via-teal-50 to-blue-50 border-none">
               <CardContent className="space-y-6 p-6">
                 {/* Continent Selection */}
                 <div>
@@ -1161,7 +1161,7 @@ export default function MyTripsNew() {
                 {t('trips.personalized_recommendations')}
               </p>
             </div>
-            <Card className="shadow-lg bg-white/80 backdrop-blur-sm border-none">
+            <Card className="shadow-lg bg-gradient-to-br from-orange-50 via-teal-50 to-blue-50 border-none">
               <CardContent>
                 {isGenerating && (
                   <div className="text-center py-8">
@@ -1328,7 +1328,7 @@ export default function MyTripsNew() {
                 {t('trips.detailed_day_by_day_plan')}
               </p>
             </div>
-            <Card className="shadow-lg bg-white/80 backdrop-blur-sm border-none">
+            <Card className="shadow-lg bg-gradient-to-br from-orange-50 via-teal-50 to-blue-50 border-none">
               <CardContent>
                 {isGeneratingItinerary && (
                   <div className="text-center py-8">
@@ -1457,7 +1457,7 @@ export default function MyTripsNew() {
                 {t('trips.view_manage_itineraries')}
               </p>
             </div>
-            <Card className="shadow-lg bg-white/80 backdrop-blur-sm border-none">
+            <Card className="shadow-lg bg-gradient-to-br from-orange-50 via-teal-50 to-blue-50 border-none">
               <CardContent>
                 {!isAuthenticated ? (
                   <div className="text-center py-8">
@@ -1585,7 +1585,7 @@ export default function MyTripsNew() {
                 {t('trips.view_manage_trips')}
               </p>
             </div>
-            <Card className="shadow-lg bg-white/80 backdrop-blur-sm border-none">
+            <Card className="shadow-lg bg-gradient-to-br from-orange-50 via-teal-50 to-blue-50 border-none">
               <CardContent>
                 {isLoadingSavedTrips && (
                   <div className="text-center py-8">
