@@ -412,6 +412,9 @@ export default function MyTripsNew() {
         interests: selectedInterests,
         travelStyle: selectedStyles,
         budget: budget[0] || 1000,
+        adults: formData.adults || 2,
+        children: formData.children || 0,
+        tripType: formData.tripType || 'family',
       };
       
       console.log('Sending itinerary request with data:', requestData);
@@ -657,6 +660,7 @@ export default function MyTripsNew() {
         travelStyle: suggestion.travelStyle
       });
       
+      const formData = form.getValues();
       const response = await apiRequest('/api/ai/itinerary', {
         method: 'POST',
         body: JSON.stringify({
@@ -666,6 +670,9 @@ export default function MyTripsNew() {
           language: i18n.language,
           travelStyle: suggestion.travelStyle,
           budget: suggestion.estimatedBudget.low || 1000,
+          adults: formData.adults || 2,
+          children: formData.children || 0,
+          tripType: formData.tripType || 'family',
         }),
       });
       

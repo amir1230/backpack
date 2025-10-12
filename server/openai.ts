@@ -75,6 +75,9 @@ export async function generateTravelSuggestions(
     preferredCountries?: string[];
     specificCity?: string;
     language?: string;
+    adults?: number;
+    children?: number;
+    tripType?: string;
   }
 ): Promise<TripSuggestion[]> {
   try {
@@ -92,6 +95,9 @@ export async function generateTravelSuggestions(
     const interestsStr = preferences.interests?.join(', ') || 'General exploration';
     const countriesStr = preferences.preferredCountries?.join(', ') || 'Any country worldwide';
     const specificCity = preferences.specificCity;
+    const adults = preferences.adults || 2;
+    const children = preferences.children || 0;
+    const tripType = preferences.tripType || 'family';
 
     const isHebrew = preferences.language === 'he';
     
@@ -105,6 +111,10 @@ You MUST provide 3 trip suggestions ONLY for ${specificCity} specifically. All s
       : `CRITICAL: The user has selected these specific countries: ${countriesStr}
 You MUST provide trip suggestions ONLY for destinations within these countries. Do NOT suggest destinations in other countries.`;
     
+    const travelerComposition = children > 0 
+      ? `${adults} adult${adults > 1 ? 's' : ''} and ${children} child${children > 1 ? 'ren' : ''}`
+      : `${adults} adult${adults > 1 ? 's' : ''}`;
+    
     const prompt = `You are GlobeMate – a smart, friendly, and social travel planner built for Gen Z and solo travelers.  
 Your mission is to help travelers discover personalized, exciting, and budget-conscious trips across the world.
 
@@ -112,7 +122,17 @@ ${isHebrew ? 'IMPORTANT: Respond in Hebrew. All text fields (destination, countr
 
 ${locationConstraint}
 
+CRITICAL: This trip is for ${travelerComposition} as a ${tripType} trip. 
+${children > 0 ? 'IMPORTANT: This is a family trip with children. All suggestions MUST be family-friendly with child-appropriate activities, accommodations, and safety considerations.' : ''}
+${tripType === 'honeymoon' ? 'IMPORTANT: This is a honeymoon trip. Focus on romantic destinations, couple activities, and intimate experiences.' : ''}
+${tripType === 'solo' ? 'IMPORTANT: This is a solo trip. Focus on safe destinations, solo-friendly activities, and social opportunities.' : ''}
+${tripType === 'couples' ? 'IMPORTANT: This is a couples trip. Focus on romantic and couple-friendly activities.' : ''}
+${tripType === 'family' && children === 0 ? 'IMPORTANT: This is a family trip for adults. Include multi-generational activities and comfortable accommodations.' : ''}
+${tripType === 'friends' ? 'IMPORTANT: This is a group of friends traveling together. Focus on fun group activities and social experiences.' : ''}
+
 Using the following preferences:
+- Traveler Composition: ${travelerComposition}
+- Trip Type: ${tripType}
 - Travel Style: ${travelStylesStr}
 - Budget: ${budgetStr}
 - Duration: ${durationStr}

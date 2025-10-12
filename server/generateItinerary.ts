@@ -22,12 +22,15 @@ export interface ItineraryRequest {
   travelStyle: string[];
   budget: number;
   language?: string;
+  adults?: number;
+  children?: number;
+  tripType?: string;
 }
 
 export async function generateItinerary(request: ItineraryRequest): Promise<ItineraryDay[]> {
   console.log('generateItinerary called with request:', request);
   
-  const { destination, duration, interests, travelStyle, budget, language } = request;
+  const { destination, duration, interests, travelStyle, budget, language, adults = 2, children = 0, tripType = 'family' } = request;
   
   // Validate inputs
   if (!destination) {
@@ -42,11 +45,25 @@ export async function generateItinerary(request: ItineraryRequest): Promise<Itin
   
   const isHebrew = language === 'he';
   
-  const prompt = `You are GlobeMate – an AI travel planner helping solo travelers build day-by-day itineraries.
+  const travelerComposition = children > 0 
+    ? `${adults} adult${adults > 1 ? 's' : ''} and ${children} child${children > 1 ? 'ren' : ''}`
+    : `${adults} adult${adults > 1 ? 's' : ''}`;
+  
+  const prompt = `You are GlobeMate – an AI travel planner helping travelers build day-by-day itineraries.
 
 ${isHebrew ? 'IMPORTANT: Respond in Hebrew. All text fields (location, activities, tips) must be in Hebrew.' : ''}
 
+CRITICAL: This itinerary is for ${travelerComposition} on a ${tripType} trip.
+${children > 0 ? 'IMPORTANT: This is a family trip with children. All activities MUST be family-friendly, child-appropriate, and safe for kids.' : ''}
+${tripType === 'honeymoon' ? 'IMPORTANT: This is a honeymoon trip. Focus on romantic activities, couple experiences, and intimate settings.' : ''}
+${tripType === 'solo' ? 'IMPORTANT: This is a solo trip. Focus on safe activities, solo-friendly experiences, and opportunities to meet other travelers.' : ''}
+${tripType === 'couples' ? 'IMPORTANT: This is a couples trip. Focus on romantic and couple-friendly activities.' : ''}
+${tripType === 'family' && children === 0 ? 'IMPORTANT: This is a family trip for adults. Include multi-generational activities and comfortable experiences.' : ''}
+${tripType === 'friends' ? 'IMPORTANT: This is a group of friends traveling together. Focus on fun group activities and social experiences.' : ''}
+
 Using the user's preferences:
+- Traveler Composition: ${travelerComposition}
+- Trip Type: ${tripType}
 - Destination: ${destination}
 - Duration: ${duration} days
 - Interests: ${interests.join(', ')}

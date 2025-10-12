@@ -1426,7 +1426,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   // AI-powered travel suggestions (guest-friendly)
   app.post('/api/ai/travel-suggestions', async (req, res) => {
     try {
-      const { destination, travelStyle, budget, duration, interests, preferredCountries, language } = req.body;
+      const { destination, travelStyle, budget, duration, interests, preferredCountries, language, adults, children, tripType } = req.body;
       
       // Normalize language parameter
       const normalizedLanguage = (language || req.headers['accept-language'] || 'en').toString().toLowerCase();
@@ -1455,7 +1455,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       console.log("Generating travel suggestions with data:", {
-        specificCity, country, travelStyle, budget, duration, interests, preferredCountries
+        specificCity, country, travelStyle, budget, duration, interests, preferredCountries, adults, children, tripType
       });
 
       const suggestions = await generateTravelSuggestions({
@@ -1465,7 +1465,10 @@ export async function registerRoutes(app: Express): Promise<void> {
         interests,
         preferredCountries: Array.isArray(destination) ? destination : [country],
         specificCity,
-        language: finalLanguage
+        language: finalLanguage,
+        adults: adults || 2,
+        children: children || 0,
+        tripType: tripType || 'family'
       });
       
       console.log("Generated suggestions:", suggestions);
@@ -1499,7 +1502,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   // AI-powered itinerary generation
   app.post('/api/ai/itinerary', noAuth, async (req, res) => {
     try {
-      const { destination, duration, interests, travelStyle, budget, language } = req.body;
+      const { destination, duration, interests, travelStyle, budget, language, adults, children, tripType } = req.body;
       
       // Normalize language parameter
       const normalizedLanguage = (language || req.headers['accept-language'] || 'en').toString().toLowerCase();
@@ -1543,7 +1546,10 @@ export async function registerRoutes(app: Express): Promise<void> {
         interests: cleanInterests,
         travelStyle: cleanTravelStyle,
         budget: cleanBudget,
-        language: finalLanguage
+        language: finalLanguage,
+        adults: adults || 2,
+        children: children || 0,
+        tripType: tripType || 'family'
       });
       
       console.log('Generated itinerary successfully:', itinerary.length, 'days');
