@@ -727,8 +727,8 @@ export default function DestinationDetail() {
 
             {/* Book with Us */}
             <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-              <CardHeader className={isRTL ? "text-right" : "text-left"}>
-                <CardTitle className={`flex items-center gap-2 text-primary ${isRTL ? "flex-row-reverse" : ""}`}>
+              <CardHeader>
+                <CardTitle className={`flex items-center gap-2 text-primary ${isRTL ? "flex-row-reverse text-right" : "text-left"}`}>
                   <Bookmark className="h-5 w-5" />
                   {t("destinations.detail.book_with_us.title")}
                 </CardTitle>
