@@ -16,11 +16,12 @@ Preferred communication style: Simple, everyday language.
     - Fixed Promise rendering bug by properly destructuring `useLocalizedDestinations()` hook
     - Added fallback destinations list for reliability when API doesn't load
     - Fixed field naming from snake_case to camelCase (startDate, endDate, groupSize, travelStyle, contactInfo)
-  - **My Trips Page**:
-    - Added adults (מבוגרים) selector: 1-8 travelers
-    - Added children (ילדים) selector: 0-6 kids
+  - **My Trips Page** (my-trips-new.tsx):
+    - Added adults (מבוגרים) selector: 1-8 travelers (default: 2)
+    - Added children (ילדים) selector: 0-6 kids (default: 0)
     - Updated TripFormData interface to include adults/children fields
-    - UI shows separate fields in trip generation form
+    - UI shows separate fields in trip generation form after duration field
+    - Note: Old my-trips.tsx deleted (unused, app uses my-trips-new.tsx)
   - **Backend API**:
     - Updated POST /api/travel-buddy-posts to support guest users (userId defaults to 'guest')
     - Validates adults/children fields with insertTravelBuddyPostSchema
