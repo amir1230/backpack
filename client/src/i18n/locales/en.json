@@ -1257,6 +1257,13 @@
       "basics": "Basic Information",
       "inspiration": "Inspiration",
       "booking": "Bookings",
+      "book_with_us": {
+        "title": "Book with Us",
+        "description": "To book hotels, flights, or travel packages to this destination, contact us and we'll be happy to help plan your perfect trip.",
+        "email": "Email",
+        "phone": "Phone",
+        "contact_button": "Contact Us Now"
+      },
       "top_attractions": "Top Attractions",
       "weather_now": "Current Weather",
       "forecast": "Forecast",

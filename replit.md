@@ -17,6 +17,13 @@ Preferred communication style: Simple, everyday language.
   - All interactive elements have data-testid attributes for testing
   - Footer links updated to navigate to support pages
 
+- **Booking Contact Section**: Added "Book with Us" section to destination detail pages
+  - Replaced booking stub with contact information card
+  - Displays email (support@globemate.co.il) and phone (0525530454) for booking inquiries
+  - Includes direct link to contact page
+  - Fully translated in Hebrew and English
+  - Professional gradient card design with clear call-to-action
+
 ## Previous Changes (October 11, 2025)
 - **Explore Page Removal**: Completely removed the /explore page and all related functionality
   - Deleted client/src/pages/explore.tsx (1251 lines)

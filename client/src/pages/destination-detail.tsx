@@ -725,25 +725,45 @@ export default function DestinationDetail() {
               </CardContent>
             </Card>
 
-            {/* Booking (Stub) */}
-            <Card>
+            {/* Book with Us */}
+            <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
               <CardHeader className={isRTL ? "text-right" : "text-left"}>
-                <div className={`flex items-center justify-between gap-4 ${isRTL ? "flex-row-reverse" : ""}`}>
-                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 flex-shrink-0">
-                    {t("destinations.states.soon_badge")}
-                  </Badge>
-                  <CardTitle className={isRTL ? "text-right" : "text-left"}>{t("destinations.detail.booking")}</CardTitle>
-                </div>
+                <CardTitle className={`flex items-center gap-2 text-primary ${isRTL ? "flex-row-reverse" : ""}`}>
+                  <Bookmark className="h-5 w-5" />
+                  {t("destinations.detail.book_with_us.title")}
+                </CardTitle>
               </CardHeader>
-              <CardContent className={`space-y-3 ${isRTL ? "text-right" : "text-left"}`}>
-                <Button className="w-full" variant="outline" disabled>
-                  {t("destinations.detail.hotels")}
-                </Button>
-                <Button className="w-full" variant="outline" disabled>
-                  {t("destinations.detail.flights")}
-                </Button>
-                <Button className="w-full" variant="outline" disabled>
-                  {t("destinations.detail.packages")}
+              <CardContent className={`space-y-4 ${isRTL ? "text-right" : "text-left"}`}>
+                <p className="text-gray-700" data-testid="text-booking-description">
+                  {t("destinations.detail.book_with_us.description")}
+                </p>
+                <div className="space-y-2">
+                  <a 
+                    href="mailto:support@globemate.co.il" 
+                    className="flex items-center gap-2 text-primary hover:underline"
+                    data-testid="link-booking-email"
+                  >
+                    <span className="font-medium">{t("destinations.detail.book_with_us.email")}:</span>
+                    <span>support@globemate.co.il</span>
+                  </a>
+                  <a 
+                    href="tel:+972525530454" 
+                    className="flex items-center gap-2 text-primary hover:underline"
+                    data-testid="link-booking-phone"
+                  >
+                    <span className="font-medium">{t("destinations.detail.book_with_us.phone")}:</span>
+                    <span>0525530454</span>
+                  </a>
+                </div>
+                <Button 
+                  className="w-full mt-4" 
+                  variant="default"
+                  asChild
+                  data-testid="button-contact-booking"
+                >
+                  <Link href="/contact">
+                    {t("destinations.detail.book_with_us.contact_button")}
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
