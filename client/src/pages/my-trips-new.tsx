@@ -68,6 +68,8 @@ type TripFormData = {
   budget: number;
   duration: string;
   interests: string[];
+  adults: number;
+  children: number;
 };
 
 const getWorldDestinations = () => ({
@@ -271,6 +273,8 @@ export default function MyTripsNew() {
       budget: 1000,
       duration: "",
       interests: [],
+      adults: 2,
+      children: 0,
     },
   });
 
@@ -918,6 +922,46 @@ export default function MyTripsNew() {
                         <SelectItem key={duration.value} value={duration.value}>
                           {duration.label}
                         </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Adults */}
+                <div>
+                  <Label htmlFor="adults" className={`text-sm font-medium text-slate-700 mb-2 block ${i18n.language === 'he' ? 'text-right' : ''}`}>
+                    {t('trips.adults')}
+                  </Label>
+                  <Select 
+                    value={form.watch('adults')?.toString() || '2'} 
+                    onValueChange={(value) => form.setValue('adults', parseInt(value))}
+                  >
+                    <SelectTrigger className="w-full p-3" data-testid="select-adults-mytrips">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map(count => (
+                        <SelectItem key={count} value={count.toString()}>{count}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Children */}
+                <div>
+                  <Label htmlFor="children" className={`text-sm font-medium text-slate-700 mb-2 block ${i18n.language === 'he' ? 'text-right' : ''}`}>
+                    {t('trips.children')}
+                  </Label>
+                  <Select 
+                    value={form.watch('children')?.toString() || '0'} 
+                    onValueChange={(value) => form.setValue('children', parseInt(value))}
+                  >
+                    <SelectTrigger className="w-full p-3" data-testid="select-children-mytrips">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[0, 1, 2, 3, 4, 5, 6].map(count => (
+                        <SelectItem key={count} value={count.toString()}>{count}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
