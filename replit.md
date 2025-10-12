@@ -11,11 +11,16 @@ Preferred communication style: Simple, everyday language.
   - **Schema Updates**: 
     - Added `adults` (integer, default: 2) and `children` (integer, default: 0) to `travel_buddy_posts` table
     - Validation: adults 1-8, children 0-6 via Zod schema
-  - **NewBuddyPostModal Component**:
+  - **Travel Buddy Posts (Community Page)**:
     - Added separate selects for adults and children instead of single group size
     - Fixed Promise rendering bug by properly destructuring `useLocalizedDestinations()` hook
     - Added fallback destinations list for reliability when API doesn't load
     - Fixed field naming from snake_case to camelCase (startDate, endDate, groupSize, travelStyle, contactInfo)
+  - **My Trips Page**:
+    - Added adults (מבוגרים) selector: 1-8 travelers
+    - Added children (ילדים) selector: 0-6 kids
+    - Updated TripFormData interface to include adults/children fields
+    - UI shows separate fields in trip generation form
   - **Backend API**:
     - Updated POST /api/travel-buddy-posts to support guest users (userId defaults to 'guest')
     - Validates adults/children fields with insertTravelBuddyPostSchema
