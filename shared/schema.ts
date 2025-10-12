@@ -208,6 +208,8 @@ export const travelBuddyPosts = pgTable("travel_buddy_posts", {
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
   groupSize: integer("group_size").notNull(),
+  adults: integer("adults").default(2),
+  children: integer("children").default(0),
   currentMembers: integer("current_members").default(1),
   budget: varchar("budget"), // "low", "mid", "high"
   travelStyle: text("travel_style").array(),
@@ -958,6 +960,8 @@ export const insertTravelBuddyPostSchema = createInsertSchema(travelBuddyPosts).
   title: z.string().min(10).max(100),
   description: z.string().min(20).max(1000),
   groupSize: z.number().min(1).max(20),
+  adults: z.number().min(1).max(8).default(2),
+  children: z.number().min(0).max(6).default(0),
   travelStyle: z.array(z.string()).max(5),
   activities: z.array(z.string()).max(10),
 });

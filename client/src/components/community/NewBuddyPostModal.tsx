@@ -38,7 +38,7 @@ interface NewBuddyPostModalProps {
 
 export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps) {
   const { t } = useTranslation();
-  const localizedDestinations = useLocalizedDestinations();
+  const { data: localizedDestinations, isLoading: destinationsLoading } = useLocalizedDestinations();
 
   const TRAVEL_STYLES = [
     { id: 'backpacking', label: t('community.travel_styles.backpacking') },
@@ -286,8 +286,10 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
                   <SelectValue placeholder={t('community.select_destination_placeholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(localizedDestinations).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  {localizedDestinations?.map((destination) => (
+                    <SelectItem key={destination.id} value={destination.name}>
+                      {destination.nameLocalized || destination.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
