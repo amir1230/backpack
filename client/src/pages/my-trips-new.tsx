@@ -220,11 +220,17 @@ export default function MyTripsNew() {
 
   // Localized constants - defined inside component to access t()
   const DURATIONS = [
-    { value: "1-2 weeks", label: t('trips.duration_1_2_weeks') },
-    { value: "2-4 weeks", label: t('trips.duration_2_4_weeks') },
-    { value: "1-2 months", label: t('trips.duration_1_2_months') },
-    { value: "3+ months", label: t('trips.duration_3_months') },
+    { value: "1-2 weeks", label: t('trips.duration_1_2_weeks'), days: 14 },
+    { value: "2-4 weeks", label: t('trips.duration_2_4_weeks'), days: 28 },
+    { value: "1-2 months", label: t('trips.duration_1_2_months'), days: 60 },
+    { value: "3+ months", label: t('trips.duration_3_months'), days: 90 },
   ];
+
+  // Helper function to convert duration string to number of days
+  const getDurationInDays = (durationString: string): number => {
+    const duration = DURATIONS.find(d => d.value === durationString);
+    return duration?.days || 7; // default to 7 days if not found
+  };
 
   const TRAVEL_STYLES = [
     { id: 'adventure', icon: Mountain, label: t('trips.adventure'), description: t('trips.adventure_desc') },
@@ -327,7 +333,7 @@ export default function MyTripsNew() {
 
   // API calls
   const generateAISuggestionsMutation = useMutation({
-    mutationFn: async (data: TripFormData) => {
+    mutationFn: async (data: Omit<TripFormData, 'duration'> & { duration: number }) => {
       try {
         const response = await apiRequest('/api/ai/travel-suggestions', {
           method: 'POST',
@@ -408,7 +414,7 @@ export default function MyTripsNew() {
 
       const requestData = {
         destination: effectiveDestination,
-        duration: formData.duration || t('trips.1_week_default'),
+        duration: getDurationInDays(formData.duration || "1-2 weeks"),
         interests: selectedInterests,
         travelStyle: selectedStyles,
         budget: budget[0] || 1000,
@@ -591,12 +597,13 @@ export default function MyTripsNew() {
         ? `${formData.specificCity}, ${formData.destination}`
         : formData.destination;
 
-      const data: TripFormData = {
+      const data = {
         ...formData,
         destination: effectiveDestination,
         travelStyle: selectedStyles,
         interests: selectedInterests,
         budget: budget[0],
+        duration: getDurationInDays(formData.duration || "1-2 weeks"),
       };
 
       console.log('Sending data to API:', data);

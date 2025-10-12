@@ -70,7 +70,7 @@ export async function generateTravelSuggestions(
   preferences: {
     travelStyle?: string[];
     budget?: number;
-    duration?: string;
+    duration?: string | number;
     interests?: string[];
     preferredCountries?: string[];
     specificCity?: string;
@@ -91,7 +91,10 @@ export async function generateTravelSuggestions(
     
     const travelStylesStr = preferences.travelStyle?.join(', ') || 'Flexible';
     const budgetStr = preferences.budget ? `$${preferences.budget}` : 'Flexible';
-    const durationStr = preferences.duration || 'Flexible';
+    // Convert duration to days if it's a number, otherwise use the string as-is
+    const durationStr = typeof preferences.duration === 'number' 
+      ? `${preferences.duration} days` 
+      : preferences.duration || 'Flexible';
     const interestsStr = preferences.interests?.join(', ') || 'General exploration';
     const countriesStr = preferences.preferredCountries?.join(', ') || 'Any country worldwide';
     const specificCity = preferences.specificCity;

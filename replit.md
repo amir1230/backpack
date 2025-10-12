@@ -40,6 +40,11 @@ Preferred communication style: Simple, everyday language.
   - **Hebrew**: ₪2,000 - ₪50,000 (step: ₪500)
   - **Display**: Formatted numbers with currency symbols and locale-aware formatting
 
+- **Accurate Itinerary Duration**: Fixed itinerary generation to match selected duration range
+  - **Duration Mapping**: 1-2 weeks = 14 days, 2-4 weeks = 28 days, 1-2 months = 60 days, 3+ months = 90 days
+  - **Backend Integration**: Frontend now sends exact number of days to AI endpoints
+  - **AI Response**: OpenAI generates itineraries with the correct number of days (e.g., 28-day itinerary for 2-4 weeks selection)
+
 ## System Architecture
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript
