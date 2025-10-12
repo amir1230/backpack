@@ -7,13 +7,23 @@ GlobeMate is a full-stack web application for global travel planning and communi
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (October 12, 2025)
-- **Family-Friendly Trip Planning**: Expanded GlobeMate for all travelers - families, couples, solo travelers
-  - Added "Adults" and "Children" count fields to trip planning across all forms
-  - NewBuddyPostModal: Replaced single group size with separate adults (1-8) and children (0-6) selectors
-  - Schema update: Added `adults` (default: 2) and `children` (default: 0) to trips table
-  - Updated AI assistant welcome message to emphasize family-friendly worldwide travel
-  - Bilingual support: Added translations for "מבוגרים" (adults) and "ילדים" (children) in Hebrew
-  - AI prompts now consider family composition for personalized recommendations
+- **Family-Friendly Trip Planning System**: Complete overhaul to support all traveler types
+  - **Schema Updates**: 
+    - Added `adults` (integer, default: 2) and `children` (integer, default: 0) to `travel_buddy_posts` table
+    - Validation: adults 1-8, children 0-6 via Zod schema
+  - **NewBuddyPostModal Component**:
+    - Added separate selects for adults and children instead of single group size
+    - Fixed Promise rendering bug by properly destructuring `useLocalizedDestinations()` hook
+    - Added fallback destinations list for reliability when API doesn't load
+    - Fixed field naming from snake_case to camelCase (startDate, endDate, groupSize, travelStyle, contactInfo)
+  - **Backend API**:
+    - Updated POST /api/travel-buddy-posts to support guest users (userId defaults to 'guest')
+    - Validates adults/children fields with insertTravelBuddyPostSchema
+  - **AI Integration**:
+    - Updated welcome message to emphasize family-friendly worldwide travel
+    - AI prompts now consider family composition for personalized recommendations
+  - **Translations**: Full Hebrew/English support for "מבוגרים"/"Adults" and "ילדים"/"Children"
+  - **Database Migration**: Columns added via Supabase SQL Editor manually
 
 ## Previous Updates (October 12, 2025)
 - **Support Pages Implementation**: Created comprehensive support and informational pages

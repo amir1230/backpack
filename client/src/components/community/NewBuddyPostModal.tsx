@@ -40,6 +40,18 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
   const { t } = useTranslation();
   const { data: localizedDestinations, isLoading: destinationsLoading } = useLocalizedDestinations();
 
+  // Fallback destinations if API doesn't load
+  const POPULAR_DESTINATIONS = [
+    'Tokyo', 'Paris', 'Bangkok', 'Rome', 'Sydney', 'New York', 'London', 
+    'Barcelona', 'Dubai', 'Singapore', 'Istanbul', 'Amsterdam', 'Berlin',
+    'Prague', 'Vienna', 'Budapest', 'Lisbon', 'Athens', 'Copenhagen'
+  ];
+
+  const destinations = localizedDestinations?.map(d => ({
+    value: d.name,
+    label: d.nameLocalized || d.name
+  })) || POPULAR_DESTINATIONS.map(d => ({ value: d, label: d }));
+
   const TRAVEL_STYLES = [
     { id: 'backpacking', label: t('community.travel_styles.backpacking') },
     { id: 'luxury', label: t('community.travel_styles.luxury') },
@@ -285,9 +297,9 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
                   <SelectValue placeholder={t('community.select_destination_placeholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {localizedDestinations?.map((destination) => (
-                    <SelectItem key={destination.id} value={destination.name}>
-                      {destination.nameLocalized || destination.name}
+                  {destinations.map((destination) => (
+                    <SelectItem key={destination.value} value={destination.value}>
+                      {destination.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
