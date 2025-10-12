@@ -355,6 +355,8 @@
     "budget": "Budget",
     "trip_type": "Trip Type",
     "select_trip_type": "Select trip type",
+    "travelers_and_trip_type": "Travelers & Trip Type",
+    "travelers_and_trip_type_desc": "Tell us about your travel group to receive personalized recommendations",
     "trip_types": {
       "family": "Family Trip",
       "couples": "Couples Trip",

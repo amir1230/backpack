@@ -598,6 +598,8 @@
     "budget": "תקציב",
     "trip_type": "אופי הטיול",
     "select_trip_type": "בחר אופי טיול",
+    "travelers_and_trip_type": "הרכב המטיילים ואופי הטיול",
+    "travelers_and_trip_type_desc": "ספר לנו על ההרכב הנוסעים שלך כדי לקבל המלצות אישיות",
     "trip_types": {
       "family": "טיול משפחתי",
       "couples": "טיול זוגות",

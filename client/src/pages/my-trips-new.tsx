@@ -821,8 +821,18 @@ export default function MyTripsNew() {
           </div>
 
           {/* Trip Type & Travelers Header */}
-          <Card className="mb-6 mt-6 bg-gradient-to-r from-orange-50 to-teal-50 border-none shadow-md">
-            <CardContent className="p-6">
+          <div className="mt-6 mb-6">
+            <div className="text-center mb-4">
+              <h2 className={`text-2xl font-bold text-orange-500 mb-2 flex items-center gap-2 ${i18n.language === 'he' ? 'justify-center flex-row-reverse' : 'justify-center'}`}>
+                <Users className="w-6 h-6" />
+                {t('trips.travelers_and_trip_type')}
+              </h2>
+              <p className={`text-sm text-gray-600 ${i18n.language === 'he' ? 'text-center' : 'text-center'}`}>
+                {t('trips.travelers_and_trip_type_desc')}
+              </p>
+            </div>
+            <Card className="bg-gradient-to-r from-orange-50 to-teal-50 border-none shadow-md">
+              <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Trip Type */}
                 <div className="space-y-2">
@@ -930,6 +940,7 @@ export default function MyTripsNew() {
               </div>
             </CardContent>
           </Card>
+          </div>
 
           {/* Tab 1: Preferences */}
           <TabsContent value="preferences" className="mt-6">
