@@ -65,7 +65,7 @@ export default function AiChat({ className }: AiChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hi! I'm GlobeMate – your smart travel assistant for South American adventures! 🌎\n\nJust tell me what you're thinking (even incomplete ideas like 'I want to go to Peru') and I'll help you build the perfect trip by asking the right questions about budget, timing, and what you love to do!\n\nTry one of the prompts below or just start chatting:",
+      content: "Hi! I'm GlobeMate – your smart travel assistant for worldwide adventures! 🌎\n\nWhether you're traveling solo, as a couple, or with family and kids, I'll help you build the perfect trip! Just tell me what you're thinking (even incomplete ideas like 'I want to go to Japan with 2 adults and 2 kids') and I'll ask the right questions about budget, timing, and what you love to do!\n\nTry one of the prompts below or just start chatting:",
       sender: 'ai',
       timestamp: new Date()
     }

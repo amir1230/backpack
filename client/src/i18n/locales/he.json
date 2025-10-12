@@ -593,6 +593,8 @@
     "start_date": "תאריך התחלה",
     "end_date": "תאריך סיום",
     "participants": "משתתפים",
+    "adults": "מבוגרים",
+    "children": "ילדים",
     "budget": "תקציב",
     "no_trips": "אין טיולים עדיין",
     "create_first_trip": "צור את הטיול הראשון שלך כדי להתחיל",

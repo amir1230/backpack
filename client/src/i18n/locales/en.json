@@ -350,6 +350,8 @@
     "start_date": "Start Date",
     "end_date": "End Date",
     "participants": "Participants",
+    "adults": "Adults",
+    "children": "Children",
     "budget": "Budget",
     "no_trips": "No trips yet",
     "create_first_trip": "Create your first trip to get started",

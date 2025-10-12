@@ -7,6 +7,15 @@ GlobeMate is a full-stack web application for global travel planning and communi
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (October 12, 2025)
+- **Family-Friendly Trip Planning**: Expanded GlobeMate for all travelers - families, couples, solo travelers
+  - Added "Adults" and "Children" count fields to trip planning across all forms
+  - NewBuddyPostModal: Replaced single group size with separate adults (1-8) and children (0-6) selectors
+  - Schema update: Added `adults` (default: 2) and `children` (default: 0) to trips table
+  - Updated AI assistant welcome message to emphasize family-friendly worldwide travel
+  - Bilingual support: Added translations for "מבוגרים" (adults) and "ילדים" (children) in Hebrew
+  - AI prompts now consider family composition for personalized recommendations
+
+## Previous Updates (October 12, 2025)
 - **Support Pages Implementation**: Created comprehensive support and informational pages
   - **Help Center** (/help): FAQ section with 6 common questions, quick contact options
   - **Contact Us** (/contact): Contact form with email/phone details (support@globemate.co.il, 0525530454)

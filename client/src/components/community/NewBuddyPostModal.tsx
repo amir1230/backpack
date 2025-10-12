@@ -87,6 +87,8 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
     startDate: undefined as Date | undefined,
     endDate: undefined as Date | undefined,
     groupSize: 2,
+    adults: 2,
+    children: 0,
     budget: 'mid' as 'low' | 'mid' | 'high',
     travelStyles: [] as string[],
     activities: [] as string[],
@@ -137,6 +139,8 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
       startDate: undefined,
       endDate: undefined,
       groupSize: 2,
+      adults: 2,
+      children: 0,
       budget: 'mid',
       travelStyles: [],
       activities: [],
@@ -199,6 +203,8 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
       start_date: formData.startDate.toISOString(),
       end_date: formData.endDate.toISOString(),
       group_size: formData.groupSize,
+      adults: formData.adults,
+      children: formData.children,
       budget: formData.budget,
       travel_style: formData.travelStyles,
       activities: formData.activities,
@@ -301,8 +307,8 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
             </div>
           </div>
 
-          {/* Dates and Group Size */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Dates and Travelers */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label>{t('trips.start_date')} *</Label>
               <Popover>
@@ -347,19 +353,39 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
                 </PopoverContent>
               </Popover>
             </div>
+          </div>
 
+          {/* Travelers Count */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="groupSize">{t('community.group_size')}</Label>
+              <Label htmlFor="adults">{t('trips.adults')}</Label>
               <Select 
-                value={formData.groupSize.toString()} 
-                onValueChange={(value) => setFormData({ ...formData, groupSize: parseInt(value) })}
+                value={formData.adults.toString()} 
+                onValueChange={(value) => setFormData({ ...formData, adults: parseInt(value), groupSize: parseInt(value) + formData.children })}
               >
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-adults">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {[2, 3, 4, 5, 6, 7, 8, 9, 10].map(size => (
-                    <SelectItem key={size} value={size.toString()}>{size} {t('community.people')}</SelectItem>
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map(count => (
+                    <SelectItem key={count} value={count.toString()}>{count}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="children">{t('trips.children')}</Label>
+              <Select 
+                value={formData.children.toString()} 
+                onValueChange={(value) => setFormData({ ...formData, children: parseInt(value), groupSize: formData.adults + parseInt(value) })}
+              >
+                <SelectTrigger data-testid="select-children">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[0, 1, 2, 3, 4, 5, 6].map(count => (
+                    <SelectItem key={count} value={count.toString()}>{count}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

@@ -68,6 +68,8 @@ export const trips = pgTable("trips", {
   travelStyle: varchar("travel_style"),
   itinerary: jsonb("itinerary"), // Daily itinerary data
   isPublic: boolean("is_public").default(true),
+  adults: integer("adults").default(2), // Number of adults
+  children: integer("children").default(0), // Number of children
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
