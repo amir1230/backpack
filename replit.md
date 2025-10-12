@@ -7,13 +7,16 @@ GlobeMate is a full-stack web application for global travel planning and communi
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (October 12, 2025)
-- **Trip Type & Travelers Header**: Added interactive header section in My Trips page
-  - **Trip Type Selector**: Choose from 10 trip types (טיול משפחתי, טיול זוגות, מסיבת רווקים, etc.)
-  - **Adults/Children Counters**: Interactive +/- buttons for selecting number of travelers
-  - **Visual Design**: Gradient card (orange-teal) with prominent display
+- **Trip Type & Travelers Header - Updated**: Interactive header section in My Trips page
+  - **Trip Type Selector**: Choose from 11 trip types including new "ירח דבש/Honeymoon" option
+  - **Adults/Children Counters**: Interactive +/- buttons for selecting travelers
+    - Adults: 1-8 travelers (default: 2)
+    - Children: 0-10 kids (updated from 0-6)
+  - **Visual Design**: Gradient card (orange-teal) positioned BELOW tabs
   - **AI Integration**: Trip type, adults, and children data sent to AI for personalized recommendations
-  - **Translations**: Full Hebrew/English support for all trip types
-  - **Location**: Header appears at top of /my-trips page, above tabs
+  - **Translations**: Full Hebrew/English support for all 11 trip types
+  - **Location**: Header appears BELOW tab bar, before tab content
+  - **Removed Duplicates**: Deleted redundant adults/children fields from Preferences tab
 
 ## Previous Updates (October 12, 2025)
 - **Family-Friendly Trip Planning System**: Complete overhaul to support all traveler types
