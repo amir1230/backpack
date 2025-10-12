@@ -1265,9 +1265,9 @@ export default function MyTripsNew() {
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             {suggestion.highlights.map((highlight, idx) => (
-                              <div key={idx} className={`flex items-center text-sm text-gray-700 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
+                              <div key={idx} className={`flex items-center text-sm text-gray-700 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                                 <span className={`w-2 h-2 bg-yellow-500 rounded-full ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`}></span>
-                                {highlight}
+                                <span dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>{highlight}</span>
                               </div>
                             ))}
                           </div>
@@ -1419,9 +1419,9 @@ export default function MyTripsNew() {
                             </div>
                             <ul className="space-y-1">
                               {day.activities.map((activity, idx) => (
-                                <li key={idx} className={`text-sm text-gray-700 flex items-start ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
+                                <li key={idx} className={`text-sm text-gray-700 flex items-start ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                                   <span className={`w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0 ${i18n.language === 'he' ? 'ml-3' : 'mr-3'}`}></span>
-                                  {activity}
+                                  <span dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>{activity}</span>
                                 </li>
                               ))}
                             </ul>
@@ -1444,9 +1444,9 @@ export default function MyTripsNew() {
                             </div>
                             <ul className="space-y-1">
                               {day.tips.map((tip, idx) => (
-                                <li key={idx} className={`text-sm text-gray-700 flex items-start ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
+                                <li key={idx} className={`text-sm text-gray-700 flex items-start ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                                   <span className={`w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0 ${i18n.language === 'he' ? 'ml-3' : 'mr-3'}`}></span>
-                                  {tip}
+                                  <span dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>{tip}</span>
                                 </li>
                               ))}
                             </ul>
