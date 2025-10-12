@@ -787,7 +787,7 @@ export default function MyTripsNew() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 pb-20 md:pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-teal-50 to-blue-50 py-8 px-4 sm:px-6 lg:px-8 pb-20 md:pb-8">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4">{t('trips.my_trip_planner')}</h1>
@@ -831,7 +831,7 @@ export default function MyTripsNew() {
                 {t('trips.travelers_and_trip_type_desc')}
               </p>
             </div>
-            <Card className="bg-gradient-to-r from-orange-50 to-teal-50 border-none shadow-md">
+            <Card className="shadow-lg bg-white/80 backdrop-blur-sm border-none">
               <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Trip Type */}
@@ -944,17 +944,17 @@ export default function MyTripsNew() {
 
           {/* Tab 1: Preferences */}
           <TabsContent value="preferences" className="mt-6">
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className={`flex items-center ${i18n.language === 'he' ? 'justify-end text-right' : ''}`}>
-                  <Bot className={`w-6 h-6 text-primary ${i18n.language === 'he' ? 'ml-2 mr-0' : 'mr-2'}`} />
-                  {t('trips.trip_preferences')}
-                </CardTitle>
-                <CardDescription className={i18n.language === 'he' ? 'text-right' : ''}>
-                  {t('trips.tell_us_preferences')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
+            <div className="text-center mb-4">
+              <h2 className={`text-2xl font-bold text-orange-500 mb-2 flex items-center gap-2 ${i18n.language === 'he' ? 'justify-center flex-row-reverse' : 'justify-center'}`}>
+                <Bot className="w-6 h-6" />
+                {t('trips.trip_preferences')}
+              </h2>
+              <p className="text-sm text-gray-600">
+                {t('trips.tell_us_preferences')}
+              </p>
+            </div>
+            <Card className="shadow-lg bg-white/80 backdrop-blur-sm border-none">
+              <CardContent className="space-y-6 p-6">
                 {/* Continent Selection */}
                 <div>
                   <Label htmlFor="continent" className={`text-sm font-medium text-slate-700 mb-2 block ${i18n.language === 'he' ? 'text-right' : ''}`}>
@@ -1152,16 +1152,16 @@ export default function MyTripsNew() {
 
           {/* Tab 2: Suggestions */}
           <TabsContent value="suggestions" className="mt-6">
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className={`flex items-center ${i18n.language === 'he' ? 'justify-end text-right' : ''}`}>
-                  <Sparkles className={`w-6 h-6 text-primary ${i18n.language === 'he' ? 'ml-2 mr-0' : 'mr-2'}`} />
-                  {t('trips.ai_trip_suggestions')}
-                </CardTitle>
-                <CardDescription className={i18n.language === 'he' ? 'text-right' : ''}>
-                  {t('trips.personalized_recommendations')}
-                </CardDescription>
-              </CardHeader>
+            <div className="text-center mb-4">
+              <h2 className={`text-2xl font-bold text-orange-500 mb-2 flex items-center gap-2 ${i18n.language === 'he' ? 'justify-center flex-row-reverse' : 'justify-center'}`}>
+                <Sparkles className="w-6 h-6" />
+                {t('trips.ai_trip_suggestions')}
+              </h2>
+              <p className="text-sm text-gray-600">
+                {t('trips.personalized_recommendations')}
+              </p>
+            </div>
+            <Card className="shadow-lg bg-white/80 backdrop-blur-sm border-none">
               <CardContent>
                 {isGenerating && (
                   <div className="text-center py-8">
@@ -1319,16 +1319,16 @@ export default function MyTripsNew() {
 
           {/* Tab 3: Itinerary */}
           <TabsContent value="itinerary" className="mt-6">
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className={`flex items-center ${i18n.language === 'he' ? 'justify-end text-right' : ''}`}>
-                  <Route className={`w-6 h-6 text-primary ${i18n.language === 'he' ? 'ml-2 mr-0' : 'mr-2'}`} />
-                  {t('trips.daily_itinerary')}
-                </CardTitle>
-                <CardDescription className={i18n.language === 'he' ? 'text-right' : ''}>
-                  {t('trips.detailed_day_by_day_plan')}
-                </CardDescription>
-              </CardHeader>
+            <div className="text-center mb-4">
+              <h2 className={`text-2xl font-bold text-orange-500 mb-2 flex items-center gap-2 ${i18n.language === 'he' ? 'justify-center flex-row-reverse' : 'justify-center'}`}>
+                <Route className="w-6 h-6" />
+                {t('trips.daily_itinerary')}
+              </h2>
+              <p className="text-sm text-gray-600">
+                {t('trips.detailed_day_by_day_plan')}
+              </p>
+            </div>
+            <Card className="shadow-lg bg-white/80 backdrop-blur-sm border-none">
               <CardContent>
                 {isGeneratingItinerary && (
                   <div className="text-center py-8">
@@ -1448,16 +1448,16 @@ export default function MyTripsNew() {
 
           {/* Tab 4: My Itineraries */}
           <TabsContent value="my-itineraries" className="mt-6">
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className={`flex items-center ${i18n.language === 'he' ? 'justify-end text-right' : ''}`}>
-                  <Save className={`w-6 h-6 text-primary ${i18n.language === 'he' ? 'ml-2 mr-0' : 'mr-2'}`} />
-                  {t('trips.my_saved_itineraries')}
-                </CardTitle>
-                <CardDescription className={i18n.language === 'he' ? 'text-right' : ''}>
-                  {t('trips.view_manage_itineraries')}
-                </CardDescription>
-              </CardHeader>
+            <div className="text-center mb-4">
+              <h2 className={`text-2xl font-bold text-orange-500 mb-2 flex items-center gap-2 ${i18n.language === 'he' ? 'justify-center flex-row-reverse' : 'justify-center'}`}>
+                <Save className="w-6 h-6" />
+                {t('trips.my_saved_itineraries')}
+              </h2>
+              <p className="text-sm text-gray-600">
+                {t('trips.view_manage_itineraries')}
+              </p>
+            </div>
+            <Card className="shadow-lg bg-white/80 backdrop-blur-sm border-none">
               <CardContent>
                 {!isAuthenticated ? (
                   <div className="text-center py-8">
@@ -1576,16 +1576,16 @@ export default function MyTripsNew() {
 
           {/* Tab 5: My Trips */}
           <TabsContent value="saved" className="mt-6">
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className={`flex items-center ${i18n.language === 'he' ? 'justify-end text-right' : ''}`}>
-                  <FolderOpen className={`w-6 h-6 text-primary ${i18n.language === 'he' ? 'ml-2 mr-0' : 'mr-2'}`} />
-                  {t('trips.my_saved_trips')}
-                </CardTitle>
-                <CardDescription className={i18n.language === 'he' ? 'text-right' : ''}>
-                  {t('trips.view_manage_trips')}
-                </CardDescription>
-              </CardHeader>
+            <div className="text-center mb-4">
+              <h2 className={`text-2xl font-bold text-orange-500 mb-2 flex items-center gap-2 ${i18n.language === 'he' ? 'justify-center flex-row-reverse' : 'justify-center'}`}>
+                <FolderOpen className="w-6 h-6" />
+                {t('trips.my_saved_trips')}
+              </h2>
+              <p className="text-sm text-gray-600">
+                {t('trips.view_manage_trips')}
+              </p>
+            </div>
+            <Card className="shadow-lg bg-white/80 backdrop-blur-sm border-none">
               <CardContent>
                 {isLoadingSavedTrips && (
                   <div className="text-center py-8">
