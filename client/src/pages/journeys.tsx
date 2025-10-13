@@ -25,15 +25,15 @@ interface Journey {
     country: string;
     nights: number;
   }>;
-  totalNights: number;
-  priceMin: string;
-  priceMax: string;
+  total_nights: number;
+  price_min: number;
+  price_max: number;
   season: string[];
   tags: string[];
-  audienceTags: string[];
-  rating: string;
+  audience_tags: string[];
+  rating: number;
   popularity: number;
-  heroImage: string;
+  hero_image: string;
 }
 
 export default function JourneysPage() {
@@ -59,11 +59,28 @@ export default function JourneysPage() {
     return destinations.map(d => d.name).join(` ${arrow} `);
   };
 
-  const formatPrice = (min: string, max: string) => {
+  const formatPrice = (min: number, max: number) => {
     const currency = isRTL ? '₪' : '$';
-    const minNum = isRTL ? Math.round(parseFloat(min) * 3.5) : parseInt(min);
-    const maxNum = isRTL ? Math.round(parseFloat(max) * 3.5) : parseInt(max);
+    const minNum = isRTL ? Math.round(min * 3.5) : min;
+    const maxNum = isRTL ? Math.round(max * 3.5) : max;
     return `${currency}${minNum.toLocaleString()} - ${currency}${maxNum.toLocaleString()}`;
+  };
+
+  const translateTag = (tag: string) => {
+    const translations: Record<string, { he: string; en: string }> = {
+      nature: { he: 'טבע', en: 'Nature' },
+      food: { he: 'אוכל', en: 'Food' },
+      culture: { he: 'תרבות', en: 'Culture' },
+      nightlife: { he: 'חיי לילה', en: 'Nightlife' },
+      adventure: { he: 'הרפתקאות', en: 'Adventure' },
+      art: { he: 'אמנות', en: 'Art' },
+      '12+': { he: '12+', en: '12+' },
+      couple: { he: 'זוגות', en: 'Couple' },
+      solo: { he: 'יחידים', en: 'Solo' },
+      friends: { he: 'חברים', en: 'Friends' },
+      family: { he: 'משפחות', en: 'Family' },
+    };
+    return translations[tag]?.[isRTL ? 'he' : 'en'] || tag;
   };
 
   const formatDuration = (nights: number) => {
@@ -133,7 +150,7 @@ export default function JourneysPage() {
               {/* Budget Filter */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>
-                  {isRTL ? 'תקציב' : 'Budget'}: {formatPrice(filters.minBudget.toString(), filters.maxBudget.toString())}
+                  {isRTL ? 'תקציב' : 'Budget'}: {formatPrice(filters.minBudget, filters.maxBudget)}
                 </label>
                 <Slider
                   value={[filters.minBudget, filters.maxBudget]}
@@ -167,7 +184,7 @@ export default function JourneysPage() {
                     className={`cursor-pointer ${filters.tags.includes(tag) ? 'bg-orange-500 hover:bg-orange-600' : 'hover:bg-gray-100'}`}
                     onClick={() => toggleTag(tag)}
                   >
-                    {tag}
+                    {translateTag(tag)}
                   </Badge>
                 ))}
               </div>
@@ -196,13 +213,13 @@ export default function JourneysPage() {
                 <Card className="h-full overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group">
                   <div className="relative h-48 overflow-hidden">
                     <img
-                      src={journey.heroImage || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828'}
+                      src={journey.hero_image || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828'}
                       alt={journey.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-semibold">{parseFloat(journey.rating || '0').toFixed(1)}</span>
+                      <span className="text-sm font-semibold">{journey.rating.toFixed(1)}</span>
                     </div>
                   </div>
 
@@ -221,19 +238,19 @@ export default function JourneysPage() {
                     <div className="flex gap-4 mb-4 text-sm text-gray-600">
                       <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Calendar className="w-4 h-4" />
-                        <span dir={isRTL ? 'rtl' : 'ltr'}>{formatDuration(journey.totalNights)}</span>
+                        <span dir={isRTL ? 'rtl' : 'ltr'}>{formatDuration(journey.total_nights)}</span>
                       </div>
                       <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <DollarSign className="w-4 h-4" />
-                        <span dir={isRTL ? 'rtl' : 'ltr'}>{formatPrice(journey.priceMin, journey.priceMax)}</span>
+                        <span dir={isRTL ? 'rtl' : 'ltr'}>{formatPrice(journey.price_min, journey.price_max)}</span>
                       </div>
                     </div>
 
                     {/* Audience Tags */}
                     <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      {journey.audienceTags?.slice(0, 3).map((tag) => (
+                      {journey.audience_tags?.slice(0, 3).map((tag) => (
                         <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
+                          {translateTag(tag)}
                         </Badge>
                       ))}
                     </div>
