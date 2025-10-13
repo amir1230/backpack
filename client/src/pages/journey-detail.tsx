@@ -70,10 +70,33 @@ export default function JourneyDetailPage() {
     return `${currency}${minNum.toLocaleString()} - ${currency}${maxNum.toLocaleString()}`;
   };
 
+  const translateCityName = (cityName: string) => {
+    const cityTranslations: Record<string, { he: string; en: string }> = {
+      'Tokyo': { he: 'טוקיו', en: 'Tokyo' },
+      'Kyoto': { he: 'קיוטו', en: 'Kyoto' },
+      'Osaka': { he: 'אוסקה', en: 'Osaka' },
+      'Paris': { he: 'פריז', en: 'Paris' },
+      'Amsterdam': { he: 'אמסטרדם', en: 'Amsterdam' },
+      'Berlin': { he: 'ברלין', en: 'Berlin' },
+      'Barcelona': { he: 'ברצלונה', en: 'Barcelona' },
+      'Nice': { he: 'ניס', en: 'Nice' },
+      'Rome': { he: 'רומא', en: 'Rome' },
+      'Bangkok': { he: 'בנגקוק', en: 'Bangkok' },
+      'Chiang Mai': { he: 'צ\'יאנג מאי', en: 'Chiang Mai' },
+      'Phuket': { he: 'פוקט', en: 'Phuket' },
+      'New York': { he: 'ניו יורק', en: 'New York' },
+      'Philadelphia': { he: 'פילדלפיה', en: 'Philadelphia' },
+      'Washington DC': { he: 'וושינגטון', en: 'Washington DC' },
+      'Boston': { he: 'בוסטון', en: 'Boston' },
+    };
+    return cityTranslations[cityName]?.[isRTL ? 'he' : 'en'] || cityName;
+  };
+
   const translateJourneyTitle = (title: string) => {
     const titleTranslations: Record<string, { he: string; en: string }> = {
       'Classic Japan Circuit': { he: 'מסע יפן הקלאסי', en: 'Classic Japan Circuit' },
       'European Highlights Tour': { he: 'סיור דגשי אירופה', en: 'European Highlights Tour' },
+      'European Capital Tour': { he: 'סיור בירות אירופה', en: 'European Capital Tour' },
       'Southeast Asia Adventure': { he: 'הרפתקה בדרום מזרח אסיה', en: 'Southeast Asia Adventure' },
       'Mediterranean Dream': { he: 'חלום ים תיכוני', en: 'Mediterranean Dream' },
       'East Coast USA Explorer': { he: 'סיור החוף המזרחי של ארה"ב', en: 'East Coast USA Explorer' },
@@ -234,7 +257,7 @@ export default function JourneyDetailPage() {
                         {idx + 1}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-bold text-lg" dir={isRTL ? 'rtl' : 'ltr'}>{dest.name}, {dest.country}</h4>
+                        <h4 className="font-bold text-lg" dir={isRTL ? 'rtl' : 'ltr'}>{translateCityName(dest.name)}, {dest.country}</h4>
                         <p className="text-sm text-gray-600" dir={isRTL ? 'rtl' : 'ltr'}>
                           {dest.nights} {isRTL ? 'לילות' : 'nights'}
                         </p>
@@ -282,7 +305,7 @@ export default function JourneyDetailPage() {
                       {journey.destinations.map((dest, idx) => (
                         <tr key={idx} className="border-b hover:bg-gray-50">
                           <td className={`py-4 ${isRTL ? 'pr-4' : 'pl-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                            <span className="font-medium">{dest.name}</span>, {dest.country}
+                            <span className="font-medium">{translateCityName(dest.name)}</span>, {dest.country}
                           </td>
                           <td className="py-4" dir={isRTL ? 'rtl' : 'ltr'}>{dest.nights}</td>
                           <td className="py-4" dir={isRTL ? 'rtl' : 'ltr'}>{dest.transport?.type || '-'}</td>
@@ -306,7 +329,7 @@ export default function JourneyDetailPage() {
                 <Card key={destIdx}>
                   <CardContent className="p-6">
                     <h3 className="text-xl font-bold mb-4 text-orange-600" dir={isRTL ? 'rtl' : 'ltr'}>
-                      {journey.destinations[parseInt(destIdx)]?.name || `Destination ${parseInt(destIdx) + 1}`}
+                      {translateCityName(journey.destinations[parseInt(destIdx)]?.name || `Destination ${parseInt(destIdx) + 1}`)}
                     </h3>
                     <div className="space-y-4">
                       {days.map((day, idx) => (

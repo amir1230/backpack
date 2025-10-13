@@ -288,16 +288,39 @@ function PopularJourneysSection() {
     enabled: true,
   });
 
+  const translateCityName = (cityName: string) => {
+    const cityTranslations: Record<string, { he: string; en: string }> = {
+      'Tokyo': { he: 'טוקיו', en: 'Tokyo' },
+      'Kyoto': { he: 'קיוטו', en: 'Kyoto' },
+      'Osaka': { he: 'אוסקה', en: 'Osaka' },
+      'Paris': { he: 'פריז', en: 'Paris' },
+      'Amsterdam': { he: 'אמסטרדם', en: 'Amsterdam' },
+      'Berlin': { he: 'ברלין', en: 'Berlin' },
+      'Barcelona': { he: 'ברצלונה', en: 'Barcelona' },
+      'Nice': { he: 'ניס', en: 'Nice' },
+      'Rome': { he: 'רומא', en: 'Rome' },
+      'Bangkok': { he: 'בנגקוק', en: 'Bangkok' },
+      'Chiang Mai': { he: 'צ\'יאנג מאי', en: 'Chiang Mai' },
+      'Phuket': { he: 'פוקט', en: 'Phuket' },
+      'New York': { he: 'ניו יורק', en: 'New York' },
+      'Philadelphia': { he: 'פילדלפיה', en: 'Philadelphia' },
+      'Washington DC': { he: 'וושינגטון', en: 'Washington DC' },
+      'Boston': { he: 'בוסטון', en: 'Boston' },
+    };
+    return cityTranslations[cityName]?.[isRTL ? 'he' : 'en'] || cityName;
+  };
+
   const formatDestinationChain = (destinations: any[]) => {
     if (!destinations || destinations.length === 0) return '';
     const arrow = isRTL ? '→' : '←';
-    return destinations.map(d => d.name).join(` ${arrow} `);
+    return destinations.map(d => translateCityName(d.name)).join(` ${arrow} `);
   };
 
   const translateJourneyTitle = (title: string) => {
     const titleTranslations: Record<string, { he: string; en: string }> = {
       'Classic Japan Circuit': { he: 'מסע יפן הקלאסי', en: 'Classic Japan Circuit' },
       'European Highlights Tour': { he: 'סיור דגשי אירופה', en: 'European Highlights Tour' },
+      'European Capital Tour': { he: 'סיור בירות אירופה', en: 'European Capital Tour' },
       'Southeast Asia Adventure': { he: 'הרפתקה בדרום מזרח אסיה', en: 'Southeast Asia Adventure' },
       'Mediterranean Dream': { he: 'חלום ים תיכוני', en: 'Mediterranean Dream' },
       'East Coast USA Explorer': { he: 'סיור החוף המזרחי של ארה"ב', en: 'East Coast USA Explorer' },
