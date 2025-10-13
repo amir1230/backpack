@@ -183,6 +183,66 @@ export default function JourneyDetailPage() {
     return `${currency}${amount}`;
   };
 
+  const translateActivity = (activity: string) => {
+    const activityTranslations: Record<string, { he: string; en: string }> = {
+      'Grand Palace': { he: 'ארמון המלך', en: 'Grand Palace' },
+      'Wat Pho temple': { he: 'מקדש וואט פו', en: 'Wat Pho temple' },
+      'Khao San Road': { he: 'רחוב קאו סאן', en: 'Khao San Road' },
+      'Floating markets': { he: 'שווקים צפים', en: 'Floating markets' },
+      'Wat Arun': { he: 'מקדש וואט ארון', en: 'Wat Arun' },
+      'Rooftop bar evening': { he: 'ערב בבר על הגג', en: 'Rooftop bar evening' },
+      'Chatuchak Market': { he: 'שוק צ\'אטוצ\'ק', en: 'Chatuchak Market' },
+      'Jim Thompson House': { he: 'בית ג\'ים תומפסון', en: 'Jim Thompson House' },
+      'Thai cooking class': { he: 'שיעור בישול תאילנדי', en: 'Thai cooking class' },
+      'Eiffel Tower': { he: 'מגדל אייפל', en: 'Eiffel Tower' },
+      'Louvre Museum': { he: 'מוזיאון הלובר', en: 'Louvre Museum' },
+      'Seine River cruise': { he: 'שיט בנהר הסיין', en: 'Seine River cruise' },
+      'Anne Frank House': { he: 'בית אנה פרנק', en: 'Anne Frank House' },
+      'Van Gogh Museum': { he: 'מוזיאון ואן גוך', en: 'Van Gogh Museum' },
+      'Canal boat tour': { he: 'סיור בסירה בתעלות', en: 'Canal boat tour' },
+      'Brandenburg Gate': { he: 'שער ברנדנבורג', en: 'Brandenburg Gate' },
+      'Berlin Wall Memorial': { he: 'אנדרטת חומת ברלין', en: 'Berlin Wall Memorial' },
+      'Museum Island': { he: 'אי המוזיאונים', en: 'Museum Island' },
+      'Sensoji Temple': { he: 'מקדש סנסוג\'י', en: 'Sensoji Temple' },
+      'Tokyo Tower': { he: 'מגדל טוקיו', en: 'Tokyo Tower' },
+      'Shibuya Crossing': { he: 'מעבר חציה שיבויה', en: 'Shibuya Crossing' },
+      'Fushimi Inari Shrine': { he: 'מקדש פושימי אינרי', en: 'Fushimi Inari Shrine' },
+      'Bamboo Grove': { he: 'יער הבמבוק', en: 'Bamboo Grove' },
+      'Traditional tea ceremony': { he: 'טקס תה מסורתי', en: 'Traditional tea ceremony' },
+      'Osaka Castle': { he: 'טירת אוסקה', en: 'Osaka Castle' },
+      'Dotonbori district': { he: 'רובע דוטונבורי', en: 'Dotonbori district' },
+      'Street food tour': { he: 'סיור אוכל רחוב', en: 'Street food tour' },
+    };
+    return activityTranslations[activity]?.[isRTL ? 'he' : 'en'] || activity;
+  };
+
+  const formatDuration = (duration: string) => {
+    if (!isRTL) return duration;
+    
+    // Convert "hours 8" to "8 שעות"
+    const hoursMatch = duration.match(/hours?\s+(\d+)/i);
+    if (hoursMatch) {
+      return `${hoursMatch[1]} שעות`;
+    }
+    
+    // Convert "1h 20m" to "1 שעה 20 דקות"
+    const timeMatch = duration.match(/(\d+)h\s*(\d+)m/i);
+    if (timeMatch) {
+      const hours = parseInt(timeMatch[1]);
+      const minutes = parseInt(timeMatch[2]);
+      return `${hours} שעה ${minutes} דקות`;
+    }
+    
+    // Convert "2h" to "2 שעות"
+    const hoursOnlyMatch = duration.match(/(\d+)h/i);
+    if (hoursOnlyMatch) {
+      const hours = parseInt(hoursOnlyMatch[1]);
+      return hours === 1 ? `שעה אחת` : `${hours} שעות`;
+    }
+    
+    return duration;
+  };
+
   const getTransportIcon = (type: string) => {
     switch (type) {
       case 'flight':
@@ -326,7 +386,7 @@ export default function JourneyDetailPage() {
                       {dest.transport && (
                         <div className={`flex items-center gap-2 text-sm text-gray-600 ${isRTL ? 'flex-row-reverse' : ''}`}>
                           {getTransportIcon(dest.transport.type)}
-                          <span dir={isRTL ? 'rtl' : 'ltr'}>{dest.transport.duration}</span>
+                          <span dir={isRTL ? 'rtl' : 'ltr'}>{formatDuration(dest.transport.duration)}</span>
                           <span dir={isRTL ? 'rtl' : 'ltr'}>{formatCost(dest.transport.cost)}</span>
                         </div>
                       )}
@@ -370,7 +430,7 @@ export default function JourneyDetailPage() {
                           </td>
                           <td className="py-4" dir={isRTL ? 'rtl' : 'ltr'}>{dest.nights}</td>
                           <td className="py-4" dir={isRTL ? 'rtl' : 'ltr'}>{translateTransportType(dest.transport?.type || '-')}</td>
-                          <td className="py-4" dir={isRTL ? 'rtl' : 'ltr'}>{dest.transport?.duration || '-'}</td>
+                          <td className="py-4" dir={isRTL ? 'rtl' : 'ltr'}>{dest.transport?.duration ? formatDuration(dest.transport.duration) : '-'}</td>
                           <td className={`py-4 ${isRTL ? 'pr-4' : 'pl-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                             {dest.transport?.cost ? formatCost(dest.transport.cost) : '-'}
                           </td>
@@ -407,13 +467,13 @@ export default function JourneyDetailPage() {
                             {day.activities.map((activity, actIdx) => (
                               <li key={actIdx} className="flex items-start gap-2">
                                 <span className="text-orange-500 mt-1">•</span>
-                                <span dir={isRTL ? 'rtl' : 'ltr'}>{activity}</span>
+                                <span dir={isRTL ? 'rtl' : 'ltr'}>{translateActivity(activity)}</span>
                               </li>
                             ))}
                           </ul>
                           <p className="text-sm text-gray-500 mt-2" dir={isRTL ? 'rtl' : 'ltr'}>
                             <Clock className="inline w-3 h-3 mr-1" />
-                            {day.duration}
+                            {formatDuration(day.duration)}
                           </p>
                         </div>
                       ))}

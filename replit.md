@@ -13,6 +13,8 @@ Preferred communication style: Simple, everyday language.
   - **Country Names**: All countries translated (Thailand→תאילנד, Japan→יפן, USA→ארה"ב, etc.)
   - **Transport Types**: Travel methods translated (flight→טיסה, train→רכבת, "Start point"→נקודת התחלה)
   - **Journey Descriptions**: Context-aware Hebrew descriptions for each journey (e.g., "מבנגקוק התוססת למקדשים שלווים וחופים גן עדן")
+  - **Activity Translation**: All daily activities translated (Grand Palace→ארמון המלך, Wat Pho temple→מקדש וואט פו, etc.)
+  - **Duration Formatting**: Time formats adapted for Hebrew (hours 8→8 שעות, 1h 20m→1 שעה 20 דקות)
   - **Currency Formatting**: Dynamic currency display ($ in English, ₪ with 3.5x conversion in Hebrew)
   - **Applied Across**:
     - `/journeys` - Journey list page with destination chains
