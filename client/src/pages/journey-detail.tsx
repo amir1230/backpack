@@ -408,48 +408,62 @@ export default function JourneyDetailPage() {
 
           {/* Nights Tab */}
           <TabsContent value="nights" className="mt-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="overflow-x-auto">
-                  <table className="w-full table-fixed">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="py-3 px-4 font-semibold" style={isRTL ? { textAlign: 'right', width: '30%' } : { textAlign: 'left', width: '30%' }} dir={isRTL ? 'rtl' : 'ltr'}>
-                          {isRTL ? 'יעד' : 'Destination'}
-                        </th>
-                        <th className="py-3 px-4 font-semibold" style={isRTL ? { textAlign: 'right', width: '15%' } : { textAlign: 'left', width: '15%' }} dir={isRTL ? 'rtl' : 'ltr'}>
-                          {isRTL ? 'לילות' : 'Nights'}
-                        </th>
-                        <th className="py-3 px-4 font-semibold" style={isRTL ? { textAlign: 'right', width: '20%' } : { textAlign: 'left', width: '20%' }} dir={isRTL ? 'rtl' : 'ltr'}>
-                          {isRTL ? 'תחבורה' : 'Transport'}
-                        </th>
-                        <th className="py-3 px-4 font-semibold" style={isRTL ? { textAlign: 'right', width: '20%' } : { textAlign: 'left', width: '20%' }} dir={isRTL ? 'rtl' : 'ltr'}>
-                          {isRTL ? 'זמן מעבר' : 'Travel Time'}
-                        </th>
-                        <th className="py-3 px-4 font-semibold" style={isRTL ? { textAlign: 'right', width: '15%' } : { textAlign: 'left', width: '15%' }} dir={isRTL ? 'rtl' : 'ltr'}>
-                          {isRTL ? 'עלות' : 'Cost'}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {journey.destinations.map((dest, idx) => (
-                        <tr key={idx} className="border-b hover:bg-gray-50">
-                          <td className="py-4 px-4" style={isRTL ? { textAlign: 'right' } : { textAlign: 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>
-                            <span className="font-medium">{translateCityName(dest.name)}</span>, {translateCountry(dest.country)}
-                          </td>
-                          <td className="py-4 px-4" style={isRTL ? { textAlign: 'right' } : { textAlign: 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>{dest.nights}</td>
-                          <td className="py-4 px-4" style={isRTL ? { textAlign: 'right' } : { textAlign: 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>{translateTransportType(dest.transport?.type || '-')}</td>
-                          <td className="py-4 px-4" style={isRTL ? { textAlign: 'right' } : { textAlign: 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>{dest.transport?.duration ? formatDuration(dest.transport.duration) : '-'}</td>
-                          <td className="py-4 px-4" style={isRTL ? { textAlign: 'right' } : { textAlign: 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>
-                            {dest.transport?.cost ? formatCost(dest.transport.cost) : '-'}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="space-y-4">
+              {journey.destinations.map((dest, idx) => (
+                <Card key={idx} className="overflow-hidden border-l-4 border-orange-500">
+                  <CardContent className="p-0">
+                    <div className="bg-gradient-to-r from-orange-50 to-teal-50 p-4">
+                      <div className="flex items-center gap-3" style={isRTL ? { flexDirection: 'row-reverse' } : {}}>
+                        <div className="flex-shrink-0 w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold">
+                          {idx + 1}
+                        </div>
+                        <div className="flex-1" style={isRTL ? { textAlign: 'right' } : { textAlign: 'left' }}>
+                          <h4 className="font-bold text-lg" dir={isRTL ? 'rtl' : 'ltr'}>
+                            {translateCityName(dest.name)}, {translateCountry(dest.country)}
+                          </h4>
+                          <p className="text-sm text-gray-600" dir={isRTL ? 'rtl' : 'ltr'}>
+                            {dest.nights} {isRTL ? 'לילות' : 'nights'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    {dest.transport && (
+                      <div className="p-4 bg-white">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div style={isRTL ? { textAlign: 'right' } : { textAlign: 'left' }}>
+                            <p className="text-xs text-gray-500 mb-1" dir={isRTL ? 'rtl' : 'ltr'}>
+                              {isRTL ? 'תחבורה' : 'Transport'}
+                            </p>
+                            <div className="flex items-center gap-2" style={isRTL ? { flexDirection: 'row-reverse', justifyContent: 'flex-end' } : {}}>
+                              {getTransportIcon(dest.transport.type)}
+                              <span className="font-medium" dir={isRTL ? 'rtl' : 'ltr'}>
+                                {translateTransportType(dest.transport.type)}
+                              </span>
+                            </div>
+                          </div>
+                          <div style={isRTL ? { textAlign: 'right' } : { textAlign: 'left' }}>
+                            <p className="text-xs text-gray-500 mb-1" dir={isRTL ? 'rtl' : 'ltr'}>
+                              {isRTL ? 'זמן מעבר' : 'Travel Time'}
+                            </p>
+                            <p className="font-medium" dir={isRTL ? 'rtl' : 'ltr'}>
+                              {formatDuration(dest.transport.duration)}
+                            </p>
+                          </div>
+                          <div style={isRTL ? { textAlign: 'right' } : { textAlign: 'left' }}>
+                            <p className="text-xs text-gray-500 mb-1" dir={isRTL ? 'rtl' : 'ltr'}>
+                              {isRTL ? 'עלות' : 'Cost'}
+                            </p>
+                            <p className="font-bold text-orange-600" dir={isRTL ? 'rtl' : 'ltr'}>
+                              {formatCost(dest.transport.cost)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </TabsContent>
 
           {/* Daily Schedule Tab */}
