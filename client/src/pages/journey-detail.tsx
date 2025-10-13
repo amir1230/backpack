@@ -219,6 +219,11 @@ export default function JourneyDetailPage() {
   const formatDuration = (duration: string) => {
     if (!isRTL) return duration;
     
+    // Convert "Start point" to "נקודת התחלה"
+    if (duration === "Start point") {
+      return "נקודת התחלה";
+    }
+    
     // Convert "hours 8" to "8 שעות"
     const hoursMatch = duration.match(/hours?\s+(\d+)/i);
     if (hoursMatch) {
