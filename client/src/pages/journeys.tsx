@@ -169,23 +169,23 @@ export default function JourneysPage() {
                   <SelectTrigger className={isRTL ? 'text-right' : ''} dir={isRTL ? 'rtl' : 'ltr'}>
                     <SelectValue placeholder={isRTL ? 'כל העונות' : 'All Seasons'} />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all" className={isRTL ? 'text-right' : ''}>
+                  <SelectContent dir={isRTL ? 'rtl' : 'ltr'}>
+                    <SelectItem value="all">
                       <span dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'כל העונות' : 'All Seasons'}</span>
                     </SelectItem>
-                    <SelectItem value="spring" className={isRTL ? 'text-right' : ''}>
+                    <SelectItem value="spring">
                       <span dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'אביב' : 'Spring'}</span>
                     </SelectItem>
-                    <SelectItem value="summer" className={isRTL ? 'text-right' : ''}>
+                    <SelectItem value="summer">
                       <span dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'קיץ' : 'Summer'}</span>
                     </SelectItem>
-                    <SelectItem value="fall" className={isRTL ? 'text-right' : ''}>
+                    <SelectItem value="fall">
                       <span dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'סתיו' : 'Fall'}</span>
                     </SelectItem>
-                    <SelectItem value="winter" className={isRTL ? 'text-right' : ''}>
+                    <SelectItem value="winter">
                       <span dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'חורף' : 'Winter'}</span>
                     </SelectItem>
-                    <SelectItem value="year-round" className={isRTL ? 'text-right' : ''}>
+                    <SelectItem value="year-round">
                       <span dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'כל השנה' : 'Year-round'}</span>
                     </SelectItem>
                   </SelectContent>
