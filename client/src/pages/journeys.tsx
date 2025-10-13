@@ -55,8 +55,11 @@ export default function JourneysPage() {
   });
 
   const formatDestinationChain = (destinations: Journey['destinations']) => {
-    const arrow = isRTL ? '→' : '←';
-    return destinations.map(d => translateCityName(d.name)).join(` ${arrow} `);
+    const arrow = isRTL ? '←' : '←';
+    const cities = destinations.map(d => translateCityName(d.name));
+    // Reverse order for RTL to read from right to left
+    const orderedCities = isRTL ? cities.reverse() : cities;
+    return orderedCities.join(` ${arrow} `);
   };
 
   const formatPrice = (min: number, max: number) => {
