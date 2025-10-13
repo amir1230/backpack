@@ -464,12 +464,12 @@ export default function JourneyDetailPage() {
                           <div className="flex justify-between items-start mb-2">
                             {isRTL ? (
                               <>
-                                <Badge variant="secondary" className="bg-teal-500 text-white" dir="rtl">
-                                  {formatCost(day.estimatedCost)}
-                                </Badge>
                                 <h4 className="font-semibold" dir="rtl">
                                   יום {day.day}
                                 </h4>
+                                <Badge variant="secondary" className="bg-teal-500 text-white" dir="rtl">
+                                  {formatCost(day.estimatedCost)}
+                                </Badge>
                               </>
                             ) : (
                               <>
@@ -482,9 +482,9 @@ export default function JourneyDetailPage() {
                               </>
                             )}
                           </div>
-                          <ul className={`space-y-1 text-gray-700 ${isRTL ? 'pr-4' : 'pl-4'}`}>
+                          <ul className={`space-y-1 text-gray-700 ${isRTL ? 'text-right' : ''}`}>
                             {day.activities.map((activity, actIdx) => (
-                              <li key={actIdx} className={`flex items-start gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                              <li key={actIdx} className={`flex items-start gap-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
                                 <span className="text-orange-500 mt-1">•</span>
                                 <span dir={isRTL ? 'rtl' : 'ltr'}>{translateActivity(activity)}</span>
                               </li>
