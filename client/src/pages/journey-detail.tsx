@@ -463,15 +463,17 @@ export default function JourneyDetailPage() {
                               </>
                             )}
                           </div>
-                          <ul className={`space-y-1 text-gray-700 ${isRTL ? 'text-right' : ''}`}>
+                          <ul className="space-y-1 text-gray-700" style={isRTL ? { textAlign: 'right' } : {}}>
                             {day.activities.map((activity, actIdx) => (
-                              <li key={actIdx} className={`flex items-start gap-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
-                                <span className="text-orange-500 mt-1">•</span>
-                                <span dir={isRTL ? 'rtl' : 'ltr'}>{translateActivity(activity)}</span>
+                              <li key={actIdx}>
+                                <div className="inline-flex items-start gap-2">
+                                  <span className="text-orange-500 mt-1">•</span>
+                                  <span dir={isRTL ? 'rtl' : 'ltr'}>{translateActivity(activity)}</span>
+                                </div>
                               </li>
                             ))}
                           </ul>
-                          <p className="text-sm text-gray-500 mt-2" style={isRTL ? { textAlign: 'right' } : {}} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <p className="text-sm text-gray-500 mt-2" style={isRTL ? { textAlign: 'left' } : {}} dir={isRTL ? 'rtl' : 'ltr'}>
                             <Clock className="inline w-3 h-3" style={isRTL ? { marginLeft: '0.25rem' } : { marginRight: '0.25rem' }} />
                             {formatDuration(day.duration)}
                           </p>
