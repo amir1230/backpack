@@ -411,22 +411,22 @@ export default function JourneyDetailPage() {
             <Card>
               <CardContent className="p-6">
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full table-fixed">
                     <thead>
                       <tr className="border-b">
-                        <th className={`py-3 font-semibold ${isRTL ? 'text-right pr-4' : 'text-left pl-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <th className="py-3 px-4 font-semibold" style={isRTL ? { textAlign: 'right', width: '30%' } : { textAlign: 'left', width: '30%' }} dir={isRTL ? 'rtl' : 'ltr'}>
                           {isRTL ? 'יעד' : 'Destination'}
                         </th>
-                        <th className={`py-3 font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <th className="py-3 px-4 font-semibold" style={isRTL ? { textAlign: 'right', width: '15%' } : { textAlign: 'left', width: '15%' }} dir={isRTL ? 'rtl' : 'ltr'}>
                           {isRTL ? 'לילות' : 'Nights'}
                         </th>
-                        <th className={`py-3 font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <th className="py-3 px-4 font-semibold" style={isRTL ? { textAlign: 'right', width: '20%' } : { textAlign: 'left', width: '20%' }} dir={isRTL ? 'rtl' : 'ltr'}>
                           {isRTL ? 'תחבורה' : 'Transport'}
                         </th>
-                        <th className={`py-3 font-semibold ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <th className="py-3 px-4 font-semibold" style={isRTL ? { textAlign: 'right', width: '20%' } : { textAlign: 'left', width: '20%' }} dir={isRTL ? 'rtl' : 'ltr'}>
                           {isRTL ? 'זמן מעבר' : 'Travel Time'}
                         </th>
-                        <th className={`py-3 font-semibold ${isRTL ? 'text-right pr-4' : 'text-left pl-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <th className="py-3 px-4 font-semibold" style={isRTL ? { textAlign: 'right', width: '15%' } : { textAlign: 'left', width: '15%' }} dir={isRTL ? 'rtl' : 'ltr'}>
                           {isRTL ? 'עלות' : 'Cost'}
                         </th>
                       </tr>
@@ -434,13 +434,13 @@ export default function JourneyDetailPage() {
                     <tbody>
                       {journey.destinations.map((dest, idx) => (
                         <tr key={idx} className="border-b hover:bg-gray-50">
-                          <td className={`py-4 ${isRTL ? 'pr-4 text-right' : 'pl-4 text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <td className="py-4 px-4" style={isRTL ? { textAlign: 'right' } : { textAlign: 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>
                             <span className="font-medium">{translateCityName(dest.name)}</span>, {translateCountry(dest.country)}
                           </td>
-                          <td className={`py-4 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{dest.nights}</td>
-                          <td className={`py-4 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{translateTransportType(dest.transport?.type || '-')}</td>
-                          <td className={`py-4 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{dest.transport?.duration ? formatDuration(dest.transport.duration) : '-'}</td>
-                          <td className={`py-4 ${isRTL ? 'pr-4 text-right' : 'pl-4 text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                          <td className="py-4 px-4" style={isRTL ? { textAlign: 'right' } : { textAlign: 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>{dest.nights}</td>
+                          <td className="py-4 px-4" style={isRTL ? { textAlign: 'right' } : { textAlign: 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>{translateTransportType(dest.transport?.type || '-')}</td>
+                          <td className="py-4 px-4" style={isRTL ? { textAlign: 'right' } : { textAlign: 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>{dest.transport?.duration ? formatDuration(dest.transport.duration) : '-'}</td>
+                          <td className="py-4 px-4" style={isRTL ? { textAlign: 'right' } : { textAlign: 'left' }} dir={isRTL ? 'rtl' : 'ltr'}>
                             {dest.transport?.cost ? formatCost(dest.transport.cost) : '-'}
                           </td>
                         </tr>
