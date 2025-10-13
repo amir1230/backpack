@@ -348,7 +348,7 @@ export class DatabaseStorage implements IStorage {
     
     const conditions = [];
     
-    if (filters?.season) {
+    if (filters?.season && filters.season !== 'all') {
       conditions.push(sql`${filters.season} = ANY(${journeys.season})`);
     }
     
