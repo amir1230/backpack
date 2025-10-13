@@ -122,6 +122,67 @@ export default function JourneyDetailPage() {
     return translations[tag]?.[isRTL ? 'he' : 'en'] || tag;
   };
 
+  const translateTransportType = (type: string) => {
+    const translations: Record<string, { he: string; en: string }> = {
+      flight: { he: 'טיסה', en: 'Flight' },
+      bullet_train: { he: 'רכבת מהירה', en: 'Bullet Train' },
+      train: { he: 'רכבת', en: 'Train' },
+      bus: { he: 'אוטובוס', en: 'Bus' },
+      'Start point': { he: 'נקודת התחלה', en: 'Start point' },
+    };
+    return translations[type]?.[isRTL ? 'he' : 'en'] || type;
+  };
+
+  const translateCountry = (country: string) => {
+    const translations: Record<string, { he: string; en: string }> = {
+      'Japan': { he: 'יפן', en: 'Japan' },
+      'France': { he: 'צרפת', en: 'France' },
+      'Netherlands': { he: 'הולנד', en: 'Netherlands' },
+      'Germany': { he: 'גרמניה', en: 'Germany' },
+      'Spain': { he: 'ספרד', en: 'Spain' },
+      'Italy': { he: 'איטליה', en: 'Italy' },
+      'Thailand': { he: 'תאילנד', en: 'Thailand' },
+      'USA': { he: 'ארה"ב', en: 'USA' },
+    };
+    return translations[country]?.[isRTL ? 'he' : 'en'] || country;
+  };
+
+  const translateDescription = (title: string) => {
+    const descriptions: Record<string, { he: string; en: string }> = {
+      'Classic Japan Circuit': { 
+        he: 'גלה את היופי של יפן המסורתית והמודרנית - ממקדשים עתיקים למסעדות רובוטים', 
+        en: 'Discover the beauty of traditional and modern Japan - from ancient temples to robot restaurants' 
+      },
+      'European Capital Tour': { 
+        he: 'בקר בשלוש מהערים היפות ביותר באירופה - פריז, אמסטרדם וברלין', 
+        en: 'Visit three of Europe\'s most beautiful cities - Paris, Amsterdam and Berlin' 
+      },
+      'European Highlights Tour': { 
+        he: 'חווה את הטוב שבים התיכון - מחופי ברצלונה לרומא העתיקה', 
+        en: 'Experience the best of the Mediterranean - from Barcelona\'s beaches to ancient Rome' 
+      },
+      'Southeast Asia Adventure': { 
+        he: 'מבנגקוק התוססת למקדשים שלווים וחופים גן עדן - החוויה התאילנדית האולטימטיבית', 
+        en: 'From bustling Bangkok to serene temples and paradise beaches - the ultimate Thai experience' 
+      },
+      'Mediterranean Dream': { 
+        he: 'חקור את הריביירה הצרפתית ואת רומא ההיסטורית במסע ים תיכוני בלתי נשכח', 
+        en: 'Explore the French Riviera and historic Rome in an unforgettable Mediterranean journey' 
+      },
+      'East Coast USA Explorer': { 
+        he: 'גלה את הערים האייקוניות של החוף המזרחי - מניו יורק לבוסטון', 
+        en: 'Discover the iconic cities of the East Coast - from New York to Boston' 
+      },
+    };
+    return descriptions[title]?.[isRTL ? 'he' : 'en'] || '';
+  };
+
+  const formatCost = (cost: number) => {
+    const currency = isRTL ? '₪' : '$';
+    const amount = isRTL ? Math.round(cost * 3.5) : cost;
+    return `${currency}${amount}`;
+  };
+
   const getTransportIcon = (type: string) => {
     switch (type) {
       case 'flight':
@@ -200,7 +261,7 @@ export default function JourneyDetailPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Description */}
-        <p className="text-lg text-gray-700 mb-8" dir={isRTL ? 'rtl' : 'ltr'}>{journey.description}</p>
+        <p className="text-lg text-gray-700 mb-8" dir={isRTL ? 'rtl' : 'ltr'}>{translateDescription(journey.title)}</p>
 
         {/* Tags */}
         <div className={`flex flex-wrap gap-2 mb-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -257,7 +318,7 @@ export default function JourneyDetailPage() {
                         {idx + 1}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-bold text-lg" dir={isRTL ? 'rtl' : 'ltr'}>{translateCityName(dest.name)}, {dest.country}</h4>
+                        <h4 className="font-bold text-lg" dir={isRTL ? 'rtl' : 'ltr'}>{translateCityName(dest.name)}, {translateCountry(dest.country)}</h4>
                         <p className="text-sm text-gray-600" dir={isRTL ? 'rtl' : 'ltr'}>
                           {dest.nights} {isRTL ? 'לילות' : 'nights'}
                         </p>
@@ -266,7 +327,7 @@ export default function JourneyDetailPage() {
                         <div className={`flex items-center gap-2 text-sm text-gray-600 ${isRTL ? 'flex-row-reverse' : ''}`}>
                           {getTransportIcon(dest.transport.type)}
                           <span dir={isRTL ? 'rtl' : 'ltr'}>{dest.transport.duration}</span>
-                          <span dir={isRTL ? 'rtl' : 'ltr'}>${dest.transport.cost}</span>
+                          <span dir={isRTL ? 'rtl' : 'ltr'}>{formatCost(dest.transport.cost)}</span>
                         </div>
                       )}
                     </div>
@@ -305,13 +366,13 @@ export default function JourneyDetailPage() {
                       {journey.destinations.map((dest, idx) => (
                         <tr key={idx} className="border-b hover:bg-gray-50">
                           <td className={`py-4 ${isRTL ? 'pr-4' : 'pl-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                            <span className="font-medium">{translateCityName(dest.name)}</span>, {dest.country}
+                            <span className="font-medium">{translateCityName(dest.name)}</span>, {translateCountry(dest.country)}
                           </td>
                           <td className="py-4" dir={isRTL ? 'rtl' : 'ltr'}>{dest.nights}</td>
-                          <td className="py-4" dir={isRTL ? 'rtl' : 'ltr'}>{dest.transport?.type || '-'}</td>
+                          <td className="py-4" dir={isRTL ? 'rtl' : 'ltr'}>{translateTransportType(dest.transport?.type || '-')}</td>
                           <td className="py-4" dir={isRTL ? 'rtl' : 'ltr'}>{dest.transport?.duration || '-'}</td>
                           <td className={`py-4 ${isRTL ? 'pr-4' : 'pl-4'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                            ${dest.transport?.cost || 0}
+                            {dest.transport?.cost ? formatCost(dest.transport.cost) : '-'}
                           </td>
                         </tr>
                       ))}
@@ -339,7 +400,7 @@ export default function JourneyDetailPage() {
                               {isRTL ? `יום ${day.day}` : `Day ${day.day}`}
                             </h4>
                             <Badge variant="secondary" dir={isRTL ? 'rtl' : 'ltr'}>
-                              ${day.estimatedCost}
+                              {formatCost(day.estimatedCost)}
                             </Badge>
                           </div>
                           <ul className={`space-y-1 text-gray-700 ${isRTL ? 'pr-4' : 'pl-4'}`}>
@@ -378,7 +439,7 @@ export default function JourneyDetailPage() {
                         <div className={`flex justify-between items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
                           <span className="font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'תחבורה' : 'Transport'}</span>
                           <span className="text-lg font-bold" dir={isRTL ? 'rtl' : 'ltr'}>
-                            ${journey.costs_breakdown.transport.min} - ${journey.costs_breakdown.transport.max}
+                            {formatCost(journey.costs_breakdown.transport.min)} - {formatCost(journey.costs_breakdown.transport.max)}
                           </span>
                         </div>
                       </div>
@@ -386,7 +447,7 @@ export default function JourneyDetailPage() {
                         <div className={`flex justify-between items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
                           <span className="font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'פעילויות' : 'Activities'}</span>
                           <span className="text-lg font-bold" dir={isRTL ? 'rtl' : 'ltr'}>
-                            ${journey.costs_breakdown.activities.min} - ${journey.costs_breakdown.activities.max}
+                            {formatCost(journey.costs_breakdown.activities.min)} - {formatCost(journey.costs_breakdown.activities.max)}
                           </span>
                         </div>
                       </div>
@@ -394,7 +455,7 @@ export default function JourneyDetailPage() {
                         <div className={`flex justify-between items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
                           <span className="font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'לינה' : 'Lodging'}</span>
                           <span className="text-lg font-bold" dir={isRTL ? 'rtl' : 'ltr'}>
-                            ${journey.costs_breakdown.lodging.min} - ${journey.costs_breakdown.lodging.max}
+                            {formatCost(journey.costs_breakdown.lodging.min)} - {formatCost(journey.costs_breakdown.lodging.max)}
                           </span>
                         </div>
                       </div>

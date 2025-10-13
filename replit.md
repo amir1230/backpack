@@ -7,6 +7,18 @@ GlobeMate is a full-stack web application designed for worldwide travel planning
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (October 13, 2025)
+- **Complete Journey Translation System**: Full bilingual support for all journey content
+  - **Journey Titles**: All 5 journeys now have Hebrew translations (e.g., "European Capital Tour" → "סיור בירות אירופה")
+  - **City Names**: Comprehensive city translation system (Tokyo→טוקיו, Paris→פריז, Bangkok→בנגקוק, etc.)
+  - **Country Names**: All countries translated (Thailand→תאילנד, Japan→יפן, USA→ארה"ב, etc.)
+  - **Transport Types**: Travel methods translated (flight→טיסה, train→רכבת, "Start point"→נקודת התחלה)
+  - **Journey Descriptions**: Context-aware Hebrew descriptions for each journey (e.g., "מבנגקוק התוססת למקדשים שלווים וחופים גן עדן")
+  - **Currency Formatting**: Dynamic currency display ($ in English, ₪ with 3.5x conversion in Hebrew)
+  - **Applied Across**:
+    - `/journeys` - Journey list page with destination chains
+    - `/journeys/:id` - Journey detail page (all 5 tabs: Overview, Nights, Schedule, Costs, Map)
+    - `/` - Home page Popular Journeys section
+
 - **Multi-Destination Journeys System**: NEW feature showcasing pre-planned itineraries across multiple destinations
   - **Database Schema**: Added `journeys` table with destination chains, nightly breakdown per city, transport details, pricing ranges, seasonal suitability, tags, audience filters, ratings, daily itineraries, and cost breakdowns
   - **API Routes**: 
