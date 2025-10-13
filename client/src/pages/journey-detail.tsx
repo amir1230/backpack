@@ -57,21 +57,35 @@ interface Journey {
 
 // Journey Map Component with markers for all destinations
 function JourneyMap({ destinations, isRTL }: { destinations: Journey['destinations'], isRTL: boolean }) {
-  // City coordinates mapping
+  // City coordinates mapping - Complete list for all journeys
   const cityCoordinates: Record<string, { lat: number; lng: number }> = {
+    // Japan
     'Tokyo': { lat: 35.6762, lng: 139.6503 },
     'Kyoto': { lat: 35.0116, lng: 135.7681 },
     'Osaka': { lat: 34.6937, lng: 135.5023 },
+    'Hiroshima': { lat: 34.3853, lng: 132.4553 },
+    // Europe
     'Paris': { lat: 48.8566, lng: 2.3522 },
     'Amsterdam': { lat: 52.3676, lng: 4.9041 },
     'Berlin': { lat: 52.5200, lng: 13.4050 },
+    'Prague': { lat: 50.0755, lng: 14.4378 },
+    'Vienna': { lat: 48.2082, lng: 16.3738 },
+    'Barcelona': { lat: 41.3874, lng: 2.1686 },
+    'Nice': { lat: 43.7102, lng: 7.2620 },
+    'Rome': { lat: 41.9028, lng: 12.4964 },
+    'Ibiza': { lat: 38.9067, lng: 1.4206 },
+    'Mykonos': { lat: 37.4467, lng: 25.3289 },
+    // Southeast Asia
     'Bangkok': { lat: 13.7563, lng: 100.5018 },
     'Chiang Mai': { lat: 18.7883, lng: 98.9853 },
     'Phuket': { lat: 7.8804, lng: 98.3923 },
-    'Barcelona': { lat: 41.3874, lng: 2.1686 },
-    'Ibiza': { lat: 38.9067, lng: 1.4206 },
-    'Mykonos': { lat: 37.4467, lng: 25.3289 },
+    'Bali': { lat: -8.3405, lng: 115.0920 },
+    'Singapore': { lat: 1.3521, lng: 103.8198 },
+    // USA
     'New York': { lat: 40.7128, lng: -74.0060 },
+    'Philadelphia': { lat: 39.9526, lng: -75.1652 },
+    'Washington DC': { lat: 38.9072, lng: -77.0369 },
+    'Boston': { lat: 42.3601, lng: -71.0589 },
     'Miami': { lat: 25.7617, lng: -80.1918 },
     'New Orleans': { lat: 29.9511, lng: -90.0715 },
   };
@@ -158,6 +172,8 @@ export default function JourneyDetailPage() {
       'Paris': { he: 'פריז', en: 'Paris' },
       'Amsterdam': { he: 'אמסטרדם', en: 'Amsterdam' },
       'Berlin': { he: 'ברלין', en: 'Berlin' },
+      'Prague': { he: 'פראג', en: 'Prague' },
+      'Vienna': { he: 'וינה', en: 'Vienna' },
       'Barcelona': { he: 'ברצלונה', en: 'Barcelona' },
       'Nice': { he: 'ניס', en: 'Nice' },
       'Rome': { he: 'רומא', en: 'Rome' },
