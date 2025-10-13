@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   ArrowLeft,
   MapPin,
@@ -16,10 +20,12 @@ import {
   Star,
   Heart,
   Share2,
-  Sparkles
+  Sparkles,
+  Users
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
+import { useState } from "react";
 
 // RTL support for Hebrew - Force rebuild v2
 interface Journey {
@@ -148,6 +154,17 @@ export default function JourneyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'he';
+  const [, setLocation] = useLocation();
+  
+  // Custom Journey Dialog State
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [customTrip, setCustomTrip] = useState({
+    adults: 2,
+    children: 0,
+    startDate: "",
+    budget: "",
+    tripType: "couple"
+  });
   
   console.log('🔴 RTL FIX VERSION 3 LOADED - isRTL:', isRTL, 'language:', i18n.language);
 
@@ -454,7 +471,11 @@ export default function JourneyDetailPage() {
         {/* CTAs - Scrollable Horizontal */}
         <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 mb-8">
           <div className={`flex gap-4 ${isRTL ? 'flex-row-reverse' : ''} flex-nowrap min-w-max`}>
-            <Button className={`bg-orange-500 hover:bg-orange-600 ${isRTL ? 'flex-row-reverse' : ''} whitespace-nowrap`} data-testid="build-similar-journey-v3">
+            <Button 
+              onClick={() => setIsDialogOpen(true)}
+              className={`bg-orange-500 hover:bg-orange-600 ${isRTL ? 'flex-row-reverse' : ''} whitespace-nowrap`} 
+              data-testid="build-similar-journey-v3"
+            >
               <Sparkles className="w-4 h-4" />
               <span className={isRTL ? 'mr-2' : 'ml-2'} dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'בנה לי מסע דומה ⭐' : '⭐ Build me a similar journey'}</span>
             </Button>
@@ -703,6 +724,155 @@ export default function JourneyDetailPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Custom Journey Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]" dir={isRTL ? 'rtl' : 'ltr'}>
+          <DialogHeader>
+            <DialogTitle className="text-2xl" dir={isRTL ? 'rtl' : 'ltr'}>
+              {isRTL ? '✨ התאם את המסע שלך' : '✨ Customize Your Journey'}
+            </DialogTitle>
+            <DialogDescription dir={isRTL ? 'rtl' : 'ltr'}>
+              {isRTL 
+                ? `מבוסס על המסע: ${translateJourneyTitle(journey?.title || '')}` 
+                : `Based on: ${translateJourneyTitle(journey?.title || '')}`
+              }
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Travelers */}
+            <div className="space-y-2">
+              <Label htmlFor="adults" className="flex items-center gap-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                <Users className="w-4 h-4" />
+                {isRTL ? 'מספר מטיילים' : 'Number of Travelers'}
+              </Label>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <Label htmlFor="adults" className="text-sm text-gray-600" dir={isRTL ? 'rtl' : 'ltr'}>
+                    {isRTL ? 'מבוגרים' : 'Adults'}
+                  </Label>
+                  <Select 
+                    value={customTrip.adults.toString()} 
+                    onValueChange={(val) => setCustomTrip({...customTrip, adults: parseInt(val)})}
+                  >
+                    <SelectTrigger dir={isRTL ? 'rtl' : 'ltr'}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1,2,3,4,5,6,7,8].map(n => (
+                        <SelectItem key={n} value={n.toString()}>{n}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <Label htmlFor="children" className="text-sm text-gray-600" dir={isRTL ? 'rtl' : 'ltr'}>
+                    {isRTL ? 'ילדים' : 'Children'}
+                  </Label>
+                  <Select 
+                    value={customTrip.children.toString()} 
+                    onValueChange={(val) => setCustomTrip({...customTrip, children: parseInt(val)})}
+                  >
+                    <SelectTrigger dir={isRTL ? 'rtl' : 'ltr'}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[0,1,2,3,4,5,6,7,8,9,10].map(n => (
+                        <SelectItem key={n} value={n.toString()}>{n}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Trip Type */}
+            <div className="space-y-2">
+              <Label htmlFor="tripType" className="flex items-center gap-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                <Heart className="w-4 h-4" />
+                {isRTL ? 'סוג הטיול' : 'Trip Type'}
+              </Label>
+              <Select 
+                value={customTrip.tripType} 
+                onValueChange={(val) => setCustomTrip({...customTrip, tripType: val})}
+              >
+                <SelectTrigger dir={isRTL ? 'rtl' : 'ltr'}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="couple">{isRTL ? 'זוגות' : 'Couple'}</SelectItem>
+                  <SelectItem value="family">{isRTL ? 'משפחה' : 'Family'}</SelectItem>
+                  <SelectItem value="solo">{isRTL ? 'סולו' : 'Solo'}</SelectItem>
+                  <SelectItem value="friends">{isRTL ? 'חברים' : 'Friends'}</SelectItem>
+                  <SelectItem value="honeymoon">{isRTL ? 'ירח דבש' : 'Honeymoon'}</SelectItem>
+                  <SelectItem value="adventure">{isRTL ? 'הרפתקאות' : 'Adventure'}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Start Date */}
+            <div className="space-y-2">
+              <Label htmlFor="startDate" className="flex items-center gap-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                <Calendar className="w-4 h-4" />
+                {isRTL ? 'תאריך התחלה (אופציונלי)' : 'Start Date (Optional)'}
+              </Label>
+              <Input 
+                id="startDate"
+                type="date"
+                value={customTrip.startDate}
+                onChange={(e) => setCustomTrip({...customTrip, startDate: e.target.value})}
+                dir={isRTL ? 'rtl' : 'ltr'}
+              />
+            </div>
+
+            {/* Budget */}
+            <div className="space-y-2">
+              <Label htmlFor="budget" className="flex items-center gap-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                <DollarSign className="w-4 h-4" />
+                {isRTL ? 'תקציב משוער (אופציונלי)' : 'Estimated Budget (Optional)'}
+              </Label>
+              <Input 
+                id="budget"
+                type="text"
+                placeholder={isRTL ? 'לדוגמה: ₪10,000' : 'e.g., $3,000'}
+                value={customTrip.budget}
+                onChange={(e) => setCustomTrip({...customTrip, budget: e.target.value})}
+                dir={isRTL ? 'rtl' : 'ltr'}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3 justify-end" style={isRTL ? { flexDirection: 'row-reverse' } : {}}>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsDialogOpen(false)}
+              dir={isRTL ? 'rtl' : 'ltr'}
+            >
+              {isRTL ? 'ביטול' : 'Cancel'}
+            </Button>
+            <Button 
+              onClick={() => {
+                // Navigate to My Trips with journey inspiration
+                const params = new URLSearchParams({
+                  journeyId: id || '',
+                  adults: customTrip.adults.toString(),
+                  children: customTrip.children.toString(),
+                  tripType: customTrip.tripType,
+                  ...(customTrip.startDate && { startDate: customTrip.startDate }),
+                  ...(customTrip.budget && { budget: customTrip.budget })
+                });
+                setLocation(`/my-trips?${params.toString()}`);
+              }}
+              className="bg-orange-500 hover:bg-orange-600"
+              dir={isRTL ? 'rtl' : 'ltr'}
+            >
+              <Sparkles className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+              {isRTL ? 'בנה את המסע' : 'Build Journey'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
