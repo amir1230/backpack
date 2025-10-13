@@ -2969,7 +2969,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       const defaultAchievements = [
         {
           name: "First Steps",
-          description: "Plan your first trip to South America",
+          description: "Plan your first trip",
           category: "travel",
           iconName: "MapPin",
           badgeColor: "bg-blue-500",
@@ -2989,7 +2989,7 @@ export async function registerRoutes(app: Express): Promise<void> {
         },
         {
           name: "Country Collector",
-          description: "Visit 3 different South American countries",
+          description: "Visit 3 different countries",
           category: "exploration",
           iconName: "Globe",
           badgeColor: "bg-purple-500",
@@ -3058,12 +3058,12 @@ export async function registerRoutes(app: Express): Promise<void> {
           rarity: "rare"
         },
         {
-          name: "South America Master",
-          description: "Visit all 13 South American countries",
+          name: "World Explorer",
+          description: "Visit 20 different countries",
           category: "exploration",
           iconName: "Award",
           badgeColor: "bg-gradient-to-r from-yellow-400 to-orange-500",
-          requirement: JSON.stringify({ type: "country_count", value: 13 }),
+          requirement: JSON.stringify({ type: "country_count", value: 20 }),
           points: 500,
           rarity: "legendary"
         }
@@ -3102,7 +3102,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     const apiDocs = {
       title: "GlobeMate API Documentation",
       version: "1.0.0",
-      description: "Complete API reference for the GlobeMate South American travel platform",
+      description: "Complete API reference for the GlobeMate global travel platform",
       endpoints: {
         authentication: {
           "GET /api/auth/user": "Get authenticated user details",

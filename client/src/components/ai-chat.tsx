@@ -144,9 +144,9 @@ export default function AiChat({ className }: AiChatProps) {
 
   const quickPrompts = [
     { text: "I want to go to Peru", icon: MapPin },
-    { text: "Help me plan a backpacking trip", icon: DollarSign },
+    { text: "Help me plan a budget trip", icon: DollarSign },
     { text: "I love hiking and nature", icon: Calendar },
-    { text: "Solo travel in South America", icon: User }
+    { text: "Solo travel adventure", icon: User }
   ];
 
   const handleQuickPrompt = (prompt: string) => {
@@ -373,7 +373,7 @@ export default function AiChat({ className }: AiChatProps) {
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Ask me anything about South American travel..."
+              placeholder="Ask me anything about travel worldwide..."
               className="flex-1"
               disabled={chatMutation.isPending}
             />

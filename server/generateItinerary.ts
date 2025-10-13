@@ -97,7 +97,7 @@ Return the itinerary as a JSON object with an itinerary array, like this:
       messages: [
         {
           role: "system", 
-          content: `You are GlobeMate, an expert South American travel planner. Always respond with valid JSON only.${isHebrew ? ' Respond in Hebrew - all location, activities, and tips must be in Hebrew.' : ''}`
+          content: `You are GlobeMate, an expert global travel planner. Always respond with valid JSON only.${isHebrew ? ' Respond in Hebrew - all location, activities, and tips must be in Hebrew.' : ''}`
         },
         {
           role: "user",

@@ -49,7 +49,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
             ברוך הבא ל-GlobeMate
           </DialogTitle>
           <DialogDescription className="text-center">
-            התחבר כדי לתכנן את המסע הבא שלך בדרום אמריקה
+            התחבר כדי לתכנן את המסע הבא שלך ברחבי העולם
           </DialogDescription>
         </DialogHeader>
         

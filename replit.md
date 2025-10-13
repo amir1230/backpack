@@ -1,12 +1,24 @@
 # GlobeMate - Global Travel Platform
 
 ## Overview
-GlobeMate is a full-stack web application designed for global travel planning and community building. It leverages AI to offer personalized trip recommendations, itinerary generation, and expense tracking. The platform integrates advanced AI capabilities with robust social features to simplify travel logistics, fostering a vibrant global travel community. It supports over 70 countries with multilingual support (Hebrew/English) and provides detailed destination data, including climate information.
+GlobeMate is a full-stack web application designed for worldwide travel planning and community building. It leverages AI to offer personalized trip recommendations, itinerary generation, and expense tracking. The platform integrates advanced AI capabilities with robust social features to simplify travel logistics, fostering a vibrant global travel community. It supports over 70 countries worldwide with multilingual support (Hebrew/English) and provides detailed destination data, including climate information.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes (October 12, 2025)
+## Recent Changes (October 13, 2025)
+- **Global Platform Rebranding**: Complete transition from South American focus to worldwide travel platform
+  - **UI Text Updates**: Changed all references from "South America" to "worldwide/global" across entire platform
+  - **Translation Updates**: Updated both Hebrew and English translations:
+    - "תכנן, גלה ושמור את ההרפתקה הדרום-אמריקאית המושלמת שלך" → "תכנן, גלה ושמור את ההרפתקה העולמית המושלמת שלך"
+    - "תרמילאים" → "מטיילים" (backpackers → travelers)
+    - "South American travel planner" → "global travel planner"
+  - **AI System Prompts**: Updated OpenAI system prompts to reflect global expertise
+  - **Achievements**: Modified achievement descriptions (e.g., "South America Master" → "World Explorer" for 20 countries)
+  - **API Documentation**: Updated platform description to "global travel platform"
+  - **Auth & Chat**: Updated authentication modal and AI chat placeholders to reference worldwide travel
+
+## Previous Changes (October 12, 2025)
 - **Complete RTL Support for All Content**: Full RTL implementation across entire My Trips page
   - **Text Direction**: All Hebrew text uses `dir="rtl"` for proper punctuation placement
   - **Visual Alignment**: Elements remain right-aligned while text flows correctly RTL
@@ -82,7 +94,7 @@ Preferred communication style: Simple, everyday language.
 - **Weather & Travel Timing System**: Real-time weather data (OpenWeather API) and historical climate analysis for "Best Time to Travel" recommendations.
 - **Real Places Booking Integration**: Enriches AI-generated suggestions with bookable locations from Google Places API.
 - **Destinations Hub**: Comprehensive destination discovery system with search, filters, sorting, and detailed pages including weather cards, attractions, and interactive Google Maps integration. Displays real destinations from Google Places API.
-- **Global Expansion & Multilingual Support**: Worldwide destination coverage with full Hebrew/English bilingual support across all features, including instant language toggling and RTL support for content and interactive elements.
+- **Global Expansion & Multilingual Support**: Worldwide destination coverage with full Hebrew/English bilingual support across all features, including instant language toggling and RTL support for content and interactive elements. Platform rebranded from South American focus to global travel platform.
 - **Support Pages**: Implementation of Help Center, Contact Us, Privacy Policy, Terms of Service, and About Us pages with full translation and RTL support.
 - **Optimized Image Loading**: Implemented `OptimizedImage` component with automatic retry, lazy loading, skeleton states, and error handling for all galleries.
 
