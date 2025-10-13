@@ -235,6 +235,255 @@ export const sampleJourneys: InsertJourney[] = [
       activities: { min: 800, max: 1200 },
       lodging: { min: 995, max: 2495 }
     }
+  },
+  {
+    title: "Japan Extended Discovery",
+    description: "An immersive journey through Japan's most iconic cities, from Tokyo's neon lights to Hiroshima's powerful history",
+    destinations: [
+      {
+        name: "Tokyo",
+        country: "Japan",
+        nights: 5,
+        transport: { type: "flight", cost: 500, duration: "Start point" }
+      },
+      {
+        name: "Kyoto",
+        country: "Japan",
+        nights: 4,
+        transport: { type: "bullet_train", cost: 140, duration: "2h 15m" }
+      },
+      {
+        name: "Osaka",
+        country: "Japan",
+        nights: 4,
+        transport: { type: "train", cost: 15, duration: "30m" }
+      },
+      {
+        name: "Hiroshima",
+        country: "Japan",
+        nights: 3,
+        transport: { type: "bullet_train", cost: 95, duration: "1h 20m" }
+      }
+    ],
+    totalNights: 16,
+    priceMin: "1200",
+    priceMax: "2000",
+    season: ["spring", "fall", "year-round"],
+    tags: ["culture", "food", "nature", "adventure"],
+    audienceTags: ["couple", "solo", "friends", "12+"],
+    rating: 4.9,
+    popularity: 234,
+    heroImage: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf",
+    images: [
+      "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e",
+      "https://images.unsplash.com/photo-1528360983277-13d401cdc186"
+    ],
+    dailyItinerary: {
+      "0": [
+        { day: 1, activities: ["Senso-ji Temple", "Shibuya Crossing", "Tokyo Skytree"], duration: "8 hours", estimatedCost: 60 },
+        { day: 2, activities: ["Meiji Shrine", "Harajuku shopping", "Shinjuku nightlife"], duration: "9 hours", estimatedCost: 80 },
+        { day: 3, activities: ["Tsukiji Outer Market", "Imperial Palace", "Ginza shopping"], duration: "8 hours", estimatedCost: 100 },
+        { day: 4, activities: ["teamLab Borderless", "Odaiba", "Rainbow Bridge"], duration: "8 hours", estimatedCost: 70 },
+        { day: 5, activities: ["Akihabara", "Ueno Park", "Ameya-Yokocho Market"], duration: "7 hours", estimatedCost: 60 }
+      ],
+      "1": [
+        { day: 6, activities: ["Fushimi Inari Shrine", "Arashiyama Bamboo Grove", "Monkey Park"], duration: "9 hours", estimatedCost: 50 },
+        { day: 7, activities: ["Kinkaku-ji Temple", "Ryoan-ji Temple", "Nijo Castle"], duration: "8 hours", estimatedCost: 60 },
+        { day: 8, activities: ["Gion district", "Yasaka Shrine", "Traditional tea ceremony"], duration: "8 hours", estimatedCost: 90 },
+        { day: 9, activities: ["Philosopher's Path", "Kiyomizu-dera", "Pontocho dining"], duration: "8 hours", estimatedCost: 100 }
+      ],
+      "2": [
+        { day: 10, activities: ["Osaka Castle", "Dotonbori", "Street food tour"], duration: "9 hours", estimatedCost: 80 },
+        { day: 11, activities: ["Kuromon Market", "Shinsekai district", "Tsutenkaku Tower"], duration: "8 hours", estimatedCost: 70 },
+        { day: 12, activities: ["Universal Studios Japan full day"], duration: "10 hours", estimatedCost: 120 },
+        { day: 13, activities: ["Sumiyoshi Taisha Shrine", "Namba shopping", "Osaka nightlife"], duration: "8 hours", estimatedCost: 90 }
+      ],
+      "3": [
+        { day: 14, activities: ["Peace Memorial Park", "Atomic Bomb Dome", "Peace Memorial Museum"], duration: "7 hours", estimatedCost: 40 },
+        { day: 15, activities: ["Miyajima Island", "Itsukushima Shrine", "Mount Misen hike"], duration: "10 hours", estimatedCost: 80 },
+        { day: 16, activities: ["Hiroshima Castle", "Shukkeien Garden", "Okonomiyaki dining"], duration: "7 hours", estimatedCost: 60 }
+      ]
+    },
+    costsBreakdown: {
+      transport: { min: 750, max: 950 },
+      activities: { min: 900, max: 1400 },
+      lodging: { min: 800, max: 1800 }
+    }
+  },
+  {
+    title: "Grand European Journey",
+    description: "Discover four of Europe's most captivating cities in one spectacular journey through art, culture, and cuisine",
+    destinations: [
+      {
+        name: "Paris",
+        country: "France",
+        nights: 6,
+        transport: { type: "flight", cost: 400, duration: "Start point" }
+      },
+      {
+        name: "Rome",
+        country: "Italy",
+        nights: 6,
+        transport: { type: "flight", cost: 120, duration: "2h" }
+      },
+      {
+        name: "Barcelona",
+        country: "Spain",
+        nights: 6,
+        transport: { type: "flight", cost: 100, duration: "2h" }
+      },
+      {
+        name: "Amsterdam",
+        country: "Netherlands",
+        nights: 6,
+        transport: { type: "flight", cost: 130, duration: "2h 15m" }
+      }
+    ],
+    totalNights: 24,
+    priceMin: "800",
+    priceMax: "1500",
+    season: ["spring", "summer", "fall"],
+    tags: ["culture", "art", "food", "nightlife"],
+    audienceTags: ["couple", "friends", "family", "9+"],
+    rating: 4.8,
+    popularity: 189,
+    heroImage: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34",
+    images: [
+      "https://images.unsplash.com/photo-1549144511-f099e773c147",
+      "https://images.unsplash.com/photo-1523906834658-6e24ef2386f9"
+    ],
+    dailyItinerary: {
+      "0": [
+        { day: 1, activities: ["Eiffel Tower", "Trocadéro Gardens", "Seine River cruise"], duration: "8 hours", estimatedCost: 80 },
+        { day: 2, activities: ["Louvre Museum", "Tuileries Garden", "Place Vendôme"], duration: "9 hours", estimatedCost: 70 },
+        { day: 3, activities: ["Notre-Dame area", "Latin Quarter", "Panthéon"], duration: "8 hours", estimatedCost: 60 },
+        { day: 4, activities: ["Versailles Palace day trip"], duration: "10 hours", estimatedCost: 100 },
+        { day: 5, activities: ["Montmartre", "Sacré-Cœur", "Moulin Rouge area"], duration: "8 hours", estimatedCost: 90 },
+        { day: 6, activities: ["Champs-Élysées", "Arc de Triomphe", "Le Marais"], duration: "8 hours", estimatedCost: 80 }
+      ],
+      "1": [
+        { day: 7, activities: ["Colosseum", "Roman Forum", "Palatine Hill"], duration: "9 hours", estimatedCost: 80 },
+        { day: 8, activities: ["Vatican Museums", "Sistine Chapel", "St. Peter's Basilica"], duration: "9 hours", estimatedCost: 70 },
+        { day: 9, activities: ["Trevi Fountain", "Spanish Steps", "Pantheon"], duration: "8 hours", estimatedCost: 60 },
+        { day: 10, activities: ["Trastevere", "Villa Borghese", "Piazza Navona"], duration: "8 hours", estimatedCost: 90 },
+        { day: 11, activities: ["Borghese Gallery", "Appian Way", "Catacombs"], duration: "8 hours", estimatedCost: 70 },
+        { day: 12, activities: ["Campo de' Fiori market", "Jewish Ghetto", "Roman dining"], duration: "7 hours", estimatedCost: 80 }
+      ],
+      "2": [
+        { day: 13, activities: ["Sagrada Família", "Park Güell", "Gothic Quarter"], duration: "9 hours", estimatedCost: 80 },
+        { day: 14, activities: ["La Rambla", "Boqueria Market", "Barceloneta Beach"], duration: "8 hours", estimatedCost: 70 },
+        { day: 15, activities: ["Casa Batlló", "Casa Milà", "Passeig de Gràcia"], duration: "8 hours", estimatedCost: 90 },
+        { day: 16, activities: ["Montjuïc", "Magic Fountain", "Olympic Stadium"], duration: "8 hours", estimatedCost: 60 },
+        { day: 17, activities: ["Camp Nou Stadium", "FC Barcelona Museum", "Tapas tour"], duration: "8 hours", estimatedCost: 100 },
+        { day: 18, activities: ["Bunkers del Carmel", "El Born district", "Picasso Museum"], duration: "8 hours", estimatedCost: 80 }
+      ],
+      "3": [
+        { day: 19, activities: ["Canal cruise", "Anne Frank House", "Jordaan"], duration: "8 hours", estimatedCost: 70 },
+        { day: 20, activities: ["Van Gogh Museum", "Rijksmuseum", "Museumplein"], duration: "8 hours", estimatedCost: 60 },
+        { day: 21, activities: ["Bike tour", "Vondelpark", "Nine Streets shopping"], duration: "7 hours", estimatedCost: 50 },
+        { day: 22, activities: ["Zaanse Schans windmills", "Dutch countryside"], duration: "9 hours", estimatedCost: 80 },
+        { day: 23, activities: ["Albert Cuyp Market", "Heineken Experience", "De Pijp"], duration: "8 hours", estimatedCost: 70 },
+        { day: 24, activities: ["A'DAM Lookout", "NDSM Wharf", "Canal-side dining"], duration: "8 hours", estimatedCost: 90 }
+      ]
+    },
+    costsBreakdown: {
+      transport: { min: 750, max: 950 },
+      activities: { min: 1200, max: 1800 },
+      lodging: { min: 1400, max: 2800 }
+    }
+  },
+  {
+    title: "Southeast Asia Multi-Country",
+    description: "An epic adventure across four Southeast Asian gems, from Thai temples to Balinese beaches and Singapore's skyline",
+    destinations: [
+      {
+        name: "Bangkok",
+        country: "Thailand",
+        nights: 8,
+        transport: { type: "flight", cost: 600, duration: "Start point" }
+      },
+      {
+        name: "Chiang Mai",
+        country: "Thailand",
+        nights: 9,
+        transport: { type: "flight", cost: 80, duration: "1h 20m" }
+      },
+      {
+        name: "Bali",
+        country: "Indonesia",
+        nights: 10,
+        transport: { type: "flight", cost: 180, duration: "4h 30m" }
+      },
+      {
+        name: "Singapore",
+        country: "Singapore",
+        nights: 8,
+        transport: { type: "flight", cost: 150, duration: "2h 30m" }
+      }
+    ],
+    totalNights: 35,
+    priceMin: "1500",
+    priceMax: "2800",
+    season: ["winter", "spring", "year-round"],
+    tags: ["adventure", "nature", "culture", "food"],
+    audienceTags: ["solo", "friends", "couple", "5+"],
+    rating: 4.7,
+    popularity: 156,
+    heroImage: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a",
+    images: [
+      "https://images.unsplash.com/photo-1528181304800-259b08848526",
+      "https://images.unsplash.com/photo-1537996194471-e657df975ab4"
+    ],
+    dailyItinerary: {
+      "0": [
+        { day: 1, activities: ["Grand Palace", "Wat Pho", "Wat Arun"], duration: "8 hours", estimatedCost: 50 },
+        { day: 2, activities: ["Chatuchak Market", "Jim Thompson House", "Khao San Road"], duration: "9 hours", estimatedCost: 60 },
+        { day: 3, activities: ["Floating markets", "Ayutthaya day trip"], duration: "10 hours", estimatedCost: 80 },
+        { day: 4, activities: ["Chinatown", "Pak Khlong Talat flower market", "Rooftop bar"], duration: "8 hours", estimatedCost: 70 },
+        { day: 5, activities: ["Thai cooking class", "MBK shopping", "Siam area"], duration: "8 hours", estimatedCost: 90 },
+        { day: 6, activities: ["Lumpini Park", "Terminal 21", "Asiatique riverfront"], duration: "8 hours", estimatedCost: 60 },
+        { day: 7, activities: ["Damnoen Saduak floating market", "Railway market"], duration: "9 hours", estimatedCost: 70 },
+        { day: 8, activities: ["Erawan Museum", "Ancient City", "Night market"], duration: "8 hours", estimatedCost: 80 }
+      ],
+      "1": [
+        { day: 9, activities: ["Doi Suthep Temple", "Old City temples", "Night Bazaar"], duration: "9 hours", estimatedCost: 50 },
+        { day: 10, activities: ["Elephant sanctuary", "Waterfall visit"], duration: "10 hours", estimatedCost: 100 },
+        { day: 11, activities: ["Thai cooking class", "Local markets", "Massage course"], duration: "8 hours", estimatedCost: 80 },
+        { day: 12, activities: ["Doi Inthanon National Park", "Hill tribe villages"], duration: "10 hours", estimatedCost: 90 },
+        { day: 13, activities: ["White Temple day trip (Chiang Rai)", "Blue Temple"], duration: "12 hours", estimatedCost: 120 },
+        { day: 14, activities: ["Sticky Waterfall", "Bua Thong", "Hot springs"], duration: "9 hours", estimatedCost: 70 },
+        { day: 15, activities: ["Sunday Walking Street", "Art galleries", "Cafe hopping"], duration: "8 hours", estimatedCost: 60 },
+        { day: 16, activities: ["Zip-lining adventure", "Mae Ping River cruise"], duration: "9 hours", estimatedCost: 110 },
+        { day: 17, activities: ["Nimman Road", "Maya shopping", "Rooftop bars"], duration: "8 hours", estimatedCost: 80 }
+      ],
+      "2": [
+        { day: 18, activities: ["Ubud Monkey Forest", "Tegallalang Rice Terraces", "Ubud Palace"], duration: "9 hours", estimatedCost: 60 },
+        { day: 19, activities: ["Mount Batur sunrise trek", "Hot springs"], duration: "10 hours", estimatedCost: 100 },
+        { day: 20, activities: ["Tirta Empul Temple", "Gunung Kawi", "Coffee plantation"], duration: "8 hours", estimatedCost: 70 },
+        { day: 21, activities: ["Beach day in Seminyak", "Tanah Lot sunset"], duration: "8 hours", estimatedCost: 80 },
+        { day: 22, activities: ["Uluwatu Temple", "Kecak dance", "Jimbaran seafood"], duration: "9 hours", estimatedCost: 90 },
+        { day: 23, activities: ["Snorkeling Nusa Penida", "Kelingking Beach"], duration: "10 hours", estimatedCost: 120 },
+        { day: 24, activities: ["Surfing lesson", "Beach clubs", "Shopping"], duration: "8 hours", estimatedCost: 100 },
+        { day: 25, activities: ["Sacred Monkey Forest Sanctuary", "Ubud Art Market", "Traditional dance"], duration: "8 hours", estimatedCost: 70 },
+        { day: 26, activities: ["Waterbom Bali", "Kuta Beach", "Sunset drinks"], duration: "8 hours", estimatedCost: 80 },
+        { day: 27, activities: ["Spa day", "Yoga class", "Healthy cafes"], duration: "7 hours", estimatedCost: 90 }
+      ],
+      "3": [
+        { day: 28, activities: ["Marina Bay Sands", "Gardens by the Bay", "Supertree Grove"], duration: "8 hours", estimatedCost: 80 },
+        { day: 29, activities: ["Chinatown", "Little India", "Arab Street"], duration: "9 hours", estimatedCost: 60 },
+        { day: 30, activities: ["Universal Studios Singapore"], duration: "10 hours", estimatedCost: 120 },
+        { day: 31, activities: ["Sentosa Island", "Beaches", "S.E.A. Aquarium"], duration: "9 hours", estimatedCost: 100 },
+        { day: 32, activities: ["Orchard Road shopping", "ION Sky", "Rooftop bars"], duration: "8 hours", estimatedCost: 90 },
+        { day: 33, activities: ["Singapore Zoo", "Night Safari"], duration: "10 hours", estimatedCost: 110 },
+        { day: 34, activities: ["Clarke Quay", "Singapore River cruise", "Hawker centers"], duration: "8 hours", estimatedCost: 70 },
+        { day: 35, activities: ["Haji Lane", "Kampong Glam", "Raffles Hotel"], duration: "7 hours", estimatedCost: 80 }
+      ]
+    },
+    costsBreakdown: {
+      transport: { min: 1010, max: 1210 },
+      activities: { min: 2100, max: 3200 },
+      lodging: { min: 1800, max: 3500 }
+    }
   }
 ];
 

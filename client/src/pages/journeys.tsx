@@ -89,6 +89,7 @@ export default function JourneysPage() {
       'Tokyo': { he: 'טוקיו', en: 'Tokyo' },
       'Kyoto': { he: 'קיוטו', en: 'Kyoto' },
       'Osaka': { he: 'אוסקה', en: 'Osaka' },
+      'Hiroshima': { he: 'הירושימה', en: 'Hiroshima' },
       'Paris': { he: 'פריז', en: 'Paris' },
       'Amsterdam': { he: 'אמסטרדם', en: 'Amsterdam' },
       'Berlin': { he: 'ברלין', en: 'Berlin' },
@@ -98,6 +99,8 @@ export default function JourneysPage() {
       'Bangkok': { he: 'בנגקוק', en: 'Bangkok' },
       'Chiang Mai': { he: 'צ\'יאנג מאי', en: 'Chiang Mai' },
       'Phuket': { he: 'פוקט', en: 'Phuket' },
+      'Bali': { he: 'באלי', en: 'Bali' },
+      'Singapore': { he: 'סינגפור', en: 'Singapore' },
       'New York': { he: 'ניו יורק', en: 'New York' },
       'Philadelphia': { he: 'פילדלפיה', en: 'Philadelphia' },
       'Washington DC': { he: 'וושינגטון', en: 'Washington DC' },
@@ -114,6 +117,9 @@ export default function JourneysPage() {
       'Southeast Asia Adventure': { he: 'הרפתקה בדרום מזרח אסיה', en: 'Southeast Asia Adventure' },
       'Mediterranean Dream': { he: 'חלום ים תיכוני', en: 'Mediterranean Dream' },
       'East Coast USA Explorer': { he: 'סיור החוף המזרחי של ארה"ב', en: 'East Coast USA Explorer' },
+      'Japan Extended Discovery': { he: 'לחקור את יפן המורחבת', en: 'Japan Extended Discovery' },
+      'Grand European Journey': { he: 'מסע אירופי גדול', en: 'Grand European Journey' },
+      'Southeast Asia Multi-Country': { he: 'הרפתקה בדרום מזרח אסיה (מרובת מדינות)', en: 'Southeast Asia Multi-Country' },
     };
     return titleTranslations[title]?.[isRTL ? 'he' : 'en'] || title;
   };
