@@ -494,8 +494,8 @@ export default function JourneyDetailPage() {
                   <div className="inline-flex items-center gap-2">
                     {isRTL ? (
                       <>
-                        <span dir="rtl">פירוט עלויות משוער</span>
                         <span className="text-3xl">₪</span>
+                        <span dir="rtl">פירוט עלויות משוער</span>
                       </>
                     ) : (
                       <>
