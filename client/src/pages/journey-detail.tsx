@@ -437,13 +437,33 @@ export default function JourneyDetailPage() {
           </Button>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs - Styled like Journeys page */}
         <Tabs defaultValue="overview" className="w-full" dir={isRTL ? 'rtl' : 'ltr'}>
-          <TabsList className={`grid w-full grid-cols-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <TabsTrigger value="overview">{isRTL ? 'סקירה' : 'Overview'}</TabsTrigger>
-            <TabsTrigger value="schedule">{isRTL ? 'לוח זמנים יומי' : 'Daily Schedule'}</TabsTrigger>
-            <TabsTrigger value="costs">{isRTL ? 'עלויות' : 'Costs'}</TabsTrigger>
-            <TabsTrigger value="map">{isRTL ? 'מפה' : 'Map'}</TabsTrigger>
+          <TabsList className={`grid w-full grid-cols-4 gap-2 bg-white p-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <TabsTrigger 
+              value="overview"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white rounded-lg font-medium transition-all"
+            >
+              {isRTL ? 'סקירה' : 'Overview'}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="schedule"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white rounded-lg font-medium transition-all"
+            >
+              {isRTL ? 'לוח זמנים יומי' : 'Daily Schedule'}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="costs"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white rounded-lg font-medium transition-all"
+            >
+              {isRTL ? 'עלויות' : 'Costs'}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="map"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white rounded-lg font-medium transition-all"
+            >
+              {isRTL ? 'מפה' : 'Map'}
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab - Card Design */}
