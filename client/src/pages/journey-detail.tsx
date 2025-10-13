@@ -460,7 +460,7 @@ export default function JourneyDetailPage() {
                     </h3>
                     <div className="space-y-4">
                       {days.map((day, idx) => (
-                        <div key={idx} className="border-l-4 border-orange-500 pl-4">
+                        <div key={idx} className={`${isRTL ? 'border-r-4 pr-4' : 'border-l-4 pl-4'} border-orange-500`}>
                           <div className="flex justify-between items-start mb-2">
                             {isRTL ? (
                               <>
@@ -484,13 +484,13 @@ export default function JourneyDetailPage() {
                           </div>
                           <ul className={`space-y-1 text-gray-700 ${isRTL ? 'pr-4' : 'pl-4'}`}>
                             {day.activities.map((activity, actIdx) => (
-                              <li key={actIdx} className="flex items-start gap-2">
+                              <li key={actIdx} className={`flex items-start gap-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                 <span className="text-orange-500 mt-1">•</span>
                                 <span dir={isRTL ? 'rtl' : 'ltr'}>{translateActivity(activity)}</span>
                               </li>
                             ))}
                           </ul>
-                          <p className="text-sm text-gray-500 mt-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                          <p className={`text-sm text-gray-500 mt-2 ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                             <Clock className="inline w-3 h-3 mr-1" />
                             {formatDuration(day.duration)}
                           </p>
