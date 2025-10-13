@@ -145,7 +145,7 @@ export default function JourneysPage() {
     <div className={`min-h-screen bg-gray-50 pb-20 md:pb-0 ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-500 to-teal-500 text-white py-12 px-4">
-        <div className="max-w-7xl mx-auto">
+        <div className={`max-w-7xl mx-auto ${isRTL ? 'text-right' : ''}`}>
           <h1 className="text-4xl font-bold mb-4" dir={isRTL ? 'rtl' : 'ltr'}>
             {isRTL ? 'מסעות מתוכננים ברחבי העולם' : 'Multi-Destination Journeys'}
           </h1>
@@ -162,7 +162,7 @@ export default function JourneysPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {/* Season Filter */}
               <div>
-                <label className="block text-sm font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                <label className={`block text-sm font-medium mb-2 ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                   {isRTL ? 'עונה' : 'Season'}
                 </label>
                 <Select value={filters.season} onValueChange={(val) => setFilters(prev => ({ ...prev, season: val }))}>
@@ -184,7 +184,7 @@ export default function JourneysPage() {
 
               {/* Budget Filter */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-2" dir={isRTL ? 'rtl' : 'ltr'}>
+                <label className={`block text-sm font-medium mb-2 ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                   {isRTL ? 'תקציב' : 'Budget'}: {formatPrice(filters.minBudget, filters.maxBudget)}
                 </label>
                 <Slider
@@ -198,7 +198,7 @@ export default function JourneysPage() {
               </div>
 
               {/* Duration Info */}
-              <div className="flex items-center gap-2">
+              <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
                 <Calendar className="w-5 h-5 text-orange-500" />
                 <span className="text-sm text-gray-600" dir={isRTL ? 'rtl' : 'ltr'}>
                   {journeys.length} {isRTL ? 'מסעות זמינים' : 'journeys available'}
@@ -208,10 +208,10 @@ export default function JourneysPage() {
 
             {/* Tags Filter */}
             <div className="mt-6">
-              <label className="block text-sm font-medium mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
+              <label className={`block text-sm font-medium mb-3 ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 {isRTL ? 'תגיות' : 'Tags'}
               </label>
-              <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
                 {tagFilters.map(tag => (
                   <Badge
                     key={tag}
