@@ -19,6 +19,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
 
 // RTL support for Hebrew - Force rebuild v2
 interface Journey {
@@ -52,6 +53,81 @@ interface Journey {
     activities: { min: number; max: number };
     lodging: { min: number; max: number };
   };
+}
+
+// Journey Map Component with markers for all destinations
+function JourneyMap({ destinations, isRTL }: { destinations: Journey['destinations'], isRTL: boolean }) {
+  // City coordinates mapping
+  const cityCoordinates: Record<string, { lat: number; lng: number }> = {
+    'Tokyo': { lat: 35.6762, lng: 139.6503 },
+    'Kyoto': { lat: 35.0116, lng: 135.7681 },
+    'Osaka': { lat: 34.6937, lng: 135.5023 },
+    'Paris': { lat: 48.8566, lng: 2.3522 },
+    'Amsterdam': { lat: 52.3676, lng: 4.9041 },
+    'Berlin': { lat: 52.5200, lng: 13.4050 },
+    'Bangkok': { lat: 13.7563, lng: 100.5018 },
+    'Chiang Mai': { lat: 18.7883, lng: 98.9853 },
+    'Phuket': { lat: 7.8804, lng: 98.3923 },
+    'Barcelona': { lat: 41.3874, lng: 2.1686 },
+    'Ibiza': { lat: 38.9067, lng: 1.4206 },
+    'Mykonos': { lat: 37.4467, lng: 25.3289 },
+    'New York': { lat: 40.7128, lng: -74.0060 },
+    'Miami': { lat: 25.7617, lng: -80.1918 },
+    'New Orleans': { lat: 29.9511, lng: -90.0715 },
+  };
+
+  // Get coordinates for destinations
+  const markers = destinations.map((dest, index) => ({
+    position: cityCoordinates[dest.name] || { lat: 0, lng: 0 },
+    name: dest.name,
+    index: index + 1
+  }));
+
+  // Calculate center of map (average of all coordinates)
+  const center = markers.reduce(
+    (acc, marker) => ({
+      lat: acc.lat + marker.position.lat / markers.length,
+      lng: acc.lng + marker.position.lng / markers.length,
+    }),
+    { lat: 0, lng: 0 }
+  );
+
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+  if (!apiKey) {
+    return (
+      <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
+        <p className="text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>
+          {isRTL ? 'נדרש Google Maps API Key' : 'Google Maps API Key required'}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <APIProvider apiKey={apiKey}>
+      <div className="h-96 w-full rounded-lg overflow-hidden">
+        <Map
+          mapId="DEMO_MAP_ID"
+          defaultCenter={center}
+          defaultZoom={markers.length === 1 ? 10 : 4}
+          gestureHandling="greedy"
+          disableDefaultUI={false}
+        >
+          {markers.map((marker, idx) => (
+            <AdvancedMarker
+              key={idx}
+              position={marker.position}
+            >
+              <div className="bg-orange-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg shadow-lg border-2 border-white">
+                {marker.index}
+              </div>
+            </AdvancedMarker>
+          ))}
+        </Map>
+      </div>
+    </APIProvider>
+  );
 }
 
 export default function JourneyDetailPage() {
@@ -551,9 +627,7 @@ export default function JourneyDetailPage() {
           <TabsContent value="map" className="mt-6">
             <Card>
               <CardContent className="p-6">
-                <div className="h-96 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <p className="text-gray-500" dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'מפה אינטראקטיבית בקרוב' : 'Interactive map coming soon'}</p>
-                </div>
+                <JourneyMap destinations={journey.destinations} isRTL={isRTL} />
               </CardContent>
             </Card>
           </TabsContent>
