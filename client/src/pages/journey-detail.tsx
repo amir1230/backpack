@@ -381,7 +381,7 @@ export default function JourneyDetailPage() {
                         <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
                           {idx + 1}
                         </div>
-                        <div>
+                        <div style={isRTL ? { textAlign: 'right' } : { textAlign: 'left' }}>
                           <h4 className="font-bold text-lg" dir={isRTL ? 'rtl' : 'ltr'}>
                             {translateCityName(dest.name)},{translateCountry(dest.country)}
                           </h4>
