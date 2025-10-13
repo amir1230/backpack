@@ -70,6 +70,35 @@ export default function JourneyDetailPage() {
     return `${currency}${minNum.toLocaleString()} - ${currency}${maxNum.toLocaleString()}`;
   };
 
+  const translateJourneyTitle = (title: string) => {
+    const titleTranslations: Record<string, { he: string; en: string }> = {
+      'Classic Japan Circuit': { he: 'מסע יפן הקלאסי', en: 'Classic Japan Circuit' },
+      'European Highlights Tour': { he: 'סיור דגשי אירופה', en: 'European Highlights Tour' },
+      'Southeast Asia Adventure': { he: 'הרפתקה בדרום מזרח אסיה', en: 'Southeast Asia Adventure' },
+      'Mediterranean Dream': { he: 'חלום ים תיכוני', en: 'Mediterranean Dream' },
+      'East Coast USA Explorer': { he: 'סיור החוף המזרחי של ארה"ב', en: 'East Coast USA Explorer' },
+    };
+    return titleTranslations[title]?.[isRTL ? 'he' : 'en'] || title;
+  };
+
+  const translateTag = (tag: string) => {
+    const translations: Record<string, { he: string; en: string }> = {
+      nature: { he: 'טבע', en: 'Nature' },
+      food: { he: 'אוכל', en: 'Food' },
+      culture: { he: 'תרבות', en: 'Culture' },
+      nightlife: { he: 'חיי לילה', en: 'Nightlife' },
+      adventure: { he: 'הרפתקאות', en: 'Adventure' },
+      art: { he: 'אמנות', en: 'Art' },
+      '12+': { he: '12+', en: '12+' },
+      couple: { he: 'זוגות', en: 'Couple' },
+      solo: { he: 'יחידים', en: 'Solo' },
+      friends: { he: 'חברים', en: 'Friends' },
+      family: { he: 'משפחות', en: 'Family' },
+      group: { he: 'קבוצות', en: 'Group' },
+    };
+    return translations[tag]?.[isRTL ? 'he' : 'en'] || tag;
+  };
+
   const getTransportIcon = (type: string) => {
     switch (type) {
       case 'flight':
@@ -131,7 +160,7 @@ export default function JourneyDetailPage() {
                 <span dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'חזרה למסעות' : 'Back to Journeys'}</span>
               </Button>
             </Link>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4" dir={isRTL ? 'rtl' : 'ltr'}>{journey.title}</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4" dir={isRTL ? 'rtl' : 'ltr'}>{translateJourneyTitle(journey.title)}</h1>
             <div className={`flex items-center gap-4 text-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className="flex items-center gap-2">
                 <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
@@ -154,12 +183,12 @@ export default function JourneyDetailPage() {
         <div className={`flex flex-wrap gap-2 mb-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
           {journey.tags?.map((tag) => (
             <Badge key={tag} className="bg-gradient-to-r from-orange-100 to-teal-100 text-gray-800 border-0">
-              {tag}
+              {translateTag(tag)}
             </Badge>
           ))}
           {journey.audience_tags?.map((tag) => (
             <Badge key={tag} variant="outline" className="border-orange-500 text-orange-600">
-              {tag}
+              {translateTag(tag)}
             </Badge>
           ))}
         </div>

@@ -83,6 +83,17 @@ export default function JourneysPage() {
     return translations[tag]?.[isRTL ? 'he' : 'en'] || tag;
   };
 
+  const translateJourneyTitle = (title: string) => {
+    const titleTranslations: Record<string, { he: string; en: string }> = {
+      'Classic Japan Circuit': { he: 'מסע יפן הקלאסי', en: 'Classic Japan Circuit' },
+      'European Highlights Tour': { he: 'סיור דגשי אירופה', en: 'European Highlights Tour' },
+      'Southeast Asia Adventure': { he: 'הרפתקה בדרום מזרח אסיה', en: 'Southeast Asia Adventure' },
+      'Mediterranean Dream': { he: 'חלום ים תיכוני', en: 'Mediterranean Dream' },
+      'East Coast USA Explorer': { he: 'סיור החוף המזרחי של ארה"ב', en: 'East Coast USA Explorer' },
+    };
+    return titleTranslations[title]?.[isRTL ? 'he' : 'en'] || title;
+  };
+
   const formatDuration = (nights: number) => {
     const weeks = Math.floor(nights / 7);
     const days = nights % 7;
@@ -224,7 +235,7 @@ export default function JourneysPage() {
                   </div>
 
                   <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-2" dir={isRTL ? 'rtl' : 'ltr'}>{journey.title}</h3>
+                    <h3 className="text-xl font-bold mb-2" dir={isRTL ? 'rtl' : 'ltr'}>{translateJourneyTitle(journey.title)}</h3>
                     
                     {/* Destination Chain */}
                     <div className={`flex items-center gap-2 mb-3 text-orange-600 font-medium ${isRTL ? 'flex-row-reverse' : ''}`}>

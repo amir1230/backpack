@@ -294,6 +294,17 @@ function PopularJourneysSection() {
     return destinations.map(d => d.name).join(` ${arrow} `);
   };
 
+  const translateJourneyTitle = (title: string) => {
+    const titleTranslations: Record<string, { he: string; en: string }> = {
+      'Classic Japan Circuit': { he: 'מסע יפן הקלאסי', en: 'Classic Japan Circuit' },
+      'European Highlights Tour': { he: 'סיור דגשי אירופה', en: 'European Highlights Tour' },
+      'Southeast Asia Adventure': { he: 'הרפתקה בדרום מזרח אסיה', en: 'Southeast Asia Adventure' },
+      'Mediterranean Dream': { he: 'חלום ים תיכוני', en: 'Mediterranean Dream' },
+      'East Coast USA Explorer': { he: 'סיור החוף המזרחי של ארה"ב', en: 'East Coast USA Explorer' },
+    };
+    return titleTranslations[title]?.[isRTL ? 'he' : 'en'] || title;
+  };
+
   return (
     <section className="mb-12">
       <div className={`flex items-center justify-between mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -330,13 +341,13 @@ function PopularJourneysSection() {
               <Card className="h-full overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group">
                 <div className="relative h-32 overflow-hidden">
                   <img
-                    src={journey.heroImage || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828'}
+                    src={journey.hero_image || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828'}
                     alt={journey.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                 </div>
                 <CardContent className="p-4">
-                  <h3 className="font-bold mb-2 line-clamp-1" dir={isRTL ? 'rtl' : 'ltr'}>{journey.title}</h3>
+                  <h3 className="font-bold mb-2 line-clamp-1" dir={isRTL ? 'rtl' : 'ltr'}>{translateJourneyTitle(journey.title)}</h3>
                   <div className={`flex items-center gap-1 text-xs text-orange-600 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <MapPin className="w-3 h-3 flex-shrink-0" />
                     <span className="truncate" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -346,11 +357,11 @@ function PopularJourneysSection() {
                   <div className={`flex items-center gap-3 text-xs text-gray-600 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <Calendar className="w-3 h-3" />
-                      <span>{journey.totalNights} {isRTL ? 'לילות' : 'nights'}</span>
+                      <span>{journey.total_nights} {isRTL ? 'לילות' : 'nights'}</span>
                     </div>
                     <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      <span>{parseFloat(journey.rating || '0').toFixed(1)}</span>
+                      <span>{journey.rating.toFixed(1)}</span>
                     </div>
                   </div>
                 </CardContent>
