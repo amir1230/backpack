@@ -285,7 +285,8 @@ export default function Landing() {
                 rating: 4.9,
                 reviews: 234,
                 travelers: 15,
-                image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=250&fit=crop"
+                image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=250&fit=crop",
+                journeyId: 11
               },
               {
                 title: t('landing.route_two_title'),
@@ -295,7 +296,8 @@ export default function Landing() {
                 rating: 4.8,
                 reviews: 189,
                 travelers: 12,
-                image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=250&fit=crop"
+                image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=250&fit=crop",
+                journeyId: 12
               },
               {
                 title: t('landing.route_three_title'),
@@ -305,7 +307,8 @@ export default function Landing() {
                 rating: 4.7,
                 reviews: 156,
                 travelers: 8,
-                image: "https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?w=400&h=250&fit=crop"
+                image: "https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?w=400&h=250&fit=crop",
+                journeyId: 13
               }
             ].map((route, index) => (
               <Card key={index} className="overflow-hidden card-hover">
@@ -343,7 +346,7 @@ export default function Landing() {
                       )}
                     </div>
                     <Button asChild className="bg-primary text-white hover:bg-orange-600">
-                      <Link href="/my-trips">{t('landing.view_route')}</Link>
+                      <Link href={`/journeys/${route.journeyId}`}>{t('landing.view_route')}</Link>
                     </Button>
                   </div>
                 </CardContent>
