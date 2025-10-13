@@ -19,7 +19,7 @@ import { googlePlaces } from "./googlePlaces.js";
 import { seedSouthAmericanData } from "./dataSeeder.js";
 import { weatherService } from "./weatherService.js";
 import { travelTimingService } from "./travelTimingService.js";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { registerCollectorRoutes } from "./collectorRoutes.js";
 import type { Request, Response, Router } from 'express';
 import { supabaseAdmin } from './supabase.js';
@@ -4767,6 +4767,40 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Seed journeys (development only)
+  // Create journeys table if not exists
+  app.post('/api/create-journeys-table', async (req, res) => {
+    try {
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS journeys (
+          id SERIAL PRIMARY KEY,
+          title VARCHAR NOT NULL,
+          description TEXT NOT NULL,
+          destinations JSONB NOT NULL,
+          total_nights INTEGER NOT NULL,
+          price_min NUMERIC(10,2) NOT NULL,
+          price_max NUMERIC(10,2) NOT NULL,
+          season TEXT[],
+          tags TEXT[],
+          audience_tags TEXT[],
+          rating NUMERIC(3,2) DEFAULT 0,
+          popularity INTEGER DEFAULT 0,
+          hero_image TEXT,
+          images TEXT[],
+          daily_itinerary JSONB,
+          costs_breakdown JSONB,
+          created_at TIMESTAMP DEFAULT NOW(),
+          updated_at TIMESTAMP DEFAULT NOW()
+        )
+      `);
+      const result = await db.execute(sql`SELECT COUNT(*) as count FROM journeys`);
+      const count = result.rows?.[0] || { count: 0 };
+      res.json({ success: true, message: 'Table created/verified', count });
+    } catch (error) {
+      console.error('Error creating journeys table:', error);
+      res.status(500).json({ message: 'Failed to create table', error: String(error) });
+    }
+  });
+
   app.post('/api/seed/journeys', async (req, res) => {
     try {
       const { seedJourneys } = await import('./journeysSeeder.js');
