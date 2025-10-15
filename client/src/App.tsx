@@ -29,6 +29,7 @@ import DestinationDetail from "./pages/destination-detail.js";
 import IntegrationsDemoDestinations from "./pages/integrations-demo-destinations.js";
 import Journeys from "./pages/journeys.js";
 import JourneyDetail from "./pages/journey-detail.js";
+import CreateJourney from "./pages/create-journey.js";
 import MediaDemo from "./pages/media-demo.js";
 import IntegrationsDemoUnsplash from "./pages/integrations-demo-unsplash.js";
 import HelpCenter from "./pages/help-center.js";
@@ -67,6 +68,7 @@ function Router() {
           <Route path="/destinations/:slug" component={DestinationDetail} />
           <Route path="/journeys" component={Journeys} />
           <Route path="/journeys/:id" component={JourneyDetail} />
+          <Route path="/create-journey" component={CreateJourney} />
           <Route path="/integrations-demo/destinations" component={IntegrationsDemoDestinations} />
           <Route path="/integrations-demo/media" component={MediaDemo} />
           <Route path="/integrations-demo/unsplash" component={IntegrationsDemoUnsplash} />

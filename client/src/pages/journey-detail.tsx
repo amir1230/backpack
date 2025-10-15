@@ -853,7 +853,7 @@ export default function JourneyDetailPage() {
             </Button>
             <Button 
               onClick={() => {
-                // Navigate to My Trips with journey inspiration
+                // Navigate to Create Journey page with inspiration
                 const params = new URLSearchParams({
                   journeyId: id || '',
                   adults: customTrip.adults.toString(),
@@ -862,7 +862,7 @@ export default function JourneyDetailPage() {
                   ...(customTrip.startDate && { startDate: customTrip.startDate }),
                   ...(customTrip.budget && { budget: customTrip.budget })
                 });
-                setLocation(`/my-trips?${params.toString()}`);
+                setLocation(`/create-journey?${params.toString()}`);
               }}
               className="bg-orange-500 hover:bg-orange-600"
               dir={isRTL ? 'rtl' : 'ltr'}
