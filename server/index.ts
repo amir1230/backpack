@@ -228,7 +228,7 @@ async function startServer() {
         return res.status(400).json({ error: 'source parameter is required' });
       }
 
-      // Special handling for Unsplash: redirect instead of serving buffer
+      // Special handling for Unsplash: use the media proxy service
       if (source === 'unsplash') {
         const { unsplashService } = await import('./integrations/unsplash/unsplashService.js');
         
@@ -258,8 +258,24 @@ async function startServer() {
           else if (width >= 2000) variant = 'full';
         }
 
-        // 302 Redirect to Unsplash CDN
-        return res.redirect(302, photo.urls[variant]);
+        // Fetch and proxy the image instead of redirecting
+        const imageUrl = photo.urls[variant];
+        const imageResponse = await fetch(imageUrl);
+        const buffer = Buffer.from(await imageResponse.arrayBuffer());
+        const contentType = imageResponse.headers.get('content-type') || 'image/jpeg';
+
+        // Set cache headers
+        res.setHeader('Cache-Control', 'public, max-age=7200, stale-while-revalidate=86400');
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('X-Attribution', JSON.stringify({
+          provider: 'Unsplash',
+          attributionText: `Photo by ${photo.user.name}`,
+          attributionUrl: photo.user.links.html,
+          license: 'Unsplash License'
+        }));
+
+        console.log(`[Media Proxy] unsplash - ${query || id} - proxied`);
+        return res.send(buffer);
       }
 
       const { mediaProxyService } = await import('./integrations/media/mediaProxyService.js');

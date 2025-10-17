@@ -516,14 +516,13 @@ export default function DestinationDetail() {
                     { source: 'pexels', query: destination.name, alt: `${destination.name} view` }
                   ]}
                   poiImages={
-                    attractions
-                      ?.filter(attr => attr.photos && attr.photos.length > 0)
-                      .slice(0, 3)
-                      .map((attr) => ({
-                        source: 'google' as const,
-                        ref: attr.photos![0].photo_reference,
-                        alt: attr.name
-                      })) || []
+                    attractions && attractions.length > 0
+                      ? attractions.slice(0, 3).map((attr) => ({
+                          source: 'unsplash' as const,
+                          query: `${attr.name} ${destination.name}`,
+                          alt: attr.name
+                        }))
+                      : []
                   }
                   isLoading={attractionsLoading}
                 />
