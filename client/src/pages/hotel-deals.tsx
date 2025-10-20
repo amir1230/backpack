@@ -79,6 +79,41 @@ export default function HotelDeals() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!formData.destination || !formData.checkIn || !formData.checkOut || !formData.phone || !formData.email || !formData.budget) {
+      toast({
+        title: "שדות חסרים ⚠️",
+        description: "אנא מלא את כל השדות הנדרשים (יעד, תאריכים, תקציב, טלפון, אימייל)",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Validate dates
+    const checkInDate = new Date(formData.checkIn);
+    const checkOutDate = new Date(formData.checkOut);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (checkInDate < today) {
+      toast({
+        title: "תאריך שגוי ⚠️",
+        description: "תאריך כניסה חייב להיות בעתיד",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (checkOutDate <= checkInDate) {
+      toast({
+        title: "תאריך שגוי ⚠️",
+        description: "תאריך יציאה חייב להיות אחרי תאריך הכניסה",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     submitInquiry.mutate(formData);
   };
 
@@ -320,13 +355,14 @@ export default function HotelDeals() {
                 {/* Budget */}
                 <div>
                   <Label htmlFor="budget" className="text-right block mb-2" dir="rtl">
-                    תקציב משוער ללילה (₪)
+                    תקציב משוער ללילה (₪) *
                   </Label>
                   <Input
                     id="budget"
                     placeholder="לדוגמה: 500-800 ₪"
                     value={formData.budget}
                     onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+                    required
                     className="text-right"
                     dir="rtl"
                     data-testid="input-budget"
