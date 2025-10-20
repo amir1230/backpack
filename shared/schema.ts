@@ -1164,6 +1164,34 @@ export type InsertLocationPhoto = z.infer<typeof insertLocationPhotoSchema>;
 export type LocationAncestor = typeof locationAncestors.$inferSelect;
 export type InsertLocationAncestor = z.infer<typeof insertLocationAncestorSchema>;
 
+// Hotel Inquiries table (for hotel-deals page)
+export const hotelInquiries = pgTable("hotel_inquiries", {
+  id: serial("id").primaryKey(),
+  destination: varchar("destination").notNull(),
+  checkIn: timestamp("check_in").notNull(),
+  checkOut: timestamp("check_out").notNull(),
+  adults: integer("adults").notNull().default(2),
+  children: integer("children").notNull().default(0),
+  budget: varchar("budget").notNull(),
+  phone: varchar("phone").notNull(),
+  email: varchar("email").notNull(),
+  notes: text("notes"),
+  whatsappConsent: boolean("whatsapp_consent").default(false),
+  status: varchar("status").default("new"), // new, contacted, quoted, booked, cancelled
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertHotelInquirySchema = createInsertSchema(hotelInquiries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  status: true,
+});
+
+export type HotelInquiry = typeof hotelInquiries.$inferSelect;
+export type InsertHotelInquiry = z.infer<typeof insertHotelInquirySchema>;
+
 // i18n types
 export type DestinationI18n = typeof destinationsI18n.$inferSelect;
 export type InsertDestinationI18n = z.infer<typeof insertDestinationI18nSchema>;
