@@ -1707,7 +1707,134 @@
   },
   "onboarding": {
     "complete_profile_message": "Complete your profile to get personalized travel recommendations from around the world",
-    "complete_setup": "Complete Setup"
+    "complete_setup": "Complete Setup",
+    "step_of": "Step {{current}} of {{total}}",
+    "skip_for_now": "Skip for now",
+    "next": "Next",
+    "back": "Back",
+    "view_landing_page": "View Landing Page",
+    "step1": {
+      "title": "Welcome to GlobeMate!",
+      "description": "Let's personalize your adventure around the world. What interests you most?"
+    },
+    "step2": {
+      "title": "Travel Style",
+      "description": "How do you like to travel? Select all that apply."
+    },
+    "step3": {
+      "title": "Budget & Duration",
+      "description": "Help us plan the perfect trip for your budget and time."
+    },
+    "step4": {
+      "title": "Favorite Activities",
+      "description": "What activities make your travels memorable?"
+    },
+    "step5": {
+      "title": "Your Travel Personality",
+      "description": "Tell us about your travel style and preferences."
+    },
+    "step6": {
+      "title": "Final Details",
+      "description": "A few more details to perfect your recommendations."
+    },
+    "interests": {
+      "history_culture": "History & Culture",
+      "adventure_sports": "Adventure Sports",
+      "nature_wildlife": "Nature & Wildlife",
+      "food_cuisine": "Food & Cuisine",
+      "photography": "Photography",
+      "music_nightlife": "Music & Nightlife",
+      "art_museums": "Art & Museums",
+      "spiritual_wellness": "Spiritual & Wellness",
+      "local_communities": "Local Communities",
+      "architecture": "Architecture",
+      "festivals_events": "Festivals & Events",
+      "shopping": "Shopping"
+    },
+    "travel_styles": {
+      "adventure": "Adventure",
+      "cultural": "Cultural",
+      "budget_backpacking": "Budget Backpacking",
+      "luxury": "Luxury",
+      "eco_tourism": "Eco-Tourism",
+      "solo_travel": "Solo Travel",
+      "family_friendly": "Family-Friendly",
+      "digital_nomad": "Digital Nomad",
+      "volunteer_tourism": "Volunteer Tourism"
+    },
+    "activities": {
+      "hiking_trekking": "Hiking & Trekking",
+      "water_sports": "Water Sports",
+      "city_tours": "City Tours",
+      "cooking_classes": "Cooking Classes",
+      "dancing_lessons": "Dancing Lessons",
+      "wildlife_viewing": "Wildlife Viewing",
+      "archaeological_sites": "Archaeological Sites",
+      "beach_relaxation": "Beach Relaxation",
+      "mountain_climbing": "Mountain Climbing",
+      "river_rafting": "River Rafting",
+      "scuba_diving": "Scuba Diving",
+      "cycling_tours": "Cycling Tours"
+    },
+    "personality_traits": {
+      "spontaneous": "Spontaneous",
+      "well_planned": "Well-Planned",
+      "social_butterfly": "Social Butterfly",
+      "peaceful_explorer": "Peaceful Explorer",
+      "adrenaline_seeker": "Adrenaline Seeker",
+      "culture_enthusiast": "Culture Enthusiast",
+      "budget_conscious": "Budget Conscious",
+      "luxury_lover": "Luxury Lover",
+      "early_riser": "Early Riser",
+      "night_owl": "Night Owl",
+      "group_leader": "Group Leader",
+      "easy_going": "Easy Going"
+    },
+    "budget_range": {
+      "label": "Budget Range per Trip",
+      "placeholder": "Select your budget range",
+      "budget": "Budget ($500-$1,500)",
+      "mid_range": "Mid-range ($1,500-$3,000)",
+      "luxury": "Luxury ($3,000+)"
+    },
+    "duration": {
+      "label": "Preferred Trip Duration",
+      "placeholder": "How long do you like to travel?",
+      "1_2_weeks": "1-2 weeks",
+      "2_4_weeks": "2-4 weeks",
+      "1_2_months": "1-2 months",
+      "3_plus_months": "3+ months"
+    },
+    "group_size": {
+      "label": "Group Size",
+      "placeholder": "How many people usually travel with you?",
+      "solo": "Solo traveler",
+      "couple": "Couple (2 people)",
+      "small_group": "Small group (3-5 people)",
+      "large_group": "Large group (6+ people)"
+    },
+    "experience_level": {
+      "label": "Travel Experience Level",
+      "placeholder": "How experienced are you with travel?",
+      "beginner": "Beginner (0-2 trips)",
+      "intermediate": "Intermediate (3-10 trips)",
+      "experienced": "Experienced (10+ trips)",
+      "expert": "Expert (frequent traveler)"
+    },
+    "personality_traits_label": "Personality Traits",
+    "accommodation": {
+      "label": "Preferred Accommodation",
+      "hostels": "Hostels",
+      "hotels": "Hotels",
+      "guesthouses": "Guesthouses",
+      "airbnb": "Airbnb",
+      "camping": "Camping",
+      "luxury_resorts": "Luxury Resorts"
+    },
+    "bio": {
+      "label": "Tell us about yourself (optional)",
+      "placeholder": "What makes you excited about traveling around the world? Any specific goals or dreams?"
+    }
   },
   "footer": {
     "about_text": "Your smart travel companion for worldwide adventures. Plan, track, and share your journeys with AI-powered insights.",

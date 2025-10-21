@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,31 +30,34 @@ interface UserPreferences {
   bio: string;
 }
 
-const interests = [
-  "History & Culture", "Adventure Sports", "Nature & Wildlife", "Food & Cuisine",
-  "Photography", "Music & Nightlife", "Art & Museums", "Spiritual & Wellness",
-  "Local Communities", "Architecture", "Festivals & Events", "Shopping"
+const interestKeys = [
+  "history_culture", "adventure_sports", "nature_wildlife", "food_cuisine",
+  "photography", "music_nightlife", "art_museums", "spiritual_wellness",
+  "local_communities", "architecture", "festivals_events", "shopping"
 ];
 
-const travelStyles = [
-  "Adventure", "Cultural", "Budget Backpacking", "Luxury", "Eco-Tourism",
-  "Solo Travel", "Family-Friendly", "Digital Nomad", "Volunteer Tourism"
+const travelStyleKeys = [
+  "adventure", "cultural", "budget_backpacking", "luxury", "eco_tourism",
+  "solo_travel", "family_friendly", "digital_nomad", "volunteer_tourism"
 ];
 
-const activities = [
-  "Hiking & Trekking", "Water Sports", "City Tours", "Cooking Classes",
-  "Dancing Lessons", "Wildlife Viewing", "Archaeological Sites", "Beach Relaxation",
-  "Mountain Climbing", "River Rafting", "Scuba Diving", "Cycling Tours"
+const activityKeys = [
+  "hiking_trekking", "water_sports", "city_tours", "cooking_classes",
+  "dancing_lessons", "wildlife_viewing", "archaeological_sites", "beach_relaxation",
+  "mountain_climbing", "river_rafting", "scuba_diving", "cycling_tours"
 ];
 
-const personalityTraits = [
-  "Spontaneous", "Well-Planned", "Social Butterfly", "Peaceful Explorer",
-  "Adrenaline Seeker", "Culture Enthusiast", "Budget Conscious", "Luxury Lover",
-  "Early Riser", "Night Owl", "Group Leader", "Easy Going"
+const personalityTraitKeys = [
+  "spontaneous", "well_planned", "social_butterfly", "peaceful_explorer",
+  "adrenaline_seeker", "culture_enthusiast", "budget_conscious", "luxury_lover",
+  "early_riser", "night_owl", "group_leader", "easy_going"
 ];
+
+const accommodationKeys = ["hostels", "hotels", "guesthouses", "airbnb", "camping", "luxury_resorts"];
 
 export default function Onboarding() {
   const [, setLocation] = useLocation();
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [preferences, setPreferences] = useState<UserPreferences>({
     interests: [],
@@ -141,25 +145,25 @@ export default function Onboarding() {
               <div className="flex justify-center mb-4">
                 <Heart className="h-12 w-12 text-blue-600" />
               </div>
-              <CardTitle className="text-2xl">Welcome to GlobeMate!</CardTitle>
+              <CardTitle className="text-2xl">{t('onboarding.step1.title')}</CardTitle>
               <CardDescription>
-                Let's personalize your South American adventure. What interests you most?
+                {t('onboarding.step1.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-3">
-                {interests.map((interest) => (
-                  <div key={interest} className="flex items-center space-x-2 p-3 min-h-[3rem] border rounded-lg hover:bg-gray-50 transition-colors">
+                {interestKeys.map((interestKey) => (
+                  <div key={interestKey} className="flex items-center space-x-2 p-3 min-h-[3rem] border rounded-lg hover:bg-gray-50 transition-colors">
                     <Checkbox
-                      id={interest}
-                      checked={preferences.interests.includes(interest)}
+                      id={interestKey}
+                      checked={preferences.interests.includes(interestKey)}
                       onCheckedChange={(checked) => 
-                        handleArrayChange('interests', interest, checked as boolean)
+                        handleArrayChange('interests', interestKey, checked as boolean)
                       }
                       className="flex-shrink-0"
                     />
-                    <Label htmlFor={interest} className="text-sm font-medium cursor-pointer break-words whitespace-normal leading-tight text-balance flex-1">
-                      {interest}
+                    <Label htmlFor={interestKey} className="text-sm font-medium cursor-pointer break-words whitespace-normal leading-tight text-balance flex-1">
+                      {t(`onboarding.interests.${interestKey}`)}
                     </Label>
                   </div>
                 ))}
@@ -175,25 +179,25 @@ export default function Onboarding() {
               <div className="flex justify-center mb-4">
                 <Compass className="h-12 w-12 text-green-600" />
               </div>
-              <CardTitle className="text-2xl">Travel Style</CardTitle>
+              <CardTitle className="text-2xl">{t('onboarding.step2.title')}</CardTitle>
               <CardDescription>
-                How do you like to travel? Select all that apply.
+                {t('onboarding.step2.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-3">
-                {travelStyles.map((style) => (
-                  <div key={style} className="flex items-center space-x-2 p-3 min-h-[3rem] border rounded-lg hover:bg-gray-50 transition-colors">
+                {travelStyleKeys.map((styleKey) => (
+                  <div key={styleKey} className="flex items-center space-x-2 p-3 min-h-[3rem] border rounded-lg hover:bg-gray-50 transition-colors">
                     <Checkbox
-                      id={style}
-                      checked={preferences.travelStyle.includes(style)}
+                      id={styleKey}
+                      checked={preferences.travelStyle.includes(styleKey)}
                       onCheckedChange={(checked) => 
-                        handleArrayChange('travelStyle', style, checked as boolean)
+                        handleArrayChange('travelStyle', styleKey, checked as boolean)
                       }
                       className="flex-shrink-0"
                     />
-                    <Label htmlFor={style} className="text-sm font-medium cursor-pointer break-words whitespace-normal leading-tight text-balance flex-1">
-                      {style}
+                    <Label htmlFor={styleKey} className="text-sm font-medium cursor-pointer break-words whitespace-normal leading-tight text-balance flex-1">
+                      {t(`onboarding.travel_styles.${styleKey}`)}
                     </Label>
                   </div>
                 ))}
@@ -209,58 +213,58 @@ export default function Onboarding() {
               <div className="flex justify-center mb-4">
                 <DollarSign className="h-12 w-12 text-yellow-600" />
               </div>
-              <CardTitle className="text-2xl">Budget & Duration</CardTitle>
+              <CardTitle className="text-2xl">{t('onboarding.step3.title')}</CardTitle>
               <CardDescription>
-                Help us plan the perfect trip for your budget and time.
+                {t('onboarding.step3.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <Label htmlFor="budget">Budget Range per Trip</Label>
+                <Label htmlFor="budget">{t('onboarding.budget_range.label')}</Label>
                 <Select value={preferences.budgetRange} onValueChange={(value) => 
                   setPreferences(prev => ({ ...prev, budgetRange: value }))
                 }>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select your budget range" />
+                    <SelectValue placeholder={t('onboarding.budget_range.placeholder')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="budget">Budget ($500-$1,500)</SelectItem>
-                    <SelectItem value="mid-range">Mid-range ($1,500-$3,000)</SelectItem>
-                    <SelectItem value="luxury">Luxury ($3,000+)</SelectItem>
+                    <SelectItem value="budget">{t('onboarding.budget_range.budget')}</SelectItem>
+                    <SelectItem value="mid-range">{t('onboarding.budget_range.mid_range')}</SelectItem>
+                    <SelectItem value="luxury">{t('onboarding.budget_range.luxury')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label htmlFor="duration">Preferred Trip Duration</Label>
+                <Label htmlFor="duration">{t('onboarding.duration.label')}</Label>
                 <Select value={preferences.preferredDuration} onValueChange={(value) => 
                   setPreferences(prev => ({ ...prev, preferredDuration: value }))
                 }>
                   <SelectTrigger>
-                    <SelectValue placeholder="How long do you like to travel?" />
+                    <SelectValue placeholder={t('onboarding.duration.placeholder')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1-2 weeks">1-2 weeks</SelectItem>
-                    <SelectItem value="2-4 weeks">2-4 weeks</SelectItem>
-                    <SelectItem value="1-2 months">1-2 months</SelectItem>
-                    <SelectItem value="3+ months">3+ months</SelectItem>
+                    <SelectItem value="1-2 weeks">{t('onboarding.duration.1_2_weeks')}</SelectItem>
+                    <SelectItem value="2-4 weeks">{t('onboarding.duration.2_4_weeks')}</SelectItem>
+                    <SelectItem value="1-2 months">{t('onboarding.duration.1_2_months')}</SelectItem>
+                    <SelectItem value="3+ months">{t('onboarding.duration.3_plus_months')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label htmlFor="group">Group Size</Label>
+                <Label htmlFor="group">{t('onboarding.group_size.label')}</Label>
                 <Select value={preferences.groupSize} onValueChange={(value) => 
                   setPreferences(prev => ({ ...prev, groupSize: value }))
                 }>
                   <SelectTrigger>
-                    <SelectValue placeholder="How many people usually travel with you?" />
+                    <SelectValue placeholder={t('onboarding.group_size.placeholder')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="solo">Solo traveler</SelectItem>
-                    <SelectItem value="couple">Couple (2 people)</SelectItem>
-                    <SelectItem value="small-group">Small group (3-5 people)</SelectItem>
-                    <SelectItem value="large-group">Large group (6+ people)</SelectItem>
+                    <SelectItem value="solo">{t('onboarding.group_size.solo')}</SelectItem>
+                    <SelectItem value="couple">{t('onboarding.group_size.couple')}</SelectItem>
+                    <SelectItem value="small-group">{t('onboarding.group_size.small_group')}</SelectItem>
+                    <SelectItem value="large-group">{t('onboarding.group_size.large_group')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -275,24 +279,24 @@ export default function Onboarding() {
               <div className="flex justify-center mb-4">
                 <MapPin className="h-12 w-12 text-red-600" />
               </div>
-              <CardTitle className="text-2xl">Favorite Activities</CardTitle>
+              <CardTitle className="text-2xl">{t('onboarding.step4.title')}</CardTitle>
               <CardDescription>
-                What activities make your travels memorable?
+                {t('onboarding.step4.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-3">
-                {activities.map((activity) => (
-                  <div key={activity} className="flex items-center space-x-2">
+                {activityKeys.map((activityKey) => (
+                  <div key={activityKey} className="flex items-center space-x-2">
                     <Checkbox
-                      id={activity}
-                      checked={preferences.activities.includes(activity)}
+                      id={activityKey}
+                      checked={preferences.activities.includes(activityKey)}
                       onCheckedChange={(checked) => 
-                        handleArrayChange('activities', activity, checked as boolean)
+                        handleArrayChange('activities', activityKey, checked as boolean)
                       }
                     />
-                    <Label htmlFor={activity} className="text-sm font-medium cursor-pointer">
-                      {activity}
+                    <Label htmlFor={activityKey} className="text-sm font-medium cursor-pointer">
+                      {t(`onboarding.activities.${activityKey}`)}
                     </Label>
                   </div>
                 ))}
@@ -308,43 +312,43 @@ export default function Onboarding() {
               <div className="flex justify-center mb-4">
                 <Users className="h-12 w-12 text-purple-600" />
               </div>
-              <CardTitle className="text-2xl">Your Travel Personality</CardTitle>
+              <CardTitle className="text-2xl">{t('onboarding.step5.title')}</CardTitle>
               <CardDescription>
-                Tell us about your travel style and preferences.
+                {t('onboarding.step5.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <Label htmlFor="experience">Travel Experience Level</Label>
+                <Label htmlFor="experience">{t('onboarding.experience_level.label')}</Label>
                 <Select value={preferences.experienceLevel} onValueChange={(value) => 
                   setPreferences(prev => ({ ...prev, experienceLevel: value }))
                 }>
                   <SelectTrigger>
-                    <SelectValue placeholder="How experienced are you with travel?" />
+                    <SelectValue placeholder={t('onboarding.experience_level.placeholder')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="beginner">Beginner (0-2 trips)</SelectItem>
-                    <SelectItem value="intermediate">Intermediate (3-10 trips)</SelectItem>
-                    <SelectItem value="experienced">Experienced (10+ trips)</SelectItem>
-                    <SelectItem value="expert">Expert (frequent traveler)</SelectItem>
+                    <SelectItem value="beginner">{t('onboarding.experience_level.beginner')}</SelectItem>
+                    <SelectItem value="intermediate">{t('onboarding.experience_level.intermediate')}</SelectItem>
+                    <SelectItem value="experienced">{t('onboarding.experience_level.experienced')}</SelectItem>
+                    <SelectItem value="expert">{t('onboarding.experience_level.expert')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label>Personality Traits</Label>
+                <Label>{t('onboarding.personality_traits_label')}</Label>
                 <div className="grid grid-cols-2 gap-3 mt-2">
-                  {personalityTraits.map((trait) => (
-                    <div key={trait} className="flex items-center space-x-2">
+                  {personalityTraitKeys.map((traitKey) => (
+                    <div key={traitKey} className="flex items-center space-x-2">
                       <Checkbox
-                        id={trait}
-                        checked={preferences.personalityTraits.includes(trait)}
+                        id={traitKey}
+                        checked={preferences.personalityTraits.includes(traitKey)}
                         onCheckedChange={(checked) => 
-                          handleArrayChange('personalityTraits', trait, checked as boolean)
+                          handleArrayChange('personalityTraits', traitKey, checked as boolean)
                         }
                       />
-                      <Label htmlFor={trait} className="text-sm font-medium cursor-pointer">
-                        {trait}
+                      <Label htmlFor={traitKey} className="text-sm font-medium cursor-pointer">
+                        {t(`onboarding.personality_traits.${traitKey}`)}
                       </Label>
                     </div>
                   ))}
@@ -361,26 +365,26 @@ export default function Onboarding() {
               <div className="flex justify-center mb-4">
                 <Calendar className="h-12 w-12 text-indigo-600" />
               </div>
-              <CardTitle className="text-2xl">Final Details</CardTitle>
+              <CardTitle className="text-2xl">{t('onboarding.step6.title')}</CardTitle>
               <CardDescription>
-                A few more details to perfect your recommendations.
+                {t('onboarding.step6.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <Label htmlFor="accommodation">Preferred Accommodation</Label>
+                <Label htmlFor="accommodation">{t('onboarding.accommodation.label')}</Label>
                 <div className="grid grid-cols-2 gap-3 mt-2">
-                  {["Hostels", "Hotels", "Guesthouses", "Airbnb", "Camping", "Luxury Resorts"].map((type) => (
-                    <div key={type} className="flex items-center space-x-2">
+                  {accommodationKeys.map((accommodationKey) => (
+                    <div key={accommodationKey} className="flex items-center space-x-2">
                       <Checkbox
-                        id={type}
-                        checked={preferences.accommodationType.includes(type)}
+                        id={accommodationKey}
+                        checked={preferences.accommodationType.includes(accommodationKey)}
                         onCheckedChange={(checked) => 
-                          handleArrayChange('accommodationType', type, checked as boolean)
+                          handleArrayChange('accommodationType', accommodationKey, checked as boolean)
                         }
                       />
-                      <Label htmlFor={type} className="text-sm font-medium cursor-pointer">
-                        {type}
+                      <Label htmlFor={accommodationKey} className="text-sm font-medium cursor-pointer">
+                        {t(`onboarding.accommodation.${accommodationKey}`)}
                       </Label>
                     </div>
                   ))}
@@ -388,10 +392,10 @@ export default function Onboarding() {
               </div>
 
               <div>
-                <Label htmlFor="bio">Tell us about yourself (optional)</Label>
+                <Label htmlFor="bio">{t('onboarding.bio.label')}</Label>
                 <Textarea
                   id="bio"
-                  placeholder="What makes you excited about traveling to South America? Any specific goals or dreams?"
+                  placeholder={t('onboarding.bio.placeholder')}
                   value={preferences.bio}
                   onChange={(e) => setPreferences(prev => ({ ...prev, bio: e.target.value }))}
                   className="min-h-[100px]"
@@ -411,7 +415,7 @@ export default function Onboarding() {
       <div className="w-full max-w-2xl mb-8">
         <div className="text-center mb-4">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Step {currentStep} of {totalSteps}
+            {t('onboarding.step_of', { current: currentStep, total: totalSteps })}
           </h1>
           <Progress value={progressPercent} className="w-full" />
         </div>
@@ -421,13 +425,13 @@ export default function Onboarding() {
 
       <div className="flex gap-4 mt-8">
         <Button variant="outline" onClick={handleSkip}>
-          Skip for now
+          {t('onboarding.skip_for_now')}
         </Button>
         <Button 
           onClick={handleNext} 
           className="min-w-[120px]"
         >
-          {currentStep === totalSteps ? "Complete Setup" : "Next"}
+          {currentStep === totalSteps ? t('onboarding.complete_setup') : t('onboarding.next')}
         </Button>
       </div>
       
@@ -437,7 +441,7 @@ export default function Onboarding() {
           onClick={() => window.open('/landing', '_blank')}
           className="text-sm text-gray-500 hover:text-gray-700"
         >
-          View Landing Page
+          {t('onboarding.view_landing_page')}
         </Button>
       </div>
 
@@ -447,7 +451,7 @@ export default function Onboarding() {
           onClick={() => setCurrentStep(prev => prev - 1)}
           className="mt-4"
         >
-          Back
+          {t('onboarding.back')}
         </Button>
       )}
     </div>

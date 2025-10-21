@@ -2050,7 +2050,134 @@
   },
   "onboarding": {
     "complete_profile_message": "השלימו את הפרופיל שלכם כדי לקבל המלצות נסיעה מותאמות אישית מרחבי העולם",
-    "complete_setup": "השלימו את ההגדרות"
+    "complete_setup": "השלימו את ההגדרות",
+    "step_of": "שלב {{current}} מתוך {{total}}",
+    "skip_for_now": "דלג לעכשיו",
+    "next": "הבא",
+    "back": "חזור",
+    "view_landing_page": "צפה בדף הנחיתה",
+    "step1": {
+      "title": "ברוכים הבאים ל-GlobeMate!",
+      "description": "בואו נתאים אישית את ההרפתקאות שלכם ברחבי העולם. מה מעניין אתכם הכי הרבה?"
+    },
+    "step2": {
+      "title": "סגנון טיול",
+      "description": "איך אתם אוהבים לטייל? בחרו את כל התשובות המתאימות."
+    },
+    "step3": {
+      "title": "תקציב ומשך",
+      "description": "עזרו לנו לתכנן את הטיול המושלם עבור התקציב והזמן שלכם."
+    },
+    "step4": {
+      "title": "פעילויות מועדפות",
+      "description": "אילו פעילויות הופכות את הטיולים שלכם לבלתי נשכחים?"
+    },
+    "step5": {
+      "title": "אישיות הטיול שלכם",
+      "description": "ספרו לנו על סגנון הטיול וההעדפות שלכם."
+    },
+    "step6": {
+      "title": "פרטים אחרונים",
+      "description": "עוד כמה פרטים כדי לשכלל את ההמלצות שלכם."
+    },
+    "interests": {
+      "history_culture": "היסטוריה ותרבות",
+      "adventure_sports": "ספורט אתגרי",
+      "nature_wildlife": "טבע וחיות בר",
+      "food_cuisine": "אוכל ומטבח",
+      "photography": "צילום",
+      "music_nightlife": "מוזיקה וחיי לילה",
+      "art_museums": "אמנות ומוזיאונים",
+      "spiritual_wellness": "רוחניות ובריאות",
+      "local_communities": "קהילות מקומיות",
+      "architecture": "ארכיטקטורה",
+      "festivals_events": "פסטיבלים ואירועים",
+      "shopping": "קניות"
+    },
+    "travel_styles": {
+      "adventure": "הרפתקאות",
+      "cultural": "תרבותי",
+      "budget_backpacking": "תרמילאות חסכונית",
+      "luxury": "יוקרה",
+      "eco_tourism": "תיירות אקולוגית",
+      "solo_travel": "טיול סולו",
+      "family_friendly": "מתאים למשפחות",
+      "digital_nomad": "נווד דיגיטלי",
+      "volunteer_tourism": "תיירות מתנדבים"
+    },
+    "activities": {
+      "hiking_trekking": "טיולי הליכה וטרקים",
+      "water_sports": "ספורט ימי",
+      "city_tours": "סיורים בעיר",
+      "cooking_classes": "שיעורי בישול",
+      "dancing_lessons": "שיעורי ריקוד",
+      "wildlife_viewing": "צפייה בחיות בר",
+      "archaeological_sites": "אתרים ארכיאולוגיים",
+      "beach_relaxation": "הרגעה בחוף",
+      "mountain_climbing": "טיפוס הרים",
+      "river_rafting": "רפטינג בנהרות",
+      "scuba_diving": "צלילה",
+      "cycling_tours": "טיולי אופניים"
+    },
+    "personality_traits": {
+      "spontaneous": "ספונטני",
+      "well_planned": "מתוכנן היטב",
+      "social_butterfly": "חברותי מאוד",
+      "peaceful_explorer": "חוקר שליו",
+      "adrenaline_seeker": "מחפש אדרנלין",
+      "culture_enthusiast": "אוהב תרבות",
+      "budget_conscious": "מודע לתקציב",
+      "luxury_lover": "אוהב יוקרה",
+      "early_riser": "קם מוקדם",
+      "night_owl": "ינשוף לילה",
+      "group_leader": "מוביל קבוצה",
+      "easy_going": "רגוע ונינוח"
+    },
+    "budget_range": {
+      "label": "טווח תקציב לטיול",
+      "placeholder": "בחרו את טווח התקציב שלכם",
+      "budget": "חסכוני ($500-$1,500)",
+      "mid_range": "בינוני ($1,500-$3,000)",
+      "luxury": "יוקרה ($3,000+)"
+    },
+    "duration": {
+      "label": "משך טיול מועדף",
+      "placeholder": "כמה זמן אתם אוהבים לטייל?",
+      "1_2_weeks": "1-2 שבועות",
+      "2_4_weeks": "2-4 שבועות",
+      "1_2_months": "1-2 חודשים",
+      "3_plus_months": "3+ חודשים"
+    },
+    "group_size": {
+      "label": "גודל קבוצה",
+      "placeholder": "כמה אנשים בדרך כלל מטיילים איתכם?",
+      "solo": "מטייל יחיד",
+      "couple": "זוג (2 אנשים)",
+      "small_group": "קבוצה קטנה (3-5 אנשים)",
+      "large_group": "קבוצה גדולה (6+ אנשים)"
+    },
+    "experience_level": {
+      "label": "רמת ניסיון בטיולים",
+      "placeholder": "כמה ניסיון יש לכם בטיולים?",
+      "beginner": "מתחיל (0-2 טיולים)",
+      "intermediate": "בינוני (3-10 טיולים)",
+      "experienced": "מנוסה (10+ טיולים)",
+      "expert": "מומחה (מטייל תדיר)"
+    },
+    "personality_traits_label": "תכונות אישיות",
+    "accommodation": {
+      "label": "סוג לינה מועדף",
+      "hostels": "אכסניות",
+      "hotels": "מלונות",
+      "guesthouses": "בתי הארחה",
+      "airbnb": "Airbnb",
+      "camping": "קמפינג",
+      "luxury_resorts": "אתרי נופש יוקרתיים"
+    },
+    "bio": {
+      "label": "ספרו לנו על עצמכם (אופציונלי)",
+      "placeholder": "מה מרגש אתכם בטיול ברחבי העולם? יש לכם מטרות או חלומות ספציפיים?"
+    }
   },
   "footer": {
     "about_text": "השותף החכם שלכם למסעות ברחבי העולם. תכננו, עקבו ושתפו את המסעות שלכם עם תובנות מונעות בינה מלאכותית.",
