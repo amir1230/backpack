@@ -12,7 +12,7 @@ interface PersonalizedRecommendationsProps {
 
 export default function PersonalizedRecommendations({ className }: PersonalizedRecommendationsProps) {
   const [, setLocation] = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   
   const { data: preferences, isLoading } = useQuery({
     queryKey: ['/api/user/preferences'],
@@ -34,19 +34,19 @@ export default function PersonalizedRecommendations({ className }: PersonalizedR
 
   if (!preferences?.onboardingCompleted) {
     return (
-      <Card className={className}>
+      <Card className={className} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Compass className="h-5 w-5 text-blue-600" />
-            Welcome to GlobeMate!
+            {t('home.welcome_title')}
           </CardTitle>
           <CardDescription>
-            Complete your profile to get personalized travel recommendations from around the world.
+            {t('onboarding.complete_profile_message') || 'Complete your profile to get personalized travel recommendations from around the world.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Button onClick={() => setLocation('/onboarding')} className="w-full">
-            Complete Setup
+            {t('onboarding.complete_setup') || 'Complete Setup'}
           </Button>
         </CardContent>
       </Card>

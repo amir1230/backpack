@@ -1640,5 +1640,9 @@
       "description": "Have questions or ideas? We'd love to hear from you!",
       "button": "Send Us a Message"
     }
+  },
+  "onboarding": {
+    "complete_profile_message": "Complete your profile to get personalized travel recommendations from around the world",
+    "complete_setup": "Complete Setup"
   }
 }
