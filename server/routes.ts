@@ -1924,7 +1924,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   // Enhanced AI chat assistant with conversation history
   app.post('/api/ai/chat', noAuth, async (req: any, res) => {
     try {
-      const { message, chatHistory = [], previousSuggestions = [] } = req.body;
+      const { message, chatHistory = [], previousSuggestions = [], language = 'en' } = req.body;
       
       // Build context with optional user data if authenticated
       const context: any = {
@@ -1945,11 +1945,11 @@ export async function registerRoutes(app: Express): Promise<void> {
         }
       }
 
-      const response = await conversationalTripAssistant(message, context);
+      const response = await conversationalTripAssistant(message, context, language);
       
       // If AI indicates it's ready to generate suggestions, generate them
       if (response.type === 'suggestions') {
-        const suggestions = await generateConversationalSuggestions(chatHistory, previousSuggestions);
+        const suggestions = await generateConversationalSuggestions(chatHistory, previousSuggestions, language);
         response.suggestions = suggestions;
         
         // Store suggestions for this user session (could be expanded to database storage)
@@ -1969,9 +1969,9 @@ export async function registerRoutes(app: Express): Promise<void> {
   // Generate trip suggestions based on conversation
   app.post('/api/ai/conversational-suggestions', noAuth, async (req: any, res) => {
     try {
-      const { chatHistory = [], previousSuggestions = [] } = req.body;
+      const { chatHistory = [], previousSuggestions = [], language = 'en' } = req.body;
       
-      const suggestions = await generateConversationalSuggestions(chatHistory, previousSuggestions);
+      const suggestions = await generateConversationalSuggestions(chatHistory, previousSuggestions, language);
       res.json({ suggestions });
     } catch (error) {
       console.error("Error generating conversational suggestions:", error);
@@ -1982,7 +1982,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   // Generate trip suggestions from form data (MyTripsScreen)
   app.post('/api/get-suggestions', async (req, res) => {
     try {
-      const { destination, dailyBudget, travelStyle, interests, duration } = req.body;
+      const { destination, dailyBudget, travelStyle, interests, duration, language = 'en' } = req.body;
       
       if (!destination || !duration || !travelStyle || travelStyle.length === 0) {
         return res.status(400).json({ message: "Missing required fields: destination, duration, and travel style" });
@@ -1996,7 +1996,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       const message = `I want to visit ${destination} for ${duration}. My daily budget is $${dailyBudget}. I'm interested in ${travelStyleText} travel style.${interestsText} Please suggest 3 different trip options for me.`;
 
       const chatHistory = [{ role: 'user' as const, content: message }];
-      const suggestions = await generateConversationalSuggestions(chatHistory, []);
+      const suggestions = await generateConversationalSuggestions(chatHistory, [], language);
 
       console.log("Generated suggestions:", suggestions);
       res.json({ suggestions: suggestions || [] });

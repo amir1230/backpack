@@ -65,7 +65,7 @@ interface AiChatProps {
 }
 
 export default function AiChat({ className, initialMessage }: AiChatProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [location, setLocation] = useLocation();
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -103,7 +103,8 @@ export default function AiChat({ className, initialMessage }: AiChatProps) {
         body: JSON.stringify({
           message,
           chatHistory,
-          previousSuggestions: allSuggestions
+          previousSuggestions: allSuggestions,
+          language: i18n.language
         })
       });
       return response.json();

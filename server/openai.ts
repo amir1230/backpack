@@ -362,7 +362,8 @@ Focus on practical tips, hidden gems, and advice that addresses common concerns 
 // Enhanced conversational AI that maintains chat history and generates trip suggestions
 export async function conversationalTripAssistant(
   message: string,
-  context: ChatContext = {}
+  context: ChatContext = {},
+  language: string = 'en'
 ): Promise<ConversationalResponse> {
   try {
     const { userTrips = [], travelPreferences, previousSuggestions = [], chatHistory = [] } = context;
@@ -382,12 +383,16 @@ Previous conversation:
 ${chatText}
 `;
 
+    const isHebrew = language === 'he';
+    
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
           content: `You are GlobeMate – a smart, friendly, and social travel planner built for Gen Z and solo travelers.
+
+${isHebrew ? 'CRITICAL INSTRUCTION: You MUST respond ONLY in Hebrew. All your messages, questions, and responses must be written entirely in Hebrew.' : ''}
 
 Your role is to:
 1. Provide personalized travel suggestions based on the user's preferences.
@@ -407,6 +412,7 @@ Style:
 - Write like a friendly, adventurous local friend – not like a travel agent.
 - Be energetic, positive, and clear.
 - Ask one question at a time to avoid overwhelming the user.
+${isHebrew ? '- Remember: ALL responses must be in Hebrew.' : ''}
 
 Focus on worldwide travel experiences.${contextInfo}`
         },
@@ -446,13 +452,17 @@ Focus on worldwide travel experiences.${contextInfo}`
 // Generate suggestions with conversation context
 export async function generateConversationalSuggestions(
   chatHistory: Array<{role: 'user' | 'assistant'; content: string;}>,
-  previousSuggestions: TripSuggestion[] = []
+  previousSuggestions: TripSuggestion[] = [],
+  language: string = 'en'
 ): Promise<TripSuggestion[]> {
   try {
     const conversationText = chatHistory.map(h => `${h.role}: ${h.content}`).join('\n');
     const previousDestinations = previousSuggestions.map(s => `${s.destination}, ${s.country}`).join('; ');
+    const isHebrew = language === 'he';
     
     const prompt = `You are GlobeMate – a smart, friendly, and social travel planner built for Gen Z and solo travelers.
+
+${isHebrew ? 'CRITICAL INSTRUCTION: You MUST generate ALL content in Hebrew. All fields (destination, country, description, bestTimeToVisit, highlights, travelStyle, duration) must be written entirely in Hebrew. Place names can stay in English if they are proper nouns (like "Tokyo"), but ALL descriptions and explanations must be in Hebrew.' : ''}
 
 Based on this conversation, generate 3 exciting, personalized trip suggestions worldwide:
 
@@ -462,16 +472,17 @@ ${conversationText}
 IMPORTANT: Do not suggest these previously mentioned destinations: ${previousDestinations}
 
 Generate 3 trip suggestions in JSON format. Each suggestion should include:
-- destination: city or region
-- country: any country worldwide
-- description: 2–3 engaging sentences
-- bestTimeToVisit: e.g., "April to June"
+- destination: city or region ${isHebrew ? '(English name is OK, but add Hebrew if commonly used)' : ''}
+- country: any country worldwide ${isHebrew ? '(in Hebrew)' : ''}
+- description: 2–3 engaging sentences ${isHebrew ? '(in Hebrew)' : ''}
+- bestTimeToVisit: e.g., ${isHebrew ? '"אפריל עד יוני"' : '"April to June"'}
 - estimatedBudget: {low, high} in USD
-- highlights: 3–5 key places or experiences
-- travelStyle: ["adventure", "chill", etc.]
-- duration: how long to stay (e.g., "7–10 days")
+- highlights: 3–5 key places or experiences ${isHebrew ? '(in Hebrew)' : ''}
+- travelStyle: [${isHebrew ? '"הרפתקאות", "רגוע", etc. (in Hebrew)' : '"adventure", "chill", etc.'}]
+- duration: how long to stay ${isHebrew ? '(in Hebrew, e.g., "7-10 ימים")' : '(e.g., "7–10 days")'}
 
 Make sure the suggestions are diverse — different vibes, locations and experiences. Speak like a local travel buddy, not a formal guide.
+${isHebrew ? 'Remember: ALL text content must be in Hebrew except for proper nouns.' : ''}
 
 Return ONLY a JSON object with this exact structure:
 {
@@ -535,7 +546,8 @@ export async function chatAssistant(
     userTrips?: any[];
     currentLocation?: string;
     travelPreferences?: any;
-  }
+  },
+  language: string = 'en'
 ): Promise<string> {
   try {
     const chatContext: ChatContext = {
@@ -544,7 +556,7 @@ export async function chatAssistant(
       travelPreferences: context?.travelPreferences
     };
     
-    const response = await conversationalTripAssistant(message, chatContext);
+    const response = await conversationalTripAssistant(message, chatContext, language);
     return response.message;
   } catch (error) {
     console.error('Error in chat assistant:', error);
