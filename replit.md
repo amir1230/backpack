@@ -13,7 +13,7 @@ Preferred communication style: Simple, everyday language.
 - **Routing**: Wouter
 - **State Management**: TanStack Query
 - **Form Handling**: React Hook Form with Zod
-- **UI/UX Decisions**: Responsive design with consistent shadcn/ui components, Tailwind CSS for custom styling, tabbed navigation, and a clean visual style with a white background, colorful gradient cards (orange-50 → teal-50 → blue-50), and orange (orange-500) section titles. Desktop sidebar navigation uses ScrollArea component to display all 11 menu items with proper scrolling.
+- **UI/UX Decisions**: Responsive design with consistent shadcn/ui components, Tailwind CSS for custom styling, tabbed navigation, and a clean visual style with a white background, colorful gradient cards (orange-50 → teal-50 → blue-50), and orange (orange-500) section titles. Desktop sidebar navigation uses ScrollArea component to display all 11 menu items with proper scrolling. Trip planning interface uses unified "Interests" section that combines travel styles and interests into a single selection experience with icons (24 options total) for simplified user experience.
 
 ### Backend Architecture
 - **Runtime**: Node.js with TypeScript
