@@ -1195,7 +1195,7 @@ export type InsertHotelInquiry = z.infer<typeof insertHotelInquirySchema>;
 // AI Chat Sessions table
 export const chatSessions = pgTable("chat_sessions", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id").notNull(),
   title: varchar("title").notNull(),
   messages: jsonb("messages").notNull(), // Array of {id, content, sender, timestamp, suggestions?, type?}
   lastMessageAt: timestamp("last_message_at").defaultNow(),

@@ -33,6 +33,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Core Features & Technical Implementations
 - **AI-Powered Trip Planning**: Utilizes OpenAI for personalized recommendations, itinerary generation, and an interactive assistant, considering traveler composition and trip type. Integrates Google Places API for real-world booking suggestions.
+- **AI Chat History System**: Automatic conversation saving for the AI travel assistant. Conversations are auto-saved 2 seconds after the last message. Features a dedicated chat history page (`/chat-history`) with conversation list, full message display, and delete functionality. Accessible from main navigation and sidebar (below AI chat and in Quick Actions card). Uses `chat_sessions` table with JSONB message storage.
 - **Multi-Destination Journeys**: Pre-planned, curated multi-city itineraries with detailed breakdowns (accommodations, daily schedules, transport, cost estimates). Features a filterable list (`/journeys`) and detailed pages, with an option to convert journeys into personalized trips via AI.
 - **Community Features**: Reviews, user connections, real-time chat (WebSockets), content sharing, and gamified achievements.
 - **Budget Tracking**: Expense categorization, trip association, visual analytics, and multi-currency support with dynamic budget ranges.

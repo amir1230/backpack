@@ -262,7 +262,17 @@ export default function Home() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* AI Travel Assistant */}
-            <AiChat />
+            <div>
+              <AiChat />
+              <div className="mt-3 px-3">
+                <Button asChild variant="outline" size="sm" className="w-full hover:bg-orange-50 hover:border-orange-500 hover:text-orange-700 transition-all">
+                  <Link href="/chat-history">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    {t('navigation.chat_history')}
+                  </Link>
+                </Button>
+              </div>
+            </div>
 
             {/* Quick Stats */}
             <Card className="border-t-4 border-t-orange-500 shadow-lg hover:shadow-xl transition-all">
@@ -367,6 +377,12 @@ export default function Home() {
                   <Link href="/my-trips" className="block">
                     <Calendar className="w-4 h-4 mr-2" />
                     {t('home.new_trip')}
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full justify-start hover:bg-purple-50 hover:border-purple-500 hover:text-purple-700 transition-all">
+                  <Link href="/chat-history" className="block">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    {t('navigation.chat_history')}
                   </Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full justify-start hover:bg-teal-50 hover:border-teal-500 hover:text-teal-700 transition-all">
