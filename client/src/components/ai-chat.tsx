@@ -248,10 +248,10 @@ export default function AiChat({ className }: AiChatProps) {
           <div className="p-2 bg-primary/10 rounded-lg">
             <Bot className="w-5 h-5 text-primary" />
           </div>
-          <span>GlobeMate AI Assistant</span>
+          <span>{t('ai_assistant.title')}</span>
           <Badge variant="secondary" className="ml-auto">
             <Sparkles className="w-3 h-3 mr-1" />
-            AI-Powered
+            {t('ai_assistant.badge')}
           </Badge>
         </CardTitle>
       </CardHeader>

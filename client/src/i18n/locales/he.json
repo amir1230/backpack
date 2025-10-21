@@ -2044,6 +2044,10 @@
     "terms_of_service": "תנאי שימוש",
     "accessibility": "הצהרת נגישות"
   },
+  "ai_assistant": {
+    "title": "העוזר החכם של GlobeMate",
+    "badge": "מונע בינה מלאכותית"
+  },
   "accessibility": {
     "title": "הצהרת נגישות",
     "last_updated": "עודכן לאחרונה: {{date}}",

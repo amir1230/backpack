@@ -1659,6 +1659,10 @@
     "terms_of_service": "Terms of Service",
     "accessibility": "Accessibility Statement"
   },
+  "ai_assistant": {
+    "title": "GlobeMate Smart Assistant",
+    "badge": "AI-Powered"
+  },
   "accessibility": {
     "title": "Accessibility Statement",
     "last_updated": "Last updated: {{date}}",
