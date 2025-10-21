@@ -193,18 +193,18 @@ export default function AiChat({ className }: AiChatProps) {
   };
 
   const SuggestionCard = ({ suggestion }: { suggestion: TripSuggestion }) => (
-    <div className="bg-card border rounded-lg p-4 mb-3 space-y-3">
-      <div className="flex justify-between items-start">
-        <div>
-          <h4 className="font-semibold text-lg">{suggestion.destination}</h4>
-          <p className="text-sm text-muted-foreground">{suggestion.country}</p>
+    <div className="bg-card border rounded-lg p-4 mb-3 space-y-3 overflow-hidden">
+      <div className="flex justify-between items-start gap-2">
+        <div className="flex-1 min-w-0">
+          <h4 className="font-semibold text-lg break-words">{suggestion.destination}</h4>
+          <p className="text-sm text-muted-foreground break-words">{suggestion.country}</p>
         </div>
-        <Badge variant="outline" className="text-xs">
+        <Badge variant="outline" className="text-xs shrink-0">
           {suggestion.duration}
         </Badge>
       </div>
       
-      <p className="text-sm">{suggestion.description}</p>
+      <p className="text-sm break-words">{suggestion.description}</p>
       
       <div className="grid grid-cols-2 gap-2 text-xs">
         <div>
@@ -219,7 +219,7 @@ export default function AiChat({ className }: AiChatProps) {
         <span className="font-medium text-xs">Highlights:</span>
         <div className="flex flex-wrap gap-1 mt-1">
           {suggestion.highlights.slice(0, 3).map((highlight, idx) => (
-            <Badge key={idx} variant="secondary" className="text-xs">
+            <Badge key={idx} variant="secondary" className="text-xs break-words max-w-full">
               {highlight}
             </Badge>
           ))}
@@ -244,20 +244,20 @@ export default function AiChat({ className }: AiChatProps) {
   );
 
   return (
-    <Card className={className}>
+    <Card className={`${className} overflow-hidden`}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 flex-wrap">
           <div className="p-2 bg-primary/10 rounded-lg">
             <Bot className="w-5 h-5 text-primary" />
           </div>
-          <span>{t('ai_assistant.title')}</span>
+          <span className="break-words">{t('ai_assistant.title')}</span>
           <Badge variant="secondary" className="ml-auto">
             <Sparkles className="w-3 h-3 mr-1" />
             {t('ai_assistant.badge')}
           </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-0 overflow-hidden">
         <ScrollArea className="h-[400px] px-4">
           <div className="space-y-4 pb-4">
             {messages.map((message) => (
@@ -276,13 +276,13 @@ export default function AiChat({ className }: AiChatProps) {
                 )}
                 
                 <div
-                  className={`max-w-[80%] rounded-lg px-3 py-2 ${
+                  className={`max-w-[80%] rounded-lg px-3 py-2 break-words ${
                     message.sender === 'user'
                       ? 'bg-primary text-primary-foreground ml-auto'
                       : 'bg-muted'
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                   
                   {/* Display trip suggestions if included */}
                   {message.suggestions && message.suggestions.length > 0 && (
@@ -358,10 +358,10 @@ export default function AiChat({ className }: AiChatProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => handleQuickPrompt(prompt.text)}
-                    className="justify-start text-left h-auto py-2"
+                    className="justify-start text-left h-auto py-2 overflow-hidden"
                   >
                     <IconComponent className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <span className="text-xs">{prompt.text}</span>
+                    <span className="text-xs break-words">{prompt.text}</span>
                   </Button>
                 );
               })}
