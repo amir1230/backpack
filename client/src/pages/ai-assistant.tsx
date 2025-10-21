@@ -15,7 +15,7 @@ import {
   Sparkles,
   Plus
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AiChat from "../components/ai-chat.js";
 
 interface ChatSession {
@@ -33,6 +33,16 @@ export default function AiAssistant() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [selectedSession, setSelectedSession] = useState<ChatSession | null>(null);
+  const [initialMessage, setInitialMessage] = useState<string | undefined>(undefined);
+
+  // Check for initial message from home page
+  useEffect(() => {
+    const storedMessage = sessionStorage.getItem('initialAiMessage');
+    if (storedMessage) {
+      setInitialMessage(storedMessage);
+      sessionStorage.removeItem('initialAiMessage');
+    }
+  }, []);
 
   const { data: sessions = [], isLoading } = useQuery<ChatSession[]>({
     queryKey: ["/api/chat-sessions"]
@@ -253,7 +263,7 @@ export default function AiAssistant() {
                 </CardContent>
               </Card>
             ) : (
-              <AiChat className="h-full" />
+              <AiChat className="h-full" initialMessage={initialMessage} />
             )}
           </div>
         </div>

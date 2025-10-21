@@ -137,7 +137,7 @@ export default function AiChat({ className, initialMessage }: AiChatProps) {
 
   // Handle initial message auto-submit
   useEffect(() => {
-    if (initialMessage && !hasProcessedInitialMessage && !chatMutation.isPending) {
+    if (initialMessage && !hasProcessedInitialMessage) {
       setHasProcessedInitialMessage(true);
       
       // Add user message
@@ -150,10 +150,12 @@ export default function AiChat({ className, initialMessage }: AiChatProps) {
       
       setMessages(prev => [...prev, userMessage]);
       
-      // Send to AI
-      chatMutation.mutate(initialMessage);
+      // Send to AI after a small delay to ensure component is fully mounted
+      setTimeout(() => {
+        chatMutation.mutate(initialMessage);
+      }, 100);
     }
-  }, [initialMessage, hasProcessedInitialMessage, chatMutation.isPending]);
+  }, [initialMessage, hasProcessedInitialMessage]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
