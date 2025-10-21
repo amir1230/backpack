@@ -123,6 +123,9 @@ export default function Footer() {
               <Link href="/terms" className="text-gray-400 hover:text-orange-400 transition-colors" data-testid="footer-link-terms">
                 {t('footer.terms_of_service') || 'Terms of Service'}
               </Link>
+              <Link href="/accessibility" className="text-gray-400 hover:text-orange-400 transition-colors" data-testid="footer-link-accessibility">
+                {t('footer.accessibility') || 'Accessibility'}
+              </Link>
             </div>
           </div>
         </div>

@@ -1656,6 +1656,50 @@
     "location": "Israel",
     "all_rights_reserved": "All rights reserved.",
     "privacy_policy": "Privacy Policy",
-    "terms_of_service": "Terms of Service"
+    "terms_of_service": "Terms of Service",
+    "accessibility": "Accessibility Statement"
+  },
+  "accessibility": {
+    "title": "Accessibility Statement",
+    "last_updated": "Last updated: {{date}}",
+    "contact_info_title": "Contact for Accessibility Issues",
+    "response_time": "We are committed to addressing all inquiries within 3 business days.",
+    "coordinator_title": "Accessibility Coordinator",
+    "coordinator_name": "Contact: accessibility@globemate.co.il",
+    "coordinator_role": "GlobeMate Accessibility Coordinator",
+    "sections": {
+      "commitment": {
+        "title": "Commitment to Accessibility",
+        "content": "GlobeMate is committed to making our services accessible to all users, including people with disabilities. We make continuous efforts to ensure that our website and application are accessible to everyone, in accordance with the Equal Rights for Persons with Disabilities Regulations (Service Accessibility Adjustments), 2013 and Israeli Standard (IS 5568)."
+      },
+      "standards": {
+        "title": "Standards and Procedures",
+        "content": "Our website meets the requirements of WCAG 2.1 (Web Content Accessibility Guidelines) Level AA accessibility and complies with Israeli Standard IS 5568 for web content accessibility. We continue to work on improving accessibility on an ongoing basis."
+      },
+      "features": {
+        "title": "Accessibility Features",
+        "content": "• Keyboard Navigation - All functions are accessible using keyboard only\n• Screen Reader Support - The site is optimized for NVDA, JAWS, and VoiceOver\n• Color Contrast - Design with high contrast for optimal readability\n• Alternative Text - All images include textual descriptions\n• Skip Buttons - Option to skip navigation menus to main content\n• Structured Headings - Clear hierarchical structure of headings\n• RTL Support - Full support for Hebrew and right-to-left writing direction\n• Multi-language Support - Full Hebrew and English support"
+      },
+      "assistive": {
+        "title": "Assistive Technology Compatibility",
+        "content": "The site is compatible with:\n• Screen readers: NVDA, JAWS, VoiceOver, TalkBack\n• Screen magnification software\n• Voice recognition software\n• Keyboard-only navigation\n• Modern browsers: Chrome, Firefox, Safari, Edge"
+      },
+      "ongoing": {
+        "title": "Ongoing Efforts",
+        "content": "We continue to improve accessibility through:\n• Periodic accessibility testing by accessibility experts\n• Regular updates based on user feedback\n• Training for development team on accessibility\n• Using automated tools to identify accessibility issues\n• Manual testing with users with disabilities"
+      },
+      "limitations": {
+        "title": "Known Limitations",
+        "content": "Despite our efforts, some parts of the site may not yet be fully accessible. We are actively working to fix all identified issues:\n• Images from third-party providers may lack alternative text\n• Embedded content from external sources (YouTube, maps) may have limited accessibility\n• Some pages are in the process of being upgraded to full accessibility\n\nWe are committed to addressing any reported issues immediately."
+      },
+      "feedback": {
+        "title": "Feedback and Inquiries",
+        "content": "We encourage users with disabilities to contact us and report any accessibility issues they encounter. We will do our best to address the issue quickly and efficiently.\n\nEach inquiry will be handled with high priority and we will get back to you within 3 business days."
+      },
+      "contact": {
+        "title": "Contact",
+        "content": "For questions, suggestions, or to report accessibility issues:\n\nEmail: accessibility@globemate.co.il\nPhone: 0525530454\n\nYou can also contact us through the \"Contact Us\" page on the site.\n\nAccessibility Coordinator: GlobeMate Team\nAvailability: Sunday-Thursday, 9:00-18:00"
+      }
+    }
   }
 }

@@ -37,6 +37,7 @@ import HelpCenter from "./pages/help-center.js";
 import Contact from "./pages/contact.js";
 import PrivacyPolicy from "./pages/privacy-policy.js";
 import TermsOfService from "./pages/terms-of-service.js";
+import Accessibility from "./pages/accessibility.js";
 import About from "./pages/about.js";
 import HotelDeals from "./pages/hotel-deals.js";
 import Navigation from "./components/navigation.js";
@@ -80,6 +81,7 @@ function Router() {
           <Route path="/contact" component={Contact} />
           <Route path="/privacy" component={PrivacyPolicy} />
           <Route path="/terms" component={TermsOfService} />
+          <Route path="/accessibility" component={Accessibility} />
           <Route path="/about" component={About} />
           <Route path="/hotel-deals" component={HotelDeals} />
           <Route path="/auth/callback" component={Callback} />

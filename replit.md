@@ -42,7 +42,8 @@ Preferred communication style: Simple, everyday language.
 - **Real Places Booking Integration**: Enriches AI-generated suggestions with bookable locations from Google Places API.
 - **Destinations Hub**: Comprehensive discovery system with search, filters, sorting, and detailed pages including weather, attractions, and interactive Google Maps integration using real Google Places API data.
 - **Global Expansion & Multilingual Support**: Worldwide destination coverage with full Hebrew/English bilingual support across all features, including instant language toggling and RTL support for content and interactive elements.
-- **Support Pages**: Help Center, Contact Us, Privacy Policy, Terms of Service, and About Us pages with full translation and RTL support.
+- **Support Pages**: Help Center, Contact Us, Privacy Policy, Terms of Service, Accessibility Statement, and About Us pages with full translation and RTL support.
+- **Footer Component**: Comprehensive footer with 4 columns (About, Quick Links, Support, Contact Info), social media links, and legal links. Fully responsive with RTL support and proper sidebar spacing.
 - **Optimized Image Loading**: Custom `OptimizedImage` component with retry, lazy loading, skeleton states, and error handling for galleries.
 - **Hotel Deals Landing Page & Email Notification System**: A landing page (`/hotel-deals`) for capturing hotel quote requests, saving inquiries to a `hotel_inquiries` table in Supabase, and sending email notifications via Gmail SMTP (nodemailer) with a Hebrew RTL template.
 
