@@ -469,6 +469,7 @@ function PopularJourneysSection() {
       'Tokyo': { he: 'טוקיו', en: 'Tokyo' },
       'Kyoto': { he: 'קיוטו', en: 'Kyoto' },
       'Osaka': { he: 'אוסקה', en: 'Osaka' },
+      'Hiroshima': { he: 'הירושימה', en: 'Hiroshima' },
       'Paris': { he: 'פריז', en: 'Paris' },
       'Amsterdam': { he: 'אמסטרדם', en: 'Amsterdam' },
       'Berlin': { he: 'ברלין', en: 'Berlin' },
