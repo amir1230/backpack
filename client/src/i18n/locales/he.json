@@ -335,7 +335,7 @@
     "my_trips": "הטיולים שלי",
     "journeys": "מסעות",
     "hotel_deals": "מבצעי מלונות",
-    "chat_history": "היסטוריית שיחות",
+    "chat_history": "הסוכן החכם",
     "destinations": "יעדים",
     "community": "קהילה",
     "budget_tracker": "מעקב תקציב",
@@ -343,6 +343,11 @@
     "explore": "גלה",
     "weather": "מזג אויר",
     "dashboard": "לוח בקרה"
+  },
+  "ai_assistant": {
+    "title": "הסוכן החכם",
+    "subtitle": "תכנן את הטיול המושלם שלך עם העוזר החכם",
+    "viewing_history": "צופה בשיחה מההיסטוריה. התחל שיחה חדשה כדי להמשיך לתכנן."
   },
   "chat_history": {
     "title": "היסטוריית שיחות",

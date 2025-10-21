@@ -191,7 +191,7 @@
     "my_trips": "My Trips",
     "journeys": "Journeys",
     "hotel_deals": "Hotel Deals",
-    "chat_history": "Chat History",
+    "chat_history": "AI Assistant",
     "destinations": "Destinations",
     "community": "Community",
     "budget_tracker": "Budget Tracker",
@@ -199,6 +199,11 @@
     "explore": "Explore",
     "weather": "Weather",
     "dashboard": "Dashboard"
+  },
+  "ai_assistant": {
+    "title": "AI Assistant",
+    "subtitle": "Plan your perfect trip with the smart AI assistant",
+    "viewing_history": "Viewing conversation history. Start a new chat to continue planning."
   },
   "chat_history": {
     "title": "Chat History",

@@ -266,7 +266,7 @@ export default function Home() {
               <AiChat />
               <div className="mt-3 px-3">
                 <Button asChild variant="outline" size="sm" className="w-full hover:bg-orange-50 hover:border-orange-500 hover:text-orange-700 transition-all">
-                  <Link href="/chat-history">
+                  <Link href="/ai-assistant">
                     <MessageCircle className="w-4 h-4 mr-2" />
                     {t('navigation.chat_history')}
                   </Link>
@@ -380,7 +380,7 @@ export default function Home() {
                   </Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full justify-start hover:bg-purple-50 hover:border-purple-500 hover:text-purple-700 transition-all">
-                  <Link href="/chat-history" className="block">
+                  <Link href="/ai-assistant" className="block">
                     <MessageCircle className="w-4 h-4 mr-2" />
                     {t('navigation.chat_history')}
                   </Link>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,6 +65,7 @@ interface AiChatProps {
 
 export default function AiChat({ className }: AiChatProps) {
   const { t } = useTranslation();
+  const [location, setLocation] = useLocation();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -146,6 +148,13 @@ export default function AiChat({ className }: AiChatProps) {
     setNewMessage("");
     
     chatMutation.mutate(userMessage.content);
+    
+    // If on home page and this is the first user message, redirect to AI Assistant page
+    if (location === '/' && messages.filter(m => m.sender === 'user').length === 0) {
+      setTimeout(() => {
+        setLocation('/ai-assistant');
+      }, 500); // Small delay to let the message be sent
+    }
   };
 
   const quickPrompts = [
