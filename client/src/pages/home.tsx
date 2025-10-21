@@ -432,6 +432,32 @@ function FeatureCard({ icon: Icon, title, description, gradient, iconColor }: {
 function PopularJourneysSection() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'he';
+  
+  // Journey translations
+  const journeyTranslations: Record<string, { title: string; description: string }> = {
+    'Southeast Asia Adventure': {
+      title: 'הרפתקה בדרום מזרח אסיה',
+      description: 'מבנגקוק התוססת למקדשים שלווים וחופים גן עדן - חוויית תאילנד האולטימטיבית'
+    },
+    'Japan Extended Discovery': {
+      title: 'מסע מורחב ביפן',
+      description: 'מסע סוחף דרך הערים האייקוניות של יפן, מאורות הניאון של טוקיו להירושימה'
+    },
+    'Classic Japan Circuit': {
+      title: 'מעגל יפן קלאסי',
+      description: 'גלו את השילוב המושלם של מסורות עתיקות וחדשנות מודרנית בערים האייקוניות של יפן'
+    },
+    'Grand European Journey': {
+      title: 'מסע אירופי גדול',
+      description: 'חוויה אירופית מקיפה דרך חמש ערים אגדיות, מהרומנטיקה של פריז לקסם של ברלין'
+    }
+  };
+  
+  const translateJourney = (journey: any) => {
+    if (!isRTL) return { title: journey.title, description: journey.description };
+    const translation = journeyTranslations[journey.title];
+    return translation || { title: journey.title, description: journey.description };
+  };
 
   const { data: journeys = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/journeys", { limit: 4 }],
@@ -515,13 +541,15 @@ function PopularJourneysSection() {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {journeys.slice(0, 4).map((journey: any) => (
+        {journeys.slice(0, 4).map((journey: any) => {
+          const translated = translateJourney(journey);
+          return (
           <Link key={journey.id} href={`/journeys/${journey.id}`}>
             <Card className="hover:shadow-xl transition-all cursor-pointer group border-t-4 border-t-purple-500 bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="text-lg font-bold text-slate-800 group-hover:text-purple-700 transition-colors" dir={isRTL ? 'rtl' : 'ltr'}>
-                    {journey.title}
+                    {translated.title}
                   </h3>
                   <Badge className="bg-purple-600 text-white">
                     {journey.totalNights || journey.total_nights} {t('journeys.nights')}
@@ -529,7 +557,7 @@ function PopularJourneysSection() {
                 </div>
                 
                 <p className="text-sm text-gray-600 mb-3 line-clamp-2" dir={isRTL ? 'rtl' : 'ltr'}>
-                  {journey.description}
+                  {translated.description}
                 </p>
                 
                 <div className="text-sm font-medium text-slate-700 mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -542,9 +570,9 @@ function PopularJourneysSection() {
                     <span className="font-medium">{journey.rating || '4.8'}</span>
                   </div>
                   {(journey.priceMin || journey.price_min) && (journey.priceMax || journey.price_max) && (
-                    <span className="text-slate-600 font-semibold">
+                    <span className="text-slate-600 font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>
                       {isRTL 
-                        ? `₪${Math.round((journey.priceMin || journey.price_min) * 3.5)} - ₪${Math.round((journey.priceMax || journey.price_max) * 3.5)}` 
+                        ? `₪${Math.round((journey.priceMax || journey.price_max) * 3.5)} - ₪${Math.round((journey.priceMin || journey.price_min) * 3.5)}` 
                         : `$${journey.priceMin || journey.price_min} - $${journey.priceMax || journey.price_max}`
                       }
                     </span>
@@ -553,7 +581,8 @@ function PopularJourneysSection() {
               </CardContent>
             </Card>
           </Link>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
