@@ -41,6 +41,13 @@ export default function AiAssistant() {
     if (storedMessage) {
       setInitialMessage(storedMessage);
       sessionStorage.removeItem('initialAiMessage');
+      // Clear after a short delay to allow AiChat to process it
+      const timer = setTimeout(() => {
+        setInitialMessage(undefined);
+      }, 1000);
+      
+      // Cleanup timeout on unmount
+      return () => clearTimeout(timer);
     }
   }, []);
 
@@ -87,6 +94,7 @@ export default function AiAssistant() {
 
   const handleNewChat = () => {
     setSelectedSession(null);
+    setInitialMessage(undefined); // Clear initial message for fresh chat
   };
 
   return (
