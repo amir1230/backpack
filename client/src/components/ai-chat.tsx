@@ -465,11 +465,13 @@ export default function AiChat({ className, initialMessage }: AiChatProps) {
               placeholder="Ask me anything about travel worldwide..."
               className="flex-1"
               disabled={chatMutation.isPending}
+              data-testid="input-ai-chat-message"
             />
             <Button 
               type="submit" 
               size="icon"
               disabled={!newMessage.trim() || chatMutation.isPending}
+              data-testid="button-send-ai-message"
             >
               {chatMutation.isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
