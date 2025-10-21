@@ -201,10 +201,10 @@ export default function AiChat({ className, initialMessage }: AiChatProps) {
   };
 
   const quickPrompts = [
-    { text: "I want to go to Peru", icon: MapPin },
-    { text: "Help me plan a budget trip", icon: DollarSign },
-    { text: "I love hiking and nature", icon: Calendar },
-    { text: "Solo travel adventure", icon: User }
+    { text: t('ai_chat.quick_prompts.peru'), icon: MapPin },
+    { text: t('ai_chat.quick_prompts.budget'), icon: DollarSign },
+    { text: t('ai_chat.quick_prompts.hiking'), icon: Calendar },
+    { text: t('ai_chat.quick_prompts.solo'), icon: User }
   ];
 
   const handleQuickPrompt = (prompt: string) => {
@@ -453,7 +453,7 @@ export default function AiChat({ className, initialMessage }: AiChatProps) {
         {/* Quick Prompts */}
         {messages.length === 1 && (
           <div className="px-4 py-3 border-t">
-            <p className="text-sm text-muted-foreground mb-3">Quick questions to get started:</p>
+            <p className="text-sm text-muted-foreground mb-3">{t('ai_chat.quick_questions_title')}</p>
             <div className="grid grid-cols-1 gap-2">
               {quickPrompts.map((prompt, index) => {
                 const IconComponent = prompt.icon;
