@@ -1,11 +1,11 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card.js";
+import { Button } from "../components/ui/button.js";
+import { Badge } from "../components/ui/badge.js";
+import { ScrollArea } from "../components/ui/scroll-area.js";
+import { useToast } from "../hooks/use-toast.js";
+import { apiRequest, queryClient } from "../lib/queryClient.js";
 import { Link, useLocation } from "wouter";
 import { 
   MessageCircle, 
@@ -16,7 +16,7 @@ import {
   Plus
 } from "lucide-react";
 import { useState } from "react";
-import AiChat from "@/components/ai-chat";
+import AiChat from "../components/ai-chat.js";
 
 interface ChatSession {
   id: number;
