@@ -480,7 +480,7 @@ export default function AiChat({ className, initialMessage }: AiChatProps) {
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Ask me anything about travel worldwide..."
+              placeholder={t('ai_chat.input_placeholder')}
               className="flex-1"
               disabled={chatMutation.isPending}
               data-testid="input-ai-chat-message"

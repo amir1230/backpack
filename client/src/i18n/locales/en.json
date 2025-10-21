@@ -1857,6 +1857,7 @@
     "more_ideas": "More Ideas",
     "welcome_message": "Hi! I'm GlobeMate – your smart travel assistant for worldwide adventures! 🌎\n\nWhether you're traveling solo, as a couple, or with family and kids, I'll help you build the perfect trip! Just tell me what you're thinking (even incomplete ideas like 'I want to go to Japan with 2 adults and 2 kids') and I'll ask the right questions about budget, timing, and what you love to do!\n\nTry one of the prompts below or just start chatting:",
     "quick_questions_title": "Quick questions to get started:",
+    "input_placeholder": "Ask me anything about travel worldwide...",
     "quick_prompts": {
       "peru": "I want to go to Peru",
       "budget": "Help me plan a budget trip",
