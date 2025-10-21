@@ -1644,5 +1644,18 @@
   "onboarding": {
     "complete_profile_message": "Complete your profile to get personalized travel recommendations from around the world",
     "complete_setup": "Complete Setup"
+  },
+  "footer": {
+    "about_text": "Your smart travel companion for worldwide adventures. Plan, track, and share your journeys with AI-powered insights.",
+    "quick_links": "Quick Links",
+    "support": "Support",
+    "help_center": "Help Center",
+    "contact_us": "Contact Us",
+    "about_us": "About Us",
+    "contact_info": "Contact",
+    "location": "Israel",
+    "all_rights_reserved": "All rights reserved.",
+    "privacy_policy": "Privacy Policy",
+    "terms_of_service": "Terms of Service"
   }
 }

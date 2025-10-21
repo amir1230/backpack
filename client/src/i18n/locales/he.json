@@ -2029,5 +2029,18 @@
   "onboarding": {
     "complete_profile_message": "השלימו את הפרופיל שלכם כדי לקבל המלצות נסיעה מותאמות אישית מרחבי העולם",
     "complete_setup": "השלימו את ההגדרות"
+  },
+  "footer": {
+    "about_text": "שותף החכם שלכם למסעות ברחבי העולם. תכננו, עקבו ושתפו את המסעות שלכם עם תובנות מונעות בינה מלאכותית.",
+    "quick_links": "קישורים מהירים",
+    "support": "תמיכה",
+    "help_center": "מרכז עזרה",
+    "contact_us": "צור קשר",
+    "about_us": "אודות",
+    "contact_info": "יצירת קשר",
+    "location": "ישראל",
+    "all_rights_reserved": "כל הזכויות שמורות.",
+    "privacy_policy": "מדיניות פרטיות",
+    "terms_of_service": "תנאי שימוש"
   }
 }

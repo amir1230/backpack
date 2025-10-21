@@ -40,16 +40,17 @@ import TermsOfService from "./pages/terms-of-service.js";
 import About from "./pages/about.js";
 import HotelDeals from "./pages/hotel-deals.js";
 import Navigation from "./components/navigation.js";
+import Footer from "./components/footer.js";
 import { ErrorBoundary } from "./components/error-boundary.js";
 
 // Simplified demo app - no authentication needed
 
 function Router() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navigation />
       {/* Main content area adjusted for right sidebar on desktop, bottom padding for mobile nav */}
-      <main className="pb-20 md:pb-0 md:pr-64">
+      <main className="flex-1 pb-20 md:pb-0 md:pr-64">
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/landing" component={Landing} />
@@ -85,6 +86,7 @@ function Router() {
           <Route component={NotFound} />
         </Switch>
       </main>
+      <Footer />
     </div>
   );
 }
