@@ -7,7 +7,6 @@ import { TooltipProvider } from "./components/ui/tooltip.js";
 import { AuthProvider } from "./context/AuthContext.js";
 import "./i18n";
 import NotFound from "./pages/not-found.js";
-import Landing from "./pages/landing.js";
 import Home from "./pages/home.js";
 import Callback from "./pages/auth/Callback.js";
 
@@ -55,7 +54,6 @@ function Router() {
       <main className="flex-1 pb-20 md:pb-0 md:pr-64">
         <Switch>
           <Route path="/" component={Home} />
-          <Route path="/landing" component={Landing} />
           <Route path="/my-trips" component={MyTripsNew} />
           <Route path="/itineraries/:id" component={ItineraryDetail} />
           <Route path="/community" component={Community} />
