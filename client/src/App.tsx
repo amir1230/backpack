@@ -46,9 +46,20 @@ import { ErrorBoundary } from "./components/error-boundary.js";
 
 // Simplified demo app - no authentication needed
 
+function ScrollToTop() {
+  const [location] = useLocation();
+  
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+  
+  return null;
+}
+
 function Router() {
   return (
     <div className="min-h-screen flex flex-col">
+      <ScrollToTop />
       <Navigation />
       {/* Main content area adjusted for right sidebar on desktop, bottom padding for mobile nav */}
       <main className="flex-1 pb-20 md:pb-0 md:pr-64">
