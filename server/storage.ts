@@ -407,12 +407,43 @@ export class DatabaseStorage implements IStorage {
       query = query.offset(filters.offset) as any;
     }
     
-    return await query;
+    const results = await query;
+    
+    // Convert decimal strings to numbers and ensure camelCase
+    return results.map((journey: any) => ({
+      ...journey,
+      totalNights: journey.total_nights ?? journey.totalNights,
+      priceMin: parseFloat(journey.price_min ?? journey.priceMin ?? '0'),
+      priceMax: parseFloat(journey.price_max ?? journey.priceMax ?? '0'),
+      heroImage: journey.hero_image ?? journey.heroImage,
+      audienceTags: journey.audience_tags ?? journey.audienceTags,
+      dailyItinerary: journey.daily_itinerary ?? journey.dailyItinerary,
+      costsBreakdown: journey.costs_breakdown ?? journey.costsBreakdown,
+      createdAt: journey.created_at ?? journey.createdAt,
+      updatedAt: journey.updated_at ?? journey.updatedAt,
+      rating: parseFloat(journey.rating ?? '0'),
+    }));
   }
 
   async getJourneyById(id: number): Promise<Journey | undefined> {
     const [journey] = await db.select().from(journeys).where(eq(journeys.id, id));
-    return journey;
+    
+    if (!journey) return undefined;
+    
+    // Convert decimal strings to numbers and ensure camelCase
+    return {
+      ...journey,
+      totalNights: journey.total_nights ?? journey.totalNights,
+      priceMin: parseFloat(journey.price_min ?? journey.priceMin ?? '0'),
+      priceMax: parseFloat(journey.price_max ?? journey.priceMax ?? '0'),
+      heroImage: journey.hero_image ?? journey.heroImage,
+      audienceTags: journey.audience_tags ?? journey.audienceTags,
+      dailyItinerary: journey.daily_itinerary ?? journey.dailyItinerary,
+      costsBreakdown: journey.costs_breakdown ?? journey.costsBreakdown,
+      createdAt: journey.created_at ?? journey.createdAt,
+      updatedAt: journey.updated_at ?? journey.updatedAt,
+      rating: parseFloat(journey.rating ?? '0'),
+    } as Journey;
   }
 
   async createJourney(journey: InsertJourney): Promise<Journey> {
@@ -457,20 +488,44 @@ export class DatabaseStorage implements IStorage {
     
     // Fetch full journey details for each saved journey
     const results = await Promise.all(
-      savedRecords.map(async (saved) => {
+      savedRecords.map(async (saved: any) => {
         const [journey] = await db
           .select()
           .from(journeys)
-          .where(eq(journeys.id, saved.journeyId));
+          .where(eq(journeys.id, saved.journeyId || saved.journey_id));
+        
+        if (!journey) {
+          return null;
+        }
+        
+        // Convert journey to proper format
+        const formattedJourney: Journey = {
+          ...journey,
+          totalNights: journey.total_nights ?? journey.totalNights,
+          priceMin: parseFloat(journey.price_min ?? journey.priceMin ?? '0'),
+          priceMax: parseFloat(journey.price_max ?? journey.priceMax ?? '0'),
+          heroImage: journey.hero_image ?? journey.heroImage,
+          audienceTags: journey.audience_tags ?? journey.audienceTags,
+          dailyItinerary: journey.daily_itinerary ?? journey.dailyItinerary,
+          costsBreakdown: journey.costs_breakdown ?? journey.costsBreakdown,
+          createdAt: journey.created_at ?? journey.createdAt,
+          updatedAt: journey.updated_at ?? journey.updatedAt,
+          rating: parseFloat(journey.rating ?? '0'),
+        };
         
         return {
-          ...saved,
-          journey,
+          id: saved.id,
+          userId: saved.userId || saved.user_id,
+          journeyId: saved.journeyId || saved.journey_id,
+          notes: saved.notes,
+          createdAt: saved.createdAt || saved.created_at,
+          journey: formattedJourney,
         };
       })
     );
     
-    return results;
+    // Filter out any null results
+    return results.filter((r): r is NonNullable<typeof r> => r !== null);
   }
 
   async removeSavedJourney(id: number, userId: string): Promise<void> {
