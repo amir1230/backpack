@@ -25,15 +25,15 @@ interface Journey {
     country: string;
     nights: number;
   }>;
-  total_nights: number;
-  price_min: number;
-  price_max: number;
+  totalNights: number;
+  priceMin: number;
+  priceMax: number;
   season: string[];
   tags: string[];
-  audience_tags: string[];
+  audienceTags: string[];
   rating: number;
   popularity: number;
-  hero_image: string;
+  heroImage: string;
 }
 
 export default function JourneysPage() {
@@ -266,7 +266,7 @@ export default function JourneysPage() {
                 <Card className="h-full overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group">
                   <div className="relative h-48 overflow-hidden">
                     <img
-                      src={journey.hero_image || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828'}
+                      src={journey.heroImage || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828'}
                       alt={journey.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
@@ -291,12 +291,12 @@ export default function JourneysPage() {
                     <div className="flex gap-4 mb-4 text-sm text-gray-600">
                       <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Calendar className="w-4 h-4" />
-                        <span dir={isRTL ? 'rtl' : 'ltr'}>{formatDuration(journey.total_nights)}</span>
+                        <span dir={isRTL ? 'rtl' : 'ltr'}>{formatDuration(journey.totalNights)}</span>
                       </div>
                       <div className="flex flex-col">
                         <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                           <DollarSign className="w-4 h-4" />
-                          <span className="font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{formatPrice(journey.price_min, journey.price_max)}</span>
+                          <span className="font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{formatPrice(journey.priceMin, journey.priceMax)}</span>
                         </div>
                         <span className="text-xs text-gray-500 mt-0.5" dir={isRTL ? 'rtl' : 'ltr'}>
                           {isRTL ? 'כולל: מלונות, טיסות, אטרקציות' : 'Includes: Hotels, Flights, Attractions'}
@@ -306,7 +306,7 @@ export default function JourneysPage() {
 
                     {/* Audience Tags */}
                     <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
-                      {journey.audience_tags?.slice(0, 3).map((tag) => (
+                      {journey.audienceTags?.slice(0, 3).map((tag) => (
                         <Badge key={tag} variant="secondary" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
                           {translateTag(tag)}
                         </Badge>

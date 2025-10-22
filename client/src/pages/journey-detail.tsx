@@ -40,23 +40,23 @@ interface Journey {
     nights: number;
     transport?: { type: string; cost: number; duration: string };
   }>;
-  total_nights: number;
-  price_min: number;
-  price_max: number;
+  totalNights: number;
+  priceMin: number;
+  priceMax: number;
   season: string[];
   tags: string[];
-  audience_tags: string[];
+  audienceTags: string[];
   rating: number;
   popularity: number;
-  hero_image: string;
+  heroImage: string;
   images: string[];
-  daily_itinerary: Record<string, Array<{
+  dailyItinerary: Record<string, Array<{
     day: number;
     activities: string[];
     duration: string;
     estimatedCost: number;
   }>>;
-  costs_breakdown: {
+  costsBreakdown: {
     transport: { min: number; max: number };
     activities: { min: number; max: number };
     lodging: { min: number; max: number };
@@ -507,7 +507,7 @@ export default function JourneyDetailPage() {
       {/* Hero Section */}
       <div className="relative h-96 overflow-hidden">
         <img
-          src={journey.hero_image}
+          src={journey.heroImage}
           alt={journey.title}
           className="w-full h-full object-cover"
         />
@@ -528,13 +528,13 @@ export default function JourneyDetailPage() {
               </div>
               <span>•</span>
               <div className="flex flex-col">
-                <span className="font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{formatPrice(journey.price_min, journey.price_max)}</span>
+                <span className="font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{formatPrice(journey.priceMin, journey.priceMax)}</span>
                 <span className="text-xs text-gray-300" dir={isRTL ? 'rtl' : 'ltr'}>
                   {isRTL ? 'כולל: מלונות, טיסות, אטרקציות' : 'Includes: Hotels, Flights, Attractions'}
                 </span>
               </div>
               <span>•</span>
-              <span dir={isRTL ? 'rtl' : 'ltr'}>{journey.total_nights} {isRTL ? 'לילות' : 'nights'}</span>
+              <span dir={isRTL ? 'rtl' : 'ltr'}>{journey.totalNights} {isRTL ? 'לילות' : 'nights'}</span>
             </div>
           </div>
         </div>
@@ -556,7 +556,7 @@ export default function JourneyDetailPage() {
           </div>
           {/* Audience Tags - Second Row */}
           <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
-            {journey.audience_tags?.map((tag) => (
+            {journey.audienceTags?.map((tag) => (
               <Badge key={tag} variant="outline" className="border-orange-500 text-orange-600" dir={isRTL ? 'rtl' : 'ltr'}>
                 {translateTag(tag)}
               </Badge>
@@ -706,7 +706,7 @@ export default function JourneyDetailPage() {
           {/* Daily Schedule Tab */}
           <TabsContent value="schedule" className="mt-6">
             <div className="space-y-6">
-              {Object.entries(journey.daily_itinerary || {}).map(([destIdx, days]) => (
+              {Object.entries(journey.dailyItinerary || {}).map(([destIdx, days]) => (
                 <Card key={destIdx}>
                   <CardContent className="p-6">
                     <h3 className="text-xl font-bold mb-4 text-orange-600" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -779,13 +779,13 @@ export default function JourneyDetailPage() {
                   </div>
                 </h3>
                 <div className="space-y-4">
-                  {journey.costs_breakdown && (
+                  {journey.costsBreakdown && (
                     <>
                       <div className="p-4 bg-blue-50 rounded-lg" style={isRTL ? { textAlign: 'right' } : {}}>
                         <div className="flex justify-between items-center">
                           <span className="font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'תחבורה' : 'Transport'}</span>
                           <span className="text-lg font-bold" dir={isRTL ? 'rtl' : 'ltr'}>
-                            {formatCost(journey.costs_breakdown.transport.min)} - {formatCost(journey.costs_breakdown.transport.max)}
+                            {formatCost(journey.costsBreakdown.transport.min)} - {formatCost(journey.costsBreakdown.transport.max)}
                           </span>
                         </div>
                       </div>
@@ -793,7 +793,7 @@ export default function JourneyDetailPage() {
                         <div className="flex justify-between items-center">
                           <span className="font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'פעילויות' : 'Activities'}</span>
                           <span className="text-lg font-bold" dir={isRTL ? 'rtl' : 'ltr'}>
-                            {formatCost(journey.costs_breakdown.activities.min)} - {formatCost(journey.costs_breakdown.activities.max)}
+                            {formatCost(journey.costsBreakdown.activities.min)} - {formatCost(journey.costsBreakdown.activities.max)}
                           </span>
                         </div>
                       </div>
@@ -801,7 +801,7 @@ export default function JourneyDetailPage() {
                         <div className="flex justify-between items-center">
                           <span className="font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'לינה' : 'Lodging'}</span>
                           <span className="text-lg font-bold" dir={isRTL ? 'rtl' : 'ltr'}>
-                            {formatCost(journey.costs_breakdown.lodging.min)} - {formatCost(journey.costs_breakdown.lodging.max)}
+                            {formatCost(journey.costsBreakdown.lodging.min)} - {formatCost(journey.costsBreakdown.lodging.max)}
                           </span>
                         </div>
                       </div>
@@ -814,7 +814,7 @@ export default function JourneyDetailPage() {
                             </span>
                           </div>
                           <span className="text-2xl font-bold text-orange-600" dir={isRTL ? 'rtl' : 'ltr'}>
-                            {formatPrice(journey.price_min, journey.price_max)}
+                            {formatPrice(journey.priceMin, journey.priceMax)}
                           </span>
                         </div>
                       </div>
