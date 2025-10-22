@@ -468,11 +468,11 @@ export default function MyJourneyPage() {
                         className="group relative bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-xl hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-orange-300"
                         data-testid={`destination-${index}`}
                       >
-                        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className="flex items-center gap-3">
                           <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                             <MapPin className="w-6 h-6 text-white" />
                           </div>
-                          <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'}>
+                          <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                             <p className="font-bold text-gray-800 text-lg">
                               {translateCityName(dest.name || dest)}
                             </p>
