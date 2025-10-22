@@ -191,7 +191,7 @@ export default function Home() {
             description={t('home.budget_tracking_desc') || "Track expenses and stay within your budget effortlessly"}
             gradient="from-teal-50 to-teal-100"
             iconColor="text-teal-600"
-            href="/expenses"
+            href="/budget-tracker"
           />
           <FeatureCard 
             icon={Users} 

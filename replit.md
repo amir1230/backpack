@@ -9,7 +9,7 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 - **Clickable Feature Cards** (Oct 22, 2025): All feature cards on home page are now clickable and navigate to relevant pages:
   - AI Planning → /ai-assistant
-  - Budget Tracking → /expenses
+  - Budget Tracking → /budget-tracker
   - Community → /community
   - Unbeatable Prices → /hotel-deals
   - Curated Journeys → /journeys
