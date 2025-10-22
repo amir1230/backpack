@@ -196,7 +196,7 @@ export default function Home() {
                 </div>
               ) : userTrips.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {userTrips.slice(0, 4).map((trip: any) => (
+                  {userTrips.slice(0, 2).map((trip: any) => (
                     <TripCard key={trip.id} trip={trip} />
                   ))}
                 </div>
