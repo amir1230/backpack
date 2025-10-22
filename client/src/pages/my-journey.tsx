@@ -75,6 +75,75 @@ export default function MyJourneyPage() {
     });
   };
 
+  const translateCityName = (cityName: string) => {
+    const cityTranslations: Record<string, string> = {
+      // European cities
+      'Paris': 'פריז',
+      'Amsterdam': 'אמסטרדם',
+      'Berlin': 'ברלין',
+      'Prague': 'פראג',
+      'Vienna': 'וינה',
+      'Rome': 'רומא',
+      'Barcelona': 'ברצלונה',
+      'Madrid': 'מדריד',
+      'London': 'לונדון',
+      'Venice': 'ונציה',
+      'Florence': 'פירנצה',
+      'Athens': 'אתונה',
+      'Budapest': 'בודפשט',
+      'Warsaw': 'ורשה',
+      'Krakow': 'קרקוב',
+      'Lisbon': 'ליסבון',
+      'Dublin': 'דבלין',
+      'Copenhagen': 'קופנהגן',
+      'Stockholm': 'סטוקהולם',
+      'Oslo': 'אוסלו',
+      'Helsinki': 'הלסינקי',
+      'Brussels': 'בריסל',
+      'Munich': 'מינכן',
+      'Hamburg': 'המבורג',
+      'Frankfurt': 'פרנקפורט',
+      // Asian cities
+      'Tokyo': 'טוקיו',
+      'Kyoto': 'קיוטו',
+      'Osaka': 'אוסקה',
+      'Hiroshima': 'הירושימה',
+      'Nara': 'נארה',
+      'Bangkok': 'בנגקוק',
+      'Singapore': 'סינגפור',
+      'Hong Kong': 'הונג קונג',
+      'Seoul': 'סיאול',
+      'Beijing': 'בייג\'ינג',
+      'Shanghai': 'שנחאי',
+      'Dubai': 'דובאי',
+      'Abu Dhabi': 'אבו דאבי',
+      'Mumbai': 'מומבאי',
+      'Delhi': 'דלהי',
+      'Bali': 'באלי',
+      // American cities
+      'New York': 'ניו יורק',
+      'Los Angeles': 'לוס אנג\'לס',
+      'San Francisco': 'סן פרנסיסקו',
+      'Las Vegas': 'לאס וגאס',
+      'Miami': 'מיאמי',
+      'Chicago': 'שיקגו',
+      'Boston': 'בוסטון',
+      'Washington': 'וושינגטון',
+      'Seattle': 'סיאטל',
+      // Other
+      'Sydney': 'סידני',
+      'Melbourne': 'מלבורן',
+      'Auckland': 'אוקלנד',
+      'Cairo': 'קהיר',
+      'Istanbul': 'איסטנבול',
+      'Jerusalem': 'ירושלים',
+      'Tel Aviv': 'תל אביב',
+      'Haifa': 'חיפה',
+    };
+    
+    return isRTL ? (cityTranslations[cityName] || cityName) : cityName;
+  };
+
   const calculateDuration = () => {
     if (!trip?.startDate || !trip?.endDate) return null;
     const start = new Date(trip.startDate);
@@ -308,7 +377,7 @@ export default function MyJourneyPage() {
                             {day.location && (
                               <p className={`text-white/80 text-sm flex items-center gap-1 mt-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                                 <MapPin className="w-3 h-3" />
-                                {day.location}
+                                {translateCityName(day.location)}
                               </p>
                             )}
                           </div>
@@ -324,7 +393,7 @@ export default function MyJourneyPage() {
                         {day.activities && day.activities.map((activity: string, actIdx: number) => (
                           <div 
                             key={actIdx} 
-                            className={`flex items-start gap-4 p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl hover:shadow-md transition-shadow ${isRTL ? 'flex-row-reverse' : ''}`}
+                            className="flex items-start gap-4 p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl hover:shadow-md transition-shadow"
                             data-testid={`activity-${index}-${actIdx}`}
                           >
                             <div className="flex-shrink-0 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
@@ -405,7 +474,7 @@ export default function MyJourneyPage() {
                           </div>
                           <div className="flex-1" dir={isRTL ? 'rtl' : 'ltr'}>
                             <p className="font-bold text-gray-800 text-lg">
-                              {dest.name || dest}
+                              {translateCityName(dest.name || dest)}
                             </p>
                             <p className="text-sm text-gray-600">
                               {isRTL ? 'יעד' : 'Destination'} {index + 1}
