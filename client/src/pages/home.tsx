@@ -588,12 +588,17 @@ function PopularJourneysSection() {
                     <span className="font-medium">{journey.rating || '4.8'}</span>
                   </div>
                   {(journey.priceMin || journey.price_min) && (journey.priceMax || journey.price_max) && (
-                    <span className="text-slate-600 font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>
-                      {isRTL 
-                        ? `₪${Math.round((journey.priceMax || journey.price_max) * 3.5)} - ₪${Math.round((journey.priceMin || journey.price_min) * 3.5)}` 
-                        : `$${journey.priceMin || journey.price_min} - $${journey.priceMax || journey.price_max}`
-                      }
-                    </span>
+                    <div className="flex flex-col items-end">
+                      <span className="text-slate-600 font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>
+                        {isRTL 
+                          ? `₪${Math.round((journey.priceMax || journey.price_max) * 3.5)} - ₪${Math.round((journey.priceMin || journey.price_min) * 3.5)}` 
+                          : `$${journey.priceMin || journey.price_min} - $${journey.priceMax || journey.price_max}`
+                        }
+                      </span>
+                      <span className="text-xs text-gray-500 mt-0.5" dir={isRTL ? 'rtl' : 'ltr'}>
+                        {isRTL ? 'כולל הכל' : 'All inclusive'}
+                      </span>
+                    </div>
                   )}
                 </div>
               </CardContent>

@@ -293,9 +293,14 @@ export default function JourneysPage() {
                         <Calendar className="w-4 h-4" />
                         <span dir={isRTL ? 'rtl' : 'ltr'}>{formatDuration(journey.total_nights)}</span>
                       </div>
-                      <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <DollarSign className="w-4 h-4" />
-                        <span dir={isRTL ? 'rtl' : 'ltr'}>{formatPrice(journey.price_min, journey.price_max)}</span>
+                      <div className="flex flex-col">
+                        <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <DollarSign className="w-4 h-4" />
+                          <span className="font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{formatPrice(journey.price_min, journey.price_max)}</span>
+                        </div>
+                        <span className="text-xs text-gray-500 mt-0.5" dir={isRTL ? 'rtl' : 'ltr'}>
+                          {isRTL ? 'כולל: מלונות, טיסות, אטרקציות' : 'Includes: Hotels, Flights, Attractions'}
+                        </span>
                       </div>
                     </div>
 

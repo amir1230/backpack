@@ -438,13 +438,18 @@ export default function JourneyDetailPage() {
               </Button>
             </Link>
             <h1 className="text-4xl md:text-5xl font-bold mb-4" dir={isRTL ? 'rtl' : 'ltr'}>{translateJourneyTitle(journey.title)}</h1>
-            <div className={`flex items-center gap-4 text-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center gap-4 text-lg flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className="flex items-center gap-2">
                 <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                 <span>{journey.rating.toFixed(1)}</span>
               </div>
               <span>•</span>
-              <span dir={isRTL ? 'rtl' : 'ltr'}>{formatPrice(journey.price_min, journey.price_max)}</span>
+              <div className="flex flex-col">
+                <span className="font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>{formatPrice(journey.price_min, journey.price_max)}</span>
+                <span className="text-xs text-gray-300" dir={isRTL ? 'rtl' : 'ltr'}>
+                  {isRTL ? 'כולל: מלונות, טיסות, אטרקציות' : 'Includes: Hotels, Flights, Attractions'}
+                </span>
+              </div>
               <span>•</span>
               <span dir={isRTL ? 'rtl' : 'ltr'}>{journey.total_nights} {isRTL ? 'לילות' : 'nights'}</span>
             </div>
@@ -709,7 +714,12 @@ export default function JourneyDetailPage() {
                       </div>
                       <div className="p-4 bg-orange-100 rounded-lg border-2 border-orange-500" style={isRTL ? { textAlign: 'right' } : {}}>
                         <div className="flex justify-between items-center">
-                          <span className="font-bold text-lg" dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'סה"כ משוער' : 'Total Estimated'}</span>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-lg" dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'סה"כ משוער' : 'Total Estimated'}</span>
+                            <span className="text-xs text-gray-700 mt-1" dir={isRTL ? 'rtl' : 'ltr'}>
+                              {isRTL ? 'כולל: מלונות, טיסות, אטרקציות ובזבוזים' : 'Includes: Hotels, Flights, Attractions & Expenses'}
+                            </span>
+                          </div>
                           <span className="text-2xl font-bold text-orange-600" dir={isRTL ? 'rtl' : 'ltr'}>
                             {formatPrice(journey.price_min, journey.price_max)}
                           </span>
