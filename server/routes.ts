@@ -3504,6 +3504,46 @@ export async function registerRoutes(app: Express): Promise<void> {
   */
 
   // TripAdvisor-style data API routes
+  // Platform Statistics API
+  app.get('/api/stats', async (req, res) => {
+    try {
+      // Get real statistics from the database
+      const [
+        destinations,
+        reviews,
+        users,
+        journeys
+      ] = await Promise.all([
+        storage.getDestinations(),
+        storage.getRecentReviews(),
+        db.select().from(schema.users),
+        storage.getJourneys({ limit: 1000 })
+      ]);
+
+      // Calculate unique countries from destinations
+      const uniqueCountries = new Set(
+        destinations.map((d: any) => d.country).filter(Boolean)
+      );
+
+      // Calculate average rating from reviews
+      const avgRating = reviews.length > 0
+        ? (reviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
+        : '0.0';
+
+      const stats = {
+        countries: uniqueCountries.size,
+        destinations: destinations.length,
+        users: users.length,
+        rating: parseFloat(avgRating),
+        journeys: journeys.length
+      };
+
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching platform stats:", error);
+      res.status(500).json({ message: "Failed to fetch statistics" });
+    }
+  });
   
   // Destinations API
   app.get('/api/destinations', async (req, res) => {

@@ -7,6 +7,10 @@ GlobeMate is a full-stack web application for worldwide travel planning and comm
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+- **Real-Time Platform Statistics** (Oct 22, 2025): Statistics cards on home page now display real data from the database instead of hardcoded values.
+  - Backend: Added `/api/stats` endpoint that calculates live statistics (countries, destinations, users, average rating)
+  - Frontend: Updated StatsCard components to fetch and display dynamic data
+  - Stats: Average rating from reviews, destination count, user count, unique countries
 - **Trip Deletion Feature** (Oct 22, 2025): Added delete functionality for user trips with confirmation dialog. Users can now delete their trips from the "My Trips" section on the home page.
   - Backend: Added DELETE `/api/trips/:id` endpoint with user authorization
   - Storage: Implemented `deleteTrip` method in both DatabaseStorage and MemStorage

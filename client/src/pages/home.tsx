@@ -48,6 +48,16 @@ export default function Home() {
     queryKey: ["/api/reviews"]
   });
 
+  const { data: platformStats, isLoading: statsLoading } = useQuery<{
+    countries: number;
+    destinations: number;
+    users: number;
+    rating: number;
+    journeys: number;
+  }>({
+    queryKey: ["/api/stats"]
+  });
+
   const deleteTripMutation = useMutation({
     mutationFn: async (tripId: number) => {
       return await apiRequest(`/api/trips/${tripId}`, {
@@ -128,10 +138,30 @@ export default function Home() {
       {/* Stats Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20 mb-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatsCard icon={Globe} value="70+" label={t('home.countries_available') || "Countries"} gradient="from-orange-400 to-red-500" />
-          <StatsCard icon={Users} value="10K+" label={t('home.happy_travelers') || "Happy Travelers"} gradient="from-teal-400 to-cyan-500" />
-          <StatsCard icon={MapPin} value="500+" label={t('home.destinations') || "Destinations"} gradient="from-blue-400 to-indigo-500" />
-          <StatsCard icon={Star} value="4.9/5" label={t('home.average_rating') || "Average Rating"} gradient="from-purple-400 to-pink-500" />
+          <StatsCard 
+            icon={Star} 
+            value={statsLoading ? "..." : `${platformStats?.rating || 0}/5`} 
+            label={t('home.average_rating') || "Average Rating"} 
+            gradient="from-purple-400 to-pink-500" 
+          />
+          <StatsCard 
+            icon={MapPin} 
+            value={statsLoading ? "..." : `${platformStats?.destinations || 0}+`} 
+            label={t('home.destinations') || "Destinations"} 
+            gradient="from-blue-400 to-indigo-500" 
+          />
+          <StatsCard 
+            icon={Users} 
+            value={statsLoading ? "..." : `${platformStats?.users || 0}+`} 
+            label={t('home.happy_travelers') || "Happy Travelers"} 
+            gradient="from-teal-400 to-cyan-500" 
+          />
+          <StatsCard 
+            icon={Globe} 
+            value={statsLoading ? "..." : `${platformStats?.countries || 0}+`} 
+            label={t('home.countries_available') || "Countries"} 
+            gradient="from-orange-400 to-red-500" 
+          />
         </div>
       </section>
 
