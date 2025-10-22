@@ -52,7 +52,24 @@ function ScrollToTop() {
   React.useLayoutEffect(() => {
     // Scroll to top immediately before paint when route changes
     window.scrollTo(0, 0);
+    
+    // Also scroll after a tiny delay to catch any late renders
+    const timeoutId = setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 0);
+    
+    return () => clearTimeout(timeoutId);
   }, [location]);
+  
+  // Also handle browser back/forward buttons
+  React.useEffect(() => {
+    const handlePopState = () => {
+      window.scrollTo(0, 0);
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
   
   return null;
 }
