@@ -256,7 +256,8 @@ export default function JourneyDetailPage() {
     }
   };
 
-  const formatPrice = (min: string | number, max: string | number) => {
+  const formatPrice = (min: string | number | undefined, max: string | number | undefined) => {
+    if (!min || !max) return 'N/A';
     const currency = isRTL ? '₪' : '$';
     const minNum = isRTL ? Math.round(parseFloat(min.toString()) * 3.5) : parseInt(min.toString());
     const maxNum = isRTL ? Math.round(parseFloat(max.toString()) * 3.5) : parseInt(max.toString());

@@ -7,6 +7,15 @@ GlobeMate is a full-stack web application for worldwide travel planning and comm
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+- **Saved Journeys Feature** (Oct 22, 2025): Complete implementation allowing users to save and manage their favorite pre-made journeys:
+  - Database: Created `saved_journeys` table with user-journey relationships
+  - Backend: Four REST endpoints (POST, GET, DELETE, check) with Zod validation and numeric parameter checks
+  - Frontend: My Journeys page (`/my-journeys`) displaying saved journeys with remove functionality
+  - UI: Save/remove button on journey detail page with real-time state updates
+  - Navigation: Added "My Journeys" menu item with Hebrew/English translations
+  - Field naming: All journey data uses camelCase (heroImage, totalNights, priceMin, priceMax, audienceTags, dailyItinerary, costsBreakdown)
+  - Error handling: formatPrice functions handle undefined values and return "N/A" for missing price data
+  - Cache management: Mutations use React Query cache with proper invalidation
 - **Clickable Feature Cards** (Oct 22, 2025): All feature cards on home page are now clickable and navigate to relevant pages:
   - AI Planning → /ai-assistant
   - Budget Tracking → /budget-tracker

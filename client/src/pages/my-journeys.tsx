@@ -87,10 +87,13 @@ export default function MyJourneysPage() {
     return cities.join(` ${arrow} `);
   };
 
-  const formatPrice = (min: number, max: number) => {
+  const formatPrice = (min: number | string | undefined, max: number | string | undefined) => {
+    if (!min || !max) return 'N/A';
     const currency = isRTL ? '₪' : '$';
-    const minNum = isRTL ? Math.round(min * 3.5) : min;
-    const maxNum = isRTL ? Math.round(max * 3.5) : max;
+    const minVal = typeof min === 'string' ? parseFloat(min) : min;
+    const maxVal = typeof max === 'string' ? parseFloat(max) : max;
+    const minNum = isRTL ? Math.round(minVal * 3.5) : minVal;
+    const maxNum = isRTL ? Math.round(maxVal * 3.5) : maxVal;
     return `${currency}${minNum.toLocaleString()} - ${currency}${maxNum.toLocaleString()}`;
   };
 
