@@ -157,12 +157,28 @@ export default function JourneysPage() {
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-500 to-teal-500 text-white py-12 px-4">
         <div className={`max-w-7xl mx-auto ${isRTL ? 'text-right' : ''}`}>
-          <h1 className="text-4xl font-bold mb-4" dir={isRTL ? 'rtl' : 'ltr'}>
-            {isRTL ? 'מסעות מתוכננים ברחבי העולם' : 'Multi-Destination Journeys'}
-          </h1>
-          <p className="text-xl opacity-90" dir={isRTL ? 'rtl' : 'ltr'}>
-            {isRTL ? 'גלה מסלולי טיול מושלמים עם מספר יעדים' : 'Discover perfect travel routes across multiple destinations'}
-          </p>
+          <div className={`flex items-start justify-between gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold mb-4" dir={isRTL ? 'rtl' : 'ltr'}>
+                {isRTL ? 'מסעות מתוכננים ברחבי העולם' : 'Multi-Destination Journeys'}
+              </h1>
+              <p className="text-xl opacity-90" dir={isRTL ? 'rtl' : 'ltr'}>
+                {isRTL ? 'גלה מסלולי טיול מושלמים עם מספר יעדים' : 'Discover perfect travel routes across multiple destinations'}
+              </p>
+            </div>
+            <Link href="/my-journeys">
+              <Button 
+                variant="secondary" 
+                className="bg-white text-orange-600 hover:bg-orange-50 shadow-lg whitespace-nowrap"
+                data-testid="button-my-journeys-nav"
+              >
+                <Users className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                <span dir={isRTL ? 'rtl' : 'ltr'}>
+                  {isRTL ? 'המסעות השמורים שלי' : 'My Saved Journeys'}
+                </span>
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 
