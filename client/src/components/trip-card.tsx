@@ -24,6 +24,7 @@ import {
   Trash2
 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface TripCardProps {
   trip: {
@@ -52,6 +53,8 @@ interface TripCardProps {
 
 export default function TripCard({ trip, showUser = false, onEdit, onView, onDelete }: TripCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
   
   const destinations = Array.isArray(trip.destinations) ? trip.destinations : [];
   const destinationNames = destinations.map((dest: any) => 
@@ -65,11 +68,17 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return null;
-    return new Date(dateString).toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString(isRTL ? 'he-IL' : 'en-US', { 
+      day: '2-digit', 
+      month: '2-digit',
       year: 'numeric'
     });
+  };
+
+  const formatPrice = (amount: number) => {
+    const currency = isRTL ? '₪' : '$';
+    const price = isRTL ? Math.round(amount * 3.5) : amount;
+    return `${currency}${price.toLocaleString('he-IL')}`;
   };
 
   const getDuration = () => {
@@ -93,92 +102,61 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
   };
 
   return (
-    <Card className="card-hover overflow-hidden">
+    <Card className="card-hover overflow-hidden border-gray-200 shadow-sm hover:shadow-md transition-shadow" dir={isRTL ? 'rtl' : 'ltr'}>
       <CardContent className="p-6">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-slate-700 mb-2 line-clamp-1">
-              {trip.title}
-            </h3>
-            
-            {showUser && trip.user && (
-              <div className="flex items-center mb-2">
-                <Avatar className="w-6 h-6 mr-2">
-                  <AvatarImage src={trip.user.profileImageUrl} />
-                  <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
-                </Avatar>
-                <span className="text-sm text-gray-600">
-                  {trip.user.firstName} {trip.user.lastName}
-                </span>
-              </div>
-            )}
+        {/* Title */}
+        <h3 className={`text-xl font-bold text-slate-800 mb-3 line-clamp-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+          {trip.title}
+        </h3>
 
-            {trip.description && (
-              <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                {trip.description}
-              </p>
-            )}
-          </div>
-
-          {trip.isPublic && (
-            <Badge variant="outline" className="ml-2">
-              <Users className="w-3 h-3 mr-1" />
-              Public
-            </Badge>
-          )}
-        </div>
+        {/* Description */}
+        {trip.description && (
+          <p className={`text-gray-600 text-sm mb-4 line-clamp-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+            {trip.description}
+          </p>
+        )}
 
         {/* Destinations */}
         {destinationNames && (
-          <div className="flex items-center mb-3">
-            <MapPin className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
+          <div className={`flex items-center mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <MapPin className={`w-4 h-4 text-orange-600 flex-shrink-0 ${isRTL ? 'ml-2' : 'mr-2'}`} />
             <span className="text-sm text-gray-700 line-clamp-1">
               {destinationNames}
             </span>
           </div>
         )}
 
-        {/* Trip Details */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          {/* Duration/Dates */}
-          <div className="flex items-center">
-            <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-            <div className="text-sm text-gray-600">
-              {trip.startDate && trip.endDate ? (
-                <div>
-                  <div>{formatDate(trip.startDate)}</div>
-                  <div className="text-xs text-gray-500">{getDuration()}</div>
-                </div>
-              ) : (
-                <div className="flex items-center">
-                  <Clock className="w-3 h-3 mr-1" />
-                  {new Date(trip.createdAt).toLocaleDateString()}
-                </div>
-              )}
+        {/* Date and Budget Row */}
+        <div className="flex items-center justify-between mb-4">
+          {/* Date */}
+          {trip.startDate && (
+            <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <Calendar className={`w-4 h-4 text-gray-400 flex-shrink-0 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+              <span className="text-sm text-gray-600" dir={isRTL ? 'rtl' : 'ltr'}>
+                {formatDate(trip.startDate)}
+              </span>
             </div>
-          </div>
+          )}
 
           {/* Budget */}
           {budget > 0 && (
-            <div className="flex items-center">
-              <DollarSign className="w-4 h-4 text-gray-400 mr-2" />
-              <span className="text-sm text-gray-600">
-                ${budget.toLocaleString()}
+            <div className="text-right">
+              <span className="text-base font-semibold text-slate-700" dir={isRTL ? 'rtl' : 'ltr'}>
+                {formatPrice(budget)}
               </span>
             </div>
           )}
         </div>
 
-        {/* Travel Style */}
+        {/* Travel Style Tags */}
         {trip.travelStyle && (
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-1">
+          <div className={`mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+            <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
               {trip.travelStyle.split(',').map((style: string, index: number) => (
                 <Badge 
                   key={index} 
                   variant="secondary" 
-                  className={`text-xs ${getTravelStyleColor(style.trim())}`}
+                  className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200"
                 >
                   {style.trim()}
                 </Badge>
@@ -187,61 +165,85 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
           </div>
         )}
 
+        {/* User Info */}
+        {showUser && trip.user && (
+          <div className={`flex items-center mb-4 pb-4 border-b border-gray-100 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <Avatar className={`w-6 h-6 ${isRTL ? 'ml-2' : 'mr-2'}`}>
+              <AvatarImage src={trip.user.profileImageUrl} />
+              <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
+            </Avatar>
+            <span className="text-sm text-gray-600">
+              {trip.user.firstName} {trip.user.lastName}
+            </span>
+          </div>
+        )}
+
         {/* Actions */}
-        <div className="flex gap-2 pt-4 border-t border-gray-100">
+        <div className={`flex gap-2 pt-4 border-t border-gray-100 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <Button 
             variant="outline" 
             size="sm" 
-            className="flex-1"
-            onClick={() => onView?.(trip.id)}
-            data-testid={`view-trip-${trip.id}`}
+            className="hover:bg-gray-50"
+            onClick={() => {}}
+            data-testid={`share-trip-${trip.id}`}
           >
-            <Eye className="w-4 h-4 mr-1" />
-            View
+            <Share className="w-4 h-4" />
           </Button>
           
           {!showUser && (
-            <>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex-1"
-                onClick={() => onEdit?.(trip.id)}
-                data-testid={`edit-trip-${trip.id}`}
-              >
-                <Edit className="w-4 h-4 mr-1" />
-                Edit
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                onClick={() => setShowDeleteDialog(true)}
-                data-testid={`delete-trip-${trip.id}`}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={() => setShowDeleteDialog(true)}
+              data-testid={`delete-trip-${trip.id}`}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
           )}
           
-          <Button variant="outline" size="sm" data-testid={`share-trip-${trip.id}`}>
-            <Share className="w-4 h-4" />
+          {!showUser && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-1 hover:bg-gray-50"
+              onClick={() => onEdit?.(trip.id)}
+              data-testid={`edit-trip-${trip.id}`}
+            >
+              <Edit className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+              {isRTL ? 'עריכה' : 'Edit'}
+            </Button>
+          )}
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex-1 hover:bg-gray-50"
+            onClick={() => onView?.(trip.id)}
+            data-testid={`view-trip-${trip.id}`}
+          >
+            <Eye className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+            {isRTL ? 'צפייה' : 'View'}
           </Button>
         </div>
       </CardContent>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent dir={isRTL ? 'rtl' : 'ltr'}>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Trip?</AlertDialogTitle>
+            <AlertDialogTitle>{isRTL ? 'מחיקת טיול?' : 'Delete Trip?'}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{trip.title}"? This action cannot be undone.
+              {isRTL 
+                ? `האם אתה בטוח שברצונך למחוק את "${trip.title}"? פעולה זו אינה ניתנת לביטול.`
+                : `Are you sure you want to delete "${trip.title}"? This action cannot be undone.`
+              }
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel data-testid="cancel-delete-trip">Cancel</AlertDialogCancel>
+          <AlertDialogFooter className={isRTL ? 'flex-row-reverse' : ''}>
+            <AlertDialogCancel data-testid="cancel-delete-trip">
+              {isRTL ? 'ביטול' : 'Cancel'}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 onDelete?.(trip.id);
@@ -250,7 +252,7 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
               className="bg-red-600 hover:bg-red-700"
               data-testid="confirm-delete-trip"
             >
-              Delete
+              {isRTL ? 'מחיקה' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
