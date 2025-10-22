@@ -64,8 +64,9 @@ export default function Home() {
         method: 'DELETE',
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/trips/user'] });
+    onSuccess: async () => {
+      // Refetch immediately to update the UI
+      await queryClient.refetchQueries({ queryKey: ['/api/trips/user'] });
       toast({
         title: "Trip deleted",
         description: "Your trip has been deleted successfully.",
