@@ -56,13 +56,14 @@ const getNavigationItems = (t: any) => [
 export default function Navigation() {
   const [location] = useLocation();
   const { user, signOut, isLoading } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const { isVisible } = useScrollDirection();
   
   const navigationItems = getNavigationItems(t);
+  const isHebrew = i18n.language === 'he';
 
   const handleLogout = async () => {
     try {
@@ -280,23 +281,21 @@ export default function Navigation() {
         
         {/* Navigation Items */}
         <ScrollArea className="flex-1">
-          <nav className="p-4 space-y-2">
+          <nav className="p-4 space-y-2" dir={isHebrew ? 'rtl' : 'ltr'}>
             {navigationItems.map((item) => (
               <Button
                 key={item.href}
                 asChild
                 variant="ghost"
-                className={`w-full justify-start px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                className={`w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                   location === item.href
                     ? "bg-orange-100 text-orange-800 hover:bg-orange-200"
                     : "text-slate-700 hover:bg-gray-100 hover:text-slate-900"
-                }`}
+                } ${isHebrew ? 'justify-end' : 'justify-start'}`}
               >
-                <Link href={item.href}>
+                <Link href={item.href} className={`flex items-center gap-3 ${isHebrew ? 'flex-row-reverse' : 'flex-row'}`}>
                   {item.icon && (
-                    <span className="ml-1 mr-3">
-                      <item.icon className="w-5 h-5" />
-                    </span>
+                    <item.icon className="w-5 h-5 flex-shrink-0" />
                   )}
                   <span>{item.label}</span>
                 </Link>
@@ -306,11 +305,11 @@ export default function Navigation() {
         </ScrollArea>
         
         {/* User Profile and Auth Section at Bottom */}
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-4 border-t border-gray-200" dir={isHebrew ? 'rtl' : 'ltr'}>
           {user ? (
             <>
-              <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-lg">
-                <Avatar className="w-10 h-10 mr-3">
+              <div className={`flex items-center mb-4 p-3 bg-gray-50 rounded-lg ${isHebrew ? 'flex-row-reverse' : ''}`}>
+                <Avatar className={`w-10 h-10 ${isHebrew ? 'ml-3' : 'mr-3'}`}>
                   <AvatarImage src={user.user_metadata?.avatar_url} />
                   <AvatarFallback className="bg-orange-200 text-orange-800">{userInitials}</AvatarFallback>
                 </Avatar>
@@ -324,21 +323,25 @@ export default function Navigation() {
                 onClick={handleLogout}
                 variant="outline"
                 disabled={isLoading}
-                className="w-full justify-start px-4 py-3 text-slate-700 border-gray-300 hover:bg-red-50 hover:text-red-700 hover:border-red-300"
+                className={`w-full px-4 py-3 text-slate-700 border-gray-300 hover:bg-red-50 hover:text-red-700 hover:border-red-300 ${isHebrew ? 'justify-end' : 'justify-start'}`}
               >
-                <LogOut className="w-5 h-5 mr-3" />
-                {isLoading ? t('common.loading') : t('auth.sign_out')}
+                <span className={`flex items-center gap-3 ${isHebrew ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <LogOut className="w-5 h-5 flex-shrink-0" />
+                  <span>{isLoading ? t('common.loading') : t('auth.sign_out')}</span>
+                </span>
               </Button>
             </>
           ) : (
             <div className="space-y-2">
               <Button
                 onClick={() => setAuthModalOpen(true)}
-                className="w-full"
+                className={`w-full ${isHebrew ? 'justify-end' : 'justify-start'}`}
                 disabled={isLoading}
               >
-                <User className="w-5 h-5 mr-2" />
-                {t('auth.sign_in')}
+                <span className={`flex items-center gap-2 ${isHebrew ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <User className="w-5 h-5 flex-shrink-0" />
+                  <span>{t('auth.sign_in')}</span>
+                </span>
               </Button>
               <Button
                 onClick={() => setAuthModalOpen(true)}
