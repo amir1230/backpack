@@ -386,6 +386,7 @@ export default function AiChat({ className, initialMessage }: AiChatProps) {
                       ? 'bg-primary text-primary-foreground ml-auto'
                       : 'bg-muted'
                   }`}
+                  dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
                 >
                   <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                   
