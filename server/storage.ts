@@ -448,22 +448,29 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserSavedJourneys(userId: string): Promise<(SavedJourney & { journey: Journey })[]> {
-    const results = await db
+    // Get saved journey records
+    const savedRecords = await db
       .select()
       .from(savedJourneys)
-      .innerJoin(journeys, eq(savedJourneys.journeyId, journeys.id))
       .where(eq(savedJourneys.userId, userId))
       .orderBy(desc(savedJourneys.createdAt));
     
-    // Map the results to the expected format
-    return results.map((row: any) => ({
-      id: row.saved_journeys.id,
-      userId: row.saved_journeys.userId,
-      journeyId: row.saved_journeys.journeyId,
-      notes: row.saved_journeys.notes,
-      createdAt: row.saved_journeys.createdAt,
-      journey: row.journeys,
-    }));
+    // Fetch full journey details for each saved journey
+    const results = await Promise.all(
+      savedRecords.map(async (saved) => {
+        const [journey] = await db
+          .select()
+          .from(journeys)
+          .where(eq(journeys.id, saved.journeyId));
+        
+        return {
+          ...saved,
+          journey,
+        };
+      })
+    );
+    
+    return results;
   }
 
   async removeSavedJourney(id: number, userId: string): Promise<void> {
