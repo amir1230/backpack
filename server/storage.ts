@@ -449,39 +449,21 @@ export class DatabaseStorage implements IStorage {
 
   async getUserSavedJourneys(userId: string): Promise<(SavedJourney & { journey: Journey })[]> {
     const results = await db
-      .select({
-        id: savedJourneys.id,
-        userId: savedJourneys.userId,
-        journeyId: savedJourneys.journeyId,
-        notes: savedJourneys.notes,
-        createdAt: savedJourneys.createdAt,
-        journey: {
-          id: journeys.id,
-          title: journeys.title,
-          description: journeys.description,
-          destinations: journeys.destinations,
-          totalNights: journeys.totalNights,
-          priceMin: journeys.priceMin,
-          priceMax: journeys.priceMax,
-          season: journeys.season,
-          tags: journeys.tags,
-          audienceTags: journeys.audienceTags,
-          rating: journeys.rating,
-          popularity: journeys.popularity,
-          heroImage: journeys.heroImage,
-          images: journeys.images,
-          dailyItinerary: journeys.dailyItinerary,
-          costsBreakdown: journeys.costsBreakdown,
-          createdAt: journeys.createdAt,
-          updatedAt: journeys.updatedAt,
-        },
-      })
+      .select()
       .from(savedJourneys)
       .innerJoin(journeys, eq(savedJourneys.journeyId, journeys.id))
       .where(eq(savedJourneys.userId, userId))
       .orderBy(desc(savedJourneys.createdAt));
     
-    return results;
+    // Map the results to the expected format
+    return results.map((row: any) => ({
+      id: row.saved_journeys.id,
+      userId: row.saved_journeys.userId,
+      journeyId: row.saved_journeys.journeyId,
+      notes: row.saved_journeys.notes,
+      createdAt: row.saved_journeys.createdAt,
+      journey: row.journeys,
+    }));
   }
 
   async removeSavedJourney(id: number, userId: string): Promise<void> {

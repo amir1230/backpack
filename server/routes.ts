@@ -746,6 +746,10 @@ export async function registerRoutes(app: Express): Promise<void> {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const savedJourneys = await storage.getUserSavedJourneys(userId);
+      console.log('📦 Saved Journeys API Response:', JSON.stringify(savedJourneys, null, 2));
+      if (savedJourneys.length > 0) {
+        console.log('📦 First Journey Object:', savedJourneys[0].journey);
+      }
       res.json(savedJourneys);
     } catch (error) {
       console.error("Error fetching saved journeys:", error);
