@@ -500,13 +500,13 @@ function FeatureCard({ icon: Icon, title, description, gradient, iconColor, href
 }) {
   return (
     <Link href={href}>
-      <Card className={`bg-gradient-to-br ${gradient} border-0 shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group`}>
-        <CardContent className="p-6">
+      <Card className={`bg-gradient-to-br ${gradient} border-0 shadow-md hover:shadow-xl hover:scale-105 transition-all cursor-pointer group h-full`}>
+        <CardContent className="p-6 h-full flex flex-col">
           <div className={`${iconColor} mb-4 group-hover:scale-110 transition-transform`}>
             <Icon className="w-10 h-10" />
           </div>
           <h3 className="text-xl font-bold text-slate-800 mb-2">{title}</h3>
-          <p className="text-gray-600">{description}</p>
+          <p className="text-gray-600 flex-grow">{description}</p>
         </CardContent>
       </Card>
     </Link>
