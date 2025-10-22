@@ -542,9 +542,6 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.delete('/api/trips/:id', noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
-      if (!userId || userId === 'anonymous') {
-        return res.status(401).json({ message: "Authentication required" });
-      }
       
       const tripId = parseInt(req.params.id);
       await storage.deleteTrip(tripId, userId);
