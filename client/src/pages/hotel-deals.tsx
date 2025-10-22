@@ -532,51 +532,6 @@ export default function HotelDeals() {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <div className="bg-gray-800 text-white py-12">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            <div className="text-center md:text-right" dir="rtl">
-              <h3 className="font-bold text-xl mb-4">GlobeMate</h3>
-              <p className="text-gray-300 text-sm">
-                תכנון חכם לחופשות מושלמות
-              </p>
-            </div>
-
-            <div className="text-center" dir="rtl">
-              <h4 className="font-bold mb-4">קישורים שימושיים</h4>
-              <div className="space-y-2 text-sm">
-                <a href="/privacy" className="block text-gray-300 hover:text-white">
-                  מדיניות פרטיות
-                </a>
-                <a href="/terms" className="block text-gray-300 hover:text-white">
-                  תנאי שימוש
-                </a>
-                <a href="/contact" className="block text-gray-300 hover:text-white">
-                  צור קשר
-                </a>
-              </div>
-            </div>
-
-            <div className="text-center md:text-left" dir="rtl">
-              <h4 className="font-bold mb-4">יצירת קשר</h4>
-              <p className="text-gray-300 text-sm mb-2">
-                📧 support@globemate.co.il
-              </p>
-              <p className="text-gray-300 text-sm">
-                📞 0525530454
-              </p>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-700 pt-8 text-center">
-            <p className="text-gray-400 text-sm" dir="rtl">
-              © 2024 GlobeMate – תכנון חכם לחופשות. כל התשלומים מתבצעים בקישור מאובטח בלבד.
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
