@@ -74,8 +74,11 @@ export default function JourneysPage() {
     
     const minNum = isRTL ? Math.round(minVal * 3.5) : minVal;
     const maxNum = isRTL ? Math.round(maxVal * 3.5) : maxVal;
-    // Display min first, then max (smaller to larger)
-    return `${currency}${minNum.toLocaleString('he-IL')} - ${currency}${maxNum.toLocaleString('he-IL')}`;
+    
+    // In RTL (Hebrew), reverse the order so it reads correctly right-to-left
+    return isRTL 
+      ? `${currency}${maxNum.toLocaleString('he-IL')} - ${currency}${minNum.toLocaleString('he-IL')}`
+      : `${currency}${minNum.toLocaleString('he-IL')} - ${currency}${maxNum.toLocaleString('he-IL')}`;
   };
 
   const translateTag = (tag: string) => {
@@ -234,7 +237,9 @@ export default function JourneysPage() {
                     const currency = isRTL ? '₪' : '$';
                     const minNum = isRTL ? Math.round(filters.minBudget * 3.5) : filters.minBudget;
                     const maxNum = isRTL ? Math.round(filters.maxBudget * 3.5) : filters.maxBudget;
-                    return `${currency}${minNum.toLocaleString('he-IL')} - ${currency}${maxNum.toLocaleString('he-IL')}`;
+                    return isRTL
+                      ? `${currency}${maxNum.toLocaleString('he-IL')} - ${currency}${minNum.toLocaleString('he-IL')}`
+                      : `${currency}${minNum.toLocaleString('he-IL')} - ${currency}${maxNum.toLocaleString('he-IL')}`;
                   })()}
                 </label>
                 <Slider

@@ -659,7 +659,7 @@ function PopularJourneysSection() {
                     <div className="flex flex-col items-end">
                       <span className="text-slate-600 font-semibold" dir={isRTL ? 'rtl' : 'ltr'}>
                         {isRTL 
-                          ? `₪${Math.round((journey.priceMin || journey.price_min) * 3.5).toLocaleString('he-IL')} - ₪${Math.round((journey.priceMax || journey.price_max) * 3.5).toLocaleString('he-IL')}` 
+                          ? `₪${Math.round((journey.priceMax || journey.price_max) * 3.5).toLocaleString('he-IL')} - ₪${Math.round((journey.priceMin || journey.price_min) * 3.5).toLocaleString('he-IL')}` 
                           : `$${(journey.priceMin || journey.price_min).toLocaleString('he-IL')} - $${(journey.priceMax || journey.price_max).toLocaleString('he-IL')}`
                         }
                       </span>
