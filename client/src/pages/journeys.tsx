@@ -61,10 +61,17 @@ export default function JourneysPage() {
   };
 
   const formatPrice = (min: number | string | undefined, max: number | string | undefined) => {
-    if (!min || !max) return 'N/A';
+    // Check if values are undefined, null, or both zero
+    if (min === undefined || max === undefined || min === null || max === null) return 'N/A';
+    if (min === 0 && max === 0) return 'N/A';
+    
     const currency = isRTL ? '₪' : '$';
     const minVal = typeof min === 'string' ? parseFloat(min) : min;
     const maxVal = typeof max === 'string' ? parseFloat(max) : max;
+    
+    // Check for NaN after parsing
+    if (isNaN(minVal) || isNaN(maxVal)) return 'N/A';
+    
     const minNum = isRTL ? Math.round(minVal * 3.5) : minVal;
     const maxNum = isRTL ? Math.round(maxVal * 3.5) : maxVal;
     return `${currency}${minNum.toLocaleString()} - ${currency}${maxNum.toLocaleString()}`;
@@ -222,7 +229,12 @@ export default function JourneysPage() {
               {/* Budget Filter */}
               <div className="md:col-span-2">
                 <label className={`block text-sm font-medium mb-2 ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                  {isRTL ? 'תקציב' : 'Budget'}: {formatPrice(filters.minBudget, filters.maxBudget)}
+                  {isRTL ? 'תקציב' : 'Budget'}: {(() => {
+                    const currency = isRTL ? '₪' : '$';
+                    const minNum = isRTL ? Math.round(filters.minBudget * 3.5) : filters.minBudget;
+                    const maxNum = isRTL ? Math.round(filters.maxBudget * 3.5) : filters.maxBudget;
+                    return `${currency}${minNum.toLocaleString()} - ${currency}${maxNum.toLocaleString()}`;
+                  })()}
                 </label>
                 <Slider
                   value={[filters.minBudget, filters.maxBudget]}
@@ -244,11 +256,11 @@ export default function JourneysPage() {
             </div>
 
             {/* Tags Filter */}
-            <div className="mt-6">
-              <label className={`block text-sm font-medium mb-3 ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="mt-6" dir={isRTL ? 'rtl' : 'ltr'}>
+              <label className={`block text-sm font-medium mb-3 ${isRTL ? 'text-right' : ''}`}>
                 {isRTL ? 'תגיות' : 'Tags'}
               </label>
-              <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
+              <div className={`flex flex-wrap gap-2 ${isRTL ? 'justify-end' : ''}`}>
                 {tagFilters.map(tag => (
                   <Badge
                     key={tag}
