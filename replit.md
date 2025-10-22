@@ -7,6 +7,7 @@ GlobeMate is a full-stack web application for worldwide travel planning and comm
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+- **Enhanced Service Description** (Oct 22, 2025): Updated "Unbeatable Prices" feature card to emphasize customer service quality. Added "with excellent customer service and 24/7 support" to the description in both Hebrew and English.
 - **Real-Time Platform Statistics** (Oct 22, 2025): Statistics cards on home page now display real data from the database instead of hardcoded values.
   - Backend: Added `/api/stats` endpoint that calculates live statistics (countries, destinations, users, average rating)
   - Frontend: Updated StatsCard components to fetch and display dynamic data
