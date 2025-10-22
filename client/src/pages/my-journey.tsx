@@ -398,7 +398,7 @@ export default function MyJourneyPage() {
                         {day.activities && day.activities.map((activity: string, actIdx: number) => (
                           <div 
                             key={actIdx} 
-                            className="flex items-start gap-2 p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl hover:shadow-md transition-shadow"
+                            className="flex items-start gap-1 p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl hover:shadow-md transition-shadow"
                             data-testid={`activity-${index}-${actIdx}`}
                           >
                             <div className="flex-shrink-0 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
@@ -473,7 +473,7 @@ export default function MyJourneyPage() {
                         className="group relative bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-xl hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-orange-300"
                         data-testid={`destination-${index}`}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
                           <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                             <MapPin className="w-6 h-6 text-white" />
                           </div>
