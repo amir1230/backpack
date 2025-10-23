@@ -464,12 +464,17 @@ export async function generateConversationalSuggestions(
 
 ${isHebrew ? 'CRITICAL INSTRUCTION: You MUST generate ALL content in Hebrew. All fields including destination names must be in Hebrew. For example: "פריז" not "Paris", "טוקיו" not "Tokyo", "ברצלונה" not "Barcelona". Everything must be written in Hebrew.' : ''}
 
-Based on this conversation, generate 3 exciting, personalized trip suggestions worldwide:
+Based on this conversation, generate 3 exciting, personalized trip suggestions:
 
 Conversation:
 ${conversationText}
 
-IMPORTANT: Do not suggest these previously mentioned destinations: ${previousDestinations}
+CRITICAL RULES:
+1. If the user asks for suggestions about a SPECIFIC country or region (e.g., "Brazil", "Japan", "Europe"), ALL 3 suggestions MUST be destinations WITHIN that country/region.
+   - Example: If user asks about Brazil → suggest Rio de Janeiro, São Paulo, Amazon
+   - Example: If user asks about Japan → suggest Tokyo, Kyoto, Osaka
+2. If the user asks for general travel suggestions without specifying a location, suggest diverse destinations worldwide.
+3. Do not suggest these previously mentioned destinations: ${previousDestinations}
 
 Generate 3 trip suggestions in JSON format. Each suggestion should include:
 - destination: city or region name ${isHebrew ? '(MUST be in Hebrew, e.g., "פריז", "טוקיו", "ברצלונה")' : ''}
