@@ -522,7 +522,7 @@ function CreateRoomModal({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="room-name">{t('community.create_room.room_name')}</Label>
+            <Label htmlFor="room-name" className="text-left block">{t('community.create_room.room_name')}</Label>
             <Input
               id="room-name"
               placeholder={t('community.create_room.room_name_placeholder')}
@@ -530,12 +530,13 @@ function CreateRoomModal({
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               maxLength={60}
               disabled={createRoomMutation.isPending}
+              className="text-left"
             />
             <p className="text-xs text-gray-500 mt-1">{t('community.create_room.character_count', { current: formData.name.length, max: 60 })}</p>
           </div>
 
           <div>
-            <Label htmlFor="description">{t('community.create_room.description')}</Label>
+            <Label htmlFor="description" className="text-left block">{t('community.create_room.description')}</Label>
             <Textarea
               id="description"
               placeholder={t('community.create_room.description_placeholder')}
@@ -544,23 +545,25 @@ function CreateRoomModal({
               maxLength={200}
               disabled={createRoomMutation.isPending}
               rows={3}
+              className="text-left"
             />
             <p className="text-xs text-gray-500 mt-1">{t('community.create_room.character_count', { current: formData.description.length, max: 200 })}</p>
           </div>
 
           <div>
-            <Label htmlFor="destination">{t('community.create_room.location')}</Label>
+            <Label htmlFor="destination" className="text-left block">{t('community.create_room.location')}</Label>
             <Input
               id="destination"
               placeholder={t('community.create_room.location_placeholder')}
               value={formData.destination}
               onChange={(e) => setFormData(prev => ({ ...prev, destination: e.target.value }))}
               disabled={createRoomMutation.isPending}
+              className="text-left"
             />
           </div>
 
           <div>
-            <Label>{t('community.create_room.visibility')}</Label>
+            <Label className="text-left block">{t('community.create_room.visibility')}</Label>
             <RadioGroup
               value={formData.visibility}
               onValueChange={(value) => setFormData(prev => ({ ...prev, visibility: value }))}
@@ -580,13 +583,14 @@ function CreateRoomModal({
 
           {formData.visibility === 'private' && (
             <div>
-              <Label htmlFor="invite-guests">{t('community.create_room.invite_participants')}</Label>
+              <Label htmlFor="invite-guests" className="text-left block">{t('community.create_room.invite_participants')}</Label>
               <Input
                 id="invite-guests"
                 placeholder={t('community.create_room.invite_placeholder')}
                 value={formData.inviteGuests}
                 onChange={(e) => setFormData(prev => ({ ...prev, inviteGuests: e.target.value }))}
                 disabled={createRoomMutation.isPending}
+                className="text-left"
               />
               <p className="text-xs text-gray-500 mt-1">
                 {t('community.create_room.invite_help')}
@@ -596,13 +600,14 @@ function CreateRoomModal({
 
           {!storedGuestName && (
             <div>
-              <Label htmlFor="guest-name">{t('community.create_room.your_name')}</Label>
+              <Label htmlFor="guest-name" className="text-left block">{t('community.create_room.your_name')}</Label>
               <Input
                 id="guest-name"
                 placeholder={t('community.create_room.name_placeholder')}
                 value={formData.guestName}
                 onChange={(e) => setFormData(prev => ({ ...prev, guestName: e.target.value }))}
                 disabled={createRoomMutation.isPending}
+                className="text-left"
               />
             </div>
           )}

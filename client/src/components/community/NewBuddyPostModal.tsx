@@ -276,7 +276,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
           {/* Basic Information */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="title">{t('community.trip_title')} *</Label>
+              <Label htmlFor="title" className="text-left block">{t('community.trip_title')} *</Label>
               <Input
                 id="title"
                 placeholder={t('community.trip_title_placeholder')}
@@ -284,11 +284,12 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
                 data-testid="input-trip-title"
+                className="text-left"
               />
             </div>
 
             <div>
-              <Label htmlFor="destination">{t('trips.destination')} *</Label>
+              <Label htmlFor="destination" className="text-left block">{t('trips.destination')} *</Label>
               <Select 
                 value={formData.destination} 
                 onValueChange={(value) => setFormData({ ...formData, destination: value })}
@@ -307,7 +308,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
             </div>
 
             <div>
-              <Label htmlFor="description">{t('common.description')} *</Label>
+              <Label htmlFor="description" className="text-left block">{t('common.description')} *</Label>
               <Textarea
                 id="description"
                 placeholder={t('community.description_placeholder')}
@@ -316,6 +317,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
                 rows={4}
                 required
                 data-testid="textarea-description"
+                className="text-left"
               />
             </div>
           </div>
@@ -323,7 +325,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
           {/* Dates and Travelers */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label>{t('trips.start_date')} *</Label>
+              <Label className="text-left block">{t('trips.start_date')} *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
@@ -344,7 +346,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
             </div>
 
             <div>
-              <Label>{t('trips.end_date')} *</Label>
+              <Label className="text-left block">{t('trips.end_date')} *</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
@@ -371,7 +373,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
           {/* Travelers Count */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="adults">{t('trips.adults')}</Label>
+              <Label htmlFor="adults" className="text-left block">{t('trips.adults')}</Label>
               <Select 
                 value={formData.adults.toString()} 
                 onValueChange={(value) => setFormData({ ...formData, adults: parseInt(value), groupSize: parseInt(value) + formData.children })}
@@ -388,7 +390,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
             </div>
 
             <div>
-              <Label htmlFor="children">{t('trips.children')}</Label>
+              <Label htmlFor="children" className="text-left block">{t('trips.children')}</Label>
               <Select 
                 value={formData.children.toString()} 
                 onValueChange={(value) => setFormData({ ...formData, children: parseInt(value), groupSize: formData.adults + parseInt(value) })}
@@ -407,7 +409,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
 
           {/* Budget */}
           <div>
-            <Label>{t('trips.budget_range')}</Label>
+            <Label className="text-left block">{t('trips.budget_range')}</Label>
             <Select 
               value={formData.budget} 
               onValueChange={(value: 'low' | 'mid' | 'high') => setFormData({ ...formData, budget: value })}
@@ -425,7 +427,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
 
           {/* Travel Styles */}
           <div>
-            <Label>{t('trips.travel_style')}</Label>
+            <Label className="text-left block">{t('trips.travel_style')}</Label>
             <Select onValueChange={addTravelStyle}>
               <SelectTrigger>
                 <SelectValue placeholder={t('community.add_travel_styles')} />
@@ -456,7 +458,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
 
           {/* Activities */}
           <div>
-            <Label>{t('community.planned_activities')}</Label>
+            <Label className="text-left block">{t('community.planned_activities')}</Label>
             <Select onValueChange={addActivity}>
               <SelectTrigger>
                 <SelectValue placeholder={t('community.add_activities')} />
@@ -487,7 +489,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
 
           {/* Requirements */}
           <div>
-            <Label htmlFor="requirements">{t('community.special_requirements_optional')}</Label>
+            <Label htmlFor="requirements" className="text-left block">{t('community.special_requirements_optional')}</Label>
             <Textarea
               id="requirements"
               placeholder={t('community.special_requirements_placeholder')}
@@ -495,6 +497,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
               onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
               rows={2}
               data-testid="textarea-requirements"
+              className="text-left"
             />
           </div>
 
@@ -507,7 +510,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="displayName">{t('community.your_name')} *</Label>
+                <Label htmlFor="displayName" className="text-left block">{t('community.your_name')} *</Label>
                 <Input
                   id="displayName"
                   placeholder={t('community.name_placeholder')}
@@ -515,10 +518,11 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
                   onChange={(e) => setGuestData({ ...guestData, displayName: e.target.value })}
                   required
                   data-testid="input-display-name"
+                  className="text-left"
                 />
               </div>
               <div>
-                <Label htmlFor="contactMethod">{t('community.contact_method')} *</Label>
+                <Label htmlFor="contactMethod" className="text-left block">{t('community.contact_method')} *</Label>
                 <Input
                   id="contactMethod"
                   placeholder={t('community.contact_method_placeholder')}
@@ -526,6 +530,7 @@ export function NewBuddyPostModal({ open, onOpenChange }: NewBuddyPostModalProps
                   onChange={(e) => setGuestData({ ...guestData, contactMethod: e.target.value })}
                   required
                   data-testid="input-contact-method"
+                  className="text-left"
                 />
               </div>
             </div>
