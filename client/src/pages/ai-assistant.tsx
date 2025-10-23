@@ -51,6 +51,23 @@ export default function AiAssistant() {
     }
   }, []);
 
+  // Scroll to chat area when page loads
+  useEffect(() => {
+    // Wait for the page to fully render
+    const scrollTimer = setTimeout(() => {
+      // Find the chat area and scroll it into view (centered)
+      const chatArea = document.querySelector('.lg\\:col-span-3');
+      if (chatArea) {
+        chatArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        // Fallback: scroll to a reasonable position (not top, not bottom)
+        window.scrollTo({ top: 200, behavior: 'smooth' });
+      }
+    }, 100);
+
+    return () => clearTimeout(scrollTimer);
+  }, []);
+
   const { data: sessions = [], isLoading } = useQuery<ChatSession[]>({
     queryKey: ["/api/chat-sessions"]
   });
