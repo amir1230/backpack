@@ -278,7 +278,7 @@ export default function HotelDeals() {
                     value={formData.destination}
                     onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
                     required
-                    className="text-right"
+                    className="text-left"
                     dir="rtl"
                     data-testid="input-destination"
                   />
@@ -296,7 +296,7 @@ export default function HotelDeals() {
                       value={formData.checkIn}
                       onChange={(e) => setFormData({ ...formData, checkIn: e.target.value })}
                       required
-                      className="text-right"
+                      className="text-left"
                       dir="rtl"
                       data-testid="input-check-in"
                     />
@@ -311,7 +311,7 @@ export default function HotelDeals() {
                       value={formData.checkOut}
                       onChange={(e) => setFormData({ ...formData, checkOut: e.target.value })}
                       required
-                      className="text-right"
+                      className="text-left"
                       dir="rtl"
                       data-testid="input-check-out"
                     />
@@ -331,7 +331,7 @@ export default function HotelDeals() {
                       max="10"
                       value={formData.adults}
                       onChange={(e) => setFormData({ ...formData, adults: e.target.value })}
-                      className="text-right"
+                      className="text-left"
                       dir="rtl"
                       data-testid="input-adults"
                     />
@@ -347,7 +347,7 @@ export default function HotelDeals() {
                       max="10"
                       value={formData.children}
                       onChange={(e) => setFormData({ ...formData, children: e.target.value })}
-                      className="text-right"
+                      className="text-left"
                       dir="rtl"
                       data-testid="input-children"
                     />
@@ -365,7 +365,7 @@ export default function HotelDeals() {
                     value={formData.budget}
                     onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
                     required
-                    className="text-right"
+                    className="text-left"
                     dir="rtl"
                     data-testid="input-budget"
                   />
@@ -384,7 +384,7 @@ export default function HotelDeals() {
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       required
-                      className="text-right"
+                      className="text-left"
                       dir="rtl"
                       data-testid="input-phone"
                     />
@@ -418,7 +418,7 @@ export default function HotelDeals() {
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     rows={4}
-                    className="text-right"
+                    className="text-left"
                     dir="rtl"
                     data-testid="textarea-notes"
                   />
