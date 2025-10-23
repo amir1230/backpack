@@ -269,7 +269,7 @@ export default function HotelDeals() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Destination */}
                 <div>
-                  <Label htmlFor="destination" className="text-right block mb-2" dir="rtl">
+                  <Label htmlFor="destination" className="text-left block mb-2" dir="rtl">
                     לאן אתם רוצים לטוס? *
                   </Label>
                   <Input
@@ -287,7 +287,7 @@ export default function HotelDeals() {
                 {/* Check-in and Check-out */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="checkIn" className="text-right block mb-2" dir="rtl">
+                    <Label htmlFor="checkIn" className="text-left block mb-2" dir="rtl">
                       תאריך כניסה *
                     </Label>
                     <Input
@@ -302,7 +302,7 @@ export default function HotelDeals() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="checkOut" className="text-right block mb-2" dir="rtl">
+                    <Label htmlFor="checkOut" className="text-left block mb-2" dir="rtl">
                       תאריך יציאה *
                     </Label>
                     <Input
@@ -321,7 +321,7 @@ export default function HotelDeals() {
                 {/* Adults and Children */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="adults" className="text-right block mb-2" dir="rtl">
+                    <Label htmlFor="adults" className="text-left block mb-2" dir="rtl">
                       מספר מבוגרים
                     </Label>
                     <Input
@@ -337,7 +337,7 @@ export default function HotelDeals() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="children" className="text-right block mb-2" dir="rtl">
+                    <Label htmlFor="children" className="text-left block mb-2" dir="rtl">
                       מספר ילדים
                     </Label>
                     <Input
@@ -356,7 +356,7 @@ export default function HotelDeals() {
 
                 {/* Budget */}
                 <div>
-                  <Label htmlFor="budget" className="text-right block mb-2" dir="rtl">
+                  <Label htmlFor="budget" className="text-left block mb-2" dir="rtl">
                     תקציב משוער ללילה (₪) *
                   </Label>
                   <Input
@@ -374,7 +374,7 @@ export default function HotelDeals() {
                 {/* Contact Details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="phone" className="text-right block mb-2" dir="rtl">
+                    <Label htmlFor="phone" className="text-left block mb-2" dir="rtl">
                       טלפון *
                     </Label>
                     <Input
@@ -390,7 +390,7 @@ export default function HotelDeals() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="email" className="text-right block mb-2" dir="rtl">
+                    <Label htmlFor="email" className="text-left block mb-2" dir="rtl">
                       אימייל *
                     </Label>
                     <Input
@@ -409,7 +409,7 @@ export default function HotelDeals() {
 
                 {/* Notes */}
                 <div>
-                  <Label htmlFor="notes" className="text-right block mb-2" dir="rtl">
+                  <Label htmlFor="notes" className="text-left block mb-2" dir="rtl">
                     מה חשוב לכם? (אופציונלי)
                   </Label>
                   <Textarea
