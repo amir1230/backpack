@@ -88,11 +88,12 @@ export default function Contact() {
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
-                  <Label htmlFor="name">{t("contact.form.name")}</Label>
+                  <Label htmlFor="name" className="text-left block">{t("contact.form.name")}</Label>
                   <Input
                     id="name"
                     {...register("name", { required: true })}
                     placeholder={t("contact.form.name_placeholder")}
+                    className="ltr-field"
                     data-testid="input-contact-name"
                   />
                   {errors.name && (
@@ -101,12 +102,13 @@ export default function Contact() {
                 </div>
 
                 <div>
-                  <Label htmlFor="email">{t("contact.form.email")}</Label>
+                  <Label htmlFor="email" className="text-left block">{t("contact.form.email")}</Label>
                   <Input
                     id="email"
                     type="email"
                     {...register("email", { required: true, pattern: /^\S+@\S+$/i })}
                     placeholder={t("contact.form.email_placeholder")}
+                    className="ltr-field"
                     data-testid="input-contact-email"
                   />
                   {errors.email && (
@@ -115,11 +117,12 @@ export default function Contact() {
                 </div>
 
                 <div>
-                  <Label htmlFor="subject">{t("contact.form.subject")}</Label>
+                  <Label htmlFor="subject" className="text-left block">{t("contact.form.subject")}</Label>
                   <Input
                     id="subject"
                     {...register("subject", { required: true })}
                     placeholder={t("contact.form.subject_placeholder")}
+                    className="ltr-field"
                     data-testid="input-contact-subject"
                   />
                   {errors.subject && (
@@ -128,12 +131,13 @@ export default function Contact() {
                 </div>
 
                 <div>
-                  <Label htmlFor="message">{t("contact.form.message")}</Label>
+                  <Label htmlFor="message" className="text-left block">{t("contact.form.message")}</Label>
                   <Textarea
                     id="message"
                     {...register("message", { required: true })}
                     placeholder={t("contact.form.message_placeholder")}
                     rows={6}
+                    className="ltr-field"
                     data-testid="input-contact-message"
                   />
                   {errors.message && (

@@ -395,13 +395,13 @@ export default function Onboarding() {
               </div>
 
               <div>
-                <Label htmlFor="bio">{t('onboarding.bio.label')}</Label>
+                <Label htmlFor="bio" className="text-left block">{t('onboarding.bio.label')}</Label>
                 <Textarea
                   id="bio"
                   placeholder={t('onboarding.bio.placeholder')}
                   value={preferences.bio}
                   onChange={(e) => setPreferences(prev => ({ ...prev, bio: e.target.value }))}
-                  className="min-h-[100px]"
+                  className="min-h-[100px] ltr-field"
                 />
               </div>
             </CardContent>

@@ -128,14 +128,14 @@ export default function Registry() {
                 name="bio"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center gap-2 text-base font-semibold">
+                    <FormLabel className="flex items-center gap-2 text-base font-semibold text-left block">
                       <User className="h-4 w-4" />
                       About You
                     </FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Tell us about yourself, your travel experiences, and what excites you about exploring the world..."
-                        className="min-h-[100px] resize-none"
+                        className="min-h-[100px] resize-none ltr-field"
                         {...field}
                       />
                     </FormControl>

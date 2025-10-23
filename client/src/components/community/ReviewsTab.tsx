@@ -207,7 +207,7 @@ export function ReviewsTab() {
                 placeholder={t('community.reviews.search_reviews')}
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-10"
+                className="pl-10 ltr-field"
               />
             </div>
 

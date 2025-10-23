@@ -251,12 +251,13 @@ export default function BudgetTracker() {
                 </div>
 
                 <div>
-                  <Label htmlFor="amount">{t('budget.amount_usd')}</Label>
+                  <Label htmlFor="amount" className="text-left block">{t('budget.amount_usd')}</Label>
                   <Input 
                     id="amount"
                     type="number" 
                     step="0.01"
                     placeholder={t('budget.amount_placeholder')}
+                    className="ltr-field"
                     {...form.register("amount")} 
                   />
                   {form.formState.errors.amount && (
@@ -265,10 +266,11 @@ export default function BudgetTracker() {
                 </div>
 
                 <div>
-                  <Label htmlFor="description">{t('budget.description')}</Label>
+                  <Label htmlFor="description" className="text-left block">{t('budget.description')}</Label>
                   <Input 
                     id="description"
                     placeholder={t('budget.what_did_you_spend_on')}
+                    className="ltr-field"
                     {...form.register("description")} 
                   />
                   {form.formState.errors.description && (
@@ -277,10 +279,11 @@ export default function BudgetTracker() {
                 </div>
 
                 <div>
-                  <Label htmlFor="location">{t('budget.location_optional')}</Label>
+                  <Label htmlFor="location" className="text-left block">{t('budget.location_optional')}</Label>
                   <Input 
                     id="location"
                     placeholder={t('budget.where_did_you_spend_this')}
+                    className="ltr-field"
                     {...form.register("location")} 
                   />
                 </div>

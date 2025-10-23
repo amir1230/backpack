@@ -479,7 +479,7 @@ export default function ItineraryDetail() {
                   <Input
                     value={editedTitle}
                     onChange={(e) => setEditedTitle(e.target.value)}
-                    className="font-semibold"
+                    className="font-semibold ltr-field"
                     onBlur={handleTitleSave}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleTitleSave();
@@ -652,7 +652,7 @@ export default function ItineraryDetail() {
                                           setNewActivityName("");
                                         }
                                       }}
-                                      className="flex-1"
+                                      className="flex-1 ltr-field"
                                       autoFocus
                                     />
                                     <Button 
@@ -723,7 +723,7 @@ export default function ItineraryDetail() {
                                                         setEditActivityName("");
                                                       }
                                                     }}
-                                                    className="flex-1"
+                                                    className="flex-1 ltr-field"
                                                     autoFocus
                                                   />
                                                   <Button 
