@@ -159,3 +159,19 @@
     hyphens: auto !important;
   }
 }
+
+/* LTR Field Override - Keep inputs left-aligned even in RTL mode */
+input.ltr-field,
+textarea.ltr-field,
+[dir="rtl"] input.ltr-field,
+[dir="rtl"] textarea.ltr-field {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+input.ltr-field::placeholder,
+textarea.ltr-field::placeholder,
+[dir="rtl"] input.ltr-field::placeholder,
+[dir="rtl"] textarea.ltr-field::placeholder {
+  text-align: left !important;
+}

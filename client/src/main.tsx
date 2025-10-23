@@ -1,7 +1,6 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.js";
 import "./index.css";
-import "./i18n/rtl.css";
 
 // Force scroll to top on page load/refresh
 window.scrollTo(0, 0);
