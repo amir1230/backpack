@@ -542,13 +542,18 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.delete('/api/trips/:id', noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
-      
       const tripId = parseInt(req.params.id);
+      
+      console.log(`🗑️ DELETE request - Trip ID: ${tripId}, User ID: ${userId}`);
+      console.log(`🔍 Request user object:`, JSON.stringify(req.user, null, 2));
+      
       await storage.deleteTrip(tripId, userId);
-      res.json({ message: "Trip deleted successfully" });
+      
+      console.log(`✅ Trip ${tripId} deleted successfully for user ${userId}`);
+      res.json({ success: true, message: "Trip deleted successfully" });
     } catch (error) {
-      console.error("Error deleting trip:", error);
-      res.status(400).json({ message: "Failed to delete trip" });
+      console.error("❌ Error deleting trip:", error);
+      res.status(400).json({ success: false, message: "Failed to delete trip", error: String(error) });
     }
   });
 

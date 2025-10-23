@@ -106,10 +106,10 @@ export default function Home() {
         variant: "destructive",
       });
     },
-    onSettled: () => {
-      console.log('onSettled - Invalidating queries');
-      // Always refetch after error or success to sync with server
-      queryClient.invalidateQueries({ queryKey: ['/api/trips/user'] });
+    onSettled: async () => {
+      console.log('onSettled - Refetching queries');
+      // Force immediate refetch to sync with server
+      await queryClient.refetchQueries({ queryKey: ['/api/trips/user'] });
     },
   });
 
