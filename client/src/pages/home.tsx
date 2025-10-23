@@ -60,32 +60,42 @@ export default function Home() {
 
   const deleteTripMutation = useMutation({
     mutationFn: async (tripId: number) => {
-      return await apiRequest(`/api/trips/${tripId}`, {
+      console.log('Deleting trip:', tripId);
+      const result = await apiRequest(`/api/trips/${tripId}`, {
         method: 'DELETE',
       });
+      console.log('Delete result:', result);
+      return result;
     },
     onMutate: async (tripId: number) => {
+      console.log('onMutate - Removing trip optimistically:', tripId);
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['/api/trips/user'] });
       
       // Snapshot the previous value
       const previousTrips = queryClient.getQueryData(['/api/trips/user']);
+      console.log('Previous trips:', previousTrips);
       
       // Optimistically update to remove the trip
       queryClient.setQueryData(['/api/trips/user'], (old: any[]) => {
-        return old ? old.filter((trip: any) => trip.id !== tripId) : [];
+        console.log('Old trips data:', old);
+        const filtered = old ? old.filter((trip: any) => trip.id !== tripId) : [];
+        console.log('Filtered trips:', filtered);
+        return filtered;
       });
       
       // Return context with the previous trips
       return { previousTrips };
     },
     onSuccess: () => {
+      console.log('onSuccess - Trip deleted successfully');
       toast({
         title: "Trip deleted",
         description: "Your trip has been deleted successfully.",
       });
     },
     onError: (err, tripId, context: any) => {
+      console.error('onError - Delete failed:', err);
       // Rollback to the previous value on error
       if (context?.previousTrips) {
         queryClient.setQueryData(['/api/trips/user'], context.previousTrips);
@@ -97,6 +107,7 @@ export default function Home() {
       });
     },
     onSettled: () => {
+      console.log('onSettled - Invalidating queries');
       // Always refetch after error or success to sync with server
       queryClient.invalidateQueries({ queryKey: ['/api/trips/user'] });
     },
