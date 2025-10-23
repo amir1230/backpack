@@ -616,7 +616,7 @@ export default function Home() {
           <div className="space-y-6">
             {/* AI Travel Assistant */}
             <div>
-              <AiChat />
+              <AiChat disableAutoScroll={true} />
               <div className="mt-3 px-3">
                 <Button asChild variant="outline" size="sm" className="w-full hover:bg-orange-50 hover:border-orange-500 hover:text-orange-700 transition-all">
                   <Link href="/ai-assistant">

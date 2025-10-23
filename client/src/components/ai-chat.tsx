@@ -62,9 +62,10 @@ interface TripSuggestion {
 interface AiChatProps {
   className?: string;
   initialMessage?: string;
+  disableAutoScroll?: boolean;
 }
 
-export default function AiChat({ className, initialMessage }: AiChatProps) {
+export default function AiChat({ className, initialMessage, disableAutoScroll = false }: AiChatProps) {
   const { t, i18n } = useTranslation();
   const [location, setLocation] = useLocation();
   const [messages, setMessages] = useState<Message[]>([
@@ -106,13 +107,13 @@ export default function AiChat({ className, initialMessage }: AiChatProps) {
   }, [i18n.language, t]);
 
   useEffect(() => {
-    // Skip scroll on initial mount to prevent page from jumping
-    if (isInitialMount.current) {
+    // Skip scroll if disabled or on initial mount
+    if (disableAutoScroll || isInitialMount.current) {
       isInitialMount.current = false;
       return;
     }
     scrollToBottom();
-  }, [messages]);
+  }, [messages, disableAutoScroll]);
 
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
