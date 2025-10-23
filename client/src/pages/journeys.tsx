@@ -299,8 +299,8 @@ export default function JourneysPage() {
         ) : journeys.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {journeys.map((journey) => (
-              <Link key={journey.id} href={`/journeys/${journey.id}`}>
-                <Card className="h-full overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group">
+              <Link key={journey.id} href={`/journeys/${journey.id}`} className="h-full flex">
+                <Card className="h-full w-full flex flex-col overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group">
                   <div className="relative h-48 overflow-hidden">
                     <img
                       src={journey.heroImage || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828'}
@@ -313,7 +313,7 @@ export default function JourneysPage() {
                     </div>
                   </div>
 
-                  <CardContent className="p-6">
+                  <CardContent className="p-6 flex-1 flex flex-col">
                     <h3 className="text-xl font-bold mb-2" dir={isRTL ? 'rtl' : 'ltr'}>{translateJourneyTitle(journey.title)}</h3>
                     
                     {/* Destination Chain */}
@@ -342,7 +342,7 @@ export default function JourneysPage() {
                     </div>
 
                     {/* Audience Tags */}
-                    <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
+                    <div className={`flex flex-wrap gap-2 mb-4 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
                       {journey.audienceTags?.slice(0, 3).map((tag) => (
                         <Badge key={tag} variant="secondary" className="text-xs" dir={isRTL ? 'rtl' : 'ltr'}>
                           {translateTag(tag)}
@@ -350,7 +350,7 @@ export default function JourneysPage() {
                       ))}
                     </div>
 
-                    <Button className="w-full mt-4 bg-orange-500 hover:bg-orange-600" data-testid={`view-journey-${journey.id}`}>
+                    <Button className="w-full mt-auto bg-orange-500 hover:bg-orange-600" data-testid={`view-journey-${journey.id}`}>
                       <span dir={isRTL ? 'rtl' : 'ltr'}>{isRTL ? 'הצג מסלול' : 'View Journey'}</span>
                       <ArrowLeft className={`w-4 h-4 ${isRTL ? 'ml-2' : 'ml-2'}`} />
                     </Button>
