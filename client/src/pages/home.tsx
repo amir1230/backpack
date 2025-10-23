@@ -1,4 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card.js";
 import { Button } from "../components/ui/button.js";
 import { Badge } from "../components/ui/badge.js";
@@ -158,6 +159,11 @@ export default function Home() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const user = null as any; // Demo mode - no auth
+
+  // Force scroll to top when home page loads
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, []);
 
   const { data: trips = [], isLoading: tripsLoading } = useQuery<any[]>({
     queryKey: ["/api/trips"]
