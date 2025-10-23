@@ -103,6 +103,7 @@ export default function Community() {
             value={searchTerm}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
             className="pl-10 h-11 text-left"
+            dir="ltr"
           />
         </div>
         <Select value={selectedLocation} onValueChange={setSelectedLocation}>
