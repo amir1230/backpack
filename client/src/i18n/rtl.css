@@ -230,42 +230,55 @@
 }
 
 /* Form input adjustments */
-[dir="rtl"] input[type="text"],
-[dir="rtl"] input[type="email"],
-[dir="rtl"] input[type="password"],
-[dir="rtl"] textarea,
-[dir="rtl"] select {
+[dir="rtl"] input[type="text"]:not(.ltr-field),
+[dir="rtl"] input[type="email"]:not(.ltr-field),
+[dir="rtl"] input[type="password"]:not(.ltr-field),
+[dir="rtl"] textarea:not(.ltr-field),
+[dir="rtl"] select:not(.ltr-field) {
   text-align: right;
 }
 
 /* LTR Field Override - For inputs that must stay left-aligned even in RTL */
-.ltr-field,
-[dir="rtl"] .ltr-field {
+input.ltr-field,
+textarea.ltr-field,
+[dir="rtl"] input.ltr-field,
+[dir="rtl"] textarea.ltr-field,
+[dir="rtl"] input[type="text"].ltr-field,
+[dir="rtl"] input[type="email"].ltr-field,
+[dir="rtl"] input[type="password"].ltr-field {
   direction: ltr !important;
   text-align: left !important;
   unicode-bidi: plaintext !important;
 }
 
-.ltr-field::placeholder,
-[dir="rtl"] .ltr-field::placeholder {
+input.ltr-field::placeholder,
+textarea.ltr-field::placeholder,
+[dir="rtl"] input.ltr-field::placeholder,
+[dir="rtl"] textarea.ltr-field::placeholder {
   text-align: left !important;
   direction: ltr !important;
 }
 
-.ltr-field::-webkit-input-placeholder,
-[dir="rtl"] .ltr-field::-webkit-input-placeholder {
+input.ltr-field::-webkit-input-placeholder,
+textarea.ltr-field::-webkit-input-placeholder,
+[dir="rtl"] input.ltr-field::-webkit-input-placeholder,
+[dir="rtl"] textarea.ltr-field::-webkit-input-placeholder {
   text-align: left !important;
   direction: ltr !important;
 }
 
-.ltr-field::-moz-placeholder,
-[dir="rtl"] .ltr-field::-moz-placeholder {
+input.ltr-field::-moz-placeholder,
+textarea.ltr-field::-moz-placeholder,
+[dir="rtl"] input.ltr-field::-moz-placeholder,
+[dir="rtl"] textarea.ltr-field::-moz-placeholder {
   text-align: left !important;
   direction: ltr !important;
 }
 
-.ltr-field:-ms-input-placeholder,
-[dir="rtl"] .ltr-field:-ms-input-placeholder {
+input.ltr-field:-ms-input-placeholder,
+textarea.ltr-field:-ms-input-placeholder,
+[dir="rtl"] input.ltr-field:-ms-input-placeholder,
+[dir="rtl"] textarea.ltr-field:-ms-input-placeholder {
   text-align: left !important;
   direction: ltr !important;
 }
