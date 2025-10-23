@@ -200,7 +200,7 @@ export default function JourneysPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {/* Season Filter */}
               <div>
-                <label className={`block text-sm font-medium mb-2 ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <label className="block text-sm font-medium mb-2 text-left" dir={isRTL ? 'rtl' : 'ltr'}>
                   {isRTL ? 'עונה' : 'Season'}
                 </label>
                 <Select value={filters.season} onValueChange={(val) => setFilters(prev => ({ ...prev, season: val }))}>
@@ -232,7 +232,7 @@ export default function JourneysPage() {
 
               {/* Budget Filter */}
               <div className="md:col-span-2">
-                <label className={`block text-sm font-medium mb-2 ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <label className="block text-sm font-medium mb-2 text-left" dir={isRTL ? 'rtl' : 'ltr'}>
                   {isRTL ? 'תקציב' : 'Budget'}: {(() => {
                     const currency = isRTL ? '₪' : '$';
                     const minNum = isRTL ? Math.round(filters.minBudget * 3.5) : filters.minBudget;
