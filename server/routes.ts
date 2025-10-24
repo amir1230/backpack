@@ -536,14 +536,28 @@ export async function registerRoutes(app: Express): Promise<void> {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       
-      console.log('📝 Creating trip - User ID:', userId);
-      console.log('📝 Trip data:', req.body);
-      
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
       
-      const tripData = { ...req.body, userId };
+      // Validate and normalize budget to ensure it's a number
+      let budget = req.body.budget;
+      if (typeof budget === 'string') {
+        // Extract numeric value from formatted string
+        const numbers = budget.match(/\d+/g);
+        budget = numbers && numbers.length > 0 ? parseFloat(numbers[numbers.length - 1]) : null;
+        console.warn('⚠️ Budget was a string, extracted numeric value:', budget);
+      } else if (typeof budget === 'number') {
+        budget = budget;
+      } else {
+        budget = null;
+      }
+      
+      const tripData = { ...req.body, userId, budget };
+      
+      console.log('📝 Creating trip - User ID:', userId);
+      console.log('📝 Normalized budget:', budget, typeof budget);
+      
       const trip = await storage.createTrip(tripData);
       
       console.log('✅ Trip created successfully:', trip.id);

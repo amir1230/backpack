@@ -421,19 +421,20 @@ export default function TripBuilder() {
   };
 
   const handleSaveTrip = (suggestion: any) => {
-    console.log('🎯 handleSaveTrip called!');
-    console.log('🔍 Full suggestion object:', suggestion);
-    console.log('💰 estimatedBudget:', suggestion.estimatedBudget);
-    console.log('💰 estimatedBudget.high:', suggestion.estimatedBudget.high);
-    console.log('💰 Type of estimatedBudget.high:', typeof suggestion.estimatedBudget.high);
+    // Extract the numeric budget value, handling both object and potentially mutated string formats
+    let budgetValue: number;
     
-    // Extract just the numeric value from estimatedBudget
-    const budgetValue = typeof suggestion.estimatedBudget.high === 'number' 
-      ? suggestion.estimatedBudget.high 
-      : parseInt(String(suggestion.estimatedBudget.high).replace(/[^\d]/g, ''), 10);
-    
-    console.log('✅ Final budget value:', budgetValue);
-    console.log('✅ Type of budget value:', typeof budgetValue);
+    if (suggestion.estimatedBudget && typeof suggestion.estimatedBudget === 'object' && suggestion.estimatedBudget.high) {
+      // Normal case: estimatedBudget is still an object with high/low
+      budgetValue = Number(suggestion.estimatedBudget.high);
+    } else if (typeof suggestion.estimatedBudget === 'string') {
+      // Fallback: if estimatedBudget was mutated to a string, extract numeric value
+      const numbers = suggestion.estimatedBudget.match(/\d+/g);
+      budgetValue = numbers && numbers.length > 0 ? parseInt(numbers[numbers.length - 1], 10) : 2500;
+    } else {
+      // Default fallback
+      budgetValue = 2500;
+    }
     
     const tripData = {
       title: `${suggestion.destination}, ${suggestion.country}`,
@@ -446,11 +447,10 @@ export default function TripBuilder() {
         duration: suggestion.duration || ''
       }),
       budget: budgetValue,
-      travelStyle: suggestion.travelStyle.join(', '),
+      travelStyle: Array.isArray(suggestion.travelStyle) ? suggestion.travelStyle.join(', ') : suggestion.travelStyle,
       isPublic: true,
     };
 
-    console.log('📤 Trip data being sent:', JSON.stringify(tripData, null, 2));
     createTripMutation.mutate(tripData);
   };
 
