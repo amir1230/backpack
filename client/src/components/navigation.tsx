@@ -133,7 +133,7 @@ export default function Navigation() {
 
           {/* Mobile Menu Overlay */}
           {mobileMenuOpen && (
-            <div className="absolute top-16 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
+            <div className="absolute top-16 left-0 right-0 bg-white border-t border-gray-200 shadow-lg max-h-[calc(100vh-4rem)] overflow-y-auto">
               <div className="px-4 py-4 space-y-4">
                 {/* Language Toggle in Mobile Menu */}
                 <div className="flex items-center justify-between pb-3 border-b border-gray-200">
