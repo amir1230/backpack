@@ -267,7 +267,7 @@ export default function MyTripsNew() {
   ];
   
   // Form state
-  const [budget, setBudget] = useState([1000]);
+  const [budget, setBudget] = useState([5000]);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [selectedContinent, setSelectedContinent] = useState<Continent | "">("");
   const [specificCity, setSpecificCity] = useState("");
@@ -289,7 +289,7 @@ export default function MyTripsNew() {
       destination: "",
       specificCity: "",
       travelStyle: [],
-      budget: 1000,
+      budget: 5000,
       duration: "",
       interests: [],
       adults: 2,
@@ -1101,19 +1101,19 @@ export default function MyTripsNew() {
                         setBudget(value);
                         form.setValue('budget', value[0]);
                       }}
-                      max={i18n.language === 'he' ? 50000 : 10000}
-                      min={i18n.language === 'he' ? 2000 : 500}
-                      step={i18n.language === 'he' ? 500 : 100}
+                      max={i18n.language === 'he' ? 1000000 : 1000000}
+                      min={i18n.language === 'he' ? 0 : 0}
+                      step={i18n.language === 'he' ? 1000 : 1000}
                       className="mb-4"
                     />
                     <div className="flex justify-between text-sm text-gray-600">
-                      <span>{i18n.language === 'he' ? '₪2,000' : '$500'}</span>
+                      <span>{i18n.language === 'he' ? '₪0' : '$0'}</span>
                       <span className="text-orange-500 font-bold text-xl">
                         {i18n.language === 'he' 
                           ? `₪${budget[0].toLocaleString('he-IL')}` 
                           : `$${budget[0].toLocaleString('en-US')}`}
                       </span>
-                      <span>{i18n.language === 'he' ? '₪50,000' : '$10,000'}</span>
+                      <span>{i18n.language === 'he' ? 'ללא הגבלה' : 'Unlimited'}</span>
                     </div>
                   </div>
                 </div>
