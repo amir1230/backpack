@@ -487,7 +487,8 @@ export default function MyTripsNew() {
             name: suggestion.destination,
             country: suggestion.country,
             description: suggestion.description,
-            highlights: suggestion.highlights
+            highlights: suggestion.highlights,
+            bestTimeToVisit: suggestion.bestTimeToVisit
           }]),
           description: suggestion.description,
           budget: i18n.language === 'he' 
@@ -1683,14 +1684,16 @@ export default function MyTripsNew() {
                     </p>
 
                     {savedTrips.map((trip) => {
-                      // Parse destinations to extract highlights
+                      // Parse destinations to extract highlights and bestTimeToVisit
                       let highlights: string[] = [];
+                      let bestTimeToVisit: string = '';
                       try {
                         const destinations = typeof trip.destinations === 'string' 
                           ? JSON.parse(trip.destinations) 
                           : trip.destinations;
-                        if (Array.isArray(destinations) && destinations[0]?.highlights) {
-                          highlights = destinations[0].highlights;
+                        if (Array.isArray(destinations) && destinations[0]) {
+                          highlights = destinations[0].highlights || [];
+                          bestTimeToVisit = destinations[0].bestTimeToVisit || '';
                         }
                       } catch (e) {
                         // If parsing fails, highlights will remain empty
@@ -1732,7 +1735,7 @@ export default function MyTripsNew() {
                               </div>
 
                               {/* Info Cards Grid */}
-                              <div className="grid grid-cols-2 gap-4">
+                              <div className="grid grid-cols-3 gap-4">
                                 <div className="bg-blue-50 p-4 rounded-lg">
                                   <div className="flex flex-col gap-2 items-start">
                                     <div className="flex items-center gap-2">
@@ -1760,6 +1763,22 @@ export default function MyTripsNew() {
                                     </p>
                                   </div>
                                 </div>
+
+                                {bestTimeToVisit && (
+                                  <div className="bg-orange-50 p-4 rounded-lg">
+                                    <div className="flex flex-col gap-2 items-start">
+                                      <div className="flex items-center gap-2">
+                                        <Calendar className="w-5 h-5 text-orange-600" />
+                                        <span className="font-semibold text-orange-800 text-sm text-left">
+                                          {t('trips.best_time_to_visit')}
+                                        </span>
+                                      </div>
+                                      <p className="text-orange-700 font-medium text-sm text-left">
+                                        {bestTimeToVisit}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
 
                               {/* Highlights */}
