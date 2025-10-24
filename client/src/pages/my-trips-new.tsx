@@ -1244,30 +1244,30 @@ export default function MyTripsNew() {
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="bg-blue-50 p-3 rounded-lg">
-                            <div className={`flex items-center mb-1 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
-                              <Calendar className={`w-4 h-4 text-blue-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                            <div className={`flex items-center mb-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                              <Calendar className={`w-4 h-4 text-blue-600 ${i18n.language === 'he' ? 'ml-1' : 'mr-1'}`} />
                               <span className="font-semibold text-blue-800 text-sm">{t('trips.duration')}</span>
                             </div>
-                            <p className="text-blue-700 text-sm">{suggestion.duration}</p>
+                            <p className={`text-blue-700 text-sm ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{suggestion.duration}</p>
                           </div>
 
                           <div className="bg-green-50 p-3 rounded-lg">
-                            <div className={`flex items-center mb-1 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
-                              <DollarSign className={`w-4 h-4 text-green-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                            <div className={`flex items-center mb-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                              <DollarSign className={`w-4 h-4 text-green-600 ${i18n.language === 'he' ? 'ml-1' : 'mr-1'}`} />
                               <span className="font-semibold text-green-800 text-sm">{t('trips.budget')}</span>
                             </div>
-                            <p className="text-green-700 text-sm font-bold">
+                            <p className={`text-green-700 text-sm font-bold ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
                               ${suggestion.estimatedBudget.low} - ${suggestion.estimatedBudget.high}
                             </p>
                           </div>
                         </div>
 
                         <div className="bg-orange-50 p-3 rounded-lg">
-                          <div className={`flex items-center mb-1 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
-                            <Calendar className={`w-4 h-4 text-orange-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                          <div className={`flex items-center mb-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                            <Calendar className={`w-4 h-4 text-orange-600 ${i18n.language === 'he' ? 'ml-1' : 'mr-1'}`} />
                             <span className="font-semibold text-orange-800 text-sm">{t('trips.best_time_to_visit')}</span>
                           </div>
-                          <p className="text-orange-700 text-sm">{suggestion.bestTimeToVisit}</p>
+                          <p className={`text-orange-700 text-sm ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{suggestion.bestTimeToVisit}</p>
                         </div>
 
                         <div>
