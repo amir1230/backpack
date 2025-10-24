@@ -201,7 +201,7 @@ function SavedJourneyCard({ savedJourney, onRemove, formatPrice }: {
 }
 
 export default function Home() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const user = null as any; // Demo mode - no auth
 
@@ -514,8 +514,8 @@ export default function Home() {
 
             {/* My Trips */}
             <section>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-slate-700 flex items-center gap-2">
+              <div className={`flex items-center justify-between mb-6 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                <h2 className={`text-2xl font-bold text-slate-700 flex items-center gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                   <MapPin className="w-6 h-6 text-orange-600" />
                   {t('trips.my_trips')}
                 </h2>
@@ -566,8 +566,8 @@ export default function Home() {
 
             {/* My Saved Journeys */}
             <section>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-slate-700 flex items-center gap-2">
+              <div className={`flex items-center justify-between mb-6 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                <h2 className={`text-2xl font-bold text-slate-700 flex items-center gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                   <Compass className="w-6 h-6 text-purple-600" />
                   {t('navigation.my_journeys')}
                 </h2>
@@ -625,8 +625,8 @@ export default function Home() {
 
             {/* Popular Routes */}
             <section className="mt-12">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-slate-700 flex items-center gap-2">
+              <div className={`flex items-center justify-between mb-6 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                <h2 className={`text-2xl font-bold text-slate-700 flex items-center gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                   <TrendingUp className="w-6 h-6 text-teal-600" />
                   {t('home.popular_routes')}
                 </h2>
@@ -925,8 +925,8 @@ function PopularJourneysSection() {
   if (isLoading) {
     return (
       <section className="mt-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-slate-700">{t('journeys.popular_journeys')}</h2>
+        <div className={`flex items-center justify-between mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <h2 className={`text-2xl font-bold text-slate-700 ${isRTL ? 'text-right' : ''}`}>{t('journeys.popular_journeys')}</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -947,8 +947,8 @@ function PopularJourneysSection() {
 
   return (
     <section className="mt-12">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-slate-700 flex items-center gap-2">
+      <div className={`flex items-center justify-between mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <h2 className={`text-2xl font-bold text-slate-700 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <Compass className="w-6 h-6 text-purple-600" />
           {t('journeys.popular_journeys')}
         </h2>
