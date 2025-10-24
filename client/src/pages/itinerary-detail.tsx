@@ -33,6 +33,9 @@ import {
   Loader2
 } from "lucide-react";
 
+// Currency conversion rate (USD to ILS)
+const USD_TO_ILS = 3.7;
+
 interface ItineraryDay {
   day: number;
   location: string;
@@ -72,7 +75,7 @@ export default function ItineraryDetail() {
   const { isAuthenticated, user, signInWithGoogle } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // State
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -591,7 +594,9 @@ export default function ItineraryDetail() {
                       <div className="font-medium">{t("trips.day_number", { day: day.day })}</div>
                       <div className="text-sm opacity-80">{day.location}</div>
                       <div className="text-xs opacity-60 mt-1">
-                        {day.activities.length} {t("itinerary.activities")} • ${day.estimatedCost}
+                        {day.activities.length} {t("itinerary.activities")} • {i18n.language === 'he' 
+                          ? `₪${Math.round(day.estimatedCost * USD_TO_ILS).toLocaleString('he-IL')}` 
+                          : `$${day.estimatedCost}`}
                       </div>
                     </button>
                   ))}
@@ -617,7 +622,9 @@ export default function ItineraryDetail() {
                             </CardTitle>
                             <CardDescription className="flex items-center mt-2">
                               <DollarSign className="w-4 h-4 mr-1" />
-                              {t("trips.estimated_cost")}: ${day.estimatedCost}
+                              {t("trips.estimated_cost")}: {i18n.language === 'he' 
+                                ? `₪${Math.round(day.estimatedCost * USD_TO_ILS).toLocaleString('he-IL')}` 
+                                : `$${day.estimatedCost}`}
                             </CardDescription>
                           </div>
                           <Button 

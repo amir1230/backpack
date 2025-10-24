@@ -47,7 +47,7 @@ const USD_TO_ILS = 3.7;
 type ExpenseFormData = z.infer<typeof expenseSchema>;
 
 export default function BudgetTracker() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [selectedTrip, setSelectedTrip] = useState<number | null>(null);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -366,20 +366,30 @@ export default function BudgetTracker() {
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">{t('budget.total_spent')}</span>
-                      <span className="text-lg font-semibold text-primary">${totalSpent.toFixed(2)}</span>
+                      <span className="text-lg font-semibold text-primary">
+                        {i18n.language === 'he' 
+                          ? `₪${Math.round(totalSpent * USD_TO_ILS).toLocaleString('he-IL')}` 
+                          : `$${totalSpent.toFixed(2)}`}
+                      </span>
                     </div>
                     {selectedTrip && budget > 0 && (
                       <>
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">{t('budget.budget')}</span>
-                          <span className="text-lg font-semibold text-slate-700">${budget.toFixed(2)}</span>
+                          <span className="text-lg font-semibold text-slate-700">
+                            {i18n.language === 'he' 
+                              ? `₪${Math.round(budget * USD_TO_ILS).toLocaleString('he-IL')}` 
+                              : `$${budget.toFixed(2)}`}
+                          </span>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">{t('budget.remaining')}</span>
                           <span className={`text-lg font-semibold ${
                             budget - totalSpent >= 0 ? 'text-green-600' : 'text-red-600'
                           }`}>
-                            ${(budget - totalSpent).toFixed(2)}
+                            {i18n.language === 'he' 
+                              ? `₪${Math.round((budget - totalSpent) * USD_TO_ILS).toLocaleString('he-IL')}` 
+                              : `$${(budget - totalSpent).toFixed(2)}`}
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-3">
@@ -424,7 +434,11 @@ export default function BudgetTracker() {
                               </div>
                               <span className="font-medium">{t(category.labelKey)}</span>
                             </div>
-                            <span className="font-semibold">${category.total.toFixed(2)}</span>
+                            <span className="font-semibold">
+                              {i18n.language === 'he' 
+                                ? `₪${Math.round(category.total * USD_TO_ILS).toLocaleString('he-IL')}` 
+                                : `$${category.total.toFixed(2)}`}
+                            </span>
                           </div>
                           {category.total > 0 && (
                             <Progress value={percentage} className="h-2" />
@@ -481,7 +495,11 @@ export default function BudgetTracker() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-lg font-semibold">${parseFloat(expense.amount).toFixed(2)}</div>
+                            <div className="text-lg font-semibold">
+                              {i18n.language === 'he' 
+                                ? `₪${Math.round(parseFloat(expense.amount) * USD_TO_ILS).toLocaleString('he-IL')}` 
+                                : `$${parseFloat(expense.amount).toFixed(2)}`}
+                            </div>
                           </div>
                         </div>
                       );
@@ -542,7 +560,11 @@ export default function BudgetTracker() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-gray-600">{t('budget.total_spent')}</p>
-                          <p className="text-2xl font-bold">${analytics?.expenses?.total?.toFixed(2) || '0.00'}</p>
+                          <p className="text-2xl font-bold">
+                            {i18n.language === 'he' 
+                              ? `₪${Math.round((analytics?.expenses?.total || 0) * USD_TO_ILS).toLocaleString('he-IL')}` 
+                              : `$${analytics?.expenses?.total?.toFixed(2) || '0.00'}`}
+                          </p>
                         </div>
                         <DollarSign className="w-8 h-8 text-orange-500" />
                       </div>
@@ -554,7 +576,11 @@ export default function BudgetTracker() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-gray-600">Avg per Trip</p>
-                          <p className="text-2xl font-bold">${analytics?.expenses?.avgPerTrip?.toFixed(2) || '0.00'}</p>
+                          <p className="text-2xl font-bold">
+                            {i18n.language === 'he' 
+                              ? `₪${Math.round((analytics?.expenses?.avgPerTrip || 0) * USD_TO_ILS).toLocaleString('he-IL')}` 
+                              : `$${analytics?.expenses?.avgPerTrip?.toFixed(2) || '0.00'}`}
+                          </p>
                         </div>
                         <BarChart3 className="w-8 h-8 text-purple-500" />
                       </div>
