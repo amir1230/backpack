@@ -1790,9 +1790,9 @@ export default function MyTripsNew() {
                                   </div>
                                   <div className="grid grid-cols-2 gap-2">
                                     {highlights.map((highlight, idx) => (
-                                      <div key={idx} className={`flex items-center text-sm text-gray-700 gap-2 ${i18n.language === 'he' ? 'flex-row-reverse justify-end' : ''}`}>
-                                        <span className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></span>
+                                      <div key={idx} className={`flex items-center text-sm text-gray-700 gap-2 ${i18n.language === 'he' ? 'justify-end' : ''}`}>
                                         <span className={i18n.language === 'he' ? 'text-right' : 'text-left'}>{highlight}</span>
+                                        <span className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></span>
                                       </div>
                                     ))}
                                   </div>
