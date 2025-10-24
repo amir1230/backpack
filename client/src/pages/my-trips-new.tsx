@@ -1312,7 +1312,7 @@ export default function MyTripsNew() {
                           })}
                         </div>
 
-                        <div className="flex items-center pt-4 border-t gap-2">
+                        <div className="flex items-center pt-4 border-t justify-between">
                           <Button 
                             onClick={() => handleGenerateItineraryForSuggestion(suggestion)}
                             disabled={isGeneratingItinerary}
