@@ -1773,13 +1773,15 @@ export default function MyTripsNew() {
                               </div>
 
                               {/* Description */}
-                              <p 
-                                className={`text-gray-600 leading-relaxed ${i18n.language === 'he' ? 'text-right' : 'text-left'}`} 
-                                dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
-                                style={i18n.language === 'he' ? { unicodeBidi: 'plaintext' } : undefined}
-                              >
-                                {normalizeRtlText(trip.description, i18n.language === 'he')}
-                              </p>
+                              <div className={i18n.language === 'he' ? 'text-right' : 'text-left'}>
+                                <p 
+                                  className="text-gray-600 leading-relaxed" 
+                                  dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
+                                  style={i18n.language === 'he' ? { unicodeBidi: 'plaintext' } : undefined}
+                                >
+                                  {normalizeRtlText(trip.description, i18n.language === 'he')}
+                                </p>
+                              </div>
 
                               {/* Info Cards Grid */}
                               <div className="grid grid-cols-3 gap-4">
