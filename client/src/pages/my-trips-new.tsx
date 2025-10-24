@@ -1870,17 +1870,31 @@ export default function MyTripsNew() {
                                 <Button 
                                   variant="outline"
                                   className="flex-1 bg-gradient-to-r from-orange-50 to-amber-50 hover:from-orange-100 hover:to-amber-100 border-orange-200"
-                                  onClick={() => {
-                                    // Switch to preferences tab and populate with trip data
-                                    setActiveTab('preferences');
-                                    toast({
-                                      title: t('trips.generate_daily_itinerary') || 'Generate Daily Itinerary',
-                                      description: t('trips.creating_itinerary_for') + ' ' + trip.title,
-                                    });
+                                  onClick={async () => {
+                                    // Convert saved trip to suggestion format
+                                    const suggestion = {
+                                      destination: trip.title,
+                                      description: trip.description,
+                                      duration: trip.duration || '7 days',
+                                      estimatedBudget: {
+                                        low: typeof trip.budget === 'string' ? parseFloat(trip.budget.replace(/[^0-9.]/g, '')) : trip.budget,
+                                        high: typeof trip.budget === 'string' ? parseFloat(trip.budget.replace(/[^0-9.]/g, '')) : trip.budget
+                                      },
+                                      highlights: highlights,
+                                      travelStyle: trip.travelStyle ? trip.travelStyle.split(',').map(s => s.trim()) : []
+                                    };
+                                    
+                                    // Generate itinerary
+                                    await handleGenerateItineraryForSuggestion(suggestion);
                                   }}
+                                  disabled={isGeneratingItinerary}
                                   data-testid={`button-generate-itinerary-${trip.id}`}
                                 >
-                                  <Calendar className={`w-4 h-4 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                                  {isGeneratingItinerary ? (
+                                    <Loader2 className={`w-4 h-4 animate-spin ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                                  ) : (
+                                    <Calendar className={`w-4 h-4 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                                  )}
                                   {t('trips.generate_daily_itinerary')}
                                 </Button>
                                 <Button 
