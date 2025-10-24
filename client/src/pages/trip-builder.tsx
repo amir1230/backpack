@@ -424,8 +424,14 @@ export default function TripBuilder() {
     const tripData = {
       title: `${suggestion.destination}, ${suggestion.country}`,
       description: suggestion.description,
-      destinations: suggestion.destination,
-      budget: suggestion.estimatedBudget.high.toString(),
+      destinations: JSON.stringify({
+        destination: suggestion.destination,
+        country: suggestion.country,
+        highlights: suggestion.highlights || [],
+        bestTimeToVisit: suggestion.bestTimeToVisit || '',
+        duration: suggestion.duration || ''
+      }),
+      budget: suggestion.estimatedBudget.high,
       travelStyle: suggestion.travelStyle.join(', '),
       isPublic: true,
     };
