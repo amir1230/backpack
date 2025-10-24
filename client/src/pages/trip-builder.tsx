@@ -43,6 +43,13 @@ import { WORLD_COUNTRIES } from "@/lib/constants";
 // Currency conversion rate (USD to ILS)
 const USD_TO_ILS = 3.7;
 
+// Fix RTL punctuation for Hebrew text
+const fixRTLPunctuation = (text: string, isHebrew: boolean) => {
+  if (!isHebrew) return text;
+  // Wrap the entire text with RLE (Right-to-Left Embedding) and PDF (Pop Directional Formatting)
+  return `\u202B${text}\u202C`;
+};
+
 const getTripFormSchema = (t: any) => z.object({
   travelStyle: z.array(z.string()).min(1, t("trips.select_travel_style")),
   budget: z.number().min(100, t("trips.budget_required")),
@@ -701,7 +708,7 @@ export default function TripBuilder() {
                           {suggestion.destination}, {suggestion.country}
                         </h3>
                         <p className={`text-gray-600 leading-relaxed ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                          {suggestion.description}
+                          {fixRTLPunctuation(suggestion.description, i18n.language === 'he')}
                         </p>
                       </div>
 
@@ -865,7 +872,7 @@ export default function TripBuilder() {
                             {suggestion.destination}, {suggestion.country}
                           </h3>
                           <p className={`text-gray-600 leading-relaxed ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                            {suggestion.description}
+                            {fixRTLPunctuation(suggestion.description, i18n.language === 'he')}
                           </p>
                         </div>
 
