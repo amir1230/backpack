@@ -1769,8 +1769,8 @@ export default function MyTripsNew() {
                               {/* Description */}
                               <div className="flex gap-2">
                                 <MapPin className="w-4 h-4 flex-shrink-0 text-orange-500 invisible" />
-                                <p className="text-gray-600 leading-relaxed flex-1 text-right" dir="auto">
-                                  {trip.description}
+                                <p className={`text-gray-600 leading-relaxed flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                  <bdi dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>{trip.description}</bdi>
                                 </p>
                               </div>
 
