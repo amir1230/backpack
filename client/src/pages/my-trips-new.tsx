@@ -1301,7 +1301,7 @@ export default function MyTripsNew() {
                         )}
                         */}
 
-                        <div className="flex flex-wrap gap-2 mb-4 justify-start">
+                        <div className="flex flex-wrap gap-2 mb-4 justify-end">
                           {suggestion.travelStyle.map((style) => {
                             const interestConfig = ALL_INTERESTS.find(int => int.id === style.trim().toLowerCase());
                             return (
