@@ -1706,11 +1706,14 @@ export default function MyTripsNew() {
                             <div className={`flex flex-col gap-4`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
                               {/* Header with title and budget */}
                               <div className="flex items-start justify-between gap-8">
-                                <div className="flex-1 min-w-0">
-                                  <h3 className={`text-2xl font-bold text-gray-900 mb-2 ${i18n.language === 'he' ? 'text-right pr-6' : 'text-left pl-6'}`}>
-                                    {trip.title}
-                                  </h3>
-                                  <div className={`flex items-center gap-2 text-gray-600 ${i18n.language === 'he' ? 'justify-start' : ''}`}>
+                                <div className="flex-1 min-w-0 flex flex-col gap-2">
+                                  <div className="flex items-center gap-2">
+                                    <MapPin className="w-4 h-4 flex-shrink-0 text-orange-500 invisible" />
+                                    <h3 className={`text-2xl font-bold text-gray-900 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                      {trip.title}
+                                    </h3>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-gray-600">
                                     <MapPin className="w-4 h-4 flex-shrink-0 text-orange-500" />
                                     <span>{typeof trip.destinations === 'object' && trip.destinations?.name ? trip.destinations.name : t('trips.multiple_destinations')}</span>
                                   </div>
