@@ -1112,7 +1112,7 @@ export default function MyTripsNew() {
                   <Label className={`text-sm font-medium text-slate-700 mb-2 block ${i18n.language === 'he' ? 'text-left' : ''}`}>
                     {t('trips.budget_range')}
                   </Label>
-                  <p className={`text-xs text-gray-500 mb-3 ${i18n.language === 'he' ? 'text-right' : ''}`}>
+                  <p className="text-xs text-gray-500 mb-3 text-left">
                     {i18n.language === 'he' 
                       ? 'כולל טיסות, לינה, אוכל, פעילויות ותחבורה'
                       : 'Includes flights, accommodation, food, activities and transportation'}
