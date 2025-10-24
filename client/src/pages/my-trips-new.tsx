@@ -1624,30 +1624,60 @@ export default function MyTripsNew() {
                           <CardContent className="p-6">
                             <div className="flex flex-col gap-4">
                               {/* Header */}
-                              <div className={`flex items-start justify-between gap-4 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
-                                <div className={`flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                                  <Link href={`/itineraries/${itinerary.id}`} className="hover:text-purple-600 transition-colors">
-                                    <h3 className="text-2xl font-bold text-gray-900 hover:text-purple-600 transition-colors">
-                                      {itinerary.title}
-                                    </h3>
-                                  </Link>
-                                  <p className={`text-sm text-gray-500 mt-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                                    {t('common.created')} {formatDate(new Date(itinerary.created_at))}
-                                  </p>
-                                </div>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => deleteItineraryMutation.mutate(itinerary.id)}
-                                  disabled={deleteItineraryMutation.isPending}
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                >
-                                  {deleteItineraryMutation.isPending ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    <Trash2 className="w-4 h-4" />
-                                  )}
-                                </Button>
+                              <div className="flex items-start justify-between gap-4">
+                                {i18n.language === 'he' ? (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => deleteItineraryMutation.mutate(itinerary.id)}
+                                      disabled={deleteItineraryMutation.isPending}
+                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                      {deleteItineraryMutation.isPending ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                      ) : (
+                                        <Trash2 className="w-4 h-4" />
+                                      )}
+                                    </Button>
+                                    <div className="flex-1 text-right">
+                                      <Link href={`/itineraries/${itinerary.id}`} className="hover:text-purple-600 transition-colors">
+                                        <h3 className="text-2xl font-bold text-gray-900 hover:text-purple-600 transition-colors">
+                                          {itinerary.title}
+                                        </h3>
+                                      </Link>
+                                      <p className="text-sm text-gray-500 mt-1 text-right">
+                                        {t('common.created')} {formatDate(new Date(itinerary.created_at))}
+                                      </p>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <div className="flex-1 text-left">
+                                      <Link href={`/itineraries/${itinerary.id}`} className="hover:text-purple-600 transition-colors">
+                                        <h3 className="text-2xl font-bold text-gray-900 hover:text-purple-600 transition-colors">
+                                          {itinerary.title}
+                                        </h3>
+                                      </Link>
+                                      <p className="text-sm text-gray-500 mt-1 text-left">
+                                        {t('common.created')} {formatDate(new Date(itinerary.created_at))}
+                                      </p>
+                                    </div>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => deleteItineraryMutation.mutate(itinerary.id)}
+                                      disabled={deleteItineraryMutation.isPending}
+                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                      {deleteItineraryMutation.isPending ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                      ) : (
+                                        <Trash2 className="w-4 h-4" />
+                                      )}
+                                    </Button>
+                                  </>
+                                )}
                               </div>
 
                               {/* Info Grid */}
