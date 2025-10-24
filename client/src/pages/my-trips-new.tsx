@@ -1852,16 +1852,22 @@ export default function MyTripsNew() {
 
                               {/* Tags */}
                               {trip.travelStyle && (
-                                <div className={`flex flex-wrap gap-2 ${i18n.language === 'he' ? 'flex-row-reverse justify-end' : ''}`}>
-                                  {trip.travelStyle.split(',').map((style, idx) => {
-                                    const trimmedStyle = style.trim();
-                                    const interestConfig = ALL_INTERESTS.find(int => int.id === trimmedStyle.toLowerCase());
-                                    return (
-                                      <Badge key={idx} variant="secondary" className="bg-gradient-to-r from-orange-100 to-teal-100 text-gray-800 border-0">
-                                        {interestConfig ? interestConfig.label : trimmedStyle}
-                                      </Badge>
-                                    );
-                                  })}
+                                <div>
+                                  <div className={`flex items-center gap-2 mb-3 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                                    <Star className="w-4 h-4 text-yellow-600" />
+                                    <span className={`font-semibold text-gray-800 text-sm ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{t('trips.tags')}</span>
+                                  </div>
+                                  <div className={`flex flex-wrap gap-2 ${i18n.language === 'he' ? 'justify-end' : ''}`}>
+                                    {trip.travelStyle.split(',').map((style, idx) => {
+                                      const trimmedStyle = style.trim();
+                                      const interestConfig = ALL_INTERESTS.find(int => int.id === trimmedStyle.toLowerCase());
+                                      return (
+                                        <Badge key={idx} variant="secondary" className="bg-gradient-to-r from-orange-100 to-teal-100 text-gray-800 border-0">
+                                          {interestConfig ? interestConfig.label : trimmedStyle}
+                                        </Badge>
+                                      );
+                                    })}
+                                  </div>
                                 </div>
                               )}
 

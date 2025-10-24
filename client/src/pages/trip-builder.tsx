@@ -447,6 +447,7 @@ export default function TripBuilder() {
         duration: suggestion.duration || ''
       }),
       budget: budgetValue,
+      duration: suggestion.duration || '',
       travelStyle: Array.isArray(suggestion.travelStyle) ? suggestion.travelStyle.join(', ') : suggestion.travelStyle,
       isPublic: true,
     };
