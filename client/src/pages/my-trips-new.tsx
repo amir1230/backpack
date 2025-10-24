@@ -1789,7 +1789,11 @@ export default function MyTripsNew() {
                                         {t('trips.duration')}
                                       </span>
                                     </div>
-                                    <p className={`text-blue-700 font-medium ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                    <p 
+                                      className={`text-blue-700 font-medium ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}
+                                      dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
+                                      style={i18n.language === 'he' ? { unicodeBidi: 'plaintext' } : undefined}
+                                    >
                                       {trip.duration || (i18n.language === 'he' ? '7 ימים' : '7 days')}
                                     </p>
                                   </div>
