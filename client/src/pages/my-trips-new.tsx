@@ -1710,7 +1710,7 @@ export default function MyTripsNew() {
                               {planData?.itinerary && planData.itinerary.length > 0 && (
                                 <div className={`bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
                                   <p 
-                                    className={`font-semibold text-gray-800 mb-3 flex items-center gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}
+                                    className={`font-semibold text-gray-800 mb-3 flex items-center gap-2 ${i18n.language === 'he' ? 'flex-row-reverse justify-end' : ''}`}
                                     dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
                                   >
                                     <Route className="w-4 h-4 text-gray-600" />
