@@ -689,8 +689,13 @@ export default function TripBuilder() {
                         <h3 className="text-xl font-bold text-slate-700 mb-1 text-left">
                           {suggestion.destination}, {suggestion.country}
                         </h3>
-                        
-                        <div className="bg-blue-50 p-3 rounded-lg mb-3">
+                        <p className="text-gray-600 leading-relaxed text-left">
+                          {suggestion.description}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-blue-50 p-3 rounded-lg">
                           <div className={`flex items-center mb-1 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                             <Calendar className={`w-4 h-4 text-blue-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
                             <span className="font-semibold text-blue-800 text-sm">Duration</span>
@@ -698,19 +703,15 @@ export default function TripBuilder() {
                           <p className="text-blue-700 text-sm">{suggestion.duration}</p>
                         </div>
 
-                        <p className="text-gray-600 leading-relaxed text-left">
-                          {suggestion.description}
-                        </p>
-                      </div>
-
-                      <div className="bg-green-50 p-3 rounded-lg">
-                        <div className={`flex items-center mb-1 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
-                          <DollarSign className={`w-4 h-4 text-green-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
-                          <span className="font-semibold text-green-800 text-sm">Budget</span>
+                        <div className="bg-green-50 p-3 rounded-lg">
+                          <div className={`flex items-center mb-1 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                            <DollarSign className={`w-4 h-4 text-green-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                            <span className="font-semibold text-green-800 text-sm">Budget</span>
+                          </div>
+                          <p className="text-green-700 text-sm font-bold">
+                            ${suggestion.estimatedBudget.low} - ${suggestion.estimatedBudget.high}
+                          </p>
                         </div>
-                        <p className="text-green-700 text-sm font-bold">
-                          ${suggestion.estimatedBudget.low} - ${suggestion.estimatedBudget.high}
-                        </p>
                       </div>
 
                       <div className="bg-orange-50 p-3 rounded-lg">
