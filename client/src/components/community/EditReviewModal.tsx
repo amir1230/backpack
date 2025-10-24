@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -17,6 +18,7 @@ interface EditReviewModalProps {
 }
 
 export function EditReviewModal({ open, onOpenChange, review, onReviewUpdated }: EditReviewModalProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     rating: 0,
     title: '',
@@ -46,8 +48,8 @@ export function EditReviewModal({ open, onOpenChange, review, onReviewUpdated }:
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to Update Review",
-        description: error.message || "Something went wrong",
+        title: t('community.reviews.failed_update'),
+        description: error.message || t('community.reviews.something_wrong'),
         variant: "destructive",
       });
     }
@@ -59,8 +61,8 @@ export function EditReviewModal({ open, onOpenChange, review, onReviewUpdated }:
     // Validation
     if (formData.rating === 0) {
       toast({
-        title: "Rating Required",
-        description: "Please provide a rating",
+        title: t('community.reviews.rating_required'),
+        description: t('community.reviews.rating_required_desc'),
         variant: "destructive",
       });
       return;
@@ -68,8 +70,8 @@ export function EditReviewModal({ open, onOpenChange, review, onReviewUpdated }:
 
     if (formData.title.trim().length < 4 || formData.title.trim().length > 80) {
       toast({
-        title: "Invalid Title",
-        description: "Title must be between 4 and 80 characters",
+        title: t('community.reviews.invalid_title'),
+        description: t('community.reviews.title_length'),
         variant: "destructive",
       });
       return;
@@ -77,8 +79,8 @@ export function EditReviewModal({ open, onOpenChange, review, onReviewUpdated }:
 
     if (formData.body.trim().length < 20 || formData.body.trim().length > 2000) {
       toast({
-        title: "Invalid Review",
-        description: "Review must be between 20 and 2000 characters",
+        title: t('community.reviews.invalid_review'),
+        description: t('community.reviews.review_length'),
         variant: "destructive",
       });
       return;
@@ -105,10 +107,10 @@ export function EditReviewModal({ open, onOpenChange, review, onReviewUpdated }:
   // Get entity type display name
   const getEntityTypeDisplay = (type: string) => {
     const displayMap: Record<string, string> = {
-      destinations: 'Destination',
-      accommodations: 'Accommodation',
-      attractions: 'Attraction', 
-      restaurants: 'Restaurant'
+      destinations: t('community.reviews.entity_types.destinations'),
+      accommodations: t('community.reviews.entity_types.accommodations'),
+      attractions: t('community.reviews.entity_types.attractions'),
+      restaurants: t('community.reviews.entity_types.restaurants')
     };
     return displayMap[type] || type;
   };
@@ -117,13 +119,13 @@ export function EditReviewModal({ open, onOpenChange, review, onReviewUpdated }:
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Review</DialogTitle>
+          <DialogTitle>{t('community.reviews.edit_review')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Place Info (Read-only) */}
           <div className="bg-gray-50 p-4 rounded-lg">
-            <Label className="text-sm font-medium text-gray-700">Reviewing</Label>
+            <Label className="text-sm font-medium text-gray-700">{t('community.reviews.reviewing')}</Label>
             <div className="flex items-center gap-2 mt-1">
               <MapPin className="w-4 h-4 text-gray-500" />
               <span className="font-medium">
@@ -134,13 +136,13 @@ export function EditReviewModal({ open, onOpenChange, review, onReviewUpdated }:
               </span>
             </div>
             <p className="text-xs text-gray-600 mt-1">
-              You cannot change the place you're reviewing
+              {t('community.reviews.cannot_change_place')}
             </p>
           </div>
 
           {/* Rating */}
           <div>
-            <Label>Rating *</Label>
+            <Label>{t('community.reviews.rating')} *</Label>
             <div className="flex items-center gap-1 mt-2">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -161,7 +163,7 @@ export function EditReviewModal({ open, onOpenChange, review, onReviewUpdated }:
               ))}
               {formData.rating > 0 && (
                 <span className="ml-2 text-sm text-gray-600">
-                  {formData.rating} star{formData.rating !== 1 ? 's' : ''}
+                  {formData.rating} {formData.rating !== 1 ? t('community.reviews.stars') : t('community.reviews.star')}
                 </span>
               )}
             </div>
@@ -169,25 +171,25 @@ export function EditReviewModal({ open, onOpenChange, review, onReviewUpdated }:
 
           {/* Title */}
           <div>
-            <Label htmlFor="title">Review Title *</Label>
+            <Label htmlFor="title">{t('community.reviews.review_title')} *</Label>
             <Input
               id="title"
-              placeholder="Summarize your experience in a few words"
+              placeholder={t('community.reviews.title_placeholder')}
               value={formData.title}
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               disabled={updateMutation.isPending}
             />
             <div className="text-xs text-gray-500 mt-1">
-              {formData.title.length}/80 characters
+              {formData.title.length}/80 {t('community.reviews.characters')}
             </div>
           </div>
 
           {/* Review Body */}
           <div>
-            <Label htmlFor="body">Your Review *</Label>
+            <Label htmlFor="body">{t('community.reviews.your_review')} *</Label>
             <Textarea
               id="body"
-              placeholder="Share your detailed experience, what you liked or didn't like, and any tips for other travelers..."
+              placeholder={t('community.reviews.review_placeholder')}
               value={formData.body}
               onChange={(e) => setFormData(prev => ({ ...prev, body: e.target.value }))}
               disabled={updateMutation.isPending}
@@ -195,14 +197,14 @@ export function EditReviewModal({ open, onOpenChange, review, onReviewUpdated }:
               className="resize-none"
             />
             <div className="text-xs text-gray-500 mt-1">
-              {formData.body.length}/2000 characters (minimum 20)
+              {formData.body.length}/2000 {t('community.reviews.characters')} ({t('community.reviews.minimum')} 20)
             </div>
           </div>
 
           {/* Info about editing */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <p className="text-sm text-blue-800">
-              <strong>Note:</strong> Your review will be marked as edited and the updated timestamp will be shown to other users.
+              <strong>{t('common.note')}:</strong> {t('community.reviews.edit_note')}
             </p>
           </div>
 
@@ -214,7 +216,7 @@ export function EditReviewModal({ open, onOpenChange, review, onReviewUpdated }:
               onClick={handleClose}
               disabled={updateMutation.isPending}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
@@ -223,10 +225,10 @@ export function EditReviewModal({ open, onOpenChange, review, onReviewUpdated }:
               {updateMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Updating...
+                  {t('community.reviews.updating')}
                 </>
               ) : (
-                'Update Review'
+                t('community.reviews.update_review')
               )}
             </Button>
           </div>

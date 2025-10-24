@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -19,6 +20,7 @@ interface WriteReviewModalProps {
 }
 
 export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteReviewModalProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     entityType: '',
     selectedPlace: null as PlaceOption | null,
@@ -57,8 +59,8 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to Create Review",
-        description: error.message || "Something went wrong",
+        title: t('community.reviews.failed_create'),
+        description: error.message || t('community.reviews.something_wrong'),
         variant: "destructive",
       });
     }
@@ -83,8 +85,8 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
     // Validation
     if (!formData.entityType) {
       toast({
-        title: "Place Type Required",
-        description: "Please select a place type",
+        title: t('community.reviews.place_type_required'),
+        description: t('community.reviews.place_type_required_desc'),
         variant: "destructive",
       });
       return;
@@ -92,8 +94,8 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
 
     if (!formData.selectedPlace) {
       toast({
-        title: "Place Required", 
-        description: "Please select a place to review",
+        title: t('community.reviews.place_required'), 
+        description: t('community.reviews.place_required_desc'),
         variant: "destructive",
       });
       return;
@@ -101,8 +103,8 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
 
     if (formData.rating === 0) {
       toast({
-        title: "Rating Required",
-        description: "Please provide a rating",
+        title: t('community.reviews.rating_required'),
+        description: t('community.reviews.rating_required_desc'),
         variant: "destructive",
       });
       return;
@@ -110,8 +112,8 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
 
     if (formData.title.trim().length < 4 || formData.title.trim().length > 80) {
       toast({
-        title: "Invalid Title",
-        description: "Title must be between 4 and 80 characters",
+        title: t('community.reviews.invalid_title'),
+        description: t('community.reviews.title_length'),
         variant: "destructive",
       });
       return;
@@ -119,8 +121,8 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
 
     if (formData.body.trim().length < 20 || formData.body.trim().length > 2000) {
       toast({
-        title: "Invalid Review",
-        description: "Review must be between 20 and 2000 characters",
+        title: t('community.reviews.invalid_review'),
+        description: t('community.reviews.review_length'),
         variant: "destructive",
       });
       return;
@@ -128,8 +130,8 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
 
     if (!formData.guestName.trim()) {
       toast({
-        title: "Name Required",
-        description: "Please enter your name",
+        title: t('community.reviews.name_required'),
+        description: t('community.reviews.name_required_desc'),
         variant: "destructive",
       });
       return;
@@ -178,29 +180,29 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Write a Review</DialogTitle>
+          <DialogTitle>{t('community.reviews.write_review')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Entity Type Selection */}
           <div>
-            <Label htmlFor="entity-type">Place Type *</Label>
+            <Label htmlFor="entity-type">{t('community.reviews.place_type')} *</Label>
             <Select value={formData.entityType} onValueChange={handleEntityTypeChange}>
               <SelectTrigger>
-                <SelectValue placeholder="Select type of place" />
+                <SelectValue placeholder={t('community.reviews.select_place_type')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="destinations">Destination</SelectItem>
-                <SelectItem value="accommodations">Accommodation</SelectItem>
-                <SelectItem value="attractions">Attraction</SelectItem>
-                <SelectItem value="restaurants">Restaurant</SelectItem>
+                <SelectItem value="destinations">{t('community.reviews.entity_types.destinations')}</SelectItem>
+                <SelectItem value="accommodations">{t('community.reviews.entity_types.accommodations')}</SelectItem>
+                <SelectItem value="attractions">{t('community.reviews.entity_types.attractions')}</SelectItem>
+                <SelectItem value="restaurants">{t('community.reviews.entity_types.restaurants')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Place Selection */}
           <div>
-            <Label htmlFor="place">Select Place *</Label>
+            <Label htmlFor="place">{t('community.reviews.select_place')} *</Label>
             <Popover open={showPlaceCombobox} onOpenChange={setShowPlaceCombobox}>
               <PopoverTrigger asChild>
                 <Button
@@ -217,7 +219,7 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
                     </span>
                   ) : (
                     <span className="text-gray-500">
-                      {formData.entityType ? 'Search for a place...' : 'Select place type first'}
+                      {formData.entityType ? t('community.reviews.search_place') : t('community.reviews.select_place_type_first')}
                     </span>
                   )}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -226,7 +228,7 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
               <PopoverContent className="w-full p-0">
                 <Command>
                   <CommandInput
-                    placeholder={`Search ${formData.entityType}...`}
+                    placeholder={`${t('community.reviews.search_place')}`}
                     value={placeSearch}
                     onValueChange={setPlaceSearch}
                   />
@@ -234,12 +236,12 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
                     {placesLoading ? (
                       <div className="flex items-center justify-center py-4">
                         <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                        Searching...
+                        {t('community.reviews.searching')}
                       </div>
                     ) : placeSearch.length < 2 ? (
-                      "Type at least 2 characters to search"
+                      t('community.reviews.type_to_search')
                     ) : (
-                      "No places found"
+                      t('community.reviews.no_places_found')
                     )}
                   </CommandEmpty>
                   <CommandGroup>
@@ -266,7 +268,7 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
 
           {/* Rating */}
           <div>
-            <Label>Rating *</Label>
+            <Label>{t('community.reviews.rating')} *</Label>
             <div className="flex items-center gap-1 mt-2">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -286,7 +288,7 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
               ))}
               {formData.rating > 0 && (
                 <span className="ml-2 text-sm text-gray-600">
-                  {formData.rating} star{formData.rating !== 1 ? 's' : ''}
+                  {formData.rating} {formData.rating !== 1 ? t('community.reviews.stars') : t('community.reviews.star')}
                 </span>
               )}
             </div>
@@ -294,25 +296,25 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
 
           {/* Title */}
           <div>
-            <Label htmlFor="title">Review Title *</Label>
+            <Label htmlFor="title">{t('community.reviews.review_title')} *</Label>
             <Input
               id="title"
-              placeholder="Summarize your experience in a few words"
+              placeholder={t('community.reviews.title_placeholder')}
               value={formData.title}
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               disabled={createMutation.isPending}
             />
             <div className="text-xs text-gray-500 mt-1">
-              {formData.title.length}/80 characters
+              {formData.title.length}/80 {t('community.reviews.characters')}
             </div>
           </div>
 
           {/* Review Body */}
           <div>
-            <Label htmlFor="body">Your Review *</Label>
+            <Label htmlFor="body">{t('community.reviews.your_review')} *</Label>
             <Textarea
               id="body"
-              placeholder="Share your detailed experience, what you liked or didn't like, and any tips for other travelers..."
+              placeholder={t('community.reviews.review_placeholder')}
               value={formData.body}
               onChange={(e) => setFormData(prev => ({ ...prev, body: e.target.value }))}
               disabled={createMutation.isPending}
@@ -320,22 +322,22 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
               className="resize-none"
             />
             <div className="text-xs text-gray-500 mt-1">
-              {formData.body.length}/2000 characters (minimum 20)
+              {formData.body.length}/2000 {t('community.reviews.characters')} ({t('community.reviews.minimum')} 20)
             </div>
           </div>
 
           {/* Guest Name */}
           <div>
-            <Label htmlFor="guest-name">Your Name *</Label>
+            <Label htmlFor="guest-name">{t('community.reviews.your_name')} *</Label>
             <Input
               id="guest-name"
-              placeholder="Enter your name as it will appear on the review"
+              placeholder={t('community.reviews.name_placeholder')}
               value={formData.guestName}
               onChange={(e) => setFormData(prev => ({ ...prev, guestName: e.target.value }))}
               disabled={createMutation.isPending}
             />
             <div className="text-xs text-gray-500 mt-1">
-              This will be saved for future reviews
+              {t('community.reviews.name_saved_note')}
             </div>
           </div>
 
@@ -347,7 +349,7 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
               onClick={handleClose}
               disabled={createMutation.isPending}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
@@ -356,10 +358,10 @@ export function WriteReviewModal({ open, onOpenChange, onReviewCreated }: WriteR
               {createMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Publishing...
+                  {t('community.reviews.publishing')}
                 </>
               ) : (
-                'Publish Review'
+                t('community.reviews.publish_review')
               )}
             </Button>
           </div>
