@@ -35,7 +35,8 @@ import {
   CheckCircle,
   Route,
   ListChecks,
-  Lightbulb
+  Lightbulb,
+  Star
 } from "lucide-react";
 import { WORLD_COUNTRIES } from "@/lib/constants";
 
@@ -695,49 +696,53 @@ export default function TripBuilder() {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div className="bg-blue-50 p-3 rounded-lg">
-                          <div className="flex items-center mb-1">
-                            <Calendar className="w-4 h-4 mr-2 text-blue-600" />
+                          <div className={`flex items-center mb-1 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                            <Calendar className={`w-4 h-4 text-blue-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
                             <span className="font-semibold text-blue-800 text-sm">Duration</span>
                           </div>
-                          <p className="text-blue-700 text-sm">{suggestion.duration}</p>
+                          <p className={`text-blue-700 text-sm ${i18n.language === 'he' ? 'text-left' : 'text-left'}`}>{suggestion.duration}</p>
                         </div>
 
                         <div className="bg-green-50 p-3 rounded-lg">
-                          <div className="flex items-center mb-1">
-                            <DollarSign className="w-4 h-4 mr-2 text-green-600" />
+                          <div className={`flex items-center mb-1 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                            <DollarSign className={`w-4 h-4 text-green-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
                             <span className="font-semibold text-green-800 text-sm">Budget</span>
                           </div>
-                          <p className="text-green-700 text-sm font-bold">
+                          <p className={`text-green-700 text-sm font-bold ${i18n.language === 'he' ? 'text-left' : 'text-left'}`}>
                             ${suggestion.estimatedBudget.low} - ${suggestion.estimatedBudget.high}
                           </p>
                         </div>
                       </div>
 
-                      <div>
-                        <h4 className="font-semibold text-slate-700 mb-2 text-sm">Best Time to Visit</h4>
-                        <p className="text-sm text-gray-600">{suggestion.bestTimeToVisit}</p>
+                      <div className="bg-orange-50 p-3 rounded-lg">
+                        <div className={`flex items-center mb-1 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                          <Calendar className={`w-4 h-4 text-orange-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                          <span className="font-semibold text-orange-800 text-sm">Best Time to Visit</span>
+                        </div>
+                        <p className={`text-orange-700 text-sm ${i18n.language === 'he' ? 'text-left' : 'text-left'}`}>{suggestion.bestTimeToVisit}</p>
                       </div>
 
                       <div>
-                        <h4 className="font-semibold text-slate-700 mb-2 text-sm">Highlights</h4>
-                        <div className="flex flex-wrap gap-2">
+                        <div className={`flex items-center mb-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                          <Star className={`w-4 h-4 text-yellow-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                          <span className="font-semibold text-gray-800 text-sm">Highlights</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
                           {suggestion.highlights?.map((highlight: string, idx: number) => (
-                            <Badge key={idx} variant="secondary" className="text-xs">
-                              {highlight}
-                            </Badge>
+                            <div key={idx} className={`flex items-center text-sm text-gray-700 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                              <span className={`w-2 h-2 bg-yellow-500 rounded-full ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`}></span>
+                              <span className={`${i18n.language === 'he' ? 'text-left' : 'text-left'}`}>{highlight}</span>
+                            </div>
                           ))}
                         </div>
                       </div>
 
-                      <div>
-                        <h4 className="font-semibold text-slate-700 mb-2 text-sm">Travel Style</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {suggestion.travelStyle?.map((style: string, idx: number) => (
-                            <Badge key={idx} variant="outline" className="text-xs">
-                              {style}
-                            </Badge>
-                          ))}
-                        </div>
+                      <div className={`flex flex-wrap gap-2 ${i18n.language === 'he' ? 'justify-end' : 'justify-start'}`}>
+                        {suggestion.travelStyle?.map((style: string, idx: number) => (
+                          <Badge key={idx} variant="secondary" className="text-xs">
+                            {style}
+                          </Badge>
+                        ))}
                       </div>
 
                       {/* Real Places Links Component */}
@@ -871,31 +876,35 @@ export default function TripBuilder() {
                           </div>
                         </div>
 
-                        <div>
-                          <h4 className={`font-semibold text-slate-700 mb-2 text-sm ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{t("trips.best_time_to_visit")}</h4>
-                          <p className={`text-sm text-gray-600 ${i18n.language === 'he' ? 'text-left' : 'text-left'}`}>{suggestion.bestTimeToVisit}</p>
+                        <div className="bg-orange-50 p-3 rounded-lg">
+                          <div className={`flex items-center mb-1 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                            <Calendar className={`w-4 h-4 text-orange-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                            <span className="font-semibold text-orange-800 text-sm">{t("trips.best_time_to_visit")}</span>
+                          </div>
+                          <p className={`text-orange-700 text-sm ${i18n.language === 'he' ? 'text-left' : 'text-left'}`}>{suggestion.bestTimeToVisit}</p>
                         </div>
 
                         <div>
-                          <h4 className={`font-semibold text-slate-700 mb-2 text-sm ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{t("trips.highlights")}</h4>
-                          <div className={`flex flex-wrap gap-2 ${i18n.language === 'he' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`flex items-center mb-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                            <Star className={`w-4 h-4 text-yellow-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                            <span className="font-semibold text-gray-800 text-sm">{t("trips.highlights")}</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
                             {suggestion.highlights?.map((highlight: string, idx: number) => (
-                              <Badge key={idx} variant="secondary" className="text-xs">
-                                {highlight}
-                              </Badge>
+                              <div key={idx} className={`flex items-center text-sm text-gray-700 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                                <span className={`w-2 h-2 bg-yellow-500 rounded-full ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`}></span>
+                                <span className={`${i18n.language === 'he' ? 'text-left' : 'text-left'}`}>{highlight}</span>
+                              </div>
                             ))}
                           </div>
                         </div>
 
-                        <div>
-                          <h4 className="font-semibold text-slate-700 mb-2 text-sm">{t("trips.travel_style")}</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {suggestion.travelStyle?.map((style: string, idx: number) => (
-                              <Badge key={idx} variant="outline" className="text-xs">
-                                {style}
-                              </Badge>
-                            ))}
-                          </div>
+                        <div className={`flex flex-wrap gap-2 ${i18n.language === 'he' ? 'justify-end' : 'justify-start'}`}>
+                          {suggestion.travelStyle?.map((style: string, idx: number) => (
+                            <Badge key={idx} variant="secondary" className="text-xs">
+                              {style}
+                            </Badge>
+                          ))}
                         </div>
 
                         <div className="pt-2 space-y-2">
