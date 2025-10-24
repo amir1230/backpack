@@ -1705,24 +1705,19 @@ export default function MyTripsNew() {
 
                               {/* Days Preview */}
                               {planData?.itinerary && planData.itinerary.length > 0 && (
-                                <div className={`bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                                  <p 
-                                    className={`font-semibold text-gray-800 mb-3 flex items-center gap-2 ${i18n.language === 'he' ? 'justify-end' : ''}`}
-                                    dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
-                                  >
-                                    {i18n.language === 'he' ? (
-                                      <>
+                                <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg">
+                                  <div className={`flex flex-col gap-2 ${i18n.language === 'he' ? 'items-end' : 'items-start'}`}>
+                                    <div className={`flex items-center gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                                      <Route className="w-4 h-4 text-gray-600" />
+                                      <span 
+                                        className={`font-semibold text-gray-800 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}
+                                        dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
+                                      >
                                         {t('trips.activity_days_count', { count: planData.itinerary.length })}
-                                        <Route className="w-4 h-4 text-gray-600" />
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Route className="w-4 h-4 text-gray-600" />
-                                        {t('trips.activity_days_count', { count: planData.itinerary.length })}
-                                      </>
-                                    )}
-                                  </p>
-                                  <div className="space-y-2">
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className={`space-y-2 mt-3 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
                                     {planData.itinerary.slice(0, 2).map((day: any, idx: number) => (
                                       <div key={idx} className={`flex items-center gap-2 text-sm text-gray-700 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                                         <span className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></span>
