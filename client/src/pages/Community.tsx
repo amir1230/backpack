@@ -522,7 +522,7 @@ function CreateRoomModal({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <Label htmlFor="room-name" className="text-left block">{t('community.create_room.room_name')}</Label>
+            <Label htmlFor="room-name" className="text-left block mb-2">{t('community.create_room.room_name')}</Label>
             <Input
               id="room-name"
               placeholder={t('community.create_room.room_name_placeholder')}
@@ -536,7 +536,7 @@ function CreateRoomModal({
           </div>
 
           <div>
-            <Label htmlFor="description" className="text-left block">{t('community.create_room.description')}</Label>
+            <Label htmlFor="description" className="text-left block mb-2">{t('community.create_room.description')}</Label>
             <Textarea
               id="description"
               placeholder={t('community.create_room.description_placeholder')}
@@ -551,7 +551,7 @@ function CreateRoomModal({
           </div>
 
           <div>
-            <Label htmlFor="destination" className="text-left block">{t('community.create_room.location')}</Label>
+            <Label htmlFor="destination" className="text-left block mb-2">{t('community.create_room.location')}</Label>
             <Input
               id="destination"
               placeholder={t('community.create_room.location_placeholder')}
@@ -587,7 +587,7 @@ function CreateRoomModal({
 
           {formData.visibility === 'private' && (
             <div>
-              <Label htmlFor="invite-guests" className="text-left block">{t('community.create_room.invite_participants')}</Label>
+              <Label htmlFor="invite-guests" className="text-left block mb-2">{t('community.create_room.invite_participants')}</Label>
               <Input
                 id="invite-guests"
                 placeholder={t('community.create_room.invite_placeholder')}
@@ -604,7 +604,7 @@ function CreateRoomModal({
 
           {!storedGuestName && (
             <div>
-              <Label htmlFor="guest-name" className="text-left block">{t('community.create_room.your_name')}</Label>
+              <Label htmlFor="guest-name" className="text-left block mb-2">{t('community.create_room.your_name')}</Label>
               <Input
                 id="guest-name"
                 placeholder={t('community.create_room.name_placeholder')}
