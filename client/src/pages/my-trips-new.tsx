@@ -1624,13 +1624,13 @@ export default function MyTripsNew() {
                           <CardContent className="p-6">
                             <div className={`flex items-start justify-between gap-4 ${i18n.language === 'he' ? 'flex-row' : 'flex-row-reverse'}`}>
                               {/* Title and Date - next to purple bar */}
-                              <div className={`flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                              <div className="flex-1 text-left">
                                 <Link href={`/itineraries/${itinerary.id}`} className="hover:text-purple-600 transition-colors">
                                   <h3 className="text-2xl font-bold text-gray-900 hover:text-purple-600 transition-colors">
                                     {itinerary.title}
                                   </h3>
                                 </Link>
-                                <p className={`text-sm text-gray-500 mt-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                <p className="text-sm text-gray-500 mt-1 text-left">
                                   {t('common.created')} {formatDate(new Date(itinerary.created_at))}
                                 </p>
                               </div>
