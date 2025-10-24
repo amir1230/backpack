@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { MapPin, Calendar, DollarSign, Star, Trash2, BookmarkCheck } from "lucide-react";
+import { MapPin, Calendar, DollarSign, Star, Trash2, BookmarkCheck, ExternalLink } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -224,116 +224,161 @@ export default function MyJourneysPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             {savedJourneys.map((saved) => (
               <Card
                 key={saved.id}
-                className="group overflow-hidden hover:shadow-2xl transition-all duration-300 border-0 bg-white shadow-lg"
+                className={`group overflow-hidden hover:shadow-2xl transition-all duration-300 border-0 bg-white shadow-lg ${isRTL ? 'border-r-4 border-r-orange-500' : 'border-l-4 border-l-orange-500'}`}
                 data-testid={`card-saved-journey-${saved.id}`}
               >
-                <div className="relative overflow-hidden">
-                  <div className="aspect-video bg-gradient-to-br from-orange-400 via-amber-400 to-yellow-400 group-hover:scale-105 transition-transform duration-500">
-                    {saved.journey.heroImage && (
-                      <img
-                        src={saved.journey.heroImage}
-                        alt={saved.journey.title}
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                  </div>
-                  <div className="absolute top-3 right-3 flex gap-2">
-                    <Badge className="bg-white/90 text-orange-600 border-0 shadow-lg backdrop-blur-sm">
-                      <Star className="w-3 h-3 mr-1 fill-orange-500 text-orange-500" />
-                      {saved.journey.rating ? Number(saved.journey.rating).toFixed(1) : '5.0'}
-                    </Badge>
-                  </div>
-                </div>
-
                 <CardContent className="p-6">
-                  <Link href={`/journey/${saved.journeyId}`}>
-                    <h3 
-                      className={`text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-500 transition-colors cursor-pointer ${isRTL ? 'text-right' : 'text-left'}`}
-                      dir={isRTL ? 'rtl' : 'ltr'}
-                      data-testid={`text-journey-title-${saved.id}`}
-                    >
-                      {translateJourneyTitle(saved.journey.title)}
-                    </h3>
-                  </Link>
-
-                  <div className={`flex items-center gap-2 text-gray-600 text-sm mb-4 ${isRTL ? 'flex-row-reverse' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                    <MapPin className="w-4 h-4 flex-shrink-0" />
-                    <span className="line-clamp-1">{formatDestinationChain(saved.journey.destinations)}</span>
-                  </div>
-
-                  <div className={`flex items-center gap-4 mb-4 text-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <div className={`flex items-center gap-1 text-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <Calendar className="w-4 h-4 text-orange-500" />
-                      <span dir={isRTL ? 'rtl' : 'ltr'}>
-                        {saved.journey.totalNights} {isRTL ? 'לילות' : 'nights'}
-                      </span>
-                    </div>
-                    <div className={`flex items-center gap-1 text-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <DollarSign className="w-4 h-4 text-orange-500" />
-                      <span dir={isRTL ? 'rtl' : 'ltr'}>{formatPrice(saved.journey.priceMin, saved.journey.priceMax)}</span>
-                    </div>
-                  </div>
-
-                  {saved.journey.tags && saved.journey.tags.length > 0 && (
-                    <div className={`flex flex-wrap gap-2 mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      {saved.journey.tags.slice(0, 3).map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {translateTag(tag)}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className={`flex gap-2 mt-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <Link href={`/journey/${saved.journeyId}`} className="flex-1">
-                      <Button 
-                        className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white"
-                        data-testid={`button-view-journey-${saved.id}`}
-                      >
-                        {isRTL ? 'צפה במסע' : 'View Journey'}
-                      </Button>
-                    </Link>
-                    
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="border-red-200 hover:bg-red-50 hover:border-red-300"
-                          data-testid={`button-remove-journey-${saved.id}`}
-                        >
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent dir={isRTL ? 'rtl' : 'ltr'}>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle className={isRTL ? 'text-right' : 'text-left'}>
-                            {isRTL ? 'האם אתה בטוח?' : 'Are you sure?'}
-                          </AlertDialogTitle>
-                          <AlertDialogDescription className={isRTL ? 'text-right' : 'text-left'}>
-                            {isRTL 
-                              ? 'פעולה זו תסיר את המסע מהרשימה השמורה שלך. אתה תמיד יכול לשמור אותו שוב מעמוד המסעות.' 
-                              : 'This will remove the journey from your saved list. You can always save it again from the journeys page.'}
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter className={isRTL ? 'flex-row-reverse' : ''}>
-                          <AlertDialogCancel data-testid="button-cancel-remove">
-                            {isRTL ? 'ביטול' : 'Cancel'}
-                          </AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => removeMutation.mutate(saved.id)}
-                            className="bg-red-500 hover:bg-red-600"
-                            data-testid="button-confirm-remove"
+                  <div className={`flex flex-col gap-4 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    {/* Header with title and price */}
+                    <div className={`flex items-start justify-between gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <div className="flex-1">
+                        <Link href={`/journey/${saved.journeyId}`}>
+                          <h3 
+                            className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-orange-500 transition-colors cursor-pointer"
+                            data-testid={`text-journey-title-${saved.id}`}
                           >
-                            {isRTL ? 'הסר' : 'Remove'}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            {translateJourneyTitle(saved.journey.title)}
+                          </h3>
+                        </Link>
+                        <div className={`flex items-center gap-2 text-gray-600 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <MapPin className="w-4 h-4 flex-shrink-0 text-orange-500" />
+                          <span className="line-clamp-1">{formatDestinationChain(saved.journey.destinations)}</span>
+                        </div>
+                      </div>
+                      <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-lg text-base px-4 py-2 whitespace-nowrap">
+                        {formatPrice(saved.journey.priceMin, saved.journey.priceMax)}
+                      </Badge>
+                    </div>
+
+                    {/* Description */}
+                    {saved.journey.description && (
+                      <p className="text-gray-600 leading-relaxed">
+                        {saved.journey.description}
+                      </p>
+                    )}
+
+                    {/* Info Cards Grid */}
+                    <div className={`grid grid-cols-3 gap-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <div className={`flex flex-col gap-2 ${isRTL ? 'items-end' : 'items-start'}`}>
+                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <Calendar className="w-5 h-5 text-blue-600" />
+                            <span className="font-semibold text-blue-800 text-sm">
+                              {isRTL ? 'משך הטיול' : 'Duration'}
+                            </span>
+                          </div>
+                          <p className="text-blue-700 font-medium">
+                            {saved.journey.totalNights} {isRTL ? 'לילות' : 'nights'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="bg-orange-50 p-4 rounded-lg">
+                        <div className={`flex flex-col gap-2 ${isRTL ? 'items-end' : 'items-start'}`}>
+                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <Star className="w-5 h-5 text-orange-600 fill-orange-500" />
+                            <span className="font-semibold text-orange-800 text-sm">
+                              {isRTL ? 'דירוג' : 'Rating'}
+                            </span>
+                          </div>
+                          <p className="text-orange-700 font-medium">
+                            {saved.journey.rating ? Number(saved.journey.rating).toFixed(1) : '5.0'} / 5.0
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="bg-teal-50 p-4 rounded-lg">
+                        <div className={`flex flex-col gap-2 ${isRTL ? 'items-end' : 'items-start'}`}>
+                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <MapPin className="w-5 h-5 text-teal-600" />
+                            <span className="font-semibold text-teal-800 text-sm">
+                              {isRTL ? 'יעדים' : 'Destinations'}
+                            </span>
+                          </div>
+                          <p className="text-teal-700 font-medium">
+                            {saved.journey.destinations.length} {isRTL ? 'ערים' : 'cities'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tags - Content and Audience */}
+                    {((saved.journey.tags && saved.journey.tags.length > 0) || (saved.journey.audienceTags && saved.journey.audienceTags.length > 0)) && (
+                      <div className="space-y-2">
+                        {saved.journey.tags && saved.journey.tags.length > 0 && (
+                          <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
+                            {saved.journey.tags.map((tag) => (
+                              <Badge key={tag} className="bg-gradient-to-r from-orange-100 to-teal-100 text-gray-800 border-0">
+                                {translateTag(tag)}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        {saved.journey.audienceTags && saved.journey.audienceTags.length > 0 && (
+                          <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
+                            {saved.journey.audienceTags.map((tag) => (
+                              <Badge key={tag} variant="outline" className="border-orange-500 text-orange-600">
+                                {translateTag(tag)}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className={`flex gap-3 pt-4 border-t ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <Link href={`/journey/${saved.journeyId}`} className="flex-1">
+                        <Button 
+                          className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-md"
+                          data-testid={`button-view-journey-${saved.id}`}
+                        >
+                          <ExternalLink className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                          {isRTL ? 'צפה' : 'View'}
+                        </Button>
+                      </Link>
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="border-red-200 hover:bg-red-50 hover:border-red-300 text-red-600"
+                            data-testid={`button-remove-journey-${saved.id}`}
+                          >
+                            <Trash2 className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                            {isRTL ? 'מחק' : 'Remove'}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent dir={isRTL ? 'rtl' : 'ltr'}>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className={isRTL ? 'text-right' : 'text-left'}>
+                              {isRTL ? 'האם אתה בטוח?' : 'Are you sure?'}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className={isRTL ? 'text-right' : 'text-left'}>
+                              {isRTL 
+                                ? 'פעולה זו תסיר את המסע מהרשימה השמורה שלך. אתה תמיד יכול לשמור אותו שוב מעמוד המסעות.' 
+                                : 'This will remove the journey from your saved list. You can always save it again from the journeys page.'}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className={isRTL ? 'flex-row-reverse' : ''}>
+                            <AlertDialogCancel data-testid="button-cancel-remove">
+                              {isRTL ? 'ביטול' : 'Cancel'}
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => removeMutation.mutate(saved.id)}
+                              className="bg-red-500 hover:bg-red-600"
+                              data-testid="button-confirm-remove"
+                            >
+                              {isRTL ? 'הסר' : 'Remove'}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
