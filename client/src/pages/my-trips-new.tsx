@@ -1284,8 +1284,8 @@ export default function MyTripsNew() {
                             </div>
                             <div className="grid grid-cols-2 gap-2 w-full">
                               {suggestion.highlights.map((highlight, idx) => (
-                                <div key={idx} className="flex items-center text-sm text-gray-700 text-right flex-row-reverse">
-                                  <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+                                <div key={idx} className="flex items-center text-sm text-gray-700 text-right flex-row-reverse gap-2">
+                                  <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
                                   <span>{highlight}</span>
                                 </div>
                               ))}
