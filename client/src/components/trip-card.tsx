@@ -120,7 +120,7 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
         {destinationNames && (
           <div className={`flex items-center mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <MapPin className={`w-4 h-4 text-orange-600 flex-shrink-0 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-            <span className="text-sm text-gray-700 line-clamp-1">
+            <span className={`text-sm text-gray-700 line-clamp-1 ${isRTL ? 'text-right' : 'text-left'}`}>
               {destinationNames}
             </span>
           </div>
@@ -132,7 +132,7 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
           {trip.startDate && (
             <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
               <Calendar className={`w-4 h-4 text-gray-400 flex-shrink-0 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-              <span className="text-sm text-gray-600" dir={isRTL ? 'rtl' : 'ltr'}>
+              <span className={`text-sm text-gray-600 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 {formatDate(trip.startDate)}
               </span>
             </div>
@@ -151,12 +151,12 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
         {/* Travel Style Tags */}
         {trip.travelStyle && (
           <div className={`mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-            <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
+            <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse justify-start' : ''}`}>
               {trip.travelStyle.split(',').map((style: string, index: number) => (
                 <Badge 
                   key={index} 
                   variant="secondary" 
-                  className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  className={`text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 ${isRTL ? 'text-right' : 'text-left'}`}
                 >
                   {style.trim()}
                 </Badge>
@@ -172,7 +172,7 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
               <AvatarImage src={trip.user.profileImageUrl} />
               <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
             </Avatar>
-            <span className="text-sm text-gray-600">
+            <span className={`text-sm text-gray-600 ${isRTL ? 'text-right' : 'text-left'}`}>
               {trip.user.firstName} {trip.user.lastName}
             </span>
           </div>
@@ -232,8 +232,8 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent dir={isRTL ? 'rtl' : 'ltr'}>
           <AlertDialogHeader>
-            <AlertDialogTitle>{isRTL ? 'מחיקת טיול?' : 'Delete Trip?'}</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className={isRTL ? 'text-right' : 'text-left'}>{isRTL ? 'מחיקת טיול?' : 'Delete Trip?'}</AlertDialogTitle>
+            <AlertDialogDescription className={isRTL ? 'text-right' : 'text-left'}>
               {isRTL 
                 ? `האם אתה בטוח שברצונך למחוק את "${trip.title}"? פעולה זו אינה ניתנת לביטול.`
                 : `Are you sure you want to delete "${trip.title}"? This action cannot be undone.`
