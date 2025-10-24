@@ -40,6 +40,9 @@ import {
 } from "lucide-react";
 import { WORLD_COUNTRIES } from "@/lib/constants";
 
+// Currency conversion rate (USD to ILS)
+const USD_TO_ILS = 3.7;
+
 const getTripFormSchema = (t: any) => z.object({
   travelStyle: z.array(z.string()).min(1, t("trips.select_travel_style")),
   budget: z.number().min(100, t("trips.budget_required")),
@@ -185,7 +188,11 @@ function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: Tri
                 <DollarSign className="w-4 h-4 mr-2 text-green-600" />
                 <span className="font-semibold text-green-800 text-sm">{t("trips.estimated_cost")}</span>
               </div>
-              <p className="text-green-700 text-lg font-bold">${day.estimatedCost}</p>
+              <p className="text-green-700 text-lg font-bold">
+                {i18n.language === 'he' 
+                  ? `₪${Math.round(day.estimatedCost * USD_TO_ILS).toLocaleString('he-IL')}` 
+                  : `$${day.estimatedCost.toLocaleString('en-US')}`}
+              </p>
             </div>
 
             {/* Daily Tips */}
@@ -556,9 +563,13 @@ export default function TripBuilder() {
                     className="mb-4"
                   />
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>$500</span>
-                    <span className="text-orange-500 font-bold text-xl">${budget[0]}</span>
-                    <span>$5000</span>
+                    <span>{i18n.language === 'he' ? '₪1,850' : '$500'}</span>
+                    <span className="text-orange-500 font-bold text-xl">
+                      {i18n.language === 'he' 
+                        ? `₪${Math.round(budget[0] * USD_TO_ILS).toLocaleString('he-IL')}` 
+                        : `$${budget[0].toLocaleString('en-US')}`}
+                    </span>
+                    <span>{i18n.language === 'he' ? '₪18,500' : '$5,000'}</span>
                   </div>
                 </div>
               </div>
@@ -709,7 +720,9 @@ export default function TripBuilder() {
                             <span className="font-semibold text-green-800 text-sm">Budget</span>
                           </div>
                           <p className={`text-green-700 text-sm font-bold ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                            ${suggestion.estimatedBudget.low} - ${suggestion.estimatedBudget.high}
+                            {i18n.language === 'he' 
+                              ? `₪${Math.round(suggestion.estimatedBudget.low * USD_TO_ILS).toLocaleString('he-IL')} - ₪${Math.round(suggestion.estimatedBudget.high * USD_TO_ILS).toLocaleString('he-IL')}`
+                              : `$${suggestion.estimatedBudget.low.toLocaleString('en-US')} - $${suggestion.estimatedBudget.high.toLocaleString('en-US')}`}
                           </p>
                         </div>
                       </div>
@@ -871,7 +884,9 @@ export default function TripBuilder() {
                               <span className="font-semibold text-green-800 text-sm">{t("trips.budget")}</span>
                             </div>
                             <p className={`text-green-700 text-sm font-bold ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                              ${suggestion.estimatedBudget.low} - ${suggestion.estimatedBudget.high}
+                              {i18n.language === 'he' 
+                                ? `₪${Math.round(suggestion.estimatedBudget.low * USD_TO_ILS).toLocaleString('he-IL')} - ₪${Math.round(suggestion.estimatedBudget.high * USD_TO_ILS).toLocaleString('he-IL')}`
+                                : `$${suggestion.estimatedBudget.low.toLocaleString('en-US')} - $${suggestion.estimatedBudget.high.toLocaleString('en-US')}`}
                             </p>
                           </div>
                         </div>

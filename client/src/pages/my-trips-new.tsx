@@ -1608,7 +1608,9 @@ export default function MyTripsNew() {
                               {planData?.totalCost && (
                                 <div className="flex items-center text-sm text-gray-600">
                                   <DollarSign className="w-4 h-4 mr-2" />
-                                  {t('trips.estimated_cost')}: ${planData.totalCost}
+                                  {t('trips.estimated_cost')}: {i18n.language === 'he' 
+                                    ? `₪${Math.round(planData.totalCost * USD_TO_ILS).toLocaleString('he-IL')}` 
+                                    : `$${planData.totalCost.toLocaleString('en-US')}`}
                                 </div>
                               )}
                               {planData?.itinerary && planData.itinerary.length > 0 && (

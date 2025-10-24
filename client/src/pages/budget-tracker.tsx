@@ -38,6 +38,9 @@ import {
   Wallet
 } from "lucide-react";
 
+// Currency conversion rate (USD to ILS)
+const USD_TO_ILS = 3.7;
+
 // Note: expenseSchema moved inside component to access t() function
 
 
