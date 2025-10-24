@@ -83,45 +83,90 @@ function SavedJourneyCard({ savedJourney, onRemove, formatPrice }: {
     <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 border-2 border-purple-100">
       <CardContent className="p-0">
         <div className="p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
+          {/* Title and Description */}
+          <div className={`flex ${isRTL ? 'flex-row-reverse justify-between' : 'justify-between'} items-start mb-4`}>
+            <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
               <h3 className="text-xl font-bold text-slate-800 mb-2 line-clamp-1">
                 {journey.title}
               </h3>
-              <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+              <p className="text-sm text-gray-600 line-clamp-2">
                 {journey.description}
               </p>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <MapPin className="w-4 h-4 text-purple-600 flex-shrink-0" />
-              <span className="truncate">{formatDestinationChain(journey.destinations)}</span>
+          {/* Info Boxes */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            {/* Destination */}
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <div className={`flex flex-col gap-2 ${isRTL ? 'items-end' : 'items-start'}`}>
+                <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <MapPin className="w-5 h-5 text-purple-600" />
+                  <span className={`font-semibold text-purple-800 text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {isRTL ? 'יעד' : 'Destination'}
+                  </span>
+                </div>
+                <p className={`text-purple-700 font-medium text-sm line-clamp-1 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                  {formatDestinationChain(journey.destinations)}
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <Calendar className="w-4 h-4 text-purple-600 flex-shrink-0" />
-              <span>{journey.totalNights} {isRTL ? 'לילות' : 'nights'}</span>
+            {/* Duration */}
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <div className={`flex flex-col gap-2 ${isRTL ? 'items-end' : 'items-start'}`}>
+                <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                  <span className={`font-semibold text-blue-800 text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {isRTL ? 'משך זמן' : 'Duration'}
+                  </span>
+                </div>
+                <p className={`text-blue-700 font-medium text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {journey.totalNights} {isRTL ? 'לילות' : 'nights'}
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <DollarSign className="w-4 h-4 text-purple-600 flex-shrink-0" />
-              <span className="font-semibold">{formatPrice(journey.priceMin, journey.priceMax)}</span>
+            {/* Price */}
+            <div className="bg-green-50 p-4 rounded-lg">
+              <div className={`flex flex-col gap-2 ${isRTL ? 'items-end' : 'items-start'}`}>
+                <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <DollarSign className="w-5 h-5 text-green-600" />
+                  <span className={`font-semibold text-green-800 text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {isRTL ? 'מחיר' : 'Price'}
+                  </span>
+                </div>
+                <p className={`text-green-700 font-medium text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {formatPrice(journey.priceMin, journey.priceMax)}
+                </p>
+              </div>
             </div>
 
+            {/* Rating */}
             {journey.rating && (
-              <div className="flex items-center gap-2 text-sm text-gray-700">
-                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 flex-shrink-0" />
-                <span>{journey.rating.toFixed(1)}</span>
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <div className={`flex flex-col gap-2 ${isRTL ? 'items-end' : 'items-start'}`}>
+                  <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <Star className="w-5 h-5 text-yellow-600 fill-yellow-600" />
+                    <span className={`font-semibold text-yellow-800 text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {isRTL ? 'דירוג' : 'Rating'}
+                    </span>
+                  </div>
+                  <p className={`text-yellow-700 font-medium text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {journey.rating.toFixed(1)}
+                  </p>
+                </div>
               </div>
             )}
           </div>
 
-          <div className="mt-4 flex gap-2">
+          {/* Action Buttons */}
+          <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Button asChild className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700" data-testid={`button-view-journey-${journey.id}`}>
               <Link href={`/journeys/${journey.id}`}>
-                {isRTL ? 'צפה במסע' : 'View Journey'}
+                <span className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  {isRTL ? 'צפה במסע' : 'View Journey'}
+                </span>
               </Link>
             </Button>
             
