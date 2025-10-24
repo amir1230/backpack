@@ -240,14 +240,8 @@ export default function MyTripsNew() {
 
   // Combined interests (previously Travel Styles + Interests)
   const ALL_INTERESTS = [
-    { id: 'adventure', icon: Mountain, label: t('trips.adventure') },
-    { id: 'cultural', icon: Camera, label: t('trips.cultural') },
     { id: 'budget', icon: DollarSign, label: t('trips.budget_travel') },
     { id: 'luxury', icon: Sparkles, label: t('trips.luxury') },
-    { id: 'nature', icon: Mountain, label: t('trips.nature') },
-    { id: 'food', icon: Utensils, label: t('trips.food') },
-    { id: 'nightlife', icon: GlassWater, label: t('trips.nightlife') },
-    { id: 'relaxation', icon: Clock, label: t('trips.relaxation') },
     { id: 'history_culture', icon: Camera, label: t('trips.interests_list.history_culture') },
     { id: 'adventure_sports', icon: Mountain, label: t('trips.interests_list.adventure_sports') },
     { id: 'nature_wildlife', icon: Mountain, label: t('trips.interests_list.nature_wildlife') },
