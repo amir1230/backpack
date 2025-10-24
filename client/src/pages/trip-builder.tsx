@@ -686,10 +686,10 @@ export default function TripBuilder() {
                   {aiSuggestions.map((suggestion, index) => (
                     <div key={index} className={`border rounded-lg p-4 space-y-4 ${i18n.language === 'he' ? 'text-left' : 'text-left'}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
                       <div>
-                        <h3 className={`text-xl font-bold text-slate-700 mb-1 ${i18n.language === 'he' ? 'text-left' : 'text-left'}`}>
+                        <h3 className={`text-xl font-bold text-slate-700 mb-1 ${i18n.language === 'he' ? 'text-left' : 'text-left'}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
                           {suggestion.destination}, {suggestion.country}
                         </h3>
-                        <p className={`text-gray-600 leading-relaxed ${i18n.language === 'he' ? 'text-left' : 'text-left'}`}>
+                        <p className={`text-gray-600 leading-relaxed ${i18n.language === 'he' ? 'text-left' : 'text-left'}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
                           {suggestion.description}
                         </p>
                       </div>
@@ -725,7 +725,7 @@ export default function TripBuilder() {
                       <div>
                         <div className={`flex items-center mb-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                           <Star className={`w-4 h-4 text-yellow-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
-                          <span className="font-semibold text-gray-800 text-sm">Highlights</span>
+                          <span className={`font-semibold text-gray-800 text-sm ${i18n.language === 'he' ? 'text-left' : ''}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>Highlights</span>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                           {suggestion.highlights?.map((highlight: string, idx: number) => (
@@ -848,10 +848,10 @@ export default function TripBuilder() {
                     {aiSuggestions.map((suggestion, index) => (
                       <div key={index} className={`border rounded-lg p-4 space-y-4 ${i18n.language === 'he' ? 'text-left' : 'text-left'}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
                         <div>
-                          <h3 className={`text-xl font-bold text-slate-700 mb-1 ${i18n.language === 'he' ? 'text-left' : 'text-left'}`}>
+                          <h3 className={`text-xl font-bold text-slate-700 mb-1 ${i18n.language === 'he' ? 'text-left' : 'text-left'}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
                             {suggestion.destination}, {suggestion.country}
                           </h3>
-                          <p className={`text-gray-600 leading-relaxed ${i18n.language === 'he' ? 'text-left' : 'text-left'}`}>
+                          <p className={`text-gray-600 leading-relaxed ${i18n.language === 'he' ? 'text-left' : 'text-left'}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
                             {suggestion.description}
                           </p>
                         </div>
@@ -887,13 +887,13 @@ export default function TripBuilder() {
                         <div>
                           <div className={`flex items-center mb-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                             <Star className={`w-4 h-4 text-yellow-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
-                            <span className="font-semibold text-gray-800 text-sm">{t("trips.highlights")}</span>
+                            <span className={`font-semibold text-gray-800 text-sm ${i18n.language === 'he' ? 'text-left' : ''}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>{t("trips.highlights")}</span>
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             {suggestion.highlights?.map((highlight: string, idx: number) => (
                               <div key={idx} className={`flex items-center text-sm text-gray-700 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                                 <span className={`w-2 h-2 bg-yellow-500 rounded-full ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`}></span>
-                                <span className={`${i18n.language === 'he' ? 'text-left' : 'text-left'}`}>{highlight}</span>
+                                <span className={`${i18n.language === 'he' ? 'text-left' : 'text-left'}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>{highlight}</span>
                               </div>
                             ))}
                           </div>
