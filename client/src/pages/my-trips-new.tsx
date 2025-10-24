@@ -1833,7 +1833,7 @@ export default function MyTripsNew() {
                                     <Star className="w-4 h-4 text-yellow-600" />
                                     <span className={`font-semibold text-gray-800 text-sm ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{t('trips.highlights')}</span>
                                   </div>
-                                  <div className={`flex flex-wrap gap-3 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                                  <div className={`flex flex-col gap-3 md:flex-row md:flex-wrap md:gap-6 ${i18n.language === 'he' ? 'md:flex-row-reverse' : ''}`}>
                                     {highlights.map((highlight, idx) => (
                                       <div key={idx} className={`flex items-center text-sm text-gray-700 gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                                         <span className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></span>
