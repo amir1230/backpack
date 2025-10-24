@@ -1750,8 +1750,11 @@ export default function MyTripsNew() {
                                       </div>
                                     ))}
                                     {planData.itinerary.length > 2 && (
-                                      <div className={`text-xs text-gray-500 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                                        {t('trips.and_more_days', { count: planData.itinerary.length - 2 })}...
+                                      <div className={`flex items-center gap-2 text-xs text-gray-500 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                                        <span className="w-2 h-2 bg-purple-400 rounded-full flex-shrink-0"></span>
+                                        <span className={i18n.language === 'he' ? 'text-right' : 'text-left'}>
+                                          {t('trips.and_more_days', { count: planData.itinerary.length - 2 })}...
+                                        </span>
                                       </div>
                                     )}
                                   </div>
