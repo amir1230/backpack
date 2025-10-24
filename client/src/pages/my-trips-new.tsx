@@ -1784,15 +1784,16 @@ export default function MyTripsNew() {
                               {/* Highlights */}
                               {highlights && highlights.length > 0 && (
                                 <div>
-                                  <div className={`flex items-center gap-2 mb-3 ${i18n.language === 'he' ? 'flex-row-reverse justify-end' : ''}`}>
+                                  <div className="flex items-center gap-2 mb-3">
                                     <Star className="w-4 h-4 text-yellow-600" />
-                                    <span className={`font-semibold text-gray-800 text-sm ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{t('trips.highlights')}</span>
+                                    <span className="font-semibold text-gray-800 text-sm text-left">{t('trips.highlights')}</span>
                                   </div>
                                   <div className="grid grid-cols-2 gap-2">
                                     {highlights.map((highlight, idx) => (
-                                      <div key={idx} className={`flex items-center text-sm text-gray-700 gap-2 ${i18n.language === 'he' ? 'justify-end' : ''}`}>
-                                        <span className={i18n.language === 'he' ? 'text-right' : 'text-left'}>{highlight}</span>
+                                      <div key={idx} className="flex items-center text-sm text-gray-700 gap-2">
+                                        <Star className="w-4 h-4 flex-shrink-0 invisible" />
                                         <span className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></span>
+                                        <span className="text-left">{highlight}</span>
                                       </div>
                                     ))}
                                   </div>
