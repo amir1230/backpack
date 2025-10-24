@@ -1232,53 +1232,53 @@ export default function MyTripsNew() {
                     </div>
 
                     {aiSuggestions.map((suggestion, index) => (
-                      <div key={index} className={`border rounded-lg p-4 space-y-4 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
+                      <div key={index} className="border rounded-lg p-4 space-y-4 text-right" dir="rtl" data-testid={`suggestion-card-${index}`}>
                         <div>
-                          <h3 className={`text-xl font-bold text-slate-700 mb-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                          <h3 className="text-xl font-bold text-slate-700 mb-1 text-right">
                             {translateCity(suggestion.destination)}, {translateCountry(suggestion.country)}
                           </h3>
-                          <p className={`text-gray-600 leading-relaxed ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                          <p className="text-gray-600 leading-relaxed text-right">
                             {suggestion.description}
                           </p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="bg-blue-50 p-3 rounded-lg">
-                            <div className={`flex items-center mb-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
-                              <Calendar className={`w-4 h-4 text-blue-600 ${i18n.language === 'he' ? 'ml-1' : 'mr-1'}`} />
+                            <div className="flex items-center mb-2 flex-row-reverse">
+                              <Calendar className="w-4 h-4 text-blue-600 ml-1" />
                               <span className="font-semibold text-blue-800 text-sm">{t('trips.duration')}</span>
                             </div>
-                            <p className={`text-blue-700 text-sm ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{suggestion.duration}</p>
+                            <p className="text-blue-700 text-sm text-right">{suggestion.duration}</p>
                           </div>
 
                           <div className="bg-green-50 p-3 rounded-lg">
-                            <div className={`flex items-center mb-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
-                              <DollarSign className={`w-4 h-4 text-green-600 ${i18n.language === 'he' ? 'ml-1' : 'mr-1'}`} />
+                            <div className="flex items-center mb-2 flex-row-reverse">
+                              <DollarSign className="w-4 h-4 text-green-600 ml-1" />
                               <span className="font-semibold text-green-800 text-sm">{t('trips.budget')}</span>
                             </div>
-                            <p className={`text-green-700 text-sm font-bold ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                            <p className="text-green-700 text-sm font-bold text-right">
                               ${suggestion.estimatedBudget.low} - ${suggestion.estimatedBudget.high}
                             </p>
                           </div>
                         </div>
 
                         <div className="bg-orange-50 p-3 rounded-lg">
-                          <div className={`flex items-center mb-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
-                            <Calendar className={`w-4 h-4 text-orange-600 ${i18n.language === 'he' ? 'ml-1' : 'mr-1'}`} />
+                          <div className="flex items-center mb-2 flex-row-reverse">
+                            <Calendar className="w-4 h-4 text-orange-600 ml-1" />
                             <span className="font-semibold text-orange-800 text-sm">{t('trips.best_time_to_visit')}</span>
                           </div>
-                          <p className={`text-orange-700 text-sm ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{suggestion.bestTimeToVisit}</p>
+                          <p className="text-orange-700 text-sm text-right">{suggestion.bestTimeToVisit}</p>
                         </div>
 
                         <div>
-                          <div className={`flex items-center mb-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
-                            <Star className={`w-4 h-4 text-yellow-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                          <div className="flex items-center mb-2 flex-row-reverse">
+                            <Star className="w-4 h-4 text-yellow-600 ml-2" />
                             <span className="font-semibold text-gray-800 text-sm">{t('trips.highlights')}</span>
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             {suggestion.highlights.map((highlight, idx) => (
-                              <div key={idx} className={`flex items-center text-sm text-gray-700 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
-                                <span className={`w-2 h-2 bg-yellow-500 rounded-full ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`}></span>
+                              <div key={idx} className="flex items-center text-sm text-gray-700 flex-row-reverse text-right">
+                                <span className="w-2 h-2 bg-yellow-500 rounded-full ml-2"></span>
                                 <span>{highlight}</span>
                               </div>
                             ))}
@@ -1293,7 +1293,7 @@ export default function MyTripsNew() {
                         )}
                         */}
 
-                        <div className={`flex flex-wrap gap-2 mb-4 ${i18n.language === 'he' ? 'justify-end' : 'justify-start'}`}>
+                        <div className="flex flex-wrap gap-2 mb-4 justify-start">
                           {suggestion.travelStyle.map((style) => {
                             const interestConfig = ALL_INTERESTS.find(int => int.id === style.trim().toLowerCase());
                             return (
@@ -1304,35 +1304,37 @@ export default function MyTripsNew() {
                           })}
                         </div>
 
-                        <div className={`flex items-center pt-4 border-t gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
-                          <Button 
-                            onClick={() => handleGenerateItineraryForSuggestion(suggestion)}
-                            disabled={isGeneratingItinerary}
-                            variant="outline"
-                            size="sm"
-                            className={`${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}
-                          >
-                            {isGeneratingItinerary ? (
-                              <Loader2 className={`w-4 h-4 animate-spin ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
-                            ) : (
-                              <Route className={`w-4 h-4 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
-                            )}
-{t('trips.generate_daily_itinerary')}
-                          </Button>
-                          
+                        <div className="flex items-center pt-4 border-t gap-2 flex-row-reverse">
                           <Button 
                             onClick={() => saveTripMutation.mutate(suggestion)}
                             disabled={saveTripMutation.isPending}
                             variant="default"
                             size="sm"
-                            className={`${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}
+                            className="flex-row-reverse"
+                            data-testid={`button-save-trip-${index}`}
                           >
                             {saveTripMutation.isPending ? (
-                              <Loader2 className={`w-4 h-4 animate-spin ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                              <Loader2 className="w-4 h-4 animate-spin ml-2" />
                             ) : (
-                              <Heart className={`w-4 h-4 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                              <Heart className="w-4 h-4 ml-2" />
                             )}
                             {t('trips.save_trip')}
+                          </Button>
+                          
+                          <Button 
+                            onClick={() => handleGenerateItineraryForSuggestion(suggestion)}
+                            disabled={isGeneratingItinerary}
+                            variant="outline"
+                            size="sm"
+                            className="flex-row-reverse"
+                            data-testid={`button-generate-itinerary-${index}`}
+                          >
+                            {isGeneratingItinerary ? (
+                              <Loader2 className="w-4 h-4 animate-spin ml-2" />
+                            ) : (
+                              <Route className="w-4 h-4 ml-2" />
+                            )}
+{t('trips.generate_daily_itinerary')}
                           </Button>
                         </div>
                       </div>
