@@ -1755,31 +1755,29 @@ export default function MyTripsNew() {
                           data-testid={`card-saved-trip-${trip.id}`}
                         >
                           <CardContent className="p-6">
-                            <div className={`flex flex-col gap-4 ${i18n.language === 'he' ? 'items-end' : 'items-start'}`}>
-                              {/* Header with title and budget */}
-                              <div className={`flex items-start justify-between gap-8 ${i18n.language === 'he' ? 'flex-row-reverse w-full' : 'w-full'}`}>
-                                <div className="flex-1 min-w-0 flex flex-col gap-2">
+                            <div className="flex flex-col gap-4">
+                              {/* Header with title, subtitle, description, and budget */}
+                              <div className={`flex items-start justify-between gap-8 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                                <div className={`flex-1 min-w-0 flex flex-col gap-2 ${i18n.language === 'he' ? 'items-end' : 'items-start'}`}>
                                   <h3 className={`text-2xl font-bold text-gray-900 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
                                     {trip.title}
                                   </h3>
-                                  <div className={`flex items-center gap-2 text-gray-600 ${i18n.language === 'he' ? 'flex-row-reverse justify-end' : ''}`}>
+                                  <div className={`flex items-center gap-2 text-gray-600 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                                     <MapPin className="w-4 h-4 flex-shrink-0 text-orange-500" />
                                     <span className={i18n.language === 'he' ? 'text-right' : 'text-left'}>{typeof trip.destinations === 'object' && trip.destinations?.name ? trip.destinations.name : t('trips.multiple_destinations')}</span>
                                   </div>
+                                  <p 
+                                    className={`text-gray-600 leading-relaxed ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}
+                                    dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
+                                    style={i18n.language === 'he' ? { unicodeBidi: 'plaintext' } : undefined}
+                                  >
+                                    {normalizeRtlText(trip.description, i18n.language === 'he')}
+                                  </p>
                                 </div>
                                 <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-lg text-base px-4 py-2 whitespace-nowrap flex-shrink-0">
                                   {trip.budget}
                                 </Badge>
                               </div>
-
-                              {/* Description */}
-                              <p 
-                                className={`text-gray-600 leading-relaxed ${i18n.language === 'he' ? 'text-right max-w-full' : 'text-left'}`}
-                                dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
-                                style={i18n.language === 'he' ? { unicodeBidi: 'plaintext' } : undefined}
-                              >
-                                {normalizeRtlText(trip.description, i18n.language === 'he')}
-                              </p>
 
                               {/* Info Cards Grid */}
                               <div className="grid grid-cols-3 gap-4">
