@@ -1448,7 +1448,7 @@ export default function MyTripsNew() {
                     </div>
                     
                     {itinerary.map((day) => (
-                      <Card key={day.day} className={`border-l-4 border-l-primary ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                      <Card key={day.day} className={`border-r-4 border-r-primary ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
                         <CardHeader className="pb-3">
                           <CardTitle className={`flex items-center text-lg ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                             <Calendar className={`w-5 h-5 text-primary ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
