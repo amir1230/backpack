@@ -1244,11 +1244,13 @@ export default function MyTripsNew() {
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="bg-blue-50 p-3 rounded-lg">
-                            <div className="flex items-center mb-2">
-                              <Calendar className="w-4 h-4 text-blue-600 mr-1" />
-                              <span className="font-semibold text-blue-800 text-sm">{t('trips.duration')}</span>
+                            <div className="flex flex-col gap-2 items-end">
+                              <div className="flex items-center">
+                                <Calendar className="w-4 h-4 text-blue-600 mr-1" />
+                                <span className="font-semibold text-blue-800 text-sm">{t('trips.duration')}</span>
+                              </div>
+                              <p className="text-blue-700 text-sm text-right">{suggestion.duration}</p>
                             </div>
-                            <p className="text-blue-700 text-sm text-left">{suggestion.duration}</p>
                           </div>
 
                           <div className="bg-green-50 p-3 rounded-lg">
@@ -1265,25 +1267,29 @@ export default function MyTripsNew() {
                         </div>
 
                         <div className="bg-orange-50 p-3 rounded-lg">
-                          <div className="flex items-center mb-2">
-                            <Calendar className="w-4 h-4 text-orange-600 mr-1" />
-                            <span className="font-semibold text-orange-800 text-sm">{t('trips.best_time_to_visit')}</span>
+                          <div className="flex flex-col gap-2 items-end">
+                            <div className="flex items-center">
+                              <Calendar className="w-4 h-4 text-orange-600 mr-1" />
+                              <span className="font-semibold text-orange-800 text-sm">{t('trips.best_time_to_visit')}</span>
+                            </div>
+                            <p className="text-orange-700 text-sm text-right">{suggestion.bestTimeToVisit}</p>
                           </div>
-                          <p className="text-orange-700 text-sm text-left">{suggestion.bestTimeToVisit}</p>
                         </div>
 
                         <div>
-                          <div className="flex items-center mb-2">
-                            <Star className="w-4 h-4 text-yellow-600 mr-2" />
-                            <span className="font-semibold text-gray-800 text-sm">{t('trips.highlights')}</span>
-                          </div>
-                          <div className="grid grid-cols-2 gap-2">
-                            {suggestion.highlights.map((highlight, idx) => (
-                              <div key={idx} className="flex items-center text-sm text-gray-700 text-left">
-                                <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
-                                <span>{highlight}</span>
-                              </div>
-                            ))}
+                          <div className="flex flex-col gap-2 items-end">
+                            <div className="flex items-center">
+                              <Star className="w-4 h-4 text-yellow-600 mr-2" />
+                              <span className="font-semibold text-gray-800 text-sm">{t('trips.highlights')}</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 w-full">
+                              {suggestion.highlights.map((highlight, idx) => (
+                                <div key={idx} className="flex items-center text-sm text-gray-700 text-left">
+                                  <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+                                  <span>{highlight}</span>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         </div>
 
