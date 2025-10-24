@@ -56,23 +56,11 @@ import {
   Globe
 } from "lucide-react";
 
-// Component to properly display RTL text
-const RTLText = ({ text, isHebrew }: { text: string; isHebrew: boolean }) => {
-  if (!isHebrew) return <>{text}</>;
-  
-  return (
-    <span 
-      style={{ 
-        display: 'inline-block',
-        direction: 'rtl',
-        unicodeBidi: 'embed',
-        textAlign: 'right',
-        width: '100%'
-      }}
-    >
-      {text}
-    </span>
-  );
+// Fix RTL punctuation by adding RLM after punctuation marks
+const fixHebrewPunctuation = (text: string, isHebrew: boolean) => {
+  if (!isHebrew) return text;
+  // Add Right-to-Left Mark (U+200F) after punctuation marks to force them to the right
+  return text.replace(/([.!?,;:])/g, '$1\u200F');
 };
 
 // Create form schema function that uses translations
@@ -1788,8 +1776,8 @@ export default function MyTripsNew() {
                               {/* Description */}
                               <div className="flex gap-2">
                                 <MapPin className="w-4 h-4 flex-shrink-0 text-orange-500 invisible" />
-                                <p className={`text-gray-600 leading-relaxed flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                                  <RTLText text={trip.description} isHebrew={i18n.language === 'he'} />
+                                <p className={`text-gray-600 leading-relaxed flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
+                                  {fixHebrewPunctuation(trip.description, i18n.language === 'he')}
                                 </p>
                               </div>
 
