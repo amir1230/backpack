@@ -1252,12 +1252,12 @@ export default function MyTripsNew() {
                           </div>
 
                           <div className="bg-green-50 p-3 rounded-lg">
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-2 items-end">
                               <div className="flex items-center">
                                 <DollarSign className="w-4 h-4 text-green-600 mr-1" />
                                 <span className="font-semibold text-green-800 text-sm">{t('trips.budget')}</span>
                               </div>
-                              <p className="text-green-700 text-sm font-bold text-left">
+                              <p className="text-green-700 text-sm font-bold text-right">
                                 ${suggestion.estimatedBudget.low} - ${suggestion.estimatedBudget.high}
                               </p>
                             </div>
