@@ -1232,53 +1232,53 @@ export default function MyTripsNew() {
                     </div>
 
                     {aiSuggestions.map((suggestion, index) => (
-                      <div key={index} className="border rounded-lg p-4 space-y-4 text-right" dir="rtl" data-testid={`suggestion-card-${index}`}>
+                      <div key={index} className="border rounded-lg p-4 space-y-4 text-left" dir="ltr" data-testid={`suggestion-card-${index}`}>
                         <div>
-                          <h3 className="text-xl font-bold text-slate-700 mb-1 text-right">
+                          <h3 className="text-xl font-bold text-slate-700 mb-1 text-left">
                             {translateCity(suggestion.destination)}, {translateCountry(suggestion.country)}
                           </h3>
-                          <p className="text-gray-600 leading-relaxed text-right">
+                          <p className="text-gray-600 leading-relaxed text-left">
                             {suggestion.description}
                           </p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="bg-blue-50 p-3 rounded-lg">
-                            <div className="flex items-center mb-2 flex-row-reverse">
-                              <Calendar className="w-4 h-4 text-blue-600 ml-1" />
+                            <div className="flex items-center mb-2">
+                              <Calendar className="w-4 h-4 text-blue-600 mr-1" />
                               <span className="font-semibold text-blue-800 text-sm">{t('trips.duration')}</span>
                             </div>
-                            <p className="text-blue-700 text-sm text-right">{suggestion.duration}</p>
+                            <p className="text-blue-700 text-sm text-left">{suggestion.duration}</p>
                           </div>
 
                           <div className="bg-green-50 p-3 rounded-lg">
-                            <div className="flex items-center mb-2 flex-row-reverse">
-                              <DollarSign className="w-4 h-4 text-green-600 ml-1" />
+                            <div className="flex items-center mb-2">
+                              <DollarSign className="w-4 h-4 text-green-600 mr-1" />
                               <span className="font-semibold text-green-800 text-sm">{t('trips.budget')}</span>
                             </div>
-                            <p className="text-green-700 text-sm font-bold text-right">
+                            <p className="text-green-700 text-sm font-bold text-left">
                               ${suggestion.estimatedBudget.low} - ${suggestion.estimatedBudget.high}
                             </p>
                           </div>
                         </div>
 
                         <div className="bg-orange-50 p-3 rounded-lg">
-                          <div className="flex items-center mb-2 flex-row-reverse">
-                            <Calendar className="w-4 h-4 text-orange-600 ml-1" />
+                          <div className="flex items-center mb-2">
+                            <Calendar className="w-4 h-4 text-orange-600 mr-1" />
                             <span className="font-semibold text-orange-800 text-sm">{t('trips.best_time_to_visit')}</span>
                           </div>
-                          <p className="text-orange-700 text-sm text-right">{suggestion.bestTimeToVisit}</p>
+                          <p className="text-orange-700 text-sm text-left">{suggestion.bestTimeToVisit}</p>
                         </div>
 
                         <div>
-                          <div className="flex items-center mb-2 flex-row-reverse">
-                            <Star className="w-4 h-4 text-yellow-600 ml-2" />
+                          <div className="flex items-center mb-2">
+                            <Star className="w-4 h-4 text-yellow-600 mr-2" />
                             <span className="font-semibold text-gray-800 text-sm">{t('trips.highlights')}</span>
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             {suggestion.highlights.map((highlight, idx) => (
-                              <div key={idx} className="flex items-center text-sm text-gray-700 flex-row-reverse text-right">
-                                <span className="w-2 h-2 bg-yellow-500 rounded-full ml-2"></span>
+                              <div key={idx} className="flex items-center text-sm text-gray-700 text-left">
+                                <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
                                 <span>{highlight}</span>
                               </div>
                             ))}
@@ -1304,37 +1304,35 @@ export default function MyTripsNew() {
                           })}
                         </div>
 
-                        <div className="flex items-center pt-4 border-t gap-2 flex-row-reverse">
-                          <Button 
-                            onClick={() => saveTripMutation.mutate(suggestion)}
-                            disabled={saveTripMutation.isPending}
-                            variant="default"
-                            size="sm"
-                            className="flex-row-reverse"
-                            data-testid={`button-save-trip-${index}`}
-                          >
-                            {saveTripMutation.isPending ? (
-                              <Loader2 className="w-4 h-4 animate-spin ml-2" />
-                            ) : (
-                              <Heart className="w-4 h-4 ml-2" />
-                            )}
-                            {t('trips.save_trip')}
-                          </Button>
-                          
+                        <div className="flex items-center pt-4 border-t gap-2">
                           <Button 
                             onClick={() => handleGenerateItineraryForSuggestion(suggestion)}
                             disabled={isGeneratingItinerary}
                             variant="outline"
                             size="sm"
-                            className="flex-row-reverse"
                             data-testid={`button-generate-itinerary-${index}`}
                           >
                             {isGeneratingItinerary ? (
-                              <Loader2 className="w-4 h-4 animate-spin ml-2" />
+                              <Loader2 className="w-4 h-4 animate-spin mr-2" />
                             ) : (
-                              <Route className="w-4 h-4 ml-2" />
+                              <Route className="w-4 h-4 mr-2" />
                             )}
 {t('trips.generate_daily_itinerary')}
+                          </Button>
+                          
+                          <Button 
+                            onClick={() => saveTripMutation.mutate(suggestion)}
+                            disabled={saveTripMutation.isPending}
+                            variant="default"
+                            size="sm"
+                            data-testid={`button-save-trip-${index}`}
+                          >
+                            {saveTripMutation.isPending ? (
+                              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                            ) : (
+                              <Heart className="w-4 h-4 mr-2" />
+                            )}
+                            {t('trips.save_trip')}
                           </Button>
                         </div>
                       </div>
