@@ -1608,34 +1608,33 @@ export default function MyTripsNew() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <p className="text-sm text-gray-600">
+                  <div className="space-y-6">
+                    {/* Header Banner */}
+                    <div className="bg-gradient-to-r from-purple-100 via-pink-100 to-orange-100 p-4 rounded-lg text-center">
+                      <p className="text-lg font-semibold text-gray-800 flex items-center gap-2 justify-center">
+                        <Calendar className="w-5 h-5 text-purple-600" />
                         {t('trips.you_have_count_itineraries', { count: savedItineraries.length })}
                       </p>
-                      <Badge variant="secondary">{savedItineraries.length}</Badge>
                     </div>
 
                     {savedItineraries.map((itinerary) => {
                       const planData = itinerary.plan_json as any;
                       return (
-                        <Card key={itinerary.id} className="border hover:shadow-md transition-shadow">
-                          <CardHeader className="pb-3">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <CardTitle className="text-lg">
-                                  <Link href={`/itineraries/${itinerary.id}`} className="hover:text-primary cursor-pointer transition-colors">
-                                    {itinerary.title}
+                        <Card key={itinerary.id} className={`group overflow-hidden hover:shadow-2xl transition-all duration-300 border-0 bg-white shadow-lg ${i18n.language === 'he' ? 'border-r-4 border-r-purple-500' : 'border-l-4 border-l-purple-500'}`}>
+                          <CardContent className="p-6">
+                            <div className="flex flex-col gap-4">
+                              {/* Header */}
+                              <div className={`flex items-start justify-between gap-4 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                                <div className={`flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                  <Link href={`/itineraries/${itinerary.id}`} className="hover:text-purple-600 transition-colors">
+                                    <h3 className="text-2xl font-bold text-gray-900 hover:text-purple-600 transition-colors">
+                                      {itinerary.title}
+                                    </h3>
                                   </Link>
-                                </CardTitle>
-                                <p className="text-sm text-gray-500 mt-1">
-                                  {t('common.created')} {formatDate(new Date(itinerary.created_at))}
-                                </p>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Badge variant="outline" className="text-xs">
-                                  {t('trips.days_count', { count: planData?.totalDays || 0 })}
-                                </Badge>
+                                  <p className={`text-sm text-gray-500 mt-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                    {t('common.created')} {formatDate(new Date(itinerary.created_at))}
+                                  </p>
+                                </div>
                                 <Button
                                   variant="ghost"
                                   size="sm"
@@ -1650,33 +1649,80 @@ export default function MyTripsNew() {
                                   )}
                                 </Button>
                               </div>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-2">
-                              <div className="flex items-center text-sm text-gray-600">
-                                <MapPin className="w-4 h-4 mr-2" />
-                                {planData?.mainDestination || t('trips.unknown_destination')}
-                              </div>
-                              {planData?.totalCost && (
-                                <div className="flex items-center text-sm text-gray-600">
-                                  <DollarSign className="w-4 h-4 mr-2" />
-                                  {t('trips.estimated_cost')}: {i18n.language === 'he' 
-                                    ? `₪${Math.round(planData.totalCost * USD_TO_ILS).toLocaleString('he-IL')}` 
-                                    : `$${planData.totalCost.toLocaleString('en-US')}`}
+
+                              {/* Info Grid */}
+                              <div className="grid grid-cols-3 gap-4">
+                                <div className="bg-purple-50 p-4 rounded-lg">
+                                  <div className={`flex flex-col gap-2 ${i18n.language === 'he' ? 'items-end' : 'items-start'}`}>
+                                    <div className={`flex items-center gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                                      <MapPin className="w-5 h-5 text-purple-600" />
+                                      <span className={`font-semibold text-purple-800 text-sm ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                        {t('trips.destination')}
+                                      </span>
+                                    </div>
+                                    <p className={`text-purple-700 font-medium text-sm ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                      {planData?.mainDestination || t('trips.unknown_destination')}
+                                    </p>
+                                  </div>
                                 </div>
-                              )}
+
+                                <div className="bg-blue-50 p-4 rounded-lg">
+                                  <div className={`flex flex-col gap-2 ${i18n.language === 'he' ? 'items-end' : 'items-start'}`}>
+                                    <div className={`flex items-center gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                                      <Calendar className="w-5 h-5 text-blue-600" />
+                                      <span className={`font-semibold text-blue-800 text-sm ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                        {t('trips.duration')}
+                                      </span>
+                                    </div>
+                                    <p 
+                                      className={`text-blue-700 font-medium ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}
+                                      dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
+                                      style={i18n.language === 'he' ? { unicodeBidi: 'plaintext' } : undefined}
+                                    >
+                                      {t('trips.days_count', { count: planData?.totalDays || 0 })}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {planData?.totalCost && (
+                                  <div className="bg-green-50 p-4 rounded-lg">
+                                    <div className={`flex flex-col gap-2 ${i18n.language === 'he' ? 'items-end' : 'items-start'}`}>
+                                      <div className={`flex items-center gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                                        <DollarSign className="w-5 h-5 text-green-600" />
+                                        <span className={`font-semibold text-green-800 text-sm ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                          {t('trips.estimated_cost')}
+                                        </span>
+                                      </div>
+                                      <p className={`text-green-700 font-medium text-sm ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                        {i18n.language === 'he' 
+                                          ? `₪${Math.round(planData.totalCost * USD_TO_ILS).toLocaleString('he-IL')}` 
+                                          : `$${planData.totalCost.toLocaleString('en-US')}`}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Days Preview */}
                               {planData?.itinerary && planData.itinerary.length > 0 && (
-                                <div className="text-sm text-gray-600">
-                                  <span className="font-medium">{t('trips.activity_days_count', { count: planData.itinerary.length })}:</span>
-                                  <div className="mt-1 text-xs">
+                                <div className={`bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                  <p className={`font-semibold text-gray-800 mb-3 flex items-center gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                                    <Route className="w-4 h-4 text-gray-600" />
+                                    {t('trips.activity_days_count', { count: planData.itinerary.length })}
+                                  </p>
+                                  <div className="space-y-2">
                                     {planData.itinerary.slice(0, 2).map((day: any, idx: number) => (
-                                      <div key={idx} className="text-gray-500">
-                                        {t('trips.day_number')}: {day.day}: {day.location}
+                                      <div key={idx} className={`flex items-center gap-2 text-sm text-gray-700 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                                        <span className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></span>
+                                        <span className={i18n.language === 'he' ? 'text-right' : 'text-left'}>
+                                          {t('trips.day_number', { day: day.day })}: {day.location}
+                                        </span>
                                       </div>
                                     ))}
                                     {planData.itinerary.length > 2 && (
-                                      <div className="text-gray-400">{t('trips.and_more_days', { count: planData.itinerary.length - 2 })}...</div>
+                                      <div className={`text-xs text-gray-500 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                        {t('trips.and_more_days', { count: planData.itinerary.length - 2 })}...
+                                      </div>
                                     )}
                                   </div>
                                 </div>
