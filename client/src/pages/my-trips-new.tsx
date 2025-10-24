@@ -1772,12 +1772,8 @@ export default function MyTripsNew() {
                                 <p 
                                   className={`text-gray-600 leading-relaxed flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}
                                   dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
-                                  style={{ 
-                                    unicodeBidi: i18n.language === 'he' ? 'bidi-override' : 'normal',
-                                    direction: i18n.language === 'he' ? 'rtl' : 'ltr'
-                                  }}
                                 >
-                                  {trip.description}
+                                  {i18n.language === 'he' ? '\u202B' + trip.description : trip.description}
                                 </p>
                               </div>
 
