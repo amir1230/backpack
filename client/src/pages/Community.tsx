@@ -516,11 +516,11 @@ function CreateRoomModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('community.create_room.title')}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="room-name" className="text-left block">{t('community.create_room.room_name')}</Label>
             <Input
@@ -563,20 +563,24 @@ function CreateRoomModal({
           </div>
 
           <div>
-            <Label className="text-left block">{t('community.create_room.visibility')}</Label>
+            <Label className="text-left block mb-3 font-medium">{t('community.create_room.visibility')}</Label>
             <RadioGroup
               value={formData.visibility}
               onValueChange={(value) => setFormData(prev => ({ ...prev, visibility: value }))}
               disabled={createRoomMutation.isPending}
-              className="flex gap-6 mt-2"
+              className="grid grid-cols-1 gap-3"
             >
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                 <RadioGroupItem value="public" id="public" />
-                <Label htmlFor="public" className="cursor-pointer">{t('community.create_room.public_label')}</Label>
+                <Label htmlFor="public" className="cursor-pointer flex-1 flex items-center gap-2">
+                  <span className="font-medium">{t('community.create_room.public_label')}</span>
+                </Label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                 <RadioGroupItem value="private" id="private" />
-                <Label htmlFor="private" className="cursor-pointer">{t('community.create_room.private_label')}</Label>
+                <Label htmlFor="private" className="cursor-pointer flex-1 flex items-center gap-2">
+                  <span className="font-medium">{t('community.create_room.private_label')}</span>
+                </Label>
               </div>
             </RadioGroup>
           </div>
@@ -623,7 +627,15 @@ function CreateRoomModal({
             </div>
           )}
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-6 border-t">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              disabled={createRoomMutation.isPending}
+            >
+              {t('common.cancel')}
+            </Button>
             <Button 
               type="submit" 
               disabled={createRoomMutation.isPending}
@@ -637,14 +649,6 @@ function CreateRoomModal({
               ) : (
                 t('community.create_room.create_button')
               )}
-            </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => onOpenChange(false)}
-              disabled={createRoomMutation.isPending}
-            >
-              {t('common.cancel')}
             </Button>
           </div>
         </form>
