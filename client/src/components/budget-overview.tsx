@@ -93,11 +93,11 @@ export default function BudgetOverview({
           {/* Budget Progress */}
           {totalBudget > 0 && (
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
+              <div className={`flex items-center justify-between ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                 <span className="text-sm text-gray-600">{t('budget.budget_progress')}</span>
-                <span className="text-sm font-medium">{budgetUsed.toFixed(1)}%</span>
+                <span className="text-sm font-bold">{budgetUsed.toFixed(1)}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
+              <div className={`w-full bg-gray-200 rounded-full h-3 ${i18n.language === 'he' ? 'transform scale-x-[-1]' : ''}`}>
                 <div 
                   className={`h-3 rounded-full transition-all duration-300 ${
                     budgetUsed <= 80 ? 'bg-green-500' : budgetUsed <= 100 ? 'bg-orange-500' : 'bg-red-500'
