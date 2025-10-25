@@ -88,6 +88,7 @@ export default function AiChat({ className, initialMessage, disableAutoScroll = 
   const [hasProcessedInitialMessage, setHasProcessedInitialMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
+  const loadedSessionId = useRef<number | null>(null);
   const { toast } = useToast();
 
   const scrollToBottom = () => {
@@ -95,24 +96,29 @@ export default function AiChat({ className, initialMessage, disableAutoScroll = 
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   };
 
-  // Load initial messages when sessionId or initialMessages change
+  // Load initial messages when sessionId changes (not on every render)
   useEffect(() => {
-    if (initialMessages.length > 0) {
-      setMessages(initialMessages);
-      setCurrentSessionId(sessionId);
-    } else if (sessionId === null) {
-      // Reset to welcome message for new chat
-      setMessages([
-        {
-          id: '1',
-          content: t('ai_chat.welcome_message'),
-          sender: 'ai',
-          timestamp: new Date()
-        }
-      ]);
-      setCurrentSessionId(null);
+    // Only load if sessionId actually changed
+    if (sessionId !== loadedSessionId.current) {
+      loadedSessionId.current = sessionId;
+      
+      if (initialMessages.length > 0 && sessionId !== null) {
+        setMessages(initialMessages);
+        setCurrentSessionId(sessionId);
+      } else if (sessionId === null) {
+        // Reset to welcome message for new chat
+        setMessages([
+          {
+            id: '1',
+            content: t('ai_chat.welcome_message'),
+            sender: 'ai',
+            timestamp: new Date()
+          }
+        ]);
+        setCurrentSessionId(null);
+      }
     }
-  }, [sessionId, initialMessages, t]);
+  }, [sessionId, t]);
 
   // Update welcome message when language changes
   useEffect(() => {
