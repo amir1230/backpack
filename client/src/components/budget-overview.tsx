@@ -218,7 +218,7 @@ export default function BudgetOverview({
                         <div className={`p-2 rounded-lg ${category?.color || 'bg-gray-500'}`}>
                           <CategoryIcon className="w-4 h-4 text-white" />
                         </div>
-                        <div>
+                        <div className="text-start">
                           <div className="font-medium">{expense.description}</div>
                           <div className="text-sm text-gray-600">
                             {category?.label || t('budget.other')} • {formatShortDate(expense.date)}
