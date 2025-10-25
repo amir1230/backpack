@@ -85,7 +85,7 @@ function SavedJourneyCard({ savedJourney, onRemove, formatPrice }: {
         <div className="p-6">
           {/* Title and Description */}
           <div className={`flex ${isRTL ? 'flex-row-reverse justify-between' : 'justify-between'} items-start mb-4`}>
-            <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+            <div className="flex-1 text-left">
               <h3 className="text-xl font-bold text-slate-800 mb-2 line-clamp-1">
                 {journey.title}
               </h3>

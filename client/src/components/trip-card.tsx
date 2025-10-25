@@ -105,13 +105,13 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
     <Card className="card-hover overflow-hidden border-gray-200 shadow-sm hover:shadow-md transition-shadow" dir={isRTL ? 'rtl' : 'ltr'}>
       <CardContent className="p-6">
         {/* Title */}
-        <h3 className={`text-xl font-bold text-slate-800 mb-3 line-clamp-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+        <h3 className="text-xl font-bold text-slate-800 mb-3 line-clamp-2 text-left">
           {trip.title}
         </h3>
 
         {/* Description */}
         {trip.description && (
-          <p className={`text-gray-600 text-sm mb-4 line-clamp-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+          <p className="text-gray-600 text-sm mb-4 line-clamp-2 text-left">
             {trip.description}
           </p>
         )}
