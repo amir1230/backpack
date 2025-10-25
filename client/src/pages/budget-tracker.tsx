@@ -100,10 +100,20 @@ export default function BudgetTracker() {
         headers: { "Content-Type": "application/json" },
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/expenses/user"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/expenses/trip", selectedTrip] });
-      queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
+    onSuccess: async () => {
+      // Refetch all relevant queries to ensure data is updated
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/expenses/user"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/expenses/trip", selectedTrip] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] })
+      ]);
+      
+      // Force refetch to ensure fresh data
+      if (selectedTrip) {
+        await queryClient.refetchQueries({ queryKey: ["/api/expenses/trip", selectedTrip] });
+      }
+      await queryClient.refetchQueries({ queryKey: ["/api/expenses/user"] });
+      
       setShowExpenseForm(false);
       form.reset();
       toast({
