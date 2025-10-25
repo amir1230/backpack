@@ -209,9 +209,9 @@ export default function BudgetTracker() {
               <DialogHeader>
                 <DialogTitle className={i18n.language === 'he' ? 'text-right' : 'text-left'}>{t('budget.add_new_expense')}</DialogTitle>
               </DialogHeader>
-              <form onSubmit={form.handleSubmit(handleSubmitExpense)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(handleSubmitExpense)} className="space-y-6" dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
                 <div>
-                  <Label htmlFor="tripId" className={`block mb-2 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{t('budget.trip')}</Label>
+                  <Label htmlFor="tripId" className="block mb-2">{t('budget.trip')}</Label>
                   <Select onValueChange={(value) => form.setValue("tripId", parseInt(value))}>
                     <SelectTrigger>
                       <SelectValue placeholder={t('budget.select_a_trip')} />
@@ -230,7 +230,7 @@ export default function BudgetTracker() {
                 </div>
 
                 <div>
-                  <Label htmlFor="category" className={`block mb-2 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{t('budget.category')}</Label>
+                  <Label htmlFor="category" className="block mb-2">{t('budget.category')}</Label>
                   <Select onValueChange={(value) => form.setValue("category", value)}>
                     <SelectTrigger>
                       <SelectValue placeholder={t('budget.select_category')} />
@@ -255,13 +255,13 @@ export default function BudgetTracker() {
                 </div>
 
                 <div>
-                  <Label htmlFor="amount" className={`block mb-2 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{t('budget.amount_usd')}</Label>
+                  <Label htmlFor="amount" className="block mb-2">{t('budget.amount_usd')}</Label>
                   <Input 
                     id="amount"
                     type="number" 
                     step="0.01"
                     placeholder={t('budget.amount_placeholder')}
-                    className="ltr-field"
+                    dir="ltr"
                     {...form.register("amount")} 
                   />
                   {form.formState.errors.amount && (
@@ -270,11 +270,11 @@ export default function BudgetTracker() {
                 </div>
 
                 <div>
-                  <Label htmlFor="description" className={`block mb-2 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{t('budget.description')}</Label>
+                  <Label htmlFor="description" className="block mb-2">{t('budget.description')}</Label>
                   <Input 
                     id="description"
                     placeholder={t('budget.what_did_you_spend_on')}
-                    className="ltr-field"
+                    dir="ltr"
                     {...form.register("description")} 
                   />
                   {form.formState.errors.description && (
@@ -283,11 +283,11 @@ export default function BudgetTracker() {
                 </div>
 
                 <div>
-                  <Label htmlFor="location" className={`block mb-2 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{t('budget.location_optional')}</Label>
+                  <Label htmlFor="location" className="block mb-2">{t('budget.location_optional')}</Label>
                   <Input 
                     id="location"
                     placeholder={t('budget.where_did_you_spend_this')}
-                    className="ltr-field"
+                    dir="ltr"
                     {...form.register("location")} 
                   />
                 </div>
