@@ -186,12 +186,15 @@ export default function BudgetTracker() {
     : (currentTripExpenses || []).filter((expense: any) => expense.category === selectedCategory);
 
   const totalSpent = (currentTripExpenses || []).reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0);
-  const categoryTotals = (EXPENSE_CATEGORIES || []).map(category => ({
-    ...category,
-    total: (currentTripExpenses || [])
-      .filter((expense: any) => expense.category === category.id)
-      .reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0)
-  }));
+  const categoryTotals = (EXPENSE_CATEGORIES || [])
+    .map(category => ({
+      ...category,
+      total: (currentTripExpenses || [])
+        .filter((expense: any) => expense.category === category.id)
+        .reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0)
+    }))
+    .sort((a, b) => b.total - a.total)
+    .filter(cat => cat.total > 0);
 
   const selectedTripData = selectedTrip ? (Array.isArray(userTrips) ? userTrips.find((trip: any) => trip.id === selectedTrip) : null) : null;
   const budget = selectedTripData ? parseFloat(selectedTripData.budget || 0) : 0;
