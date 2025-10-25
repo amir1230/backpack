@@ -182,6 +182,11 @@ export default function AiChat({ className, initialMessage, disableAutoScroll = 
       if (data.suggestions && data.suggestions.length > 0) {
         setAllSuggestions(prev => [...prev, ...data.suggestions]);
       }
+      
+      // Auto-focus input after AI responds
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     },
     onError: (error) => {
       console.error('Chat error:', error);
