@@ -533,9 +533,9 @@ export default function BudgetTracker() {
                               <div className={`p-2 rounded-lg ${category?.color || 'bg-gray-500'}`}>
                                 <IconComponent className="w-4 h-4 text-white" />
                               </div>
-                              <div className={i18n.language === 'he' ? 'text-right' : ''}>
-                                <div className={`font-medium ${i18n.language === 'he' ? 'text-right' : ''}`}>{expense.description}</div>
-                                <div className={`text-sm text-gray-600 ${i18n.language === 'he' ? 'text-right' : ''}`}>
+                              <div>
+                                <div className="font-medium">{expense.description}</div>
+                                <div className="text-sm text-gray-600">
                                   {t(category?.labelKey || 'budget.other')} • {new Date(expense.createdAt).toLocaleDateString('he-IL')}
                                   {expense.location && ` • ${expense.location}`}
                                 </div>
