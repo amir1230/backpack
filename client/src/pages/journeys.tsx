@@ -168,7 +168,7 @@ export default function JourneysPage() {
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-500 to-teal-500 text-white py-12 px-4">
         <div className={`max-w-7xl mx-auto ${isRTL ? 'text-right' : ''}`}>
-          <div className={`flex items-start justify-between gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex items-start justify-between gap-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Link href="/my-journeys">
               <Button 
                 variant="secondary" 
@@ -181,7 +181,7 @@ export default function JourneysPage() {
                 </span>
               </Button>
             </Link>
-            <div className="flex-1">
+            <div className={isRTL ? 'text-right' : 'text-left'}>
               <h1 className="text-4xl font-bold mb-4" dir={isRTL ? 'rtl' : 'ltr'}>
                 {isRTL ? 'מסעות מתוכננים ברחבי העולם' : 'Multi-Destination Journeys'}
               </h1>
