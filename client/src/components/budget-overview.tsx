@@ -219,8 +219,8 @@ export default function BudgetOverview({
                           <CategoryIcon className="w-4 h-4 text-white" />
                         </div>
                         <div className={i18n.language === 'he' ? 'text-right' : ''}>
-                          <div className="font-medium">{expense.description}</div>
-                          <div className="text-sm text-gray-600">
+                          <div className={`font-medium ${i18n.language === 'he' ? 'text-right' : ''}`}>{expense.description}</div>
+                          <div className={`text-sm text-gray-600 ${i18n.language === 'he' ? 'text-right' : ''}`}>
                             {category?.label || t('budget.other')} • {formatShortDate(expense.date)}
                           </div>
                         </div>
