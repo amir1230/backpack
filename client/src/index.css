@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* RTL Dialog Support */
+[data-rtl="true"] {
+  direction: rtl !important;
+}
+
+[data-rtl="true"] button[aria-label="Close"] {
+  left: 1rem !important;
+  right: auto !important;
+}
+
 /* RTL Support - Essential rules only */
 [dir="rtl"] {
   direction: rtl;
