@@ -263,7 +263,7 @@ export default function BudgetTracker() {
                   <Input 
                     id="amount"
                     type="number" 
-                    step="0.01"
+                    step="0.5"
                     placeholder={t('budget.amount_placeholder')}
                     dir="ltr"
                     {...form.register("amount")} 
