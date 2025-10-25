@@ -88,6 +88,14 @@ export default function BudgetTracker() {
     enabled: !!selectedTrip,
   });
 
+  // Debug logging
+  console.log('🔍 Budget Tracker State:', {
+    selectedTrip,
+    tripExpensesLength: tripExpenses?.length,
+    expensesLength: expenses?.length,
+    currentTripExpensesWillBe: selectedTrip ? 'tripExpenses' : 'expenses'
+  });
+
   const { data: analytics, isLoading: analyticsLoading } = useQuery<any>({
     queryKey: ["/api/analytics/dashboard"]
   });
