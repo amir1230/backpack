@@ -185,9 +185,11 @@ export default function JourneysPage() {
               {isRTL ? 'מסעות מתוכננים ברחבי העולם' : 'Multi-Destination Journeys'}
             </h1>
           </div>
-          <p className={`text-xl opacity-90 mt-4 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-            {isRTL ? 'גלה מסלולי טיול מושלמים עם מספר יעדים' : 'Discover perfect travel routes across multiple destinations'}
-          </p>
+          <div className={`flex ${isRTL ? 'justify-end' : 'justify-start'}`}>
+            <p className={`text-xl opacity-90 mt-4 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+              {isRTL ? 'גלה מסלולי טיול מושלמים עם מספר יעדים' : 'Discover perfect travel routes across multiple destinations'}
+            </p>
+          </div>
         </div>
       </div>
 
