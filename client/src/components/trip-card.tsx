@@ -107,7 +107,7 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
       <CardContent className="p-6">
         {/* Title */}
         <Link href={`/my-trips/${trip.id}`}>
-          <h3 className="text-xl font-bold text-slate-800 mb-3 line-clamp-2 text-left hover:text-purple-600 cursor-pointer transition-colors" data-testid={`link-trip-title-${trip.id}`}>
+          <h3 className="text-xl font-bold text-slate-800 mb-3 line-clamp-2 text-left hover:text-orange-600 cursor-pointer transition-colors" data-testid={`link-trip-title-${trip.id}`}>
             {trip.title}
           </h3>
         </Link>
