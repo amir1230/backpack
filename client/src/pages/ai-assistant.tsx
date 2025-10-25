@@ -233,60 +233,18 @@ export default function AiAssistant() {
           {/* Main Chat Area */}
           <div className="lg:col-span-3">
             {selectedSession ? (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-xl">{selectedSession.title}</CardTitle>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {t('common.created')}: {new Date(selectedSession.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={handleNewChat}
-                      data-testid="button-start-new-chat"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      {t('chat_history.new_chat')}
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-sm text-gray-600 mb-4">
-                      {t('ai_assistant.viewing_history')}
-                    </p>
-                    <ScrollArea className="h-[500px]">
-                      <div className="space-y-4">
-                        {selectedSession.messages.map((message: any, index: number) => (
-                          <div
-                            key={index}
-                            className={`flex ${
-                              message.sender === 'user' ? 'justify-end' : 'justify-start'
-                            }`}
-                          >
-                            <div
-                              className={`max-w-[80%] rounded-lg px-4 py-3 ${
-                                message.sender === 'user'
-                                  ? 'bg-orange-500 text-white'
-                                  : 'bg-white border'
-                              }`}
-                            >
-                              <p className="text-sm whitespace-pre-wrap break-words">
-                                {message.content}
-                              </p>
-                              <span className="text-xs opacity-70 mt-2 block">
-                                {new Date(message.timestamp).toLocaleTimeString()}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </div>
-                </CardContent>
-              </Card>
+              <AiChat 
+                className="h-full" 
+                sessionId={selectedSession.id}
+                initialMessages={selectedSession.messages.map((msg: any, index: number) => ({
+                  id: `${selectedSession.id}-${index}`,
+                  content: msg.content,
+                  sender: msg.sender,
+                  timestamp: new Date(msg.timestamp),
+                  suggestions: msg.suggestions,
+                  type: msg.type
+                }))}
+              />
             ) : (
               <AiChat className="h-full" initialMessage={initialMessage} />
             )}

@@ -63,22 +63,28 @@ interface AiChatProps {
   className?: string;
   initialMessage?: string;
   disableAutoScroll?: boolean;
+  sessionId?: number | null;
+  initialMessages?: Message[];
 }
 
-export default function AiChat({ className, initialMessage, disableAutoScroll = false }: AiChatProps) {
+export default function AiChat({ className, initialMessage, disableAutoScroll = false, sessionId = null, initialMessages = [] }: AiChatProps) {
   const { t, i18n } = useTranslation();
   const [location, setLocation] = useLocation();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      content: t('ai_chat.welcome_message'),
-      sender: 'ai',
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>(
+    initialMessages.length > 0 
+      ? initialMessages 
+      : [
+          {
+            id: '1',
+            content: t('ai_chat.welcome_message'),
+            sender: 'ai',
+            timestamp: new Date()
+          }
+        ]
+  );
   const [newMessage, setNewMessage] = useState("");
   const [allSuggestions, setAllSuggestions] = useState<TripSuggestion[]>([]);
-  const [currentSessionId, setCurrentSessionId] = useState<number | null>(null);
+  const [currentSessionId, setCurrentSessionId] = useState<number | null>(sessionId);
   const [hasProcessedInitialMessage, setHasProcessedInitialMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
