@@ -292,7 +292,7 @@ export default function BudgetTracker() {
                   />
                 </div>
 
-                <div className={`flex gap-2 pt-4 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                <div className="flex gap-2 pt-4">
                   <Button type="submit" disabled={addExpenseMutation.isPending} className="flex-1">
                     {addExpenseMutation.isPending ? t('budget.adding') : t('budget.add_expense')}
                   </Button>
