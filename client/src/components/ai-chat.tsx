@@ -95,6 +95,25 @@ export default function AiChat({ className, initialMessage, disableAutoScroll = 
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   };
 
+  // Load initial messages when sessionId or initialMessages change
+  useEffect(() => {
+    if (initialMessages.length > 0) {
+      setMessages(initialMessages);
+      setCurrentSessionId(sessionId);
+    } else if (sessionId === null) {
+      // Reset to welcome message for new chat
+      setMessages([
+        {
+          id: '1',
+          content: t('ai_chat.welcome_message'),
+          sender: 'ai',
+          timestamp: new Date()
+        }
+      ]);
+      setCurrentSessionId(null);
+    }
+  }, [sessionId, initialMessages, t]);
+
   // Update welcome message when language changes
   useEffect(() => {
     setMessages(prev => {
