@@ -665,7 +665,7 @@ export default function BudgetTracker() {
                       {budgetUsed <= 80 ? (
                         <div className="flex items-start gap-3 p-4 bg-green-50 rounded-lg" dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
                           <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                          <div className={i18n.language === 'he' ? 'text-right' : ''}>
+                          <div className="flex-1">
                             <h4 className="font-semibold text-green-900 mb-1">
                               {i18n.language === 'he' ? 'כל הכבוד! אתם בדרך הנכונה' : 'Great job! You\'re on track'}
                             </h4>
@@ -679,7 +679,7 @@ export default function BudgetTracker() {
                       ) : budgetUsed <= 100 ? (
                         <div className="flex items-start gap-3 p-4 bg-orange-50 rounded-lg" dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
                           <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
-                          <div className={i18n.language === 'he' ? 'text-right' : ''}>
+                          <div className="flex-1">
                             <h4 className="font-semibold text-orange-900 mb-1">
                               {i18n.language === 'he' ? 'שימו לב - קרוב לתקציב' : 'Attention - Near Budget Limit'}
                             </h4>
@@ -693,7 +693,7 @@ export default function BudgetTracker() {
                       ) : (
                         <div className="flex items-start gap-3 p-4 bg-red-50 rounded-lg" dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
                           <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
-                          <div className={i18n.language === 'he' ? 'text-right' : ''}>
+                          <div className="flex-1">
                             <h4 className="font-semibold text-red-900 mb-1">
                               {i18n.language === 'he' ? 'חריגה מהתקציב' : 'Over Budget'}
                             </h4>
@@ -726,7 +726,7 @@ export default function BudgetTracker() {
                             <div className={`p-2 rounded-lg ${categoryTotals[0]?.color}`}>
                               {TopIcon && <TopIcon className="w-5 h-5 text-white" />}
                             </div>
-                            <div className={i18n.language === 'he' ? 'text-right flex-1' : 'flex-1'}>
+                            <div className="flex-1">
                               <h4 className="font-semibold text-blue-900 mb-1">
                                 {i18n.language === 'he' 
                                   ? `מרבית ההוצאות: ${t(categoryTotals[0]?.labelKey)}` 
@@ -754,22 +754,31 @@ export default function BudgetTracker() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="p-3 border-l-4 border-blue-500 bg-blue-50" dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
-                      <p className={`text-sm ${i18n.language === 'he' ? 'text-right' : ''}`}>
+                    <div 
+                      className={`p-3 bg-blue-50 ${i18n.language === 'he' ? 'border-r-4 border-blue-500' : 'border-l-4 border-blue-500'}`} 
+                      dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
+                    >
+                      <p className="text-sm">
                         💡 {i18n.language === 'he' 
                           ? 'עקבו אחר ההוצאות היומיות כדי למנוע הפתעות בסוף הטיול'
                           : 'Track daily expenses to avoid surprises at the end of your trip'}
                       </p>
                     </div>
-                    <div className="p-3 border-l-4 border-green-500 bg-green-50" dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
-                      <p className={`text-sm ${i18n.language === 'he' ? 'text-right' : ''}`}>
+                    <div 
+                      className={`p-3 bg-green-50 ${i18n.language === 'he' ? 'border-r-4 border-green-500' : 'border-l-4 border-green-500'}`} 
+                      dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
+                    >
+                      <p className="text-sm">
                         💡 {i18n.language === 'he' 
                           ? 'בדקו מחירים מקומיים לפני רכישות גדולות'
                           : 'Check local prices before making large purchases'}
                       </p>
                     </div>
-                    <div className="p-3 border-l-4 border-purple-500 bg-purple-50" dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
-                      <p className={`text-sm ${i18n.language === 'he' ? 'text-right' : ''}`}>
+                    <div 
+                      className={`p-3 bg-purple-50 ${i18n.language === 'he' ? 'border-r-4 border-purple-500' : 'border-l-4 border-purple-500'}`} 
+                      dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
+                    >
+                      <p className="text-sm">
                         💡 {i18n.language === 'he' 
                           ? 'שמרו קבלות לכל הוצאה לתיעוד מדויק'
                           : 'Keep receipts for all expenses for accurate tracking'}
