@@ -57,8 +57,8 @@ import {
 } from "lucide-react";
 
 // Remove problematic Unicode control characters that OpenAI injects into Hebrew text
-const normalizeRtlText = (text: string, isHebrew: boolean) => {
-  if (!isHebrew) return text;
+const normalizeRtlText = (text: string | null | undefined, isHebrew: boolean) => {
+  if (!text || !isHebrew) return text || '';
   // Remove LTR marks and other directional control characters
   const cleaned = text.replace(/[\u200e\u202a\u202c\u202d\u202e]/g, '').trim();
   // Optionally add RLM after terminal punctuation
