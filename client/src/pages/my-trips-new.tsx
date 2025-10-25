@@ -444,7 +444,7 @@ export default function MyTripsNew() {
       
       // Validate data before sending
       if (!formData.destination) {
-        throw new Error(t('trips.please_select_destination_first'));
+        throw new Error(i18n.language === 'he' ? 'צור הצעות טיול תחילה' : 'Create trip suggestions first');
       }
       
       if (selectedInterests.length === 0) {
