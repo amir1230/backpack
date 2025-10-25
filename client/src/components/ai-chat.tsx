@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
   Bot, 
   Send, 
@@ -87,6 +87,7 @@ export default function AiChat({ className, initialMessage, disableAutoScroll = 
   const [currentSessionId, setCurrentSessionId] = useState<number | null>(sessionId);
   const [hasProcessedInitialMessage, setHasProcessedInitialMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const isInitialMount = useRef(true);
   const loadedSessionId = useRef<number | null>(null);
   const { toast } = useToast();
@@ -229,6 +230,11 @@ export default function AiChat({ className, initialMessage, disableAutoScroll = 
     const messageToSend = newMessage.trim();
     setNewMessage("");
     
+    // Auto-focus input after sending message
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+    
     // If on home page and this is the first user message, redirect to AI Assistant page
     // Save the message to sessionStorage so it can be picked up by the AI Assistant page
     if (location === '/' && messages.filter(m => m.sender === 'user').length === 0) {
@@ -269,16 +275,21 @@ export default function AiChat({ className, initialMessage, disableAutoScroll = 
       return response.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/trips'] });
       toast({
-        title: "Trip Saved!",
-        description: "Your trip has been saved to My Trips.",
+        title: i18n.language.startsWith('he') ? "הטיול נשמר!" : "Trip Saved!",
+        description: i18n.language.startsWith('he') 
+          ? "הטיול נשמר בהצלחה לדף הטיולים שלי תחת 'הטיולים השמורים שלי'" 
+          : "Your trip has been saved to My Trips under 'My Saved Trips'",
       });
     },
     onError: (error) => {
       console.error('Save trip error:', error);
       toast({
-        title: "Save Error",
-        description: "Failed to save trip. Please try again.",
+        title: i18n.language.startsWith('he') ? "שגיאה בשמירה" : "Save Error",
+        description: i18n.language.startsWith('he') 
+          ? "לא הצלחנו לשמור את הטיול. נסה שוב." 
+          : "Failed to save trip. Please try again.",
         variant: "destructive"
       });
     }
@@ -518,6 +529,7 @@ export default function AiChat({ className, initialMessage, disableAutoScroll = 
         <div className="px-4 py-3 border-t">
           <form onSubmit={handleSendMessage} className="flex gap-2">
             <Input
+              ref={inputRef}
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder={t('ai_chat.input_placeholder')}
