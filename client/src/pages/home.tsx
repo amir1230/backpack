@@ -659,6 +659,42 @@ export default function Home() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Quick Actions */}
+            <Card className="border-t-4 border-t-blue-500 shadow-lg hover:shadow-xl transition-all">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Zap className="w-5 h-5 mr-2 text-blue-600" />
+                  {t('home.quick_actions')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button asChild variant="outline" className="w-full justify-start hover:bg-orange-50 hover:border-orange-500 hover:text-orange-700 transition-all">
+                  <Link href="/my-trips" className="block">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    {t('home.new_trip')}
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full justify-start hover:bg-purple-50 hover:border-purple-500 hover:text-purple-700 transition-all">
+                  <Link href="/ai-assistant" className="block">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    {t('navigation.chat_history')}
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full justify-start hover:bg-teal-50 hover:border-teal-500 hover:text-teal-700 transition-all">
+                  <Link href="/budget-tracker" className="block">
+                    <DollarSign className="w-4 h-4 mr-2" />
+                    {t('home.track_expenses')}
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full justify-start hover:bg-blue-50 hover:border-blue-500 hover:text-blue-700 transition-all">
+                  <Link href="/community" className="block">
+                    <Users className="w-4 h-4 mr-2" />
+                    {t('home.find_travel_buddies')}
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
             {/* AI Travel Assistant */}
             <div>
               <AiChat disableAutoScroll={true} />
@@ -757,42 +793,6 @@ export default function Home() {
                 <Button asChild variant="outline" size="sm" className="w-full mt-4 hover:bg-teal-50 hover:border-teal-500 hover:text-teal-700 transition-all">
                   <Link href="/community">
                     {t('home.view_all_activity')}
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card className="border-t-4 border-t-blue-500 shadow-lg hover:shadow-xl transition-all">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Zap className="w-5 h-5 mr-2 text-blue-600" />
-                  {t('home.quick_actions')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button asChild variant="outline" className="w-full justify-start hover:bg-orange-50 hover:border-orange-500 hover:text-orange-700 transition-all">
-                  <Link href="/my-trips" className="block">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {t('home.new_trip')}
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" className="w-full justify-start hover:bg-purple-50 hover:border-purple-500 hover:text-purple-700 transition-all">
-                  <Link href="/ai-assistant" className="block">
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    {t('navigation.chat_history')}
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" className="w-full justify-start hover:bg-teal-50 hover:border-teal-500 hover:text-teal-700 transition-all">
-                  <Link href="/budget-tracker" className="block">
-                    <DollarSign className="w-4 h-4 mr-2" />
-                    {t('home.track_expenses')}
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" className="w-full justify-start hover:bg-blue-50 hover:border-blue-500 hover:text-blue-700 transition-all">
-                  <Link href="/community" className="block">
-                    <Users className="w-4 h-4 mr-2" />
-                    {t('home.find_travel_buddies')}
                   </Link>
                 </Button>
               </CardContent>
