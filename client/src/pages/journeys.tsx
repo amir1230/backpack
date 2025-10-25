@@ -182,10 +182,10 @@ export default function JourneysPage() {
               </Button>
             </Link>
             <div className={isRTL ? 'text-right' : 'text-left'}>
-              <h1 className="text-4xl font-bold mb-4" dir={isRTL ? 'rtl' : 'ltr'}>
+              <h1 className={`text-4xl font-bold mb-4 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 {isRTL ? 'מסעות מתוכננים ברחבי העולם' : 'Multi-Destination Journeys'}
               </h1>
-              <p className="text-xl opacity-90" dir={isRTL ? 'rtl' : 'ltr'}>
+              <p className={`text-xl opacity-90 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                 {isRTL ? 'גלה מסלולי טיול מושלמים עם מספר יעדים' : 'Discover perfect travel routes across multiple destinations'}
               </p>
             </div>
