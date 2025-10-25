@@ -266,7 +266,7 @@ export default function AiChat({ className, initialMessage, disableAutoScroll = 
       const tripData = {
         destination: `${suggestion.destination}, ${suggestion.country}`,
         description: suggestion.description,
-        estimatedBudget: suggestion.estimatedBudget.high,
+        budget: suggestion.estimatedBudget.high,
         duration: suggestion.duration,
         isPublic: false,
         highlights: suggestion.highlights,
