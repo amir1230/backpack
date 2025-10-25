@@ -119,6 +119,7 @@ export interface IStorage {
   createExpense(expense: InsertExpense): Promise<Expense>;
   getTripExpenses(tripId: number): Promise<Expense[]>;
   getUserExpenses(userId: string): Promise<Expense[]>;
+  deleteExpense(id: number): Promise<void>;
   
   // Chat operations
   getChatRooms(): Promise<ChatRoom[]>;
@@ -617,6 +618,10 @@ export class DatabaseStorage implements IStorage {
       .from(expenses)
       .where(eq(expenses.userId, userId))
       .orderBy(desc(expenses.createdAt));
+  }
+
+  async deleteExpense(id: number): Promise<void> {
+    await db.delete(expenses).where(eq(expenses.id, id));
   }
 
   // Chat operations
@@ -1663,6 +1668,7 @@ class MemStorage implements IStorage {
   async createExpense(expense: InsertExpense): Promise<Expense> { throw new Error('Not implemented'); }
   async getTripExpenses(tripId: number): Promise<Expense[]> { return []; }
   async getUserExpenses(userId: string): Promise<Expense[]> { return []; }
+  async deleteExpense(id: number): Promise<void> { throw new Error('Not implemented'); }
   async getChatRooms(): Promise<ChatRoom[]> { return []; }
   async getChatMessages(roomId: number): Promise<ChatMessage[]> { return []; }
   async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> { throw new Error('Not implemented'); }

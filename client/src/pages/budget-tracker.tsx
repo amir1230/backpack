@@ -143,6 +143,37 @@ export default function BudgetTracker() {
     addExpenseMutation.mutate(data);
   };
 
+  // Delete expense mutation
+  const deleteExpenseMutation = useMutation({
+    mutationFn: async (expenseId: number) => {
+      await apiRequest(`/api/expenses/${expenseId}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/expenses/user"] });
+      if (selectedTrip) {
+        queryClient.invalidateQueries({ queryKey: ["/api/expenses/trip", selectedTrip] });
+      }
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics/dashboard"] });
+      toast({
+        title: t('budget.success'),
+        description: t('budget.expense_deleted_successfully'),
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteExpense = (expenseId: number) => {
+    deleteExpenseMutation.mutate(expenseId);
+  };
+
   const getCategoryColor = (category: string) => {
     const categoryData = EXPENSE_CATEGORIES.find(c => c.id === category);
     return categoryData ? categoryData.color : 'bg-gray-500';
@@ -362,6 +393,7 @@ export default function BudgetTracker() {
                       description: expense.description,
                       date: expense.createdAt || expense.date
                     }))}
+                    onDeleteExpense={handleDeleteExpense}
                   />
                 ) : (
                   <Card>

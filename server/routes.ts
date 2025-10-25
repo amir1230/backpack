@@ -908,6 +908,22 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  app.delete('/api/expenses/:id', noAuth, async (req: any, res) => {
+    try {
+      const expenseId = parseInt(req.params.id);
+      
+      if (isNaN(expenseId)) {
+        return res.status(400).json({ message: 'Invalid expense ID' });
+      }
+
+      await storage.deleteExpense(expenseId);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('Error deleting expense:', error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Hotel Inquiries (hotel-deals page)
   app.post('/api/hotel-inquiries', async (req, res) => {
     try {

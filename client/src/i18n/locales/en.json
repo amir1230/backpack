@@ -983,6 +983,7 @@
     "adding": "Adding...",
     "success": "Success",
     "expense_added_successfully": "Expense added successfully",
+    "expense_deleted_successfully": "Expense deleted successfully",
     "authentication_required": "Authentication Required",
     "please_log_in_to_add_expenses": "Please log in to add expenses",
     "failed_to_add_expense": "Failed to add expense",

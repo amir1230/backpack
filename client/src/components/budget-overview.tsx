@@ -12,8 +12,10 @@ import {
   Target,
   AlertTriangle,
   CheckCircle,
-  ShoppingBag
+  ShoppingBag,
+  Trash2
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface BudgetOverviewProps {
   totalBudget?: number;
@@ -25,6 +27,7 @@ interface BudgetOverviewProps {
     description: string;
     date: string;
   }>;
+  onDeleteExpense?: (id: number) => void;
 }
 
 const USD_TO_ILS = 3.7;
@@ -32,7 +35,8 @@ const USD_TO_ILS = 3.7;
 export default function BudgetOverview({ 
   totalBudget = 0, 
   totalSpent = 0, 
-  expenses = []
+  expenses = [],
+  onDeleteExpense
 }: BudgetOverviewProps) {
   const { t, i18n } = useTranslation();
   const { formatCurrency, formatNumber, formatShortDate } = useIntlFormatters();
@@ -221,8 +225,21 @@ export default function BudgetOverview({
                           </div>
                         </div>
                       </div>
-                      <div className="font-semibold text-gray-800">
-                        {formatAmount(expense.amount)}
+                      <div className={`flex items-center gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                        <div className="font-semibold text-gray-800">
+                          {formatAmount(expense.amount)}
+                        </div>
+                        {onDeleteExpense && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => onDeleteExpense(expense.id)}
+                            data-testid={`button-delete-expense-${expense.id}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                     {index < (recentExpenses || []).length - 1 && <Separator className="mt-2" />}

@@ -1190,6 +1190,7 @@
     "adding": "מוסיף...",
     "success": "הצלחה",
     "expense_added_successfully": "ההוצאה נוספה בהצלחה",
+    "expense_deleted_successfully": "ההוצאה נמחקה בהצלחה",
     "authentication_required": "נדרשת התחברות",
     "please_log_in_to_add_expenses": "אנא התחבר כדי להוסיף הוצאות",
     "failed_to_add_expense": "נכשל בהוספת הוצאה",
