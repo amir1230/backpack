@@ -25,6 +25,27 @@
   right: auto !important;
 }
 
+/* Keep scrollbar on the right side even in RTL */
+[dir="rtl"][role="dialog"] {
+  direction: rtl;
+  overflow-y: auto;
+}
+
+/* Force scrollbar to stay on right in RTL */
+[dir="rtl"][role="dialog"]::-webkit-scrollbar {
+  position: absolute;
+  right: 0;
+}
+
+/* Alternative: Use LTR for scrollbar container but RTL for content */
+[dir="rtl"][role="dialog"] > div {
+  direction: ltr;
+}
+
+[dir="rtl"][role="dialog"] > div > * {
+  direction: rtl;
+}
+
 /* RTL Support - Essential rules only */
 [dir="rtl"] {
   direction: rtl;
