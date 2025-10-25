@@ -226,6 +226,14 @@ export default function MyTripsNew() {
   const [activeTab, setActiveTab] = useState("preferences");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
+  // Check URL hash to open specific tab
+  useEffect(() => {
+    const hash = window.location.hash.substring(1); // Remove the # character
+    if (hash && ['preferences', 'suggestions', 'itinerary', 'my-itineraries', 'saved'].includes(hash)) {
+      setActiveTab(hash);
+    }
+  }, []);
+
   // Set localized page title
   useEffect(() => {
     document.title = `${t('trips.my_trips')} - GlobeMate`;
