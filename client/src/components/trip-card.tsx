@@ -189,13 +189,13 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
 
         {/* Travel Style Tags */}
         {trip.travelStyle && (
-          <div className={`mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+          <div className="mb-4 text-left">
             <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse justify-start' : ''}`}>
               {trip.travelStyle.split(',').map((style: string, index: number) => (
                 <Badge 
                   key={index} 
                   variant="secondary" 
-                  className={`text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 ${isRTL ? 'text-right' : 'text-left'}`}
+                  className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 text-left"
                 >
                   {style.trim()}
                 </Badge>
