@@ -302,9 +302,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTripById(id: number): Promise<Trip | undefined> {
-    console.log('🔍 getTripById called with id:', id);
     const [trip] = await db.select().from(trips).where(eq(trips.id, id));
-    console.log('🔍 getTripById result:', trip ? `Found: ${trip.title}` : 'NOT FOUND');
     return trip;
   }
 

@@ -12,9 +12,6 @@ async function throwIfResNotOk(res: Response) {
         json.error || 
         (typeof json === 'string' ? json : text);
       
-      // Log for debugging
-      console.error('API Error:', { status: res.status, json, extracted: errorMessage });
-      
       throw new Error(errorMessage);
     } catch (e) {
       // If JSON parse fails, check if e is our thrown error
