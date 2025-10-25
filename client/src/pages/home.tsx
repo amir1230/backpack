@@ -858,7 +858,7 @@ function PopularJourneysSection() {
       description: 'מבנגקוק התוססת למקדשים שלווים וחופים גן עדן - חוויית תאילנד האולטימטיבית'
     },
     'Southeast Asia Multi-Country': {
-      title: 'הרפתקה בדרום מזרח אסיה (מרובת מדינות)',
+      title: 'הרפתקה בדרום מזרח אסיה',
       description: 'מסע אפי דרך תאילנד, אינדונזיה וסינגפור, חוויית חופים, תרבות וקולינריה מרהיבה'
     },
     'Japan Extended Discovery': {
