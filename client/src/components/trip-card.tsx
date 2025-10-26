@@ -126,7 +126,7 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
                 <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <MapPin className="w-5 h-5 text-purple-600" />
                   <span className={`font-semibold text-purple-800 text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
-                    {isRTL ? 'יעד' : 'Destination'}
+                    {t('trips.destination')}
                   </span>
                 </div>
                 <p className={`text-purple-700 font-medium text-sm line-clamp-1 ${isRTL ? 'text-right' : 'text-left'}`}>
@@ -143,7 +143,7 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
                 <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <Calendar className="w-5 h-5 text-blue-600" />
                   <span className={`font-semibold text-blue-800 text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
-                    {isRTL ? 'תאריך' : 'Date'}
+                    {t('common.date')}
                   </span>
                 </div>
                 <p className={`text-blue-700 font-medium text-sm ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -160,7 +160,7 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
                 <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <DollarSign className="w-5 h-5 text-green-600" />
                   <span className={`font-semibold text-green-800 text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
-                    {isRTL ? 'תקציב' : 'Budget'}
+                    {t('trips.budget')}
                   </span>
                 </div>
                 <p className={`text-green-700 font-medium text-sm ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -177,7 +177,7 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
                 <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <Clock className="w-5 h-5 text-orange-600" />
                   <span className={`font-semibold text-orange-800 text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
-                    {isRTL ? 'משך' : 'Duration'}
+                    {t('trips.duration')}
                   </span>
                 </div>
                 <p className={`text-orange-700 font-medium text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
@@ -240,7 +240,7 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
               data-testid={`book-flight-${trip.id}`}
             >
               <Plane className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-              {isRTL ? 'סגור טיסה' : 'Book Flight'}
+              {t('flights.book_flight')}
             </Button>
           </Link>
         </div>
@@ -250,17 +250,14 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent dir={isRTL ? 'rtl' : 'ltr'}>
           <AlertDialogHeader>
-            <AlertDialogTitle className={isRTL ? 'text-right' : 'text-left'}>{isRTL ? 'מחיקת טיול?' : 'Delete Trip?'}</AlertDialogTitle>
+            <AlertDialogTitle className={isRTL ? 'text-right' : 'text-left'}>{t('trips.delete_trip_title')}</AlertDialogTitle>
             <AlertDialogDescription className={isRTL ? 'text-right' : 'text-left'}>
-              {isRTL 
-                ? `האם אתה בטוח שברצונך למחוק את "${trip.title}"? פעולה זו אינה ניתנת לביטול.`
-                : `Are you sure you want to delete "${trip.title}"? This action cannot be undone.`
-              }
+              {t('trips.delete_trip_description', { title: trip.title })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className={isRTL ? 'flex-row-reverse' : ''}>
             <AlertDialogCancel data-testid="cancel-delete-trip">
-              {isRTL ? 'ביטול' : 'Cancel'}
+              {t('common.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
@@ -270,7 +267,7 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
               className="bg-red-600 hover:bg-red-700"
               data-testid="confirm-delete-trip"
             >
-              {isRTL ? 'מחיקה' : 'Delete'}
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
