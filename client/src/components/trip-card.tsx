@@ -17,9 +17,6 @@ import {
   Calendar, 
   DollarSign, 
   Users,
-  Eye,
-  Edit,
-  Share,
   Clock,
   Trash2,
   Plane
@@ -222,12 +219,12 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
         )}
 
         {/* Actions */}
-        <div className={`flex flex-wrap gap-2 pt-4 border-t border-gray-100 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex gap-2 pt-4 border-t border-gray-100 ${isRTL ? 'flex-row-reverse' : ''}`}>
           {!showUser && (
             <Button 
               variant="outline" 
               size="sm"
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 h-9"
               onClick={() => setShowDeleteDialog(true)}
               data-testid={`delete-trip-${trip.id}`}
             >
@@ -235,28 +232,17 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
             </Button>
           )}
           
-          <Link href="/flights" className="flex-1 min-w-[140px]">
+          <Link href="/flights" className="flex-1">
             <Button 
               variant="outline" 
               size="sm" 
-              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-700 hover:to-cyan-700 border-0"
+              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-700 hover:to-cyan-700 border-0 h-9"
               data-testid={`book-flight-${trip.id}`}
             >
               <Plane className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
               {isRTL ? 'סגור טיסה' : 'Book Flight'}
             </Button>
           </Link>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex-1 min-w-[140px] hover:bg-gray-50"
-            onClick={() => onView?.(trip.id)}
-            data-testid={`view-trip-${trip.id}`}
-          >
-            <Eye className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-            {isRTL ? 'צפייה מלאה' : 'View Details'}
-          </Button>
         </div>
       </CardContent>
 
