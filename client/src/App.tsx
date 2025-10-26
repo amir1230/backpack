@@ -59,7 +59,14 @@ function EnableScrolling() {
       document.body.style.setProperty('overflow', 'auto', 'important');
       document.body.style.setProperty('padding-right', '0', 'important');
       document.body.style.setProperty('margin-right', '0', 'important');
+      document.body.style.setProperty('pointer-events', 'auto', 'important');
       document.documentElement.style.setProperty('overflow', 'auto', 'important');
+      
+      // Also handle portal elements
+      const portals = document.querySelectorAll('[data-radix-popper-content-wrapper]');
+      portals.forEach(portal => {
+        (portal as HTMLElement).style.setProperty('pointer-events', 'auto', 'important');
+      });
     };
 
     // Run immediately
@@ -72,15 +79,34 @@ function EnableScrolling() {
     
     observer.observe(document.body, {
       attributes: true,
+      childList: true,
+      subtree: true,
       attributeFilter: ['style', 'data-scroll-locked'],
-      attributeOldValue: true,
     });
 
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['style', 'data-scroll-locked'],
-      attributeOldValue: true,
     });
+
+    // Enable wheel events
+    const wheelHandler = (e: WheelEvent) => {
+      // Don't prevent default - allow scrolling
+      if (e.target === document.body || e.target === document.documentElement) {
+        return;
+      }
+    };
+
+    const touchHandler = (e: TouchEvent) => {
+      // Don't prevent default - allow touch scrolling
+      if (e.target === document.body || e.target === document.documentElement) {
+        return;
+      }
+    };
+
+    // Add with capture to run before Radix handlers
+    window.addEventListener('wheel', wheelHandler, { passive: true, capture: true });
+    window.addEventListener('touchmove', touchHandler, { passive: true, capture: true });
 
     // Also use requestAnimationFrame for smooth continuous override
     let rafId: number;
@@ -93,6 +119,8 @@ function EnableScrolling() {
     return () => {
       observer.disconnect();
       cancelAnimationFrame(rafId);
+      window.removeEventListener('wheel', wheelHandler, { capture: true } as EventListenerOptions);
+      window.removeEventListener('touchmove', touchHandler, { capture: true } as EventListenerOptions);
     };
   }, []);
 
