@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Allow page scroll when Select dropdown is open */
+body[data-scroll-locked],
+body[data-radix-select-content],
+body {
+  overflow: auto !important;
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+  pointer-events: auto !important;
+}
+
 /* RTL Dialog Support - Force RTL on all dialog elements */
 [dir="rtl"][role="dialog"] {
   direction: rtl !important;
