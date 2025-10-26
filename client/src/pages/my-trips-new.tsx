@@ -316,7 +316,7 @@ export default function MyTripsNew() {
   const [selectedContinent, setSelectedContinent] = useState<Continent | "">("");
   const [specificCity, setSpecificCity] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("");
-  const [tripType, setTripType] = useState<string>("family");
+  const [tripType, setTripType] = useState<string>("");
   
   const WORLD_DESTINATIONS = getWorldDestinations();
   
@@ -354,7 +354,7 @@ export default function MyTripsNew() {
       interests: [],
       adults: 2,
       children: 0,
-      tripType: "family",
+      tripType: "",
     },
   });
 
@@ -988,7 +988,7 @@ export default function MyTripsNew() {
                       }}
                     >
                       <SelectTrigger className="w-full bg-white" data-testid="select-trip-type">
-                        <SelectValue />
+                        <SelectValue placeholder={t('trips.select_trip_type')} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="family">{t('trips.trip_types.family')}</SelectItem>
