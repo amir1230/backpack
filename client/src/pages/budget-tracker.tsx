@@ -361,24 +361,24 @@ export default function BudgetTracker() {
         </div>
 
         {/* Main Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="overflow-x-auto">
-            <TabsList className="inline-flex w-auto min-w-full justify-evenly h-10">
-              <TabsTrigger value="overview" className="flex items-center gap-2 whitespace-nowrap">
-                <BarChart3 className="w-4 h-4" />
-                {t('budget.overview')}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full sm:w-full justify-start sm:justify-evenly h-auto sm:h-10 gap-0.5 sm:gap-2 p-1">
+              <TabsTrigger value="overview" className="flex flex-col sm:flex-row items-center justify-center px-1 sm:px-4 py-1.5 sm:py-0 w-[24%] sm:w-auto h-auto sm:h-10" data-testid="tab-overview">
+                <BarChart3 className="w-4 h-4 sm:mr-2 mb-0.5 sm:mb-0 flex-shrink-0" />
+                <span className="text-[8px] sm:text-sm leading-[1.1] text-center w-full whitespace-normal break-words overflow-wrap-anywhere">{t('budget.overview')}</span>
               </TabsTrigger>
-              <TabsTrigger value="expenses" className="flex items-center gap-2 whitespace-nowrap">
-                <DollarSign className="w-4 h-4" />
-                {t('budget.expenses')}
+              <TabsTrigger value="expenses" className="flex flex-col sm:flex-row items-center justify-center px-1 sm:px-4 py-1.5 sm:py-0 w-[24%] sm:w-auto h-auto sm:h-10" data-testid="tab-expenses">
+                <DollarSign className="w-4 h-4 sm:mr-2 mb-0.5 sm:mb-0 flex-shrink-0" />
+                <span className="text-[8px] sm:text-sm leading-[1.1] text-center w-full whitespace-normal break-words overflow-wrap-anywhere">{t('budget.expenses')}</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2 whitespace-nowrap">
-                <PieChart className="w-4 h-4" />
-                {t('budget.analytics')}
+              <TabsTrigger value="analytics" className="flex flex-col sm:flex-row items-center justify-center px-1 sm:px-4 py-1.5 sm:py-0 w-[24%] sm:w-auto h-auto sm:h-10" data-testid="tab-analytics">
+                <PieChart className="w-4 h-4 sm:mr-2 mb-0.5 sm:mb-0 flex-shrink-0" />
+                <span className="text-[8px] sm:text-sm leading-[1.1] text-center w-full whitespace-normal break-words overflow-wrap-anywhere">{t('budget.analytics')}</span>
               </TabsTrigger>
-              <TabsTrigger value="insights" className="flex items-center gap-2 whitespace-nowrap">
-                <Lightbulb className="w-4 h-4" />
-                {t('budget.ai_insights')}
+              <TabsTrigger value="insights" className="flex flex-col sm:flex-row items-center justify-center px-1 sm:px-4 py-1.5 sm:py-0 w-[24%] sm:w-auto h-auto sm:h-10" data-testid="tab-insights">
+                <Lightbulb className="w-4 h-4 sm:mr-2 mb-0.5 sm:mb-0 flex-shrink-0" />
+                <span className="text-[8px] sm:text-sm leading-[1.1] text-center w-full whitespace-normal break-words overflow-wrap-anywhere">{t('budget.ai_insights')}</span>
               </TabsTrigger>
             </TabsList>
           </div>
