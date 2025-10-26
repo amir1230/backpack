@@ -179,9 +179,13 @@ export default function FlightSearchTab() {
                       data-testid="select-origin"
                     >
                       {origin
-                        ? airports.find((airport) => airport.code === origin)?.city + " (" + origin + ")"
+                        ? (() => {
+                            const airport = airports.find((a) => a.code === origin);
+                            const displayCity = isRTL && airport?.cityHe ? airport.cityHe : airport?.city;
+                            return `${displayCity} (${origin})`;
+                          })()
                         : t('flights.select_origin')}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      <ChevronsUpDown className={`h-4 w-4 shrink-0 opacity-50 ${isRTL ? 'mr-2' : 'ml-2'}`} />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-[400px] p-0" align="start">
@@ -190,27 +194,34 @@ export default function FlightSearchTab() {
                       <CommandList>
                         <CommandEmpty>{t('flights.no_airport_found')}</CommandEmpty>
                         <CommandGroup>
-                          {airports.map((airport) => (
-                            <CommandItem
-                              key={airport.code}
-                              value={`${airport.city} ${airport.name} ${airport.code}`}
-                              onSelect={() => {
-                                setOrigin(airport.code);
-                                setOriginOpen(false);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  origin === airport.code ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                              <div className="flex flex-col">
-                                <span className="font-semibold">{airport.city} ({airport.code})</span>
-                                <span className="text-xs text-gray-500">{airport.name}, {airport.country}</span>
-                              </div>
-                            </CommandItem>
-                          ))}
+                          {airports.map((airport) => {
+                            const displayCity = isRTL && airport.cityHe ? airport.cityHe : airport.city;
+                            const displayName = isRTL && airport.nameHe ? airport.nameHe : airport.name;
+                            const displayCountry = isRTL && airport.countryHe ? airport.countryHe : airport.country;
+                            return (
+                              <CommandItem
+                                key={airport.code}
+                                value={`${airport.city} ${airport.cityHe || ''} ${airport.name} ${airport.nameHe || ''} ${airport.code}`}
+                                onSelect={() => {
+                                  setOrigin(airport.code);
+                                  setOriginOpen(false);
+                                }}
+                                className={isRTL ? 'text-right' : 'text-left'}
+                              >
+                                <Check
+                                  className={cn(
+                                    "h-4 w-4",
+                                    isRTL ? "ml-2" : "mr-2",
+                                    origin === airport.code ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                <div className="flex flex-col">
+                                  <span className="font-semibold">{displayCity} ({airport.code})</span>
+                                  <span className="text-xs text-gray-500">{displayName}, {displayCountry}</span>
+                                </div>
+                              </CommandItem>
+                            );
+                          })}
                         </CommandGroup>
                       </CommandList>
                     </Command>
@@ -232,9 +243,13 @@ export default function FlightSearchTab() {
                       data-testid="select-destination"
                     >
                       {destination
-                        ? airports.find((airport) => airport.code === destination)?.city + " (" + destination + ")"
+                        ? (() => {
+                            const airport = airports.find((a) => a.code === destination);
+                            const displayCity = isRTL && airport?.cityHe ? airport.cityHe : airport?.city;
+                            return `${displayCity} (${destination})`;
+                          })()
                         : t('flights.select_destination')}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      <ChevronsUpDown className={`h-4 w-4 shrink-0 opacity-50 ${isRTL ? 'mr-2' : 'ml-2'}`} />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-[400px] p-0" align="start">
@@ -243,27 +258,34 @@ export default function FlightSearchTab() {
                       <CommandList>
                         <CommandEmpty>{t('flights.no_airport_found')}</CommandEmpty>
                         <CommandGroup>
-                          {airports.map((airport) => (
-                            <CommandItem
-                              key={airport.code}
-                              value={`${airport.city} ${airport.name} ${airport.code}`}
-                              onSelect={() => {
-                                setDestination(airport.code);
-                                setDestinationOpen(false);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  destination === airport.code ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                              <div className="flex flex-col">
-                                <span className="font-semibold">{airport.city} ({airport.code})</span>
-                                <span className="text-xs text-gray-500">{airport.name}, {airport.country}</span>
-                              </div>
-                            </CommandItem>
-                          ))}
+                          {airports.map((airport) => {
+                            const displayCity = isRTL && airport.cityHe ? airport.cityHe : airport.city;
+                            const displayName = isRTL && airport.nameHe ? airport.nameHe : airport.name;
+                            const displayCountry = isRTL && airport.countryHe ? airport.countryHe : airport.country;
+                            return (
+                              <CommandItem
+                                key={airport.code}
+                                value={`${airport.city} ${airport.cityHe || ''} ${airport.name} ${airport.nameHe || ''} ${airport.code}`}
+                                onSelect={() => {
+                                  setDestination(airport.code);
+                                  setDestinationOpen(false);
+                                }}
+                                className={isRTL ? 'text-right' : 'text-left'}
+                              >
+                                <Check
+                                  className={cn(
+                                    "h-4 w-4",
+                                    isRTL ? "ml-2" : "mr-2",
+                                    destination === airport.code ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                <div className="flex flex-col">
+                                  <span className="font-semibold">{displayCity} ({airport.code})</span>
+                                  <span className="text-xs text-gray-500">{displayName}, {displayCountry}</span>
+                                </div>
+                              </CommandItem>
+                            );
+                          })}
                         </CommandGroup>
                       </CommandList>
                     </Command>
