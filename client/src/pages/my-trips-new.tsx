@@ -955,7 +955,7 @@ export default function MyTripsNew() {
               </TabsTrigger>
               <TabsTrigger value="saved" className="flex flex-col sm:flex-row items-center justify-center px-1 sm:px-4 py-1.5 sm:py-0 w-[19%] sm:w-auto h-auto sm:h-10" data-testid="tab-saved">
                 <FolderOpen className="w-4 h-4 sm:mr-2 mb-0.5 sm:mb-0 flex-shrink-0" />
-                <span className="text-[8px] sm:text-sm leading-[1.1] text-center w-full whitespace-normal break-words overflow-wrap-anywhere">{t('trips.my_trips')}</span>
+                <span className="text-[8px] sm:text-sm leading-[1.1] text-center w-full whitespace-normal break-words overflow-wrap-anywhere">{t('trips.saved_trips')}</span>
               </TabsTrigger>
             </TabsList>
           </div>
