@@ -1524,6 +1524,150 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Flight Bookings endpoints
+  
+  // Create a new flight booking
+  app.post('/api/flights/bookings', isAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const bookingData = req.body;
+      
+      // Add userId to booking data
+      const booking = await storage.createFlightBooking({
+        ...bookingData,
+        userId
+      });
+      
+      res.json({
+        success: true,
+        booking
+      });
+    } catch (error: any) {
+      console.error('Create booking error:', error);
+      res.status(500).json({ error: error.message || 'Failed to create booking' });
+    }
+  });
+  
+  // Get all user bookings
+  app.get('/api/flights/bookings', isAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const bookings = await storage.getUserFlightBookings(userId);
+      
+      res.json({
+        success: true,
+        bookings
+      });
+    } catch (error: any) {
+      console.error('Get bookings error:', error);
+      res.status(500).json({ error: error.message || 'Failed to get bookings' });
+    }
+  });
+  
+  // Get upcoming bookings
+  app.get('/api/flights/bookings/upcoming', isAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const bookings = await storage.getUpcomingFlightBookings(userId);
+      
+      res.json({
+        success: true,
+        bookings
+      });
+    } catch (error: any) {
+      console.error('Get upcoming bookings error:', error);
+      res.status(500).json({ error: error.message || 'Failed to get upcoming bookings' });
+    }
+  });
+  
+  // Get past bookings
+  app.get('/api/flights/bookings/past', isAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const bookings = await storage.getPastFlightBookings(userId);
+      
+      res.json({
+        success: true,
+        bookings
+      });
+    } catch (error: any) {
+      console.error('Get past bookings error:', error);
+      res.status(500).json({ error: error.message || 'Failed to get past bookings' });
+    }
+  });
+  
+  // Track flight using OpenSky Network API
+  app.get('/api/flights/track/:callsign', noAuth, async (req: any, res) => {
+    try {
+      const { callsign } = req.params;
+      
+      // OpenSky Network API - Free, no API key required
+      const https = await import('https');
+      const options = {
+        hostname: 'opensky-network.org',
+        path: `/api/states/all?icao24=${callsign.toLowerCase()}`,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      };
+      
+      const apiResponse = await new Promise<any>((resolve, reject) => {
+        const apiReq = https.request(options, (apiRes) => {
+          let data = '';
+          apiRes.on('data', (chunk) => { data += chunk; });
+          apiRes.on('end', () => {
+            try {
+              const parsed = JSON.parse(data);
+              if (apiRes.statusCode === 200) {
+                resolve(parsed);
+              } else {
+                reject(new Error('OpenSky API error'));
+              }
+            } catch (e) {
+              reject(new Error('Failed to parse OpenSky response'));
+            }
+          });
+        });
+        apiReq.on('error', reject);
+        apiReq.end();
+      });
+      
+      // Parse OpenSky response
+      // Response format: { time, states: [[icao24, callsign, origin_country, time_position, last_contact, longitude, latitude, baro_altitude, on_ground, velocity, true_track, vertical_rate, sensors, geo_altitude, squawk, spi, position_source]] }
+      
+      if (apiResponse.states && apiResponse.states.length > 0) {
+        const state = apiResponse.states[0];
+        const flightData = {
+          callsign: state[1]?.trim() || callsign,
+          origin_country: state[2],
+          longitude: state[5],
+          latitude: state[6],
+          altitude: state[7], // meters
+          on_ground: state[8],
+          velocity: state[9], // m/s
+          heading: state[10], // degrees
+          vertical_rate: state[11], // m/s
+          last_contact: new Date(state[4] * 1000).toISOString()
+        };
+        
+        res.json({
+          success: true,
+          flight: flightData
+        });
+      } else {
+        res.json({
+          success: false,
+          message: 'Flight not found or not currently in the air'
+        });
+      }
+      
+    } catch (error: any) {
+      console.error('Flight tracking error:', error);
+      res.status(500).json({ error: error.message || 'Failed to track flight' });
+    }
+  });
+
   // ===== ENHANCED GLOBAL TRAVEL DATA ENDPOINTS =====
   
   // Seed database with comprehensive travel data (includes South America and other regions)
