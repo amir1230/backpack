@@ -32,37 +32,37 @@ export default function FlightsPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8 bg-gradient-to-r from-white via-blue-50 to-white p-3 rounded-2xl shadow-2xl border-2 border-blue-100 gap-2">
+          <TabsList className="grid w-full grid-cols-4 mb-8 bg-white/90 p-1.5 rounded-xl shadow-lg border border-blue-200 gap-1 h-14">
             <TabsTrigger 
               value="search" 
-              className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=inactive]:hover:bg-blue-100 data-[state=inactive]:hover:scale-105 transition-all duration-300 font-bold text-base py-4 px-6 rounded-xl flex items-center justify-center gap-2"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=inactive]:hover:bg-blue-50 transition-all duration-200 font-semibold text-sm h-full rounded-lg flex items-center justify-center gap-1.5"
               data-testid="tab-search"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-4 h-4" />
               <span className="hidden sm:inline">{t('flights.tab_search')}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="track" 
-              className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=inactive]:hover:bg-blue-100 data-[state=inactive]:hover:scale-105 transition-all duration-300 font-bold text-base py-4 px-6 rounded-xl flex items-center justify-center gap-2"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=inactive]:hover:bg-blue-50 transition-all duration-200 font-semibold text-sm h-full rounded-lg flex items-center justify-center gap-1.5"
               data-testid="tab-track"
             >
-              <Navigation className="w-5 h-5" />
+              <Navigation className="w-4 h-4" />
               <span className="hidden sm:inline">{t('flights.tab_track')}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="current" 
-              className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=inactive]:hover:bg-blue-100 data-[state=inactive]:hover:scale-105 transition-all duration-300 font-bold text-base py-4 px-6 rounded-xl flex items-center justify-center gap-2"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=inactive]:hover:bg-blue-50 transition-all duration-200 font-semibold text-sm h-full rounded-lg flex items-center justify-center gap-1.5"
               data-testid="tab-current"
             >
-              <Calendar className="w-5 h-5" />
+              <Calendar className="w-4 h-4" />
               <span className="hidden sm:inline">{t('flights.tab_current_bookings')}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="past" 
-              className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=inactive]:hover:bg-blue-100 data-[state=inactive]:hover:scale-105 transition-all duration-300 font-bold text-base py-4 px-6 rounded-xl flex items-center justify-center gap-2"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=inactive]:hover:bg-blue-50 transition-all duration-200 font-semibold text-sm h-full rounded-lg flex items-center justify-center gap-1.5"
               data-testid="tab-past"
             >
-              <History className="w-5 h-5" />
+              <History className="w-4 h-4" />
               <span className="hidden sm:inline">{t('flights.tab_past_bookings')}</span>
             </TabsTrigger>
           </TabsList>
