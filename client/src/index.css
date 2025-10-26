@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Force page scroll when Select dropdown is open - override Radix behavior */
+body {
+  overflow: auto !important;
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+  pointer-events: auto !important;
+}
+
+/* Prevent any element from locking scroll */
+html, body {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  position: relative !important;
+}
+
+/* Allow Select content to be scrollable while maintaining page scroll */
+[data-radix-select-content] {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
 /* RTL Dialog Support - Force RTL on all dialog elements */
 [dir="rtl"][role="dialog"] {
   direction: rtl !important;
