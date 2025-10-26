@@ -1,29 +1,109 @@
 "use client"
 
 import * as React from "react"
-import * as SelectPrimitive from "@radix-ui/react-select"
-import { Check, ChevronDown, ChevronUp } from "lucide-react"
+import * as PopoverPrimitive from "@radix-ui/react-popover"
+import { Check, ChevronDown } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
 
-const Select = SelectPrimitive.Root
+interface SelectContextValue {
+  value?: string
+  onValueChange?: (value: string) => void
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
 
-const SelectGroup = SelectPrimitive.Group
+const SelectContext = React.createContext<SelectContextValue | undefined>(undefined)
 
-const SelectValue = SelectPrimitive.Value
+function useSelectContext() {
+  const context = React.useContext(SelectContext)
+  if (!context) {
+    throw new Error("Select components must be used within a Select provider")
+  }
+  return context
+}
+
+interface SelectProps {
+  value?: string
+  defaultValue?: string
+  onValueChange?: (value: string) => void
+  open?: boolean
+  defaultOpen?: boolean
+  onOpenChange?: (open: boolean) => void
+  children?: React.ReactNode
+}
+
+const Select = React.forwardRef<HTMLDivElement, SelectProps>(
+  ({ value: controlledValue, defaultValue, onValueChange, open: controlledOpen, defaultOpen, onOpenChange, children }, ref) => {
+    const [uncontrolledValue, setUncontrolledValue] = React.useState(defaultValue)
+    const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen ?? false)
+
+    const value = controlledValue !== undefined ? controlledValue : uncontrolledValue
+    const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen
+
+    const handleValueChange = React.useCallback((newValue: string) => {
+      if (controlledValue === undefined) {
+        setUncontrolledValue(newValue)
+      }
+      onValueChange?.(newValue)
+      if (controlledOpen === undefined) {
+        setUncontrolledOpen(false)
+      }
+      onOpenChange?.(false)
+    }, [controlledValue, onValueChange, controlledOpen, onOpenChange])
+
+    const handleOpenChange = React.useCallback((newOpen: boolean) => {
+      if (controlledOpen === undefined) {
+        setUncontrolledOpen(newOpen)
+      }
+      onOpenChange?.(newOpen)
+    }, [controlledOpen, onOpenChange])
+
+    return (
+      <SelectContext.Provider value={{ value, onValueChange: handleValueChange, open, onOpenChange: handleOpenChange }}>
+        <PopoverPrimitive.Root open={open} onOpenChange={handleOpenChange} modal={false}>
+          <div ref={ref}>{children}</div>
+        </PopoverPrimitive.Root>
+      </SelectContext.Provider>
+    )
+  }
+)
+Select.displayName = "Select"
+
+const SelectGroup = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn("py-1", className)} {...props} />
+)
+SelectGroup.displayName = "SelectGroup"
+
+interface SelectValueProps {
+  placeholder?: string
+}
+
+const SelectValue = React.forwardRef<HTMLSpanElement, SelectValueProps>(
+  ({ placeholder }, ref) => {
+    const { value } = useSelectContext()
+    return (
+      <span ref={ref} className="pointer-events-none">
+        {value || placeholder}
+      </span>
+    )
+  }
+)
+SelectValue.displayName = "SelectValue"
 
 const SelectTrigger = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
+  React.ElementRef<typeof PopoverPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => {
   const { i18n } = useTranslation();
   const dir = i18n.language === 'he' ? 'rtl' : 'ltr';
+  
   return (
-    <SelectPrimitive.Trigger
+    <PopoverPrimitive.Trigger
       ref={ref}
       className={cn(
-        "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+        "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         dir === 'rtl' ? 'text-right' : 'text-left',
         className
       )}
@@ -31,140 +111,105 @@ const SelectTrigger = React.forwardRef<
       {...props}
     >
       {children}
-      <SelectPrimitive.Icon asChild>
-        <ChevronDown className="h-4 w-4 opacity-50" />
-      </SelectPrimitive.Icon>
-    </SelectPrimitive.Trigger>
+      <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+    </PopoverPrimitive.Trigger>
   );
 })
-SelectTrigger.displayName = SelectPrimitive.Trigger.displayName
-
-const SelectScrollUpButton = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.ScrollUpButton>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollUpButton>
->(({ className, ...props }, ref) => (
-  <SelectPrimitive.ScrollUpButton
-    ref={ref}
-    className={cn(
-      "flex cursor-default items-center justify-center py-1",
-      className
-    )}
-    {...props}
-  >
-    <ChevronUp className="h-4 w-4" />
-  </SelectPrimitive.ScrollUpButton>
-))
-SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
-
-const SelectScrollDownButton = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.ScrollDownButton>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollDownButton>
->(({ className, ...props }, ref) => (
-  <SelectPrimitive.ScrollDownButton
-    ref={ref}
-    className={cn(
-      "flex cursor-default items-center justify-center py-1",
-      className
-    )}
-    {...props}
-  >
-    <ChevronDown className="h-4 w-4" />
-  </SelectPrimitive.ScrollDownButton>
-))
-SelectScrollDownButton.displayName =
-  SelectPrimitive.ScrollDownButton.displayName
+SelectTrigger.displayName = "SelectTrigger"
 
 const SelectContent = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
->(({ className, children, position = "popper", ...props }, ref) => {
+  React.ElementRef<typeof PopoverPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
+>(({ className, children, align = "start", sideOffset = 4, ...props }, ref) => {
   const { i18n } = useTranslation();
   const dir = i18n.language === 'he' ? 'rtl' : 'ltr';
+  
   return (
-    <SelectPrimitive.Portal>
-      <SelectPrimitive.Content
+    <PopoverPrimitive.Portal>
+      <PopoverPrimitive.Content
         ref={ref}
+        align={align}
+        sideOffset={sideOffset}
         className={cn(
-          "relative z-50 max-h-[--radix-select-content-available-height] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-select-content-transform-origin]",
-          position === "popper" &&
-            "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+          "relative z-50 max-h-96 min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-popover-content-transform-origin] w-[var(--radix-popover-trigger-width)]",
           className
         )}
-        position={position}
         dir={dir}
         {...props}
       >
-        <SelectScrollUpButton />
-        <SelectPrimitive.Viewport
-          className={cn(
-            "p-1",
-            position === "popper" &&
-              "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
-          )}
-        >
+        <div className="p-1">
           {children}
-        </SelectPrimitive.Viewport>
-        <SelectScrollDownButton />
-      </SelectPrimitive.Content>
-    </SelectPrimitive.Portal>
+        </div>
+      </PopoverPrimitive.Content>
+    </PopoverPrimitive.Portal>
   );
 })
-SelectContent.displayName = SelectPrimitive.Content.displayName
+SelectContent.displayName = "SelectContent"
 
 const SelectLabel = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.Label>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <SelectPrimitive.Label
+  <div
     ref={ref}
     className={cn("py-1.5 pl-8 pr-2 text-sm font-semibold", className)}
     {...props}
   />
 ))
-SelectLabel.displayName = SelectPrimitive.Label.displayName
+SelectLabel.displayName = "SelectLabel"
 
-const SelectItem = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
->(({ className, children, ...props }, ref) => {
-  const { i18n } = useTranslation();
-  const isRTL = i18n.language === 'he';
-  return (
-    <SelectPrimitive.Item
-      ref={ref}
-      className={cn(
-        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-        isRTL ? "pr-8 pl-2" : "pl-8 pr-2",
-        className
-      )}
-      {...props}
-    >
-      <span className={cn(
-        "absolute flex h-3.5 w-3.5 items-center justify-center",
-        isRTL ? "right-2" : "left-2"
-      )}>
-        <SelectPrimitive.ItemIndicator>
-          <Check className="h-4 w-4" />
-        </SelectPrimitive.ItemIndicator>
-      </span>
+interface SelectItemProps extends React.HTMLAttributes<HTMLDivElement> {
+  value: string
+}
 
-      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
-    </SelectPrimitive.Item>
-  );
-})
-SelectItem.displayName = SelectPrimitive.Item.displayName
+const SelectItem = React.forwardRef<HTMLDivElement, SelectItemProps>(
+  ({ className, children, value, ...props }, ref) => {
+    const { value: selectedValue, onValueChange, onOpenChange } = useSelectContext()
+    const { i18n } = useTranslation();
+    const isRTL = i18n.language === 'he';
+    const isSelected = selectedValue === value
+
+    const handleClick = () => {
+      onValueChange?.(value)
+      onOpenChange(false)
+    }
+
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+          isRTL ? "pr-8 pl-2" : "pl-8 pr-2",
+          isSelected && "bg-accent/50",
+          className
+        )}
+        onClick={handleClick}
+        {...props}
+      >
+        <span className={cn(
+          "absolute flex h-3.5 w-3.5 items-center justify-center",
+          isRTL ? "right-2" : "left-2"
+        )}>
+          {isSelected && <Check className="h-4 w-4" />}
+        </span>
+        {children}
+      </div>
+    )
+  }
+)
+SelectItem.displayName = "SelectItem"
 
 const SelectSeparator = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.Separator>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <SelectPrimitive.Separator
+  <div
     ref={ref}
     className={cn("-mx-1 my-1 h-px bg-muted", className)}
     {...props}
   />
 ))
-SelectSeparator.displayName = SelectPrimitive.Separator.displayName
+SelectSeparator.displayName = "SelectSeparator"
 
 export {
   Select,
@@ -175,6 +220,4 @@ export {
   SelectLabel,
   SelectItem,
   SelectSeparator,
-  SelectScrollUpButton,
-  SelectScrollDownButton,
 }
