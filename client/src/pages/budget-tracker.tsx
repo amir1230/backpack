@@ -656,7 +656,7 @@ export default function BudgetTracker() {
             {filteredExpenses.length > 0 ? (
               <>
                 {/* Budget Status */}
-                {selectedTrip && trips.find((t: any) => t.id === selectedTrip)?.budget && (
+                {selectedTrip && userTrips.find((t: any) => t.id === selectedTrip)?.budget && (
                   <Card>
                     <CardHeader>
                       <CardTitle className={`flex items-center gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
