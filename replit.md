@@ -7,6 +7,15 @@ GlobeMate is a full-stack web application for worldwide travel planning and comm
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+- **Flights Search Feature** (Oct 26, 2025):
+  - Integrated Duffel Flights API for real flight search and booking
+  - Backend: Two new endpoints - POST /api/flights/search and GET /api/flights/offer/:offerId
+  - Frontend: New /flights page with comprehensive search form and results display
+  - Features: Round-trip/one-way flights, multiple passengers (adults/children), cabin class selection, real-time search
+  - UI: Beautiful card-based results with flight details (price, duration, stops, airline, departure/arrival times)
+  - Multilingual: Full Hebrew/English support with 67 new translation keys
+  - Navigation: Added "Flights" menu item with Plane icon
+  - Duffel API v2 integration verified and tested (56 flight offers returned in test search TLV→ATH)
 - **Trip Type Placeholder & Scroll Fix** (Oct 26, 2025): 
   - Added placeholder "בחר אופי טיול" to trip type selector by initializing tripType state to empty string
   - Fixed Radix Select scroll-lock issue that prevented page scrolling when dropdown was open

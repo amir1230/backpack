@@ -41,6 +41,7 @@ import Accessibility from "./pages/accessibility.js";
 import About from "./pages/about.js";
 import HotelDeals from "./pages/hotel-deals.js";
 import AiAssistant from "./pages/ai-assistant.js";
+import Flights from "./pages/flights.js";
 import Navigation from "./components/navigation.js";
 import Footer from "./components/footer.js";
 import { ErrorBoundary } from "./components/error-boundary.js";
@@ -172,6 +173,7 @@ function Router() {
           <Route path="/about" component={About} />
           <Route path="/hotel-deals" component={HotelDeals} />
           <Route path="/ai-assistant" component={AiAssistant} />
+          <Route path="/flights" component={Flights} />
           <Route path="/auth/callback" component={Callback} />
           <Route component={NotFound} />
         </Switch>

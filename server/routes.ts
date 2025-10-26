@@ -1351,6 +1351,165 @@ export async function registerRoutes(app: Express): Promise<void> {
   // ===== COLLECTOR DATA API ENDPOINTS =====
   registerCollectorRoutes(app);
 
+  // ===== DUFFEL FLIGHTS API INTEGRATION =====
+  
+  // Search flights using Duffel API
+  app.post('/api/flights/search', noAuth, async (req: any, res) => {
+    try {
+      const { origin, destination, departureDate, returnDate, passengers, cabinClass } = req.body;
+      
+      if (!origin || !destination || !departureDate || !passengers) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      const apiKey = process.env.DUFFEL_API_KEY;
+      const baseUrl = process.env.DUFFEL_BASE_URL || 'https://api.duffel.com';
+
+      if (!apiKey) {
+        return res.status(500).json({ error: 'Duffel API key not configured' });
+      }
+
+      // Build slices (one-way or round-trip)
+      const slices: any[] = [
+        {
+          origin,
+          destination,
+          departure_date: departureDate
+        }
+      ];
+
+      if (returnDate) {
+        slices.push({
+          origin: destination,
+          destination: origin,
+          departure_date: returnDate
+        });
+      }
+
+      // Build passengers array
+      const passengersList = [];
+      for (let i = 0; i < (passengers.adults || 1); i++) {
+        passengersList.push({ type: 'adult' });
+      }
+      if (passengers.children) {
+        for (let i = 0; i < passengers.children; i++) {
+          passengersList.push({ type: 'child' });
+        }
+      }
+
+      const offerRequest = {
+        data: {
+          slices,
+          passengers: passengersList,
+          cabin_class: cabinClass || 'economy'
+        }
+      };
+
+      // Make request to Duffel API
+      const https = await import('https');
+      const postData = JSON.stringify(offerRequest);
+
+      const options = {
+        hostname: 'api.duffel.com',
+        path: '/air/offer_requests',
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(postData),
+          'Duffel-Version': 'v2',
+          'Accept': 'application/json'
+        }
+      };
+
+      const apiResponse = await new Promise<any>((resolve, reject) => {
+        const apiReq = https.request(options, (apiRes) => {
+          let data = '';
+          apiRes.on('data', (chunk) => { data += chunk; });
+          apiRes.on('end', () => {
+            try {
+              const parsed = JSON.parse(data);
+              if (apiRes.statusCode === 200 || apiRes.statusCode === 201) {
+                resolve(parsed);
+              } else {
+                reject(new Error(parsed.errors?.[0]?.message || 'Duffel API error'));
+              }
+            } catch (e) {
+              reject(new Error('Failed to parse Duffel response'));
+            }
+          });
+        });
+        apiReq.on('error', reject);
+        apiReq.write(postData);
+        apiReq.end();
+      });
+
+      res.json({
+        success: true,
+        offers: apiResponse.data?.offers || [],
+        requestId: apiResponse.data?.id
+      });
+
+    } catch (error: any) {
+      console.error('Flights search error:', error);
+      res.status(500).json({ error: error.message || 'Failed to search flights' });
+    }
+  });
+
+  // Get offer details
+  app.get('/api/flights/offer/:offerId', noAuth, async (req: any, res) => {
+    try {
+      const { offerId } = req.params;
+      const apiKey = process.env.DUFFEL_API_KEY;
+
+      if (!apiKey) {
+        return res.status(500).json({ error: 'Duffel API key not configured' });
+      }
+
+      const https = await import('https');
+      const options = {
+        hostname: 'api.duffel.com',
+        path: `/air/offers/${offerId}`,
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Duffel-Version': 'v2',
+          'Accept': 'application/json'
+        }
+      };
+
+      const apiResponse = await new Promise<any>((resolve, reject) => {
+        const apiReq = https.request(options, (apiRes) => {
+          let data = '';
+          apiRes.on('data', (chunk) => { data += chunk; });
+          apiRes.on('end', () => {
+            try {
+              const parsed = JSON.parse(data);
+              if (apiRes.statusCode === 200) {
+                resolve(parsed);
+              } else {
+                reject(new Error(parsed.errors?.[0]?.message || 'Duffel API error'));
+              }
+            } catch (e) {
+              reject(new Error('Failed to parse Duffel response'));
+            }
+          });
+        });
+        apiReq.on('error', reject);
+        apiReq.end();
+      });
+
+      res.json({
+        success: true,
+        offer: apiResponse.data
+      });
+
+    } catch (error: any) {
+      console.error('Offer details error:', error);
+      res.status(500).json({ error: error.message || 'Failed to get offer details' });
+    }
+  });
+
   // ===== ENHANCED GLOBAL TRAVEL DATA ENDPOINTS =====
   
   // Seed database with comprehensive travel data (includes South America and other regions)
