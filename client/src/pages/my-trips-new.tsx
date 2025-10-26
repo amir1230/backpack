@@ -258,6 +258,80 @@ const translateBestTime = (text: string, targetLang: string): string => {
   return result;
 };
 
+// Translation function for travel style tags and highlights
+const translateText = (text: string, targetLang: string): string => {
+  if (!text) return text;
+  
+  const translations: Record<string, Record<string, string>> = {
+    'he': {
+      // Travel styles
+      'adventure': 'הרפתקאות',
+      'culture': 'תרבות',
+      'relaxation': 'רגיעה',
+      'luxury': 'יוקרה',
+      'budget': 'חיסכוני',
+      'nature': 'טבע',
+      'city': 'עירוני',
+      'beach': 'חוף',
+      'food': 'אוכל',
+      'nightlife': 'חיי לילה',
+      'shopping': 'קניות',
+      'family': 'משפחתי',
+      // Common words
+      'expensive': 'יקר',
+      'cheap': 'זול',
+      'moderate': 'בינוני',
+      'museum': 'מוזיאון',
+      'park': 'פארק',
+      'beach': 'חוף',
+      'market': 'שוק',
+      'restaurant': 'מסעדה',
+      'hotel': 'מלון',
+      'attractions': 'אטרקציות',
+      'landmarks': 'ציוני דרך'
+    },
+    'en': {
+      // Travel styles
+      'הרפתקאות': 'Adventure',
+      'תרבות': 'Culture',
+      'רגיעה': 'Relaxation',
+      'יוקרה': 'Luxury',
+      'חיסכוני': 'Budget',
+      'טבע': 'Nature',
+      'עירוני': 'City',
+      'חוף': 'Beach',
+      'אוכל': 'Food',
+      'חיי לילה': 'Nightlife',
+      'קניות': 'Shopping',
+      'משפחתי': 'Family',
+      // Common words
+      'יקר': 'Expensive',
+      'יקרה': 'Expensive',
+      'זול': 'Cheap',
+      'בינוני': 'Moderate',
+      'מוזיאון': 'Museum',
+      'פארק': 'Park',
+      'שוק': 'Market',
+      'מסעדה': 'Restaurant',
+      'מלון': 'Hotel',
+      'אטרקציות': 'Attractions',
+      'ציוני דרך': 'Landmarks'
+    }
+  };
+  
+  const mappings = translations[targetLang] || {};
+  let result = text;
+  
+  // Replace each word
+  Object.entries(mappings).forEach(([key, value]) => {
+    // Use word boundary for exact matches
+    const regex = new RegExp(`\\b${key}\\b`, 'gi');
+    result = result.replace(regex, value);
+  });
+  
+  return result;
+};
+
 export default function MyTripsNew() {
   const { t, i18n } = useTranslation();
   const { formatCurrency, formatDate } = useLocalizedFormatting();
@@ -1442,7 +1516,7 @@ export default function MyTripsNew() {
                               {suggestion.highlights.map((highlight, idx) => (
                                 <div key={idx} className="flex items-center text-sm text-gray-700 text-right flex-row-reverse gap-2">
                                   <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                                  <span>{highlight}</span>
+                                  <span>{translateText(highlight, i18n.language)}</span>
                                 </div>
                               ))}
                             </div>
@@ -1982,7 +2056,7 @@ export default function MyTripsNew() {
                                     {highlights.map((highlight, idx) => (
                                       <div key={idx} className={`flex items-center text-sm text-gray-700 gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                                         <span className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></span>
-                                        <span className={i18n.language === 'he' ? 'text-right' : 'text-left'}>{highlight}</span>
+                                        <span className={i18n.language === 'he' ? 'text-right' : 'text-left'}>{translateText(highlight, i18n.language)}</span>
                                       </div>
                                     ))}
                                   </div>
@@ -2011,7 +2085,7 @@ export default function MyTripsNew() {
                                         const interestConfig = ALL_INTERESTS.find(int => int.id === trimmedStyle.toLowerCase());
                                         return (
                                           <Badge key={idx} variant="secondary" className="bg-gradient-to-r from-orange-100 to-teal-100 text-gray-800 border-0">
-                                            {interestConfig ? interestConfig.label : trimmedStyle}
+                                            {interestConfig ? interestConfig.label : translateText(trimmedStyle, i18n.language)}
                                           </Badge>
                                         );
                                       });
