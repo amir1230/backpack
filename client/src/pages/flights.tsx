@@ -191,7 +191,7 @@ export default function FlightsPage() {
               {/* Origin and Destination */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="origin" className="flex items-center gap-2">
+                  <Label htmlFor="origin" className="flex items-center gap-2 h-6">
                     <MapPin className="w-4 h-4" />
                     {t('flights.from')}
                   </Label>
@@ -200,13 +200,13 @@ export default function FlightsPage() {
                     placeholder={t('flights.enter_origin')}
                     value={origin}
                     onChange={(e) => setOrigin(e.target.value)}
-                    className="uppercase"
+                    className="uppercase h-11"
                     maxLength={3}
                     data-testid="input-origin"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="destination" className="flex items-center gap-2">
+                  <Label htmlFor="destination" className="flex items-center gap-2 h-6">
                     <MapPin className="w-4 h-4" />
                     {t('flights.to')}
                   </Label>
@@ -215,7 +215,7 @@ export default function FlightsPage() {
                     placeholder={t('flights.enter_destination')}
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
-                    className="uppercase"
+                    className="uppercase h-11"
                     maxLength={3}
                     data-testid="input-destination"
                   />
@@ -225,7 +225,7 @@ export default function FlightsPage() {
               {/* Dates */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="departure" className="flex items-center gap-2">
+                  <Label htmlFor="departure" className="flex items-center gap-2 h-6">
                     <Calendar className="w-4 h-4" />
                     {t('flights.departure_date')}
                   </Label>
@@ -235,12 +235,13 @@ export default function FlightsPage() {
                     value={departureDate}
                     onChange={(e) => setDepartureDate(e.target.value)}
                     min={today}
+                    className="h-11"
                     data-testid="input-departure-date"
                   />
                 </div>
                 {tripType === 'round_trip' && (
                   <div className="space-y-2">
-                    <Label htmlFor="return" className="flex items-center gap-2">
+                    <Label htmlFor="return" className="flex items-center gap-2 h-6">
                       <Calendar className="w-4 h-4" />
                       {t('flights.return_date')}
                     </Label>
@@ -250,6 +251,7 @@ export default function FlightsPage() {
                       value={returnDate}
                       onChange={(e) => setReturnDate(e.target.value)}
                       min={departureDate || today}
+                      className="h-11"
                       data-testid="input-return-date"
                     />
                   </div>
@@ -259,12 +261,12 @@ export default function FlightsPage() {
               {/* Passengers and Cabin Class */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="adults" className="flex items-center gap-2">
+                  <Label htmlFor="adults" className="flex items-center gap-2 h-6">
                     <Users className="w-4 h-4" />
                     {t('flights.adults')}
                   </Label>
                   <Select value={String(adults)} onValueChange={(v) => setAdults(Number(v))}>
-                    <SelectTrigger data-testid="select-adults">
+                    <SelectTrigger data-testid="select-adults" className="h-11">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -275,9 +277,9 @@ export default function FlightsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="children">{t('flights.children')}</Label>
+                  <Label htmlFor="children" className="h-6 flex items-center">{t('flights.children')}</Label>
                   <Select value={String(children)} onValueChange={(v) => setChildren(Number(v))}>
-                    <SelectTrigger data-testid="select-children">
+                    <SelectTrigger data-testid="select-children" className="h-11">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -288,9 +290,9 @@ export default function FlightsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="cabin">{t('flights.cabin_class')}</Label>
+                  <Label htmlFor="cabin" className="h-6 flex items-center">{t('flights.cabin_class')}</Label>
                   <Select value={cabinClass} onValueChange={setCabinClass}>
-                    <SelectTrigger data-testid="select-cabin-class">
+                    <SelectTrigger data-testid="select-cabin-class" className="h-11">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
