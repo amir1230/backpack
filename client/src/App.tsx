@@ -47,86 +47,6 @@ import { ErrorBoundary } from "./components/error-boundary.js";
 
 // Simplified demo app - no authentication needed
 
-// Force enable page scrolling - override Radix Select scroll lock
-function EnableScrolling() {
-  React.useEffect(() => {
-    const forceScroll = () => {
-      // Remove scroll lock attributes
-      document.body.removeAttribute('data-scroll-locked');
-      document.documentElement.removeAttribute('data-scroll-locked');
-      
-      // Force styles
-      document.body.style.setProperty('overflow', 'auto', 'important');
-      document.body.style.setProperty('padding-right', '0', 'important');
-      document.body.style.setProperty('margin-right', '0', 'important');
-      document.body.style.setProperty('pointer-events', 'auto', 'important');
-      document.documentElement.style.setProperty('overflow', 'auto', 'important');
-      
-      // Also handle portal elements
-      const portals = document.querySelectorAll('[data-radix-popper-content-wrapper]');
-      portals.forEach(portal => {
-        (portal as HTMLElement).style.setProperty('pointer-events', 'auto', 'important');
-      });
-    };
-
-    // Run immediately
-    forceScroll();
-
-    // Watch for changes with MutationObserver
-    const observer = new MutationObserver(() => {
-      forceScroll();
-    });
-    
-    observer.observe(document.body, {
-      attributes: true,
-      childList: true,
-      subtree: true,
-      attributeFilter: ['style', 'data-scroll-locked'],
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['style', 'data-scroll-locked'],
-    });
-
-    // Enable wheel events
-    const wheelHandler = (e: WheelEvent) => {
-      // Don't prevent default - allow scrolling
-      if (e.target === document.body || e.target === document.documentElement) {
-        return;
-      }
-    };
-
-    const touchHandler = (e: TouchEvent) => {
-      // Don't prevent default - allow touch scrolling
-      if (e.target === document.body || e.target === document.documentElement) {
-        return;
-      }
-    };
-
-    // Add with capture to run before Radix handlers
-    window.addEventListener('wheel', wheelHandler, { passive: true, capture: true });
-    window.addEventListener('touchmove', touchHandler, { passive: true, capture: true });
-
-    // Also use requestAnimationFrame for smooth continuous override
-    let rafId: number;
-    const rafLoop = () => {
-      forceScroll();
-      rafId = requestAnimationFrame(rafLoop);
-    };
-    rafId = requestAnimationFrame(rafLoop);
-
-    return () => {
-      observer.disconnect();
-      cancelAnimationFrame(rafId);
-      window.removeEventListener('wheel', wheelHandler, { capture: true } as EventListenerOptions);
-      window.removeEventListener('touchmove', touchHandler, { capture: true } as EventListenerOptions);
-    };
-  }, []);
-
-  return null;
-}
-
 function ScrollToTop() {
   const [location] = useLocation();
   
@@ -148,7 +68,6 @@ function ScrollToTop() {
 function Router() {
   return (
     <div className="min-h-screen flex flex-col">
-      <EnableScrolling />
       <ScrollToTop />
       <Navigation />
       {/* Main content area adjusted for right sidebar on desktop, bottom padding for mobile nav */}
