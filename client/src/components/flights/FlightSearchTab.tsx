@@ -215,7 +215,7 @@ export default function FlightSearchTab() {
                                     origin === airport.code ? "opacity-100" : "opacity-0"
                                   )}
                                 />
-                                <div className={`flex flex-col w-full ${isRTL ? 'items-end' : 'items-start'}`}>
+                                <div className="flex flex-col w-full items-start">
                                   <span className="font-semibold">{displayCity} ({airport.code})</span>
                                   <span className="text-xs text-gray-500">{displayName}, {displayCountry}</span>
                                 </div>
@@ -279,7 +279,7 @@ export default function FlightSearchTab() {
                                     destination === airport.code ? "opacity-100" : "opacity-0"
                                   )}
                                 />
-                                <div className={`flex flex-col w-full ${isRTL ? 'items-end' : 'items-start'}`}>
+                                <div className="flex flex-col w-full items-start">
                                   <span className="font-semibold">{displayCity} ({airport.code})</span>
                                   <span className="text-xs text-gray-500">{displayName}, {displayCountry}</span>
                                 </div>
