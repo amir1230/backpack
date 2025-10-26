@@ -421,8 +421,8 @@ export default function BudgetTracker() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-600">{t('budget.total_spent')}</span>
-                      <span className="text-lg font-semibold text-primary">
+                      <span className="text-gray-600 text-left">{t('budget.total_spent')}</span>
+                      <span className="text-lg font-semibold text-primary text-right" dir="ltr">
                         {i18n.language === 'he' 
                           ? `₪${Math.round(totalSpent * USD_TO_ILS).toLocaleString('he-IL')}` 
                           : `$${totalSpent.toFixed(2)}`}
@@ -431,18 +431,18 @@ export default function BudgetTracker() {
                     {selectedTrip && budget > 0 && (
                       <>
                         <div className="flex items-center justify-between">
-                          <span className="text-gray-600">{t('budget.budget')}</span>
-                          <span className="text-lg font-semibold text-slate-700">
+                          <span className="text-gray-600 text-left">{t('budget.budget')}</span>
+                          <span className="text-lg font-semibold text-slate-700 text-right" dir="ltr">
                             {i18n.language === 'he' 
                               ? `₪${Math.round(budget * USD_TO_ILS).toLocaleString('he-IL')}` 
                               : `$${budget.toFixed(2)}`}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-gray-600">{t('budget.remaining')}</span>
-                          <span className={`text-lg font-semibold ${
+                          <span className="text-gray-600 text-left">{t('budget.remaining')}</span>
+                          <span className={`text-lg font-semibold text-right ${
                             budget - totalSpent >= 0 ? 'text-green-600' : 'text-red-600'
-                          }`}>
+                          }`} dir="ltr">
                             {i18n.language === 'he' 
                               ? `₪${Math.round((budget - totalSpent) * USD_TO_ILS).toLocaleString('he-IL')}` 
                               : `$${(budget - totalSpent).toFixed(2)}`}
