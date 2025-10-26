@@ -1651,10 +1651,21 @@ export async function registerRoutes(app: Express): Promise<void> {
       
       // Filter by callsign (state[1])
       const targetCallsign = callsign.toUpperCase().trim();
+      
+      console.log(`🔍 Searching for flight: ${targetCallsign}`);
+      console.log(`📊 Total flights in response: ${apiResponse.states?.length || 0}`);
+      
+      // Find matching flight by callsign
       const matchingState = apiResponse.states?.find((state: any) => {
         const stateCallsign = state[1]?.trim().toUpperCase();
         return stateCallsign === targetCallsign || stateCallsign?.includes(targetCallsign);
       });
+      
+      if (matchingState) {
+        console.log(`✅ Found flight: ${matchingState[1]?.trim()}`);
+      } else {
+        console.log(`❌ Flight ${targetCallsign} not found in current flights`);
+      }
       
       if (matchingState) {
         const state = matchingState;
