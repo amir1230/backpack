@@ -50,26 +50,61 @@ import { ErrorBoundary } from "./components/error-boundary.js";
 // Force enable page scrolling - override Radix Select scroll lock
 function EnableScrolling() {
   React.useEffect(() => {
+    // Patch addEventListener to prevent Radix from blocking scroll events
+    const originalAddEventListener = EventTarget.prototype.addEventListener;
+    const originalRemoveEventListener = EventTarget.prototype.removeEventListener;
+    const blockedListeners = new Map<EventTarget, Array<{ type: string; listener: any; options: any }>>();
+
+    EventTarget.prototype.addEventListener = function(type: string, listener: any, options?: any) {
+      // Block non-passive wheel/touchmove listeners from being added
+      if ((type === 'wheel' || type === 'touchmove') && 
+          (!options || options.passive !== true)) {
+        // Store reference but don't actually add it
+        if (!blockedListeners.has(this)) {
+          blockedListeners.set(this, []);
+        }
+        blockedListeners.get(this)!.push({ type, listener, options });
+        console.log(`[EnableScrolling] Blocked non-passive ${type} listener`);
+        return;
+      }
+      return originalAddEventListener.call(this, type, listener, options);
+    };
+
+    EventTarget.prototype.removeEventListener = function(type: string, listener: any, options?: any) {
+      // Check if this was a blocked listener
+      const blocked = blockedListeners.get(this);
+      if (blocked) {
+        const index = blocked.findIndex(item => 
+          item.type === type && item.listener === listener
+        );
+        if (index !== -1) {
+          blocked.splice(index, 1);
+          return;
+        }
+      }
+      return originalRemoveEventListener.call(this, type, listener, options);
+    };
+
     const forceScroll = () => {
       document.body.style.overflow = 'auto';
       document.body.style.paddingRight = '0';
       document.documentElement.style.overflow = 'auto';
     };
 
-    // Run immediately
     forceScroll();
 
-    // Watch for changes and force scroll
     const observer = new MutationObserver(forceScroll);
     observer.observe(document.body, {
       attributes: true,
       attributeFilter: ['style', 'data-scroll-locked'],
     });
 
-    // Also run periodically as backup
-    const interval = setInterval(forceScroll, 100);
+    const interval = setInterval(forceScroll, 50);
 
     return () => {
+      // Restore original methods
+      EventTarget.prototype.addEventListener = originalAddEventListener;
+      EventTarget.prototype.removeEventListener = originalRemoveEventListener;
       observer.disconnect();
       clearInterval(interval);
     };

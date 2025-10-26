@@ -7,6 +7,12 @@ GlobeMate is a full-stack web application for worldwide travel planning and comm
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+- **Trip Type Placeholder & Scroll Fix** (Oct 26, 2025): 
+  - Added placeholder "בחר אופי טיול" to trip type selector by initializing tripType state to empty string
+  - Fixed Radix Select scroll-lock issue that prevented page scrolling when dropdown was open
+  - Solution: Patched EventTarget.prototype.addEventListener to block non-passive wheel/touchmove listeners from Radix's react-remove-scroll library
+  - Includes CSS overrides and MutationObserver as additional safeguards
+  - Verified with automated Playwright tests - page now scrollable with dropdown open
 - **Saved Journeys Feature** (Oct 22, 2025): Complete implementation allowing users to save and manage their favorite pre-made journeys:
   - Database: Created `saved_journeys` table with user-journey relationships
   - Backend: Four REST endpoints (POST, GET, DELETE, check) with Zod validation and numeric parameter checks
