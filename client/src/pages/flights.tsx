@@ -330,7 +330,7 @@ export default function FlightsPage() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                {t('flights.results')} ({offers.length})
+                {t('flights.found_flights', { count: offers.length })}
               </h2>
               <Badge variant="secondary" className="text-lg px-4 py-2">
                 <TrendingDown className="w-4 h-4 mr-2" />
