@@ -51,27 +51,48 @@ import { ErrorBoundary } from "./components/error-boundary.js";
 function EnableScrolling() {
   React.useEffect(() => {
     const forceScroll = () => {
-      document.body.style.overflow = 'auto';
-      document.body.style.paddingRight = '0';
-      document.documentElement.style.overflow = 'auto';
+      // Remove scroll lock attributes
+      document.body.removeAttribute('data-scroll-locked');
+      document.documentElement.removeAttribute('data-scroll-locked');
+      
+      // Force styles
+      document.body.style.setProperty('overflow', 'auto', 'important');
+      document.body.style.setProperty('padding-right', '0', 'important');
+      document.body.style.setProperty('margin-right', '0', 'important');
+      document.documentElement.style.setProperty('overflow', 'auto', 'important');
     };
 
     // Run immediately
     forceScroll();
 
-    // Watch for changes and force scroll
-    const observer = new MutationObserver(forceScroll);
+    // Watch for changes with MutationObserver
+    const observer = new MutationObserver(() => {
+      forceScroll();
+    });
+    
     observer.observe(document.body, {
       attributes: true,
       attributeFilter: ['style', 'data-scroll-locked'],
+      attributeOldValue: true,
     });
 
-    // Also run periodically as backup
-    const interval = setInterval(forceScroll, 100);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['style', 'data-scroll-locked'],
+      attributeOldValue: true,
+    });
+
+    // Also use requestAnimationFrame for smooth continuous override
+    let rafId: number;
+    const rafLoop = () => {
+      forceScroll();
+      rafId = requestAnimationFrame(rafLoop);
+    };
+    rafId = requestAnimationFrame(rafLoop);
 
     return () => {
       observer.disconnect();
-      clearInterval(interval);
+      cancelAnimationFrame(rafId);
     };
   }, []);
 
