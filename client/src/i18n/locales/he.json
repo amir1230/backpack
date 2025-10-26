@@ -400,7 +400,7 @@
     "search_error": "שגיאה בחיפוש טיסות",
     "try_again": "נסה שוב",
     "loading": "טוען...",
-    "found_flights": "נמצאו {count} טיסות",
+    "found_flights": "נמצאו {{count}} טיסות",
     "airline": "חברת תעופה",
     "layover": "המתנה",
     "enter_origin": "הזן עיר מוצא (למשל: TLV)",

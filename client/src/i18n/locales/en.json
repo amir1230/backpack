@@ -256,7 +256,7 @@
     "search_error": "Error searching flights",
     "try_again": "Try Again",
     "loading": "Loading...",
-    "found_flights": "Found {count} flights",
+    "found_flights": "Found {{count}} flights",
     "airline": "Airline",
     "layover": "Layover",
     "enter_origin": "Enter origin city (e.g., TLV)",
