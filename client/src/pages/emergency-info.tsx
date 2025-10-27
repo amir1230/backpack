@@ -328,7 +328,7 @@ export default function EmergencyInfo() {
                     {emergencyInfo.insuranceEmergencyPhone && (
                       <div className="md:col-span-2 bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
                         <p className="text-sm text-gray-600 mb-1">{t("emergency.emergency_phone")}</p>
-                        <p className="text-lg font-bold text-green-900" dir="ltr">{emergencyInfo.insuranceEmergencyPhone}</p>
+                        <p className="text-lg font-bold text-green-900 text-left" dir="ltr">{emergencyInfo.insuranceEmergencyPhone}</p>
                       </div>
                     )}
                   </div>
