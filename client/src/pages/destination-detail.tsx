@@ -324,7 +324,7 @@ export default function DestinationDetail() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60" />
         <div className="container mx-auto px-4 h-full flex flex-col justify-between py-8 relative z-10">
           {/* Back Button */}
-          <div>
+          <div className="flex justify-end">
             <Link href="/destinations">
               <Button variant="ghost" className="text-white hover:bg-white/20" data-testid="button-back">
                 <ArrowLeft className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
@@ -335,9 +335,9 @@ export default function DestinationDetail() {
 
           {/* Title */}
           <div className="text-white">
-            <div className={`flex items-center gap-4 mb-4 ${isRTL ? "flex-row-reverse" : ""}`}>
+            <div className="flex items-center gap-4 mb-4 flex-row-reverse">
               <span className="text-8xl">{destination.flag}</span>
-              <div className={`flex-1 ${isRTL ? "text-right" : "text-left"}`}>
+              <div className="flex-1 text-right">
                 <h1 className="text-5xl font-bold mb-2">{destination.name}</h1>
                 <p className="text-xl opacity-90">
                   {t(`trips.countries.${destination.country}`, destination.country)} • {t(`trips.continents.${destination.continent}`, destination.continent)}
@@ -347,7 +347,7 @@ export default function DestinationDetail() {
           </div>
 
           {/* Quick Actions */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 justify-end">
             <Button variant="secondary" size="sm" data-testid="button-save">
               <Bookmark className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
               {t("destinations.card.save")}
