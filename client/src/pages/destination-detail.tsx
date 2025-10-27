@@ -417,11 +417,11 @@ export default function DestinationDetail() {
                       const attractionRating = typeof attraction.rating === 'string' ? parseFloat(attraction.rating) : attraction.rating;
                       
                       return (
-                        <div key={attractionKey} className="flex items-start gap-4 p-4 hover:bg-gray-50 rounded-lg transition" data-testid={`attraction-${attractionKey}`}>
+                        <div key={attractionKey} className={`flex items-start gap-4 p-4 hover:bg-gray-50 rounded-lg transition ${isRTL ? "flex-row-reverse" : ""}`} data-testid={`attraction-${attractionKey}`}>
                           <img 
                             src={getAttractionImageUrl(attraction)}
                             alt={attraction.name}
-                            className="h-20 w-20 rounded-lg object-cover bg-gray-100"
+                            className="h-20 w-20 rounded-lg object-cover bg-gray-100 flex-shrink-0"
                             loading="lazy"
                             onError={(e) => {
                               const img = e.target as HTMLImageElement;
@@ -438,15 +438,15 @@ export default function DestinationDetail() {
                             }}
                           />
                           <div className="flex-1">
-                            <h4 className="font-medium text-lg mb-1">{attraction.name}</h4>
+                            <h4 className={`font-medium text-lg mb-1 ${isRTL ? "text-right" : "text-left"}`}>{attraction.name}</h4>
                             {attraction.description && (
-                              <p className="text-sm text-gray-600 mb-2 line-clamp-2">{attraction.description}</p>
+                              <p className={`text-sm text-gray-600 mb-2 line-clamp-2 ${isRTL ? "text-right" : "text-left"}`}>{attraction.description}</p>
                             )}
                             {attractionAddress && (
-                              <p className="text-xs text-gray-400 mb-2">{attractionAddress}</p>
+                              <p className={`text-xs text-gray-400 mb-2 ${isRTL ? "text-right" : "text-left"}`}>{attractionAddress}</p>
                             )}
                             {attractionRating && (
-                              <div className="flex items-center gap-2 text-sm">
+                              <div className={`flex items-center gap-2 text-sm ${isRTL ? "flex-row-reverse justify-end" : ""}`}>
                                 <span className="flex items-center gap-1">
                                   ⭐ {attractionRating.toFixed(1)}
                                 </span>
@@ -533,15 +533,15 @@ export default function DestinationDetail() {
                   </div>
                 ) : weatherData ? (
                   <>
-                    <div className="flex items-center gap-6 mb-6">
-                      <div className="text-5xl">
+                    <div className={`flex items-center gap-6 mb-6 ${isRTL ? "flex-row-reverse" : ""}`}>
+                      <div className="text-5xl flex-shrink-0">
                         <img 
                           src={`https://openweathermap.org/img/wn/${weatherData.current.icon}@2x.png`}
                           alt={weatherData.current.description}
                           className="w-20 h-20"
                         />
                       </div>
-                      <div>
+                      <div className={isRTL ? "text-right" : "text-left"}>
                         <div className="text-4xl font-bold">
                           {weatherData.current.temp}°{units === 'metric' ? 'C' : 'F'}
                         </div>
@@ -550,7 +550,7 @@ export default function DestinationDetail() {
                           {t("destinations.detail.feels_like")} {weatherData.current.feelsLike}°
                         </p>
                       </div>
-                      <div className="flex-1 grid grid-cols-2 gap-4 text-sm">
+                      <div className={`flex-1 grid grid-cols-2 gap-4 text-sm ${isRTL ? "text-right" : "text-left"}`}>
                         <div>
                           <p className="text-gray-500">{t("destinations.detail.humidity")}</p>
                           <p className="font-medium">{weatherData.current.humidity}%</p>
@@ -572,7 +572,7 @@ export default function DestinationDetail() {
                       </div>
                     </div>
                     <div className="border-t pt-4">
-                      <h4 className="font-medium mb-3">{t("destinations.detail.forecast")}</h4>
+                      <h4 className={`font-medium mb-3 ${isRTL ? "text-right" : "text-left"}`}>{t("destinations.detail.forecast")}</h4>
                       <div className="grid grid-cols-5 gap-2">
                         {weatherData.forecast.map((day: any, idx: number) => (
                           <div key={idx} className="text-center p-3 bg-gray-50 rounded-lg">
@@ -630,8 +630,8 @@ export default function DestinationDetail() {
                 ) : geoData?.country && providers.geo ? (
                   <>
                     {/* Country */}
-                    <div className="flex items-start gap-3" data-testid="geo-country">
-                      <div className="text-2xl mt-0.5">{geoData.country.flagUrl ? <img src={geoData.country.flagUrl} alt={geoData.country.name} className="w-6 h-6" /> : "🌍"}</div>
+                    <div className={`flex items-start gap-3 ${isRTL ? "flex-row-reverse" : ""}`} data-testid="geo-country">
+                      <div className="text-2xl mt-0.5 flex-shrink-0">{geoData.country.flagUrl ? <img src={geoData.country.flagUrl} alt={geoData.country.name} className="w-6 h-6" /> : "🌍"}</div>
                       <div className="flex-1">
                         <p className="font-medium">{t("destinations.detail.country")}</p>
                         <p className="text-sm text-gray-600">{geoData.country.name} ({geoData.country.code})</p>
@@ -640,8 +640,8 @@ export default function DestinationDetail() {
 
                     {/* Currencies */}
                     {geoData.country.currencies?.length > 0 && (
-                      <div className="flex items-start gap-3" data-testid="geo-currencies">
-                        <DollarSign className="h-5 w-5 text-gray-400 mt-0.5" />
+                      <div className={`flex items-start gap-3 ${isRTL ? "flex-row-reverse" : ""}`} data-testid="geo-currencies">
+                        <DollarSign className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                         <div className="flex-1">
                           <p className="font-medium">{t("destinations.detail.currencies")}</p>
                           <p className="text-sm text-gray-600">
@@ -653,8 +653,8 @@ export default function DestinationDetail() {
 
                     {/* Languages */}
                     {geoData.country.languages?.length > 0 && (
-                      <div className="flex items-start gap-3" data-testid="geo-languages">
-                        <Languages className="h-5 w-5 text-gray-400 mt-0.5" />
+                      <div className={`flex items-start gap-3 ${isRTL ? "flex-row-reverse" : ""}`} data-testid="geo-languages">
+                        <Languages className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                         <div className="flex-1">
                           <p className="font-medium">{t("destinations.detail.languages")}</p>
                           <p className="text-sm text-gray-600">{geoData.country.languages.join(", ")}</p>
@@ -664,8 +664,8 @@ export default function DestinationDetail() {
 
                     {/* Timezones */}
                     {geoData.country.timezones?.length > 0 && (
-                      <div className="flex items-start gap-3" data-testid="geo-timezones">
-                        <Clock className="h-5 w-5 text-gray-400 mt-0.5" />
+                      <div className={`flex items-start gap-3 ${isRTL ? "flex-row-reverse" : ""}`} data-testid="geo-timezones">
+                        <Clock className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                         <div className="flex-1">
                           <p className="font-medium">{t("destinations.detail.timezones")}</p>
                           <p className="text-sm text-gray-600">
@@ -678,8 +678,8 @@ export default function DestinationDetail() {
 
                     {/* Calling Code */}
                     {geoData.country.callingCode && (
-                      <div className="flex items-start gap-3" data-testid="geo-calling-code">
-                        <Navigation className="h-5 w-5 text-gray-400 mt-0.5" />
+                      <div className={`flex items-start gap-3 ${isRTL ? "flex-row-reverse" : ""}`} data-testid="geo-calling-code">
+                        <Navigation className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                         <div className="flex-1">
                           <p className="font-medium">{t("destinations.detail.calling_code")}</p>
                           <p className="text-sm text-gray-600">{geoData.country.callingCode}</p>
