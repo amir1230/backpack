@@ -317,8 +317,8 @@ export default function DestinationsHub() {
             ) : !isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredDestinations.map((destination) => (
-                  <Card key={destination.id} className="overflow-hidden hover:shadow-lg transition-shadow" data-testid={`card-destination-${destination.id}`}>
-                    <div className="h-48 relative overflow-hidden">
+                  <Card key={destination.id} className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow" data-testid={`card-destination-${destination.id}`}>
+                    <div className="h-48 relative overflow-hidden flex-shrink-0">
                       <img 
                         src={getDestinationImageUrl(destination)}
                         alt={destination.name}
@@ -340,15 +340,15 @@ export default function DestinationsHub() {
                         {destination.flag}
                       </div>
                     </div>
-                    <CardHeader>
+                    <CardHeader className="flex-shrink-0">
                       <CardTitle className="flex items-center justify-between">
                         <span>{destination.name}</span>
                         <span className="text-sm font-normal text-gray-500">⭐ {destination.rating.toFixed(1)}</span>
                       </CardTitle>
                       <CardDescription>{t(`trips.countries.${destination.country}`, destination.country)}</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-gray-600 mb-3">{destination.description}</p>
+                    <CardContent className="flex-1 flex flex-col">
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-3">{destination.description}</p>
                       <div className="flex flex-wrap gap-2 mb-3">
                         {destination.types.map((type) => (
                           <Badge key={type} variant="outline" className="text-xs">
@@ -357,13 +357,13 @@ export default function DestinationsHub() {
                         ))}
                       </div>
                       {destination.userRatingsTotal > 0 && (
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="flex items-center gap-2 text-sm text-gray-500 mt-auto">
                           <Thermometer className="h-4 w-4" />
                           <span>{destination.userRatingsTotal.toLocaleString()} {t("destinations.reviews", "reviews")}</span>
                         </div>
                       )}
                     </CardContent>
-                    <CardFooter className="flex gap-2">
+                    <CardFooter className="flex gap-2 flex-shrink-0">
                       <Link href={`/destinations/${destination.id}`} className="flex-1">
                         <Button className="w-full" data-testid={`button-view-${destination.id}`}>
                           {t("destinations.card.view_details")}
