@@ -19,6 +19,7 @@ interface Attraction {
   user_ratings_total?: number;
   types: string[];
   photos?: Array<{ photo_reference: string }>;
+  description?: string; // Add description for database attractions
 }
 
 // Google Map Embed Component
@@ -129,7 +130,18 @@ export default function DestinationDetail() {
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data && data.data.length > 0) {
-            return data.data;
+            // Map database attractions to Attraction interface
+            const mappedAttractions = data.data.map((attr: any) => ({
+              place_id: attr.id,
+              name: attr.name,
+              formatted_address: attr.address || '',
+              rating: attr.rating || 0,
+              user_ratings_total: attr.userRatingsTotal || 0,
+              types: attr.tags || ['tourist_attraction'],
+              photos: [], // Database attractions don't have Google Photos
+              description: attr.description, // Add description field
+            }));
+            return mappedAttractions;
           }
         }
       }
