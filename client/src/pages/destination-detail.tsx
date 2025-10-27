@@ -547,24 +547,24 @@ export default function DestinationDetail() {
                           {t("destinations.detail.feels_like")} {weatherData.current.feelsLike}°
                         </p>
                       </div>
-                      <div className={`flex-1 grid grid-cols-2 gap-4 text-sm ${isRTL ? "text-right" : "text-left"}`}>
+                      <div className="flex-1 grid grid-cols-2 gap-4 text-sm text-left">
+                        <div>
+                          <p className="text-gray-500">{t("destinations.detail.wind")}</p>
+                          <p className="font-medium">
+                            {units === 'metric' ? 'm/s' : 'mph'} {weatherData.current.windSpeed}
+                          </p>
+                        </div>
                         <div>
                           <p className="text-gray-500">{t("destinations.detail.humidity")}</p>
                           <p className="font-medium">{weatherData.current.humidity}%</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">{t("destinations.detail.wind")}</p>
-                          <p className="font-medium">
-                            {weatherData.current.windSpeed} {units === 'metric' ? 'm/s' : 'mph'}
-                          </p>
+                          <p className="text-gray-500">{t("destinations.detail.visibility")}</p>
+                          <p className="font-medium">km {(weatherData.current.visibility / 1000).toFixed(1)}</p>
                         </div>
                         <div>
                           <p className="text-gray-500">{t("destinations.detail.pressure")}</p>
-                          <p className="font-medium">{weatherData.current.pressure} hPa</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">{t("destinations.detail.visibility")}</p>
-                          <p className="font-medium">{(weatherData.current.visibility / 1000).toFixed(1)} km</p>
+                          <p className="font-medium">hPa {weatherData.current.pressure}</p>
                         </div>
                       </div>
                     </div>
