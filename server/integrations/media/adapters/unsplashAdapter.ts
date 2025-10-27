@@ -1,19 +1,73 @@
 import { MediaAdapter, ImageResult, AttributionInfo, DEFAULT_TTL } from '../types.js';
 
+// Rate limiting tracker (in-memory)
+interface RateLimitTracker {
+  requests: number[];
+  maxRequests: number;
+  windowMs: number;
+}
+
 export class UnsplashAdapter implements MediaAdapter {
   private accessKey: string;
+  private rateLimit: RateLimitTracker;
 
   constructor() {
     this.accessKey = process.env.UNSPLASH_ACCESS_KEY || '';
+    // Unsplash free tier: 50 requests/hour
+    this.rateLimit = {
+      requests: [],
+      maxRequests: 50,
+      windowMs: 60 * 60 * 1000, // 1 hour
+    };
   }
 
   isEnabled(): boolean {
     return !!this.accessKey;
   }
+  
+  private checkRateLimit(): boolean {
+    const now = Date.now();
+    // Remove requests older than the window
+    this.rateLimit.requests = this.rateLimit.requests.filter(
+      (timestamp) => now - timestamp < this.rateLimit.windowMs
+    );
+    
+    // Check if we're at the limit
+    if (this.rateLimit.requests.length >= this.rateLimit.maxRequests) {
+      return false; // Rate limit exceeded
+    }
+    
+    return true;
+  }
+  
+  private trackRequest(): void {
+    this.rateLimit.requests.push(Date.now());
+  }
+  
+  getRateLimitStatus(): { remaining: number; total: number; resetAt: Date } {
+    this.checkRateLimit(); // Clean old requests
+    const remaining = Math.max(0, this.rateLimit.maxRequests - this.rateLimit.requests.length);
+    const oldestRequest = this.rateLimit.requests[0];
+    const resetAt = oldestRequest 
+      ? new Date(oldestRequest + this.rateLimit.windowMs)
+      : new Date();
+    
+    return {
+      remaining,
+      total: this.rateLimit.maxRequests,
+      resetAt,
+    };
+  }
 
   async fetchImage(params: { id?: string; query?: string; width?: number }): Promise<ImageResult> {
     if (!this.isEnabled()) {
       throw new Error('Unsplash is not enabled');
+    }
+    
+    // Check rate limit before making request
+    if (!this.checkRateLimit()) {
+      const status = this.getRateLimitStatus();
+      throw new Error(`Unsplash rate limit exceeded. Resets at ${status.resetAt.toISOString()}`);
     }
 
     let photoUrl: string;
@@ -41,6 +95,9 @@ export class UnsplashAdapter implements MediaAdapter {
       throw new Error('Either id or query must be provided');
     }
 
+    // Track the request after successful API call
+    this.trackRequest();
+    
     const imageResponse = await fetch(photoUrl);
     const buffer = Buffer.from(await imageResponse.arrayBuffer());
     const contentType = imageResponse.headers.get('content-type') || 'image/jpeg';

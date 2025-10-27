@@ -2,6 +2,10 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage.js";
+import { MediaOrchestrator } from './integrations/media/mediaOrchestrator.js';
+
+// Create MediaOrchestrator singleton for rate limiting persistence
+const mediaOrchestrator = new MediaOrchestrator(storage);
 import { config } from "./config.js";
 // Removed Replit OAuth - using Supabase Auth only
 
@@ -5443,6 +5447,50 @@ export async function registerRoutes(app: Express): Promise<void> {
     } catch (error: any) {
       console.error('Media status error:', error);
       res.status(500).json({ error: 'Failed to get status' });
+    }
+  });
+
+  // Location photo with intelligent fallback
+  app.get('/api/media/location-photo', async (req, res) => {
+    try {
+      const { entityType, entityId, entityName, country, photoReference, forceRefresh } = req.query;
+
+      if (!entityType || !entityId || !entityName) {
+        return res.status(400).json({ 
+          error: 'entityType, entityId, and entityName are required' 
+        });
+      }
+
+      // Use singleton orchestrator for rate limiting persistence
+      const result = await mediaOrchestrator.getLocationPhoto({
+        entityType: entityType as string,
+        entityId: entityId as string,
+        entityName: entityName as string,
+        country: country as string | undefined,
+        photoReference: photoReference as string | undefined,
+        forceRefresh: forceRefresh === 'true',
+      });
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('Location photo error:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch location photo', 
+        message: error.message 
+      });
+    }
+  });
+  
+  // Unsplash rate limit status
+  app.get('/api/media/unsplash-rate-limit', async (req, res) => {
+    try {
+      // Use singleton orchestrator
+      const status = mediaOrchestrator.getUnsplashRateLimit();
+      
+      res.json(status);
+    } catch (error: any) {
+      console.error('Unsplash rate limit error:', error);
+      res.status(500).json({ error: 'Failed to get rate limit status' });
     }
   });
 

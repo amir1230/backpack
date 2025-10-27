@@ -191,9 +191,14 @@ export interface IStorage {
   upsertLocationSubratings(locationId: string, category: string, subratings: InsertLocationSubrating[]): Promise<LocationSubrating[]>;
   getLocationSubratings(locationId: string, category: string): Promise<LocationSubrating[]>;
   
-  // Location photo operations
+  // Location photo operations (legacy TripAdvisor-style)
   createLocationPhoto(photo: InsertLocationPhoto): Promise<LocationPhoto>;
   getLocationPhotos(locationId: string, category: string): Promise<LocationPhoto[]>;
+  
+  // Location photo operations (entity-based model for fallback system)
+  getLocationPhotosByEntity(entityType: string, entityId: string): Promise<LocationPhoto[]>;
+  getPrimaryLocationPhoto(entityType: string, entityId: string): Promise<LocationPhoto | undefined>;
+  upsertLocationPhoto(photo: InsertLocationPhoto): Promise<LocationPhoto>;
   
   // Location ancestor operations
   upsertLocationAncestors(locationId: string, ancestors: InsertLocationAncestor[]): Promise<LocationAncestor[]>;
@@ -1243,29 +1248,86 @@ export class DatabaseStorage implements IStorage {
       ));
   }
 
-  // Location photo operations
+  // Location photo operations (legacy - kept for backwards compatibility)
   async createLocationPhoto(photo: InsertLocationPhoto): Promise<LocationPhoto> {
     const [newPhoto] = await db.insert(locationPhotos).values(photo).returning();
     return newPhoto;
   }
 
   async getLocationPhotos(locationId: string, category: string): Promise<LocationPhoto[]> {
+    // Legacy method - maps locationId to externalId and category to entityType
     return await db
       .select()
       .from(locationPhotos)
       .where(and(
-        eq(locationPhotos.locationId, locationId),
-        eq(locationPhotos.locationCategory, category)
+        eq(locationPhotos.externalId, locationId),
+        eq(locationPhotos.entityType, category)
       ))
-      .orderBy(desc(locationPhotos.createdAt));
+      .orderBy(desc(locationPhotos.insertedAt));
+  }
+  
+  // Entity-based location photo operations (for fallback system)
+  async getLocationPhotosByEntity(entityType: string, entityId: string): Promise<LocationPhoto[]> {
+    return await db
+      .select()
+      .from(locationPhotos)
+      .where(and(
+        eq(locationPhotos.entityType, entityType),
+        eq(locationPhotos.entityId, entityId)
+      ))
+      .orderBy(desc(locationPhotos.isPrimary), desc(locationPhotos.insertedAt));
+  }
+  
+  async getPrimaryLocationPhoto(entityType: string, entityId: string): Promise<LocationPhoto | undefined> {
+    const [photo] = await db
+      .select()
+      .from(locationPhotos)
+      .where(and(
+        eq(locationPhotos.entityType, entityType),
+        eq(locationPhotos.entityId, entityId),
+        eq(locationPhotos.isPrimary, true)
+      ))
+      .limit(1);
+    return photo;
+  }
+  
+  async upsertLocationPhoto(photo: InsertLocationPhoto): Promise<LocationPhoto> {
+    // Check if photo already exists (by entity, source, and externalId)
+    const [existing] = await db
+      .select()
+      .from(locationPhotos)
+      .where(and(
+        eq(locationPhotos.entityType, photo.entityType),
+        eq(locationPhotos.entityId, photo.entityId),
+        eq(locationPhotos.source, photo.source),
+        eq(locationPhotos.externalId, photo.externalId)
+      ))
+      .limit(1);
+    
+    if (existing) {
+      // Update existing photo
+      const [updated] = await db
+        .update(locationPhotos)
+        .set({
+          ...photo,
+          updatedAt: new Date(),
+        })
+        .where(eq(locationPhotos.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      // Insert new photo
+      const [newPhoto] = await db.insert(locationPhotos).values(photo).returning();
+      return newPhoto;
+    }
   }
 
-  // Location ancestor operations
+  // Location ancestor operations (legacy - maps locationId to externalId)
   async upsertLocationAncestors(locationId: string, ancestors: InsertLocationAncestor[]): Promise<LocationAncestor[]> {
-    // Delete existing ancestors for this location
+    // Delete existing ancestors for this location (by externalId)
     await db
       .delete(locationAncestors)
-      .where(eq(locationAncestors.locationId, locationId));
+      .where(eq(locationAncestors.externalId, locationId));
 
     // Insert new ancestors
     if (ancestors.length > 0) {
@@ -1278,7 +1340,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(locationAncestors)
-      .where(eq(locationAncestors.locationId, locationId));
+      .where(eq(locationAncestors.externalId, locationId));
   }
   // Enhanced community features implementation
   

@@ -49,6 +49,7 @@ Preferred communication style: Simple, everyday language.
 - **Emergency Information Management**: Comprehensive system with dual view/edit modes for emergency contacts, medical info, insurance, and passport details. After save, displays organized summary card with color-coded sections (red for contacts, blue for medical, green for insurance, purple for passport) featuring gradient boxes and badges. Edit button returns to form mode. Includes passport number, expiry date, and issuing country fields.
 - **Comprehensive Translation for Trip Content**: Functions to translate month names, travel styles, common nouns, and descriptive words in trip content for bilingual display.
 - **Flight Management System**: Integrated Duffel Flights API for flight search and booking, OpenSky Network API for real-time flight tracking, and a booking management system with current and past bookings.
+- **Intelligent Image Fallback System**: Three-tier fallback for location photos with database caching. Priority: Google Places (real photos) → Unsplash (50/hour rate limited) → Wikimedia Commons (free, unlimited). All fetched images cached in location_photos table for fast retrieval. MediaOrchestrator service manages fallback logic, rate limiting, and attribution. API endpoints: `/api/media/location-photo` for photo retrieval, `/api/media/unsplash-rate-limit` for rate limit status.
 
 ## External Dependencies
 - **PostgreSQL**: Primary database (via Supabase).
@@ -70,3 +71,6 @@ Preferred communication style: Simple, everyday language.
 - **SQLAlchemy**: ORM used in Collector microservice.
 - **Google Maps JavaScript API**: For interactive maps.
 - **Nodemailer**: For sending email notifications.
+- **Unsplash API**: For high-quality stock photography (50 requests/hour free tier).
+- **Wikimedia Commons API**: For free, unlimited access to public domain images.
+- **Pexels API**: Fallback source for stock photography.
