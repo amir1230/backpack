@@ -1318,6 +1318,7 @@ export const insertEmergencyInfoSchema = createInsertSchema(emergencyInfo).omit(
   id: true,
   createdAt: true,
   updatedAt: true,
+  passportExpiry: true,
 }).extend({
   passportExpiry: z.union([z.string(), z.date()]).optional().transform(val => {
     if (!val) return undefined;
