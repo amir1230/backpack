@@ -29,7 +29,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Database Design
 - **ORM**: Drizzle with PostgreSQL
-- **Key Tables**: Users, Sessions, Trips, Reviews, Expenses, Chat, User Connections, Journeys, Destinations, Accommodations, Attractions, Restaurants, Location Reviews, Location Photos, Location Ancestors.
+- **Key Tables**: Users, Sessions, Trips, Reviews, Expenses, Chat, User Connections, Journeys, Destinations, Destinations_i18n (for translations), Accommodations, Attractions, Restaurants, Location Reviews, Location Photos, Location Ancestors.
 
 ### Core Features & Technical Implementations
 - **AI-Powered Trip Planning**: Utilizes OpenAI for personalized recommendations, itinerary generation, and an interactive assistant, considering traveler composition and trip type. Integrates Google Places API for real-world booking suggestions.
@@ -41,8 +41,8 @@ Preferred communication style: Simple, everyday language.
 - **Multi-API Travel Data Integration**: Combines Google Places API for real-time search with a seeded database and TripAdvisor-ready infrastructure.
 - **Weather & Travel Timing System**: Real-time weather data (OpenWeather API) and historical climate analysis for "Best Time to Travel" recommendations.
 - **Real Places Booking Integration**: Enriches AI-generated suggestions with bookable locations from Google Places API.
-- **Destinations Hub**: Comprehensive discovery system with search, filters, sorting, detailed pages including weather, attractions, and interactive Google Maps integration.
-- **Global Expansion & Multilingual Support**: Worldwide destination coverage with full Hebrew/English bilingual support across all features, including instant language toggling and RTL support.
+- **Destinations Hub**: Comprehensive discovery system with search, filters, sorting, detailed pages including weather, attractions, and interactive Google Maps integration. All 101 destinations now include enriched metadata (continent, country flag, ratings, descriptions) and full Hebrew/English translations via the `destinations_i18n` table. The API endpoint `/api/destinations` accepts a `lang` parameter and returns localized names and descriptions for all destinations.
+- **Global Expansion & Multilingual Support**: Worldwide destination coverage with full Hebrew/English bilingual support across all features, including instant language toggling and RTL support. All destination content (names, descriptions) is fully translated and stored in the `destinations_i18n` table, with seamless integration via API language parameter.
 - **Support Pages**: Help Center, Contact Us, Privacy Policy, Terms of Service, Accessibility Statement, and About Us pages with full translation and RTL support.
 - **Optimized Image Loading**: Custom `OptimizedImage` component with retry, lazy loading, skeleton states, and error handling for galleries.
 - **Hotel Deals Landing Page & Email Notification System**: Landing page for hotel quote requests, saving inquiries to Supabase, and sending email notifications via Nodemailer with Hebrew RTL template.
