@@ -603,8 +603,8 @@ export default function DestinationDetail() {
           <div className="space-y-6">
             {/* Basics */}
             <Card>
-              <CardHeader className={isRTL ? "text-right" : "text-left"}>
-                <div className={`flex items-center justify-between gap-4 ${isRTL ? "flex-row-reverse" : ""}`}>
+              <CardHeader className="text-left">
+                <div className="flex items-center justify-between gap-4">
                   {providers.geo ? (
                     <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex-shrink-0">
                       {t("destinations.states.live_badge")}
@@ -614,10 +614,10 @@ export default function DestinationDetail() {
                       {t("destinations.states.soon_badge")}
                     </Badge>
                   )}
-                  <CardTitle className={isRTL ? "text-right" : "text-left"}>{t("destinations.detail.basics")}</CardTitle>
+                  <CardTitle className="text-left">{t("destinations.detail.basics")}</CardTitle>
                 </div>
               </CardHeader>
-              <CardContent className={`space-y-4 ${isRTL ? "text-right" : "text-left"}`}>
+              <CardContent className="space-y-4 text-left">
                 {geoLoading ? (
                   <div className="space-y-4">
                     <Skeleton className="h-12 w-full" />
@@ -627,7 +627,7 @@ export default function DestinationDetail() {
                 ) : geoData?.country && providers.geo ? (
                   <>
                     {/* Country */}
-                    <div className={`flex items-start gap-3 ${isRTL ? "flex-row-reverse" : ""}`} data-testid="geo-country">
+                    <div className="flex items-start gap-3" data-testid="geo-country">
                       <div className="text-2xl mt-0.5 flex-shrink-0">{geoData.country.flagUrl ? <img src={geoData.country.flagUrl} alt={geoData.country.name} className="w-6 h-6" /> : "🌍"}</div>
                       <div className="flex-1">
                         <p className="font-medium">{t("destinations.detail.country")}</p>
@@ -637,7 +637,7 @@ export default function DestinationDetail() {
 
                     {/* Currencies */}
                     {geoData.country.currencies?.length > 0 && (
-                      <div className={`flex items-start gap-3 ${isRTL ? "flex-row-reverse" : ""}`} data-testid="geo-currencies">
+                      <div className="flex items-start gap-3" data-testid="geo-currencies">
                         <DollarSign className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                         <div className="flex-1">
                           <p className="font-medium">{t("destinations.detail.currencies")}</p>
@@ -650,7 +650,7 @@ export default function DestinationDetail() {
 
                     {/* Languages */}
                     {geoData.country.languages?.length > 0 && (
-                      <div className={`flex items-start gap-3 ${isRTL ? "flex-row-reverse" : ""}`} data-testid="geo-languages">
+                      <div className="flex items-start gap-3" data-testid="geo-languages">
                         <Languages className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                         <div className="flex-1">
                           <p className="font-medium">{t("destinations.detail.languages")}</p>
@@ -661,7 +661,7 @@ export default function DestinationDetail() {
 
                     {/* Timezones */}
                     {geoData.country.timezones?.length > 0 && (
-                      <div className={`flex items-start gap-3 ${isRTL ? "flex-row-reverse" : ""}`} data-testid="geo-timezones">
+                      <div className="flex items-start gap-3" data-testid="geo-timezones">
                         <Clock className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                         <div className="flex-1">
                           <p className="font-medium">{t("destinations.detail.timezones")}</p>
@@ -675,7 +675,7 @@ export default function DestinationDetail() {
 
                     {/* Calling Code */}
                     {geoData.country.callingCode && (
-                      <div className={`flex items-start gap-3 ${isRTL ? "flex-row-reverse" : ""}`} data-testid="geo-calling-code">
+                      <div className="flex items-start gap-3" data-testid="geo-calling-code">
                         <Navigation className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
                         <div className="flex-1">
                           <p className="font-medium">{t("destinations.detail.calling_code")}</p>
