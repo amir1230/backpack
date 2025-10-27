@@ -375,7 +375,7 @@ export default function DestinationDetail() {
                 <CardTitle className={isRTL ? "text-right" : "text-left"}>{t("destinations.detail.overview")}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className={`text-gray-700 leading-relaxed ${isRTL ? "text-right" : "text-left"}`}>{destination.description}</p>
+                <p className="text-gray-700 leading-relaxed text-left">{destination.description}</p>
               </CardContent>
             </Card>
 
