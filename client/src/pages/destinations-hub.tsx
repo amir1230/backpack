@@ -107,11 +107,11 @@ export default function DestinationsHub() {
   const hasActiveFilters =
     searchQuery || selectedContinent !== "all" || selectedCountry !== "all" || selectedType !== "all";
 
-  // Get destination image URL - using Pexels
+  // Get destination image URL - using Google Places
   const getDestinationImageUrl = (destination: Destination) => {
     const params = new URLSearchParams({
-      source: 'pexels',
-      query: `${destination.name} cityscape`,
+      source: 'googleplaces',
+      query: destination.name,
       maxwidth: '600',
     });
     return `/api/media/proxy?${params}`;

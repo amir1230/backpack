@@ -181,19 +181,19 @@ export default function DestinationDetail() {
     geo: featureFlags?.geo ?? false,
   };
 
-  // Get hero image URL - using Pexels
+  // Get hero image URL - using Google Places
   const getHeroImageUrl = () => {
     const params = new URLSearchParams({
-      source: 'pexels',
-      query: `${destination.name} cityscape`,
+      source: 'googleplaces',
+      query: destination.name,
       maxwidth: '1920',
     });
     return `/api/media/proxy?${params}`;
   };
 
-  // Get attraction image URL - using Google Places Photo if available
+  // Get attraction image URL - using Google Places
   const getAttractionImageUrl = (attraction: any) => {
-    // Try Google Places photo first (real photo of the place!)
+    // Try Google Places photo reference first (fastest!)
     if (attraction.photos && attraction.photos.length > 0) {
       const params = new URLSearchParams({
         source: 'googleplaces',
@@ -203,10 +203,10 @@ export default function DestinationDetail() {
       return `/api/media/proxy?${params}`;
     }
     
-    // Fallback to Pexels if no photo available
+    // Fallback to Google Places search by name
     const params = new URLSearchParams({
-      source: 'pexels',
-      query: `${attraction.name} ${destination.name}`,
+      source: 'googleplaces',
+      query: attraction.name,
       maxwidth: '600',
     });
     return `/api/media/proxy?${params}`;
@@ -352,18 +352,9 @@ export default function DestinationDetail() {
                             const img = e.target as HTMLImageElement;
                             if (!img.dataset.retried) {
                               img.dataset.retried = 'true';
-                              // Fallback to Pexels
+                              // Fallback to simpler Google query
                               const params = new URLSearchParams({
-                                source: 'pexels',
-                                query: `${attraction.name}`,
-                                maxwidth: '600',
-                              });
-                              img.src = `/api/media/proxy?${params}`;
-                            } else if (!img.dataset.fallback) {
-                              img.dataset.fallback = 'true';
-                              // Final fallback - generic destination image
-                              const params = new URLSearchParams({
-                                source: 'pexels',
+                                source: 'googleplaces',
                                 query: destination.name,
                                 maxwidth: '600',
                               });
@@ -538,26 +529,27 @@ export default function DestinationDetail() {
                   destinationName={destination.name}
                   heroImages={[
                     { 
-                      source: 'pexels' as const, 
-                      query: `${destination.name} cityscape`,
-                      alt: `${destination.name} cityscape`
+                      source: 'googleplaces' as const, 
+                      query: destination.name,
+                      alt: destination.name
                     },
                     { 
-                      source: 'pexels' as const, 
+                      source: 'googleplaces' as const, 
                       query: `${destination.name} landmarks`,
                       alt: `${destination.name} landmarks`
                     },
                     { 
-                      source: 'pexels' as const, 
-                      query: `${destination.name} travel`,
-                      alt: `${destination.name} travel`
+                      source: 'googleplaces' as const, 
+                      query: `${destination.name} attractions`,
+                      alt: `${destination.name} attractions`
                     }
                   ]}
                   poiImages={
                     attractions && attractions.length > 0
-                      ? attractions.slice(0, 6).map((attr, idx) => ({
-                          source: 'pexels' as const,
-                          query: idx % 2 === 0 ? `${destination.name} attractions` : `${destination.name} sightseeing`,
+                      ? attractions.slice(0, 6).map((attr) => ({
+                          source: 'googleplaces' as const,
+                          ref: attr.photos && attr.photos.length > 0 ? attr.photos[0].photo_reference : undefined,
+                          query: attr.photos && attr.photos.length > 0 ? undefined : attr.name,
                           alt: attr.name
                         }))
                       : []

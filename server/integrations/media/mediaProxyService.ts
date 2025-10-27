@@ -14,7 +14,9 @@ class MediaProxyService {
   private readonly RATE_LIMIT_WINDOW = 60000;
 
   constructor() {
-    this.adapters.set('google', new GooglePlacesAdapter());
+    const googlePlacesAdapter = new GooglePlacesAdapter();
+    this.adapters.set('google', googlePlacesAdapter);
+    this.adapters.set('googleplaces', googlePlacesAdapter); // Alias for consistency
     this.adapters.set('unsplash', new UnsplashAdapter());
     this.adapters.set('pexels', new PexelsAdapter());
     this.adapters.set('wikimedia', new WikimediaAdapter());

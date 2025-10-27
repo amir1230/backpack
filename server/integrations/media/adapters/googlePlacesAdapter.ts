@@ -12,14 +12,29 @@ export class GooglePlacesAdapter implements MediaAdapter {
     return !!this.apiKey;
   }
 
-  async fetchImage(params: { ref: string; maxwidth?: number; maxheight?: number }): Promise<ImageResult> {
+  async fetchImage(params: { ref?: string; query?: string; maxwidth?: number; maxheight?: number }): Promise<ImageResult> {
     if (!this.isEnabled()) {
       throw new Error('Google Places Photos is not enabled');
     }
 
-    const { ref, maxwidth = 1200, maxheight } = params;
+    const { ref, query, maxwidth = 1200, maxheight } = params;
+    
+    let photoReference = ref;
+    
+    // If query is provided, search for the place first
+    if (query && !ref) {
+      photoReference = await this.searchPlacePhoto(query);
+      if (!photoReference) {
+        throw new Error(`No photo found for place: ${query}`);
+      }
+    }
+    
+    if (!photoReference) {
+      throw new Error('Either ref or query must be provided');
+    }
+
     const urlParams = new URLSearchParams({
-      photo_reference: ref,
+      photo_reference: photoReference,
       key: this.apiKey,
       ...(maxwidth && { maxwidth: maxwidth.toString() }),
       ...(maxheight && { maxheight: maxheight.toString() }),
@@ -38,8 +53,36 @@ export class GooglePlacesAdapter implements MediaAdapter {
     return {
       buffer,
       contentType,
-      ttl: DEFAULT_TTL.short,
+      ttl: DEFAULT_TTL.long, // Cache longer for query-based searches
     };
+  }
+  
+  private async searchPlacePhoto(query: string): Promise<string | null> {
+    try {
+      // Use Find Place API to get place_id
+      const searchParams = new URLSearchParams({
+        input: query,
+        inputtype: 'textquery',
+        fields: 'photos,place_id,name',
+        key: this.apiKey,
+      });
+      
+      const searchUrl = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?${searchParams}`;
+      const searchResponse = await fetch(searchUrl);
+      const searchData = await searchResponse.json();
+      
+      if (searchData.status === 'OK' && searchData.candidates && searchData.candidates.length > 0) {
+        const place = searchData.candidates[0];
+        if (place.photos && place.photos.length > 0) {
+          return place.photos[0].photo_reference;
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error searching place photo:', error);
+      return null;
+    }
   }
 
   getAttribution(params: { ref: string; htmlAttributions?: string[] }): AttributionInfo {
