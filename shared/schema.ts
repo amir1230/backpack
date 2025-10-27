@@ -356,129 +356,87 @@ export const userMissionProgress = pgTable("user_mission_progress", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// TripAdvisor-like data tables
+// Destination data tables (nominatim, OSM, etc.)
 export const destinations = pgTable("destinations", {
-  id: serial("id").primaryKey(),
-  locationId: varchar("location_id").unique().notNull(), // TripAdvisor location ID
-  name: varchar("name").notNull(),
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  country: text("country"),
   lat: decimal("lat", { precision: 10, scale: 8 }),
   lon: decimal("lon", { precision: 11, scale: 8 }),
-  addressStreet1: varchar("address_street1"),
-  addressStreet2: varchar("address_street2"),
-  city: varchar("city"),
-  state: varchar("state"),
-  country: varchar("country").notNull(),
-  postalCode: varchar("postal_code"),
-  addressString: text("address_string"),
-  webUrl: text("web_url"),
-  photoCount: integer("photo_count").default(0),
-  timezone: varchar("timezone"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+  source: text("source").notNull().default("nominatim"), // "nominatim", "osm", "tripadvisor"
+  externalId: text("external_id").notNull(), // ID from source system
+  insertedAt: timestamp("inserted_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("idx_destinations_country").on(table.country),
+  index("idx_destinations_country_name").on(table.country, table.name),
+]);
 
 export const accommodations = pgTable("accommodations", {
-  id: serial("id").primaryKey(),
-  locationId: varchar("location_id").unique().notNull(), // TripAdvisor location ID
-  destinationId: integer("destination_id").references(() => destinations.id),
-  name: varchar("name").notNull(),
-  rating: decimal("rating", { precision: 2, scale: 1 }), // Overall rating (1-5)
-  numReviews: integer("num_reviews").default(0),
-  priceLevel: varchar("price_level"), // $, $$, $$$, $$$$
-  category: varchar("category").notNull().default("hotel"), // hotel, bed_and_breakfast, etc.
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  destinationId: uuid("destination_id").references(() => destinations.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  placeType: text("place_type"), // hotel, hostel, apartment, etc.
   lat: decimal("lat", { precision: 10, scale: 8 }),
   lon: decimal("lon", { precision: 11, scale: 8 }),
-  addressStreet1: varchar("address_street1"),
-  addressStreet2: varchar("address_street2"),
-  city: varchar("city"),
-  state: varchar("state"),
-  country: varchar("country").notNull(),
-  postalCode: varchar("postal_code"),
-  addressString: text("address_string"),
-  webUrl: text("web_url"),
-  writeReviewUrl: text("write_review_url"),
-  bookingUrl: text("booking_url"),
-  isBookable: boolean("is_bookable").default(false),
-  photoCount: integer("photo_count").default(0),
-  ranking: integer("ranking"),
-  rankingOutOf: integer("ranking_out_of"),
-  rankingString: varchar("ranking_string"),
-  geoLocationId: varchar("geo_location_id"),
-  geoLocationName: varchar("geo_location_name"),
-  amenities: text("amenities").array(),
-  awards: jsonb("awards"), // Store award information as JSON
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+  address: text("address"),
+  phone: text("phone"),
+  website: text("website"),
+  rating: decimal("rating"),
+  source: text("source").notNull().default("osm"), // "osm", "google", "tripadvisor"
+  externalId: text("external_id").notNull(),
+  insertedAt: timestamp("inserted_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  userRatingsTotal: integer("user_ratings_total"),
+}, (table) => [
+  index("idx_accommodations_dest").on(table.destinationId),
+  index("idx_accommodations_destination_id").on(table.destinationId),
+]);
 
 export const attractions = pgTable("attractions", {
-  id: serial("id").primaryKey(),
-  locationId: varchar("location_id").unique().notNull(), // TripAdvisor location ID
-  destinationId: integer("destination_id").references(() => destinations.id),
-  name: varchar("name").notNull(),
-  rating: decimal("rating", { precision: 2, scale: 1 }), // Overall rating (1-5)
-  numReviews: integer("num_reviews").default(0),
-  priceLevel: varchar("price_level"), // $, $$, $$$, $$$$
-  category: varchar("category").notNull(), // attraction
-  subcategory: varchar("subcategory"),
-  attractionTypes: text("attraction_types").array(),
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  destinationId: uuid("destination_id").references(() => destinations.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
   lat: decimal("lat", { precision: 10, scale: 8 }),
   lon: decimal("lon", { precision: 11, scale: 8 }),
-  addressStreet1: varchar("address_street1"),
-  addressStreet2: varchar("address_street2"),
-  city: varchar("city"),
-  state: varchar("state"),
-  country: varchar("country").notNull(),
-  postalCode: varchar("postal_code"),
-  addressString: text("address_string"),
-  webUrl: text("web_url"),
-  writeReviewUrl: text("write_review_url"),
-  photoCount: integer("photo_count").default(0),
-  ranking: integer("ranking"),
-  rankingOutOf: integer("ranking_out_of"),
-  rankingString: varchar("ranking_string"),
-  geoLocationId: varchar("geo_location_id"),
-  geoLocationName: varchar("geo_location_name"),
-  hours: jsonb("hours"), // Store operating hours as JSON
-  awards: jsonb("awards"), // Store award information as JSON
-  groups: jsonb("groups"), // Attraction groups and categories
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+  address: text("address"),
+  website: text("website"),
+  rating: decimal("rating"),
+  tags: text("tags").array(),
+  source: text("source").notNull().default("otm"), // "otm", "osm", "google", "tripadvisor"
+  externalId: text("external_id").notNull(),
+  insertedAt: timestamp("inserted_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  userRatingsTotal: integer("user_ratings_total"),
+}, (table) => [
+  index("idx_attractions_dest").on(table.destinationId),
+  index("idx_attractions_destination").on(table.destinationId),
+  index("idx_attractions_destination_id").on(table.destinationId),
+]);
 
 export const restaurants = pgTable("restaurants", {
-  id: serial("id").primaryKey(),
-  locationId: varchar("location_id").unique().notNull(), // TripAdvisor location ID
-  destinationId: integer("destination_id").references(() => destinations.id),
-  name: varchar("name").notNull(),
-  rating: decimal("rating", { precision: 2, scale: 1 }), // Overall rating (1-5)
-  numReviews: integer("num_reviews").default(0),
-  priceLevel: varchar("price_level"), // $, $$, $$$, $$$$
-  category: varchar("category").notNull().default("restaurant"),
-  cuisine: text("cuisine").array(), // Array of cuisine types
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  destinationId: uuid("destination_id").references(() => destinations.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  cuisine: text("cuisine").array(),
   lat: decimal("lat", { precision: 10, scale: 8 }),
   lon: decimal("lon", { precision: 11, scale: 8 }),
-  addressStreet1: varchar("address_street1"),
-  addressStreet2: varchar("address_street2"),
-  city: varchar("city"),
-  state: varchar("state"),
-  country: varchar("country").notNull(),
-  postalCode: varchar("postal_code"),
-  addressString: text("address_string"),
-  webUrl: text("web_url"),
-  writeReviewUrl: text("write_review_url"),
-  photoCount: integer("photo_count").default(0),
-  ranking: integer("ranking"),
-  rankingOutOf: integer("ranking_out_of"),
-  rankingString: varchar("ranking_string"),
-  geoLocationId: varchar("geo_location_id"),
-  geoLocationName: varchar("geo_location_name"),
-  hours: jsonb("hours"), // Store operating hours as JSON
-  awards: jsonb("awards"), // Store award information as JSON
-  dietaryRestrictions: text("dietary_restrictions").array(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+  address: text("address"),
+  phone: text("phone"),
+  website: text("website"),
+  priceLevel: text("price_level"),
+  source: text("source").notNull().default("osm"), // "osm", "google", "tripadvisor"
+  externalId: text("external_id").notNull(),
+  insertedAt: timestamp("inserted_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  cuisines: text("cuisines").array(),
+  rating: decimal("rating"),
+  userRatingsTotal: integer("user_ratings_total"),
+}, (table) => [
+  index("idx_restaurants_dest").on(table.destinationId),
+  index("idx_restaurants_destination_id").on(table.destinationId),
+]);
 
 export const locationReviews = pgTable("location_reviews", {
   id: serial("id").primaryKey(),
@@ -531,13 +489,20 @@ export const locationPhotos = pgTable("location_photos", {
 ]);
 
 export const locationAncestors = pgTable("location_ancestors", {
-  id: serial("id").primaryKey(),
-  locationId: varchar("location_id").notNull(), // References TripAdvisor location ID
-  ancestorLocationId: varchar("ancestor_location_id").notNull(),
-  level: varchar("level").notNull(), // City, State, Country
-  name: varchar("name").notNull(),
-  abbreviation: varchar("abbreviation"),
-});
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  entityType: text("entity_type").notNull(), // "destination", "attraction", "restaurant", "accommodation"
+  entityId: uuid("entity_id").notNull(), // UUID reference to the entity
+  country: text("country"),
+  state: text("state"),
+  county: text("county"),
+  city: text("city"),
+  source: text("source").notNull().default("nominatim"), // "nominatim", "osm"
+  externalId: text("external_id").notNull(), // External ID from source
+  insertedAt: timestamp("inserted_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("ix_location_ancestors_source_external").on(table.source, table.externalId),
+]);
 
 // i18n translation tables for admin editing
 export const destinationsI18n = pgTable("destinations_i18n", {
@@ -865,35 +830,16 @@ export const locationReviewsRelations = relations(locationReviews, ({ one }) => 
   }),
 }));
 
-export const locationSubratingsRelations = relations(locationSubratings, ({ one }) => ({
-  accommodation: one(accommodations, {
-    fields: [locationSubratings.locationId],
-    references: [accommodations.locationId],
-  }),
-  restaurant: one(restaurants, {
-    fields: [locationSubratings.locationId],
-    references: [restaurants.locationId],
-  }),
-}));
+// Note: locationSubratings table doesn't exist in database, commenting out relations
+// export const locationSubratingsRelations = relations(locationSubratings, ({ one }) => ({}));
 
 // Note: locationPhotos uses entity-based model (entity_type, entity_id)
 // Relations are dynamic based on entity_type, not statically defined
 export const locationPhotosRelations = relations(locationPhotos, ({ one }) => ({}));
 
-export const locationAncestorsRelations = relations(locationAncestors, ({ one }) => ({
-  accommodation: one(accommodations, {
-    fields: [locationAncestors.locationId],
-    references: [accommodations.locationId],
-  }),
-  attraction: one(attractions, {
-    fields: [locationAncestors.locationId],
-    references: [attractions.locationId],
-  }),
-  restaurant: one(restaurants, {
-    fields: [locationAncestors.locationId],
-    references: [restaurants.locationId],
-  }),
-}));
+// Note: locationAncestors uses entity-based model (entity_type, entity_id)
+// Relations are dynamic based on entity_type, not statically defined
+export const locationAncestorsRelations = relations(locationAncestors, ({ one }) => ({}));
 
 
 // Insert schemas
@@ -1058,28 +1004,28 @@ export const insertUserMissionProgressSchema = createInsertSchema(userMissionPro
   updatedAt: true,
 });
 
-// TripAdvisor insert schemas
+// Location data insert schemas
 export const insertDestinationSchema = createInsertSchema(destinations).omit({
   id: true,
-  createdAt: true,
+  insertedAt: true,
   updatedAt: true,
 });
 
 export const insertAccommodationSchema = createInsertSchema(accommodations).omit({
   id: true,
-  createdAt: true,
+  insertedAt: true,
   updatedAt: true,
 });
 
 export const insertAttractionSchema = createInsertSchema(attractions).omit({
   id: true,
-  createdAt: true,
+  insertedAt: true,
   updatedAt: true,
 });
 
 export const insertRestaurantSchema = createInsertSchema(restaurants).omit({
   id: true,
-  createdAt: true,
+  insertedAt: true,
   updatedAt: true,
 });
 
@@ -1101,6 +1047,8 @@ export const insertLocationPhotoSchema = createInsertSchema(locationPhotos).omit
 
 export const insertLocationAncestorSchema = createInsertSchema(locationAncestors).omit({
   id: true,
+  insertedAt: true,
+  updatedAt: true,
 });
 
 // i18n insert schemas
