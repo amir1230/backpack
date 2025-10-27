@@ -283,18 +283,18 @@ export default function EmergencyInfo() {
                   )}
                   {(emergencyInfo.doctorName || emergencyInfo.doctorPhone) && (
                     <div className="md:col-span-2 bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200">
-                      <p className="text-sm text-gray-600 mb-2">{t("emergency.doctor_info")}</p>
-                      <div className="space-y-2">
+                      <p className="text-sm text-gray-600 mb-3">{t("emergency.doctor_info")}</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {emergencyInfo.doctorName && (
-                          <div>
-                            <p className="text-sm text-gray-600">{t("emergency.doctor_name")}</p>
+                          <div className="bg-white/50 p-3 rounded-md">
+                            <p className="text-xs text-gray-500 mb-1">{t("emergency.doctor_name")}</p>
                             <p className="text-gray-800 font-semibold">{emergencyInfo.doctorName}</p>
                           </div>
                         )}
                         {emergencyInfo.doctorPhone && (
-                          <div>
-                            <p className="text-sm text-gray-600">{t("emergency.doctor_phone")}</p>
-                            <p className="text-gray-800 font-semibold" dir="ltr">{emergencyInfo.doctorPhone}</p>
+                          <div className="bg-white/50 p-3 rounded-md">
+                            <p className="text-xs text-gray-500 mb-1">{t("emergency.doctor_phone")}</p>
+                            <p className="text-gray-800 font-semibold font-mono" dir="ltr">{emergencyInfo.doctorPhone}</p>
                           </div>
                         )}
                       </div>
