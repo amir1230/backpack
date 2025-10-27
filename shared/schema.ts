@@ -508,17 +508,27 @@ export const locationSubratings = pgTable("location_subratings", {
 });
 
 export const locationPhotos = pgTable("location_photos", {
-  id: serial("id").primaryKey(),
-  locationId: varchar("location_id").notNull(), // References TripAdvisor location ID
-  locationCategory: varchar("location_category").notNull(), // "accommodation", "attraction", "restaurant"
-  photoUrl: text("photo_url").notNull(),
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  entityType: text("entity_type").notNull(), // "destination", "attraction", "restaurant", "accommodation"
+  entityId: uuid("entity_id").notNull(), // UUID reference to the entity
+  url: text("url"), // Original photo URL
   thumbnailUrl: text("thumbnail_url"),
-  caption: text("caption"),
-  uploadedBy: varchar("uploaded_by"), // user or business
+  source: text("source").notNull().default("wikipedia"), // "tripadvisor", "googleplaces", "unsplash", "wikimedia", "pexels", "wikipedia"
+  externalId: text("external_id").notNull(), // External photo ID or reference
+  license: text("license"), // License type (CC-BY, etc.)
+  attribution: text("attribution"), // Attribution text for the image source
   width: integer("width"),
   height: integer("height"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+  insertedAt: timestamp("inserted_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  // Additional fields for fallback system
+  sourceRef: text("source_ref"), // photo_reference, image ID, or direct URL
+  cachedUrl: text("cached_url"), // Proxied/optimized URL for fast loading
+  isPrimary: boolean("is_primary").default(false), // Mark as primary image for entity
+}, (table) => [
+  index("location_photos_entity_idx").on(table.entityType, table.entityId),
+  index("location_photos_primary_idx").on(table.isPrimary),
+]);
 
 export const locationAncestors = pgTable("location_ancestors", {
   id: serial("id").primaryKey(),
@@ -866,20 +876,9 @@ export const locationSubratingsRelations = relations(locationSubratings, ({ one 
   }),
 }));
 
-export const locationPhotosRelations = relations(locationPhotos, ({ one }) => ({
-  accommodation: one(accommodations, {
-    fields: [locationPhotos.locationId],
-    references: [accommodations.locationId],
-  }),
-  attraction: one(attractions, {
-    fields: [locationPhotos.locationId],
-    references: [attractions.locationId],
-  }),
-  restaurant: one(restaurants, {
-    fields: [locationPhotos.locationId],
-    references: [restaurants.locationId],
-  }),
-}));
+// Note: locationPhotos uses entity-based model (entity_type, entity_id)
+// Relations are dynamic based on entity_type, not statically defined
+export const locationPhotosRelations = relations(locationPhotos, ({ one }) => ({}));
 
 export const locationAncestorsRelations = relations(locationAncestors, ({ one }) => ({
   accommodation: one(accommodations, {
@@ -1096,7 +1095,8 @@ export const insertLocationSubratingSchema = createInsertSchema(locationSubratin
 
 export const insertLocationPhotoSchema = createInsertSchema(locationPhotos).omit({
   id: true,
-  createdAt: true,
+  insertedAt: true,
+  updatedAt: true,
 });
 
 export const insertLocationAncestorSchema = createInsertSchema(locationAncestors).omit({
