@@ -605,6 +605,7 @@ export default function DestinationDetail() {
             <Card>
               <CardHeader className="text-left">
                 <div className="flex items-center justify-between gap-4">
+                  <CardTitle className="text-left">{t("destinations.detail.basics")}</CardTitle>
                   {providers.geo ? (
                     <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex-shrink-0">
                       {t("destinations.states.live_badge")}
@@ -614,7 +615,6 @@ export default function DestinationDetail() {
                       {t("destinations.states.soon_badge")}
                     </Badge>
                   )}
-                  <CardTitle className="text-left">{t("destinations.detail.basics")}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4 text-left">
