@@ -1306,7 +1306,7 @@ export const emergencyInfo = pgTable("emergency_info", {
   insuranceEmergencyPhone: varchar("insurance_emergency_phone"),
   // Passport Information
   passportNumber: varchar("passport_number"),
-  passportExpiry: timestamp("passport_expiry"),
+  passportExpiry: varchar("passport_expiry"), // Stored as YYYY-MM-DD string
   passportCountry: varchar("passport_country"),
   // Additional Notes
   additionalNotes: text("additional_notes"),
@@ -1318,13 +1318,6 @@ export const insertEmergencyInfoSchema = createInsertSchema(emergencyInfo).omit(
   id: true,
   createdAt: true,
   updatedAt: true,
-  passportExpiry: true,
-}).extend({
-  passportExpiry: z.union([z.string(), z.date()]).optional().transform(val => {
-    if (!val) return undefined;
-    if (typeof val === 'string') return new Date(val);
-    return val;
-  }),
 });
 
 export type EmergencyInfo = typeof emergencyInfo.$inferSelect;
