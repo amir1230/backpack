@@ -107,13 +107,12 @@ export default function DestinationsHub() {
   const hasActiveFilters =
     searchQuery || selectedContinent !== "all" || selectedCountry !== "all" || selectedType !== "all";
 
-  // Get destination image URL - using Unsplash for reliable images
+  // Get destination image URL - using Pexels
   const getDestinationImageUrl = (destination: Destination) => {
     const params = new URLSearchParams({
-      source: 'unsplash',
+      source: 'pexels',
       query: `${destination.name} cityscape`,
       maxwidth: '600',
-      lang: i18n.language,
     });
     return `/api/media/proxy?${params}`;
   };
