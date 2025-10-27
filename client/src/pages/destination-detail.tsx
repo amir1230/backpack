@@ -334,10 +334,10 @@ export default function DestinationDetail() {
           </div>
 
           {/* Title */}
-          <div className="text-white">
+          <div className="text-white flex justify-end">
             <div className="flex items-center gap-4 mb-4 flex-row-reverse">
               <span className="text-8xl">{destination.flag}</span>
-              <div className="flex-1 text-right">
+              <div className="text-right">
                 <h1 className="text-5xl font-bold mb-2">{destination.name}</h1>
                 <p className="text-xl opacity-90">
                   {t(`trips.countries.${destination.country}`, destination.country)} • {t(`trips.continents.${destination.continent}`, destination.continent)}
