@@ -417,7 +417,7 @@ export default function DestinationDetail() {
                       const attractionRating = typeof attraction.rating === 'string' ? parseFloat(attraction.rating) : attraction.rating;
                       
                       return (
-                        <div key={attractionKey} className={`flex items-start gap-4 p-4 hover:bg-gray-50 rounded-lg transition ${isRTL ? "flex-row-reverse" : ""}`} data-testid={`attraction-${attractionKey}`}>
+                        <div key={attractionKey} className="flex items-start gap-4 p-4 hover:bg-gray-50 rounded-lg transition" data-testid={`attraction-${attractionKey}`}>
                           <img 
                             src={getAttractionImageUrl(attraction)}
                             alt={attraction.name}
@@ -438,24 +438,21 @@ export default function DestinationDetail() {
                             }}
                           />
                           <div className="flex-1">
-                            <h4 className={`font-medium text-lg mb-1 ${isRTL ? "text-right" : "text-left"}`}>{attraction.name}</h4>
+                            <h4 className="font-medium text-lg mb-1 text-left">{attraction.name}</h4>
                             {attraction.description && (
-                              <p className={`text-sm text-gray-600 mb-2 line-clamp-2 ${isRTL ? "text-right" : "text-left"}`}>{attraction.description}</p>
+                              <p className="text-sm text-gray-600 mb-2 line-clamp-2 text-left">{attraction.description}</p>
                             )}
                             {attractionAddress && (
-                              <p className={`text-xs text-gray-400 mb-2 ${isRTL ? "text-right" : "text-left"}`}>{attractionAddress}</p>
+                              <p className="text-xs text-gray-400 mb-2 text-left">{attractionAddress}</p>
                             )}
                             {attractionRating && (
-                              <div className={`flex items-center gap-2 text-sm ${isRTL ? "flex-row-reverse justify-end" : ""}`}>
+                              <div className="flex items-center gap-2 text-sm">
                                 <span className="flex items-center gap-1">
                                   ⭐ {attractionRating.toFixed(1)}
                                 </span>
                                 {(attraction.userRatingsTotal || attraction.user_ratings_total) && (
-                                  <span className="text-gray-400" dir={isRTL ? "rtl" : "ltr"}>
-                                    ({isRTL 
-                                      ? `${(attraction.userRatingsTotal || attraction.user_ratings_total).toLocaleString()} ${t("destinations.detail.reviews")}`
-                                      : `${(attraction.userRatingsTotal || attraction.user_ratings_total).toLocaleString()} ${t("destinations.detail.reviews", "reviews")}`
-                                    })
+                                  <span className="text-gray-400">
+                                    ({(attraction.userRatingsTotal || attraction.user_ratings_total).toLocaleString()} {t("destinations.detail.reviews", "reviews")})
                                   </span>
                                 )}
                               </div>
