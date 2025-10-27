@@ -505,17 +505,28 @@ export default function DestinationDetail() {
               <CardContent className={isRTL ? "text-right" : "text-left"}>
                 <DestinationGallery
                   destinationName={destination.name}
-                  heroImages={[
-                    { source: 'unsplash', query: `${destination.name} cityscape`, alt: destination.name },
-                    { source: 'pexels', query: destination.name, alt: `${destination.name} view` }
-                  ]}
+                  heroImages={
+                    destination.photoRefs && destination.photoRefs.length > 0
+                      ? destination.photoRefs.slice(0, 3).map((ref: string, idx: number) => ({
+                          source: 'google' as const,
+                          ref: ref,
+                          alt: `${destination.name} - ${idx + 1}`
+                        }))
+                      : [
+                          { source: 'unsplash', query: `${destination.name} cityscape`, alt: destination.name },
+                          { source: 'unsplash', query: `${destination.name} landmarks`, alt: `${destination.name} landmarks` }
+                        ]
+                  }
                   poiImages={
                     attractions && attractions.length > 0
-                      ? attractions.slice(0, 3).map((attr) => ({
-                          source: 'unsplash' as const,
-                          query: `${attr.name} ${destination.name}`,
-                          alt: attr.name
-                        }))
+                      ? attractions
+                          .filter(attr => attr.photos && attr.photos.length > 0)
+                          .slice(0, 6)
+                          .map((attr) => ({
+                            source: 'google' as const,
+                            ref: attr.photos![0].photo_reference,
+                            alt: attr.name
+                          }))
                       : []
                   }
                   isLoading={attractionsLoading}

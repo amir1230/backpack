@@ -70,7 +70,6 @@ export default function DestinationGallery({
       ...(image.url && { url: image.url }),
       ...(image.query && { query: image.query }),
       ...(maxwidth && { maxwidth: maxwidth.toString() }),
-      lang: i18n.language,
     });
 
     return `/api/media/proxy?${params}`;
