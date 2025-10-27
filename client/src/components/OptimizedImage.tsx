@@ -140,6 +140,7 @@ export default function OptimizedImage({
         onLoad={handleLoad}
         onError={handleError}
         loading={priority ? 'eager' : 'lazy'}
+        crossOrigin="anonymous"
         data-testid={testId ? `${testId}-img` : 'optimized-img'}
       />
     </div>

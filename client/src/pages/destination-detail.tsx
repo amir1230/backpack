@@ -192,13 +192,12 @@ export default function DestinationDetail() {
     return `/api/media/proxy?${params}`;
   };
 
-  // Get attraction image URL - using Unsplash for reliable images
+  // Get attraction image URL - using Pexels
   const getAttractionImageUrl = (attractionName: string, destinationName: string) => {
     const params = new URLSearchParams({
-      source: 'unsplash',
+      source: 'pexels',
       query: `${attractionName} ${destinationName}`,
       maxwidth: '600',
-      lang: i18n.language,
     });
     return `/api/media/proxy?${params}`;
   };

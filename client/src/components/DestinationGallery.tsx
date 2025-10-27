@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/tooltip';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import AttributionUnsplash from './AttributionUnsplash.js';
-import OptimizedImage from './OptimizedImage';
 
 interface UnsplashPhotoData {
   id: string;
@@ -199,14 +198,12 @@ export default function DestinationGallery({
       {/* Hero Section */}
       {heroImages.length > 0 && (
         <div className="relative w-full h-96 rounded-lg overflow-hidden group" data-testid="gallery-hero">
-          <OptimizedImage
+          <img
             src={getProxyUrl(heroImages[currentHeroIndex], 1200)}
             alt={heroImages[currentHeroIndex].alt}
-            className="absolute inset-0"
-            aspectRatio="h-96"
-            priority={currentHeroIndex === 0}
-            maxRetries={2}
-            testId={`hero-image-${currentHeroIndex}`}
+            className="w-full h-full object-cover rounded-lg"
+            loading={currentHeroIndex === 0 ? 'eager' : 'lazy'}
+            crossOrigin="anonymous"
           />
 
           {/* Navigation Arrows */}
@@ -310,16 +307,13 @@ export default function DestinationGallery({
                 onClick={() => openLightbox(image)}
                 data-testid={`poi-image-${index}`}
               >
-                <div className="w-full h-full transition-transform group-hover:scale-110">
-                  <OptimizedImage
-                    src={getProxyUrl(image, 400)}
-                    alt={image.alt}
-                    aspectRatio="aspect-video"
-                    priority={index < 3}
-                    maxRetries={1}
-                    testId={`poi-image-${index}`}
-                  />
-                </div>
+                <img
+                  src={getProxyUrl(image, 400)}
+                  alt={image.alt}
+                  className="w-full h-full object-cover rounded-lg transition-transform group-hover:scale-110"
+                  loading={index < 3 ? 'eager' : 'lazy'}
+                  crossOrigin="anonymous"
+                />
                 
                 {/* Attribution Overlay */}
                 {image.unsplashData ? (
@@ -356,14 +350,12 @@ export default function DestinationGallery({
         <DialogContent className="max-w-6xl p-0" data-testid="gallery-lightbox">
           {lightboxImage && (
             <div className="relative">
-              <OptimizedImage
+              <img
                 src={getProxyUrl(lightboxImage, 1800)}
                 alt={lightboxImage.alt}
-                className="w-full"
-                aspectRatio="max-h-[90vh]"
-                priority={true}
-                maxRetries={2}
-                testId="lightbox-image"
+                className="w-full max-h-[90vh] object-contain rounded-lg"
+                loading="eager"
+                crossOrigin="anonymous"
               />
               <Button
                 variant="ghost"
