@@ -181,19 +181,43 @@ export default function DestinationDetail() {
     geo: featureFlags?.geo ?? false,
   };
 
-  // Get hero image URL - using Google Places
+  // Get hero image URL - intelligent fallback for DB entities, Google Places for live data
   const getHeroImageUrl = () => {
-    const params = new URLSearchParams({
-      source: 'googleplaces',
-      query: destination.name,
-      maxwidth: '1920',
-    });
-    return `/api/media/proxy?${params}`;
+    // Check if this is a database entity (UUID format) vs Google Places entity (ChIJ... format)
+    // UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (36 chars with dashes at positions 8, 13, 18, 23)
+    const destId = slug || destination.id || '';
+    const isDbEntity = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(destId);
+    
+    if (isDbEntity) {
+      // Use intelligent fallback system for database destinations
+      const params = new URLSearchParams({
+        entityType: 'destination',
+        entityId: destId,
+      });
+      return `/api/media/location-photo?${params}`;
+    } else {
+      // Use Google Places proxy for live destinations
+      const params = new URLSearchParams({
+        source: 'googleplaces',
+        query: destination.name,
+        maxwidth: '1920',
+      });
+      return `/api/media/proxy?${params}`;
+    }
   };
 
-  // Get attraction image URL - using Google Places
+  // Get attraction image URL - using intelligent fallback system
   const getAttractionImageUrl = (attraction: any) => {
-    // Try Google Places photo reference first (fastest!)
+    // Check if this is a database attraction with ID
+    if (attraction.id) {
+      const params = new URLSearchParams({
+        entityType: 'attraction',
+        entityId: attraction.id,
+      });
+      return `/api/media/location-photo?${params}`;
+    }
+    
+    // Fallback to Google Places for live attractions
     if (attraction.photos && attraction.photos.length > 0) {
       const params = new URLSearchParams({
         source: 'googleplaces',
@@ -203,7 +227,7 @@ export default function DestinationDetail() {
       return `/api/media/proxy?${params}`;
     }
     
-    // Fallback to Google Places search by name
+    // Final fallback to Google Places search by name
     const params = new URLSearchParams({
       source: 'googleplaces',
       query: attraction.name,
