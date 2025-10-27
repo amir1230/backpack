@@ -4055,25 +4055,38 @@ export async function registerRoutes(app: Express): Promise<void> {
   // Destinations API - Returns database destinations in frontend-compatible format
   app.get('/api/destinations', async (req, res) => {
     try {
-      // Query database
-      const dbDestinations = await db.select().from(destinationsTable);
+      // Import location_photos table
+      const { locationPhotos } = await import('../shared/schema.js');
+      
+      // Query database with photo join
+      const dbDestinations = await db
+        .select({
+          destination: destinationsTable,
+          photo: locationPhotos,
+        })
+        .from(destinationsTable)
+        .leftJoin(
+          locationPhotos,
+          sql`${locationPhotos.entityId} = ${destinationsTable.id} AND ${locationPhotos.entityType} = 'destination'`
+        );
       
       // Transform database format to frontend format
-      const formattedDestinations = dbDestinations.map(dest => ({
-        id: dest.id,
-        name: dest.name,
-        country: dest.country || '',
+      const formattedDestinations = dbDestinations.map(row => ({
+        id: row.destination.id,
+        name: row.destination.name,
+        country: row.destination.country || '',
         continent: 'Europe',
         types: ['city'],
-        description: `Explore ${dest.name}${dest.country ? ', ' + dest.country : ''}`,
+        description: `Explore ${row.destination.name}${row.destination.country ? ', ' + row.destination.country : ''}`,
         rating: 4.5,
         userRatingsTotal: 1000,
         trending: false,
         flag: '',
-        lat: parseFloat(dest.lat?.toString() || '0'),
-        lng: parseFloat(dest.lon?.toString() || '0'),
+        lat: parseFloat(row.destination.lat?.toString() || '0'),
+        lng: parseFloat(row.destination.lon?.toString() || '0'),
         photoRefs: [],
-        placeId: dest.id,
+        placeId: row.destination.id,
+        photoUrl: row.photo?.cachedUrl || undefined,
       }));
       
       res.json(formattedDestinations);

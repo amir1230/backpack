@@ -26,6 +26,7 @@ interface Destination {
   lng: number;
   photoRefs: string[];
   placeId: string;
+  photoUrl?: string;
 }
 
 export default function DestinationsHub() {
@@ -109,6 +110,11 @@ export default function DestinationsHub() {
 
   // Get destination image URL - intelligent fallback for DB entities, Google Places for live data
   const getDestinationImageUrl = (destination: Destination) => {
+    // If destination has a cached photo URL, use it directly
+    if (destination.photoUrl) {
+      return destination.photoUrl;
+    }
+    
     // Check if this is a database entity (UUID format) vs Google Places entity (ChIJ... format)
     // UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (36 chars with dashes at positions 8, 13, 18, 23)
     const isDbEntity = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(destination.id);
