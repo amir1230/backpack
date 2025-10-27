@@ -1637,7 +1637,8 @@
         "description": "To book hotels, flights, or travel packages to this destination, contact us and we'll be happy to help plan your perfect trip.",
         "email": "Email",
         "phone": "Phone",
-        "contact_button": "Contact Us Now"
+        "contact_button": "Contact Us Now",
+        "deal_button": "Close Deal Now"
       },
       "top_attractions": "Top Attractions",
       "weather_now": "Current Weather",

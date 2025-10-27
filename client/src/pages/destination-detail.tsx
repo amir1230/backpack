@@ -829,8 +829,8 @@ export default function DestinationDetail() {
                   asChild
                   data-testid="button-contact-booking"
                 >
-                  <Link href="/contact">
-                    {t("destinations.detail.book_with_us.contact_button")}
+                  <Link href="/hotel-deals">
+                    {t("destinations.detail.book_with_us.deal_button", "סגירת דיל עכשיו")}
                   </Link>
                 </Button>
               </CardContent>
