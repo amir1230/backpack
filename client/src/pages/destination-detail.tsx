@@ -388,7 +388,7 @@ export default function DestinationDetail() {
                       {t("destinations.states.live_badge")}
                     </Badge>
                   )}
-                  <CardTitle className={`flex items-center gap-2 ${isRTL ? "text-right flex-row-reverse" : "text-left"}`}>
+                  <CardTitle className="flex items-center gap-2 text-left">
                     <Star className="h-5 w-5" />
                     {t("destinations.detail.top_attractions")}
                   </CardTitle>
@@ -505,7 +505,7 @@ export default function DestinationDetail() {
                       </Badge>
                     )}
                   </div>
-                  <CardTitle className={`flex items-center gap-2 ${isRTL ? "text-right flex-row-reverse" : "text-left"}`}>
+                  <CardTitle className="flex items-center gap-2 text-left">
                     <Cloud className="h-5 w-5" />
                     {t("destinations.detail.weather")}
                   </CardTitle>
@@ -796,7 +796,7 @@ export default function DestinationDetail() {
             {/* Book with Us */}
             <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
               <CardHeader className={isRTL ? "text-right" : "text-left"}>
-                <CardTitle className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse justify-end" : ""}`}>
+                <CardTitle className="flex items-center gap-2 text-left">
                   <Bookmark className="h-5 w-5" />
                   {t("destinations.detail.book_with_us.title")}
                 </CardTitle>
