@@ -68,6 +68,31 @@ export default function DestinationGallery({
       return image.url;
     }
     
+    // If it's a placeholder, return data URL with gradient
+    if (image.source === 'placeholder') {
+      const gradients = [
+        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+        'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+      ];
+      const idx = Math.abs(image.alt?.charCodeAt(0) || 0) % gradients.length;
+      return `data:image/svg+xml,${encodeURIComponent(`
+        <svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:rgb(102,126,234);stop-opacity:1" />
+              <stop offset="100%" style="stop-color:rgb(118,75,162);stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grad)"/>
+          <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="48" font-family="Arial" opacity="0.3">${image.alt || 'Image'}</text>
+        </svg>
+      `)}`;
+    }
+    
     const params = new URLSearchParams({
       source: image.source,
       ...(image.ref && { ref: image.ref }),

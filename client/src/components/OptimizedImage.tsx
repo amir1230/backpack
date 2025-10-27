@@ -69,10 +69,21 @@ export default function OptimizedImage({
       return;
     }
 
-    // Try generic placeholder from Unsplash (simpler URL)
-    const genericFallback = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800';
-    if (currentSrc !== genericFallback) {
-      console.log(`Using generic fallback image`);
+    // Try generic SVG gradient placeholder
+    const genericFallback = `data:image/svg+xml,${encodeURIComponent(`
+      <svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:rgb(156,163,175);stop-opacity:1" />
+            <stop offset="100%" style="stop-color:rgb(107,114,128);stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grad)"/>
+        <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="32" font-family="Arial" opacity="0.5">${alt || 'Image'}</text>
+      </svg>
+    `)}`;
+    if (!currentSrc.startsWith('data:image/svg')) {
+      console.log(`Using generic gradient placeholder`);
       setCurrentSrc(genericFallback);
       setRetryCount(0);
       setIsLoading(true); // Reset loading state

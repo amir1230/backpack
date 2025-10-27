@@ -507,29 +507,22 @@ export default function DestinationDetail() {
                   destinationName={destination.name}
                   heroImages={[
                     { 
-                      source: 'url' as const, 
-                      url: `https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200`,
-                      alt: `${destination.name} cityscape`
+                      source: 'placeholder' as const, 
+                      alt: `${destination.name} Cityscape`
                     },
                     { 
-                      source: 'url' as const, 
-                      url: `https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200`,
-                      alt: `${destination.name} travel`
+                      source: 'placeholder' as const, 
+                      alt: `${destination.name} Landmarks`
                     },
                     { 
-                      source: 'url' as const, 
-                      url: `https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1200`,
-                      alt: `${destination.name} landscape`
+                      source: 'placeholder' as const, 
+                      alt: `${destination.name} Culture`
                     }
                   ]}
                   poiImages={
                     attractions && attractions.length > 0
-                      ? attractions.slice(0, 6).map((attr, idx) => ({
-                          source: 'url' as const,
-                          url: `https://images.unsplash.com/photo-${
-                            ['1469854523086-cc02fe5d8800', '1476514525535-07fb3b4ae5f1', '1488646953014-85cb44e25828',
-                             '1530789253388-582c481c54b0', '1507525428034-b723cf961d3e', '1501785888041-af3ef285b470'][idx % 6]
-                          }?w=400`,
+                      ? attractions.slice(0, 6).map((attr) => ({
+                          source: 'placeholder' as const,
                           alt: attr.name
                         }))
                       : []
