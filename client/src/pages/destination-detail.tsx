@@ -280,8 +280,12 @@ export default function DestinationDetail() {
           alt={destination.name}
           className="absolute inset-0 w-full h-full object-cover"
           loading="eager"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+          }}
         />
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60" />
         <div className="container mx-auto px-4 h-full flex flex-col justify-between py-8 relative z-10">
           {/* Back Button */}
           <div>
