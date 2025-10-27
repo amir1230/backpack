@@ -137,8 +137,8 @@ export default function DestinationDetail() {
               id: attr.id, // Keep ID for image lookup
               name: attr.name,
               formatted_address: attr.address || '',
-              rating: attr.rating || 0,
-              user_ratings_total: attr.userRatingsTotal || 0,
+              rating: attr.rating || null,
+              user_ratings_total: attr.userRatingsTotal || null,
               types: attr.tags || ['tourist_attraction'],
               photos: [], // Database attractions don't have Google Photos
               description: attr.description,
