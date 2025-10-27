@@ -533,13 +533,12 @@ export const accommodationsI18n = pgTable("accommodations_i18n", {
 ]);
 
 export const attractionsI18n = pgTable("attractions_i18n", {
-  id: serial("id").primaryKey(),
-  attractionId: integer("attraction_id").references(() => attractions.id).notNull(),
-  locale: varchar("locale", { length: 5 }).notNull(), // 'en', 'he'
-  name: varchar("name"),
+  attractionId: uuid("attraction_id").references(() => attractions.id).notNull(),
+  locale: text("locale").notNull(), // 'en', 'he'
+  name: text("name"),
   description: text("description"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  nameLc: text("name_lc"), // lowercase version for search
+  descriptionLc: text("description_lc"), // lowercase version for search
 }, (table) => [
   index("attractions_i18n_attraction_locale_idx").on(table.attractionId, table.locale),
 ]);
