@@ -70,7 +70,7 @@ export default function DestinationDetail() {
 
   // Fetch all destinations from API
   const { data: allDestinations, isLoading: destinationsLoading } = useQuery<any[]>({
-    queryKey: ['/api/destinations/popular'],
+    queryKey: ['/api/destinations'],
   });
 
   // Find the destination by slug
