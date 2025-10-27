@@ -569,7 +569,7 @@ export default function DestinationDetail() {
                       </div>
                     </div>
                     <div className="border-t pt-4">
-                      <h4 className={`font-medium mb-3 ${isRTL ? "text-right" : "text-left"}`}>{t("destinations.detail.forecast")}</h4>
+                      <h4 className="font-medium mb-3 text-left">{t("destinations.detail.forecast")}</h4>
                       <div className="grid grid-cols-5 gap-2">
                         {weatherData.forecast.map((day: any, idx: number) => (
                           <div key={idx} className="text-center p-3 bg-gray-50 rounded-lg">
