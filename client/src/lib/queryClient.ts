@@ -73,8 +73,29 @@ export const getQueryFn: <T>(options: {
     // Build URL from query key - handle both simple strings and arrays with params
     let url = queryKey[0] as string;
     if (queryKey.length > 1 && queryKey[1] !== null && queryKey[1] !== undefined) {
-      // For keys like ["/api/expenses/trip", tripId], append the ID
-      url = `${url}/${queryKey[1]}`;
+      const param = queryKey[1];
+      // If it's an object (filters), convert to query params
+      if (typeof param === 'object' && !Array.isArray(param)) {
+        const queryParams = new URLSearchParams();
+        Object.entries(param).forEach(([key, value]) => {
+          if (value !== null && value !== undefined && value !== '') {
+            if (Array.isArray(value)) {
+              if (value.length > 0) {
+                queryParams.append(key, value.join(','));
+              }
+            } else {
+              queryParams.append(key, String(value));
+            }
+          }
+        });
+        const queryString = queryParams.toString();
+        if (queryString) {
+          url = `${url}?${queryString}`;
+        }
+      } else {
+        // For keys like ["/api/expenses/trip", tripId], append the ID
+        url = `${url}/${param}`;
+      }
     }
     
     const res = await fetch(`${API_BASE}${url}`, {
