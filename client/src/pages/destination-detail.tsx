@@ -507,22 +507,26 @@ export default function DestinationDetail() {
                   destinationName={destination.name}
                   heroImages={[
                     { 
-                      source: 'placeholder' as const, 
-                      alt: `${destination.name} Cityscape`
+                      source: 'pexels' as const, 
+                      query: `${destination.name} cityscape`,
+                      alt: `${destination.name} cityscape`
                     },
                     { 
-                      source: 'placeholder' as const, 
-                      alt: `${destination.name} Landmarks`
+                      source: 'pexels' as const, 
+                      query: `${destination.name} landmarks`,
+                      alt: `${destination.name} landmarks`
                     },
                     { 
-                      source: 'placeholder' as const, 
-                      alt: `${destination.name} Culture`
+                      source: 'pexels' as const, 
+                      query: `${destination.name} travel`,
+                      alt: `${destination.name} travel`
                     }
                   ]}
                   poiImages={
                     attractions && attractions.length > 0
-                      ? attractions.slice(0, 6).map((attr) => ({
-                          source: 'placeholder' as const,
+                      ? attractions.slice(0, 6).map((attr, idx) => ({
+                          source: 'pexels' as const,
+                          query: idx % 2 === 0 ? `${destination.name} attractions` : `${destination.name} sightseeing`,
                           alt: attr.name
                         }))
                       : []
