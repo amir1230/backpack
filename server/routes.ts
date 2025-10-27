@@ -1451,6 +1451,12 @@ export async function registerRoutes(app: Express): Promise<void> {
         return res.status(500).json({ error: 'Duffel API key not configured' });
       }
 
+      // Parse base URL to extract hostname
+      const urlObj = new URL(baseUrl);
+      const hostname = urlObj.hostname;
+
+      console.log('Using Duffel API:', { baseUrl, hostname });
+
       // Build slices (one-way or round-trip)
       const slices: any[] = [
         {
@@ -1493,7 +1499,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       const postData = JSON.stringify(offerRequest);
 
       const options = {
-        hostname: 'api.duffel.com',
+        hostname: hostname,
         path: '/air/offer_requests',
         method: 'POST',
         headers: {
@@ -1554,14 +1560,19 @@ export async function registerRoutes(app: Express): Promise<void> {
     try {
       const { offerId } = req.params;
       const apiKey = process.env.DUFFEL_API_KEY;
+      const baseUrl = process.env.DUFFEL_BASE_URL || 'https://api.duffel.com';
 
       if (!apiKey) {
         return res.status(500).json({ error: 'Duffel API key not configured' });
       }
 
+      // Parse base URL to extract hostname
+      const urlObj = new URL(baseUrl);
+      const hostname = urlObj.hostname;
+
       const https = await import('https');
       const options = {
-        hostname: 'api.duffel.com',
+        hostname: hostname,
         path: `/air/offers/${offerId}`,
         method: 'GET',
         headers: {
