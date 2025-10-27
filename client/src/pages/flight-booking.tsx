@@ -36,6 +36,8 @@ export default function FlightBookingPage() {
   const [passengerData, setPassengerData] = useState({
     firstName: '',
     lastName: '',
+    firstNameEn: '',
+    lastNameEn: '',
     email: '',
     phone: '',
     passportNumber: '',
@@ -56,7 +58,7 @@ export default function FlightBookingPage() {
 
   const handleBooking = () => {
     // Validate form
-    const requiredFields = ['firstName', 'lastName', 'email', 'phone'];
+    const requiredFields = ['firstName', 'lastName', 'firstNameEn', 'lastNameEn', 'email', 'phone'];
     const missingFields = requiredFields.filter(field => !passengerData[field as keyof typeof passengerData]);
     
     if (missingFields.length > 0) {
@@ -200,6 +202,29 @@ export default function FlightBookingPage() {
                       onChange={(e) => handleInputChange('lastName', e.target.value)}
                       placeholder={t('booking.enter_last_name')}
                       data-testid="input-last-name"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstNameEn">{t('booking.first_name_en')} *</Label>
+                    <Input
+                      id="firstNameEn"
+                      value={passengerData.firstNameEn}
+                      onChange={(e) => handleInputChange('firstNameEn', e.target.value)}
+                      placeholder={t('booking.enter_first_name_en')}
+                      data-testid="input-first-name-en"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastNameEn">{t('booking.last_name_en')} *</Label>
+                    <Input
+                      id="lastNameEn"
+                      value={passengerData.lastNameEn}
+                      onChange={(e) => handleInputChange('lastNameEn', e.target.value)}
+                      placeholder={t('booking.enter_last_name_en')}
+                      data-testid="input-last-name-en"
                     />
                   </div>
                 </div>
