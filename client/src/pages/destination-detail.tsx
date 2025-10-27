@@ -335,8 +335,30 @@ export default function DestinationDetail() {
                         <img 
                           src={getAttractionImageUrl(attraction.name, destination.name)}
                           alt={attraction.name}
-                          className="h-20 w-20 rounded-lg object-cover"
+                          className="h-20 w-20 rounded-lg object-cover bg-gray-100"
                           loading="lazy"
+                          onError={(e) => {
+                            const img = e.target as HTMLImageElement;
+                            if (!img.dataset.retried) {
+                              img.dataset.retried = 'true';
+                              // Try simpler query - just the destination name
+                              const params = new URLSearchParams({
+                                source: 'pexels',
+                                query: destination.name,
+                                maxwidth: '600',
+                              });
+                              img.src = `/api/media/proxy?${params}`;
+                            } else if (!img.dataset.fallback) {
+                              img.dataset.fallback = 'true';
+                              // Final fallback - generic travel image
+                              const params = new URLSearchParams({
+                                source: 'pexels',
+                                query: 'travel',
+                                maxwidth: '600',
+                              });
+                              img.src = `/api/media/proxy?${params}`;
+                            }
+                          }}
                         />
                         <div className="flex-1">
                           <h4 className="font-medium text-lg mb-1">{attraction.name}</h4>

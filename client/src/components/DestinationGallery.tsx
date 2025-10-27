@@ -203,7 +203,6 @@ export default function DestinationGallery({
             alt={heroImages[currentHeroIndex].alt}
             className="w-full h-full object-cover rounded-lg"
             loading={currentHeroIndex === 0 ? 'eager' : 'lazy'}
-            crossOrigin="anonymous"
           />
 
           {/* Navigation Arrows */}
@@ -312,7 +311,6 @@ export default function DestinationGallery({
                   alt={image.alt}
                   className="w-full h-full object-cover rounded-lg transition-transform group-hover:scale-110"
                   loading={index < 3 ? 'eager' : 'lazy'}
-                  crossOrigin="anonymous"
                 />
                 
                 {/* Attribution Overlay */}
@@ -355,7 +353,6 @@ export default function DestinationGallery({
                 alt={lightboxImage.alt}
                 className="w-full max-h-[90vh] object-contain rounded-lg"
                 loading="eager"
-                crossOrigin="anonymous"
               />
               <Button
                 variant="ghost"
