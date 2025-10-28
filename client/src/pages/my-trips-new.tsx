@@ -258,6 +258,41 @@ const translateBestTime = (text: string, targetLang: string): string => {
   return result;
 };
 
+// Helper function to detect if text is in Hebrew
+const isHebrewText = (text: string): boolean => {
+  if (!text) return false;
+  // Count Hebrew characters
+  const hebrewChars = text.match(/[\u0590-\u05FF]/g);
+  return hebrewChars ? hebrewChars.length > text.length * 0.3 : false;
+};
+
+// Function to translate full sentences (titles, descriptions)
+const translateFullText = async (text: string, targetLang: string): Promise<string> => {
+  if (!text) return text;
+  
+  const textIsHebrew = isHebrewText(text);
+  const needsTranslation = (targetLang === 'he' && !textIsHebrew) || (targetLang === 'en' && textIsHebrew);
+  
+  if (!needsTranslation) return text;
+  
+  try {
+    const response = await apiRequest('/api/translate', {
+      method: 'POST',
+      body: JSON.stringify({
+        text,
+        targetLang
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.translatedText || text;
+  } catch (error) {
+    console.error('Translation error:', error);
+    return text; // Return original text if translation fails
+  }
+};
+
 // Translation function for travel style tags and highlights
 const translateText = (text: string, targetLang: string): string => {
   if (!text) return text;
@@ -859,6 +894,43 @@ export default function MyTripsNew() {
       return response.json() as Promise<SavedTrip[]>;
     },
   });
+
+  // State for translated trip content
+  const [translatedTrips, setTranslatedTrips] = useState<Map<number, { title: string; description: string }>>(new Map());
+
+  // Translate saved trips when language or trips change
+  useEffect(() => {
+    const translateTrips = async () => {
+      if (!savedTrips.length) return;
+      
+      const newTranslations = new Map<number, { title: string; description: string }>();
+      
+      // Translate all trips
+      await Promise.all(
+        savedTrips.map(async (trip) => {
+          try {
+            const translatedTitle = await translateFullText(trip.title, i18n.language);
+            const translatedDescription = await translateFullText(trip.description, i18n.language);
+            newTranslations.set(trip.id, {
+              title: translatedTitle,
+              description: translatedDescription
+            });
+          } catch (error) {
+            console.error('Failed to translate trip:', trip.id, error);
+            // Keep original text if translation fails
+            newTranslations.set(trip.id, {
+              title: trip.title,
+              description: trip.description
+            });
+          }
+        })
+      );
+      
+      setTranslatedTrips(newTranslations);
+    };
+    
+    translateTrips();
+  }, [savedTrips, i18n.language]);
 
   const handleGenerateAITrips = async () => {
     try {
@@ -2045,7 +2117,7 @@ export default function MyTripsNew() {
                               <div className={`flex items-start justify-between gap-8 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                                 <div className={`flex-1 min-w-0 flex flex-col gap-2 ${i18n.language === 'he' ? 'items-end' : 'items-start'}`}>
                                   <h3 className={`text-2xl font-bold text-gray-900 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                                    {trip.title}
+                                    {translatedTrips.get(trip.id)?.title || trip.title}
                                   </h3>
                                   <div className={`flex items-center gap-2 text-gray-600 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                                     <MapPin className="w-4 h-4 flex-shrink-0 text-orange-500" />
@@ -2056,7 +2128,7 @@ export default function MyTripsNew() {
                                     dir={i18n.language === 'he' ? 'rtl' : 'ltr'}
                                     style={i18n.language === 'he' ? { unicodeBidi: 'plaintext', textAlign: 'right', width: '100%' } : undefined}
                                   >
-                                    {normalizeRtlText(trip.description, i18n.language === 'he')}
+                                    {normalizeRtlText(translatedTrips.get(trip.id)?.description || trip.description, i18n.language === 'he')}
                                   </p>
                                 </div>
                                 <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-lg text-base px-4 py-2 whitespace-nowrap flex-shrink-0">

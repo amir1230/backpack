@@ -722,6 +722,40 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Translation endpoint for dynamic text translation
+  app.post('/api/translate', noAuth, async (req: any, res) => {
+    try {
+      const { text, targetLang } = req.body;
+      
+      if (!text || !targetLang) {
+        return res.status(400).json({ message: "Text and targetLang are required" });
+      }
+
+      // Use OpenAI to translate the text
+      const targetLanguage = targetLang === 'he' ? 'Hebrew' : 'English';
+      const systemPrompt = `You are a professional translator. Translate the following text to ${targetLanguage}. Return ONLY the translated text without any additional explanation or commentary.`;
+
+      const OpenAI = (await import('openai')).default;
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: text }
+        ],
+        temperature: 0.3,
+      });
+
+      const translatedText = response.choices[0]?.message?.content?.trim() || text;
+      
+      res.json({ translatedText });
+    } catch (error) {
+      console.error("Translation error:", error);
+      res.status(500).json({ message: "Failed to translate text", translatedText: req.body.text });
+    }
+  });
+
   app.get('/api/trips/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
