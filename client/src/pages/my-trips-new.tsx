@@ -891,7 +891,9 @@ export default function MyTripsNew() {
     queryKey: ['/api/trips/user'],
     queryFn: async () => {
       const response = await apiRequest('/api/trips/user');
-      return response.json() as Promise<SavedTrip[]>;
+      const data = await response.json() as SavedTrip[];
+      console.log('[Trips] Fetched saved trips:', data.length, 'trips');
+      return data;
     },
   });
 
@@ -901,8 +903,12 @@ export default function MyTripsNew() {
   // Translate saved trips when language or trips change
   useEffect(() => {
     const translateTrips = async () => {
-      if (!savedTrips.length) return;
+      if (!savedTrips.length) {
+        console.log('[Translation] No saved trips to translate');
+        return;
+      }
       
+      console.log(`[Translation] Starting translation for ${savedTrips.length} trips to ${i18n.language}`);
       const newTranslations = new Map<number, { title: string; description: string; highlights: string[] }>();
       
       // Translate all trips
@@ -923,14 +929,18 @@ export default function MyTripsNew() {
             }
 
             // Translate title, description, and highlights
+            console.log(`[Translation] Translating trip ${trip.id}: "${trip.title}"`);
             const translatedTitle = await translateFullText(trip.title, i18n.language);
             const translatedDescription = await translateFullText(trip.description, i18n.language);
+            console.log(`[Translation] Title translated: "${translatedTitle}"`);
             
             // Translate each highlight
             const translatedHighlights = await Promise.all(
               highlights.map(async (highlight) => {
                 try {
-                  return await translateFullText(highlight, i18n.language);
+                  const translated = await translateFullText(highlight, i18n.language);
+                  console.log(`[Translation] Highlight: "${highlight}" → "${translated}"`);
+                  return translated;
                 } catch (error) {
                   console.error('Failed to translate highlight:', highlight, error);
                   return highlight; // Return original if translation fails
@@ -943,6 +953,7 @@ export default function MyTripsNew() {
               description: translatedDescription,
               highlights: translatedHighlights
             });
+            console.log(`[Translation] Completed translation for trip ${trip.id}`);
           } catch (error) {
             console.error('Failed to translate trip:', trip.id, error);
             // Keep original text if translation fails
