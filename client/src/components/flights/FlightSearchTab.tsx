@@ -66,9 +66,9 @@ export default function FlightSearchTab() {
   const [children, setChildren] = useState(savedState?.children || 0);
   const [cabinClass, setCabinClass] = useState(savedState?.cabinClass || "economy");
   const [tripType, setTripType] = useState<"round_trip" | "one_way">(savedState?.tripType || "round_trip");
-  const [offers, setOffers] = useState<FlightOffer[]>(savedState?.offers || []);
+  const [offers, setOffers] = useState<FlightOffer[]>([]);
 
-  // Save search state to localStorage whenever it changes
+  // Save only search parameters to localStorage (not results to avoid quota issues)
   useEffect(() => {
     const stateToSave = {
       origin,
@@ -78,11 +78,15 @@ export default function FlightSearchTab() {
       adults,
       children,
       cabinClass,
-      tripType,
-      offers
+      tripType
     };
-    localStorage.setItem('flightSearchState', JSON.stringify(stateToSave));
-  }, [origin, destination, departureDate, returnDate, adults, children, cabinClass, tripType, offers]);
+    try {
+      localStorage.setItem('flightSearchState', JSON.stringify(stateToSave));
+    } catch (error) {
+      // Ignore quota exceeded errors
+      console.warn('Failed to save flight search state:', error);
+    }
+  }, [origin, destination, departureDate, returnDate, adults, children, cabinClass, tripType]);
 
   const searchFlightsMutation = useMutation({
     mutationFn: async (searchParams: any) => {
