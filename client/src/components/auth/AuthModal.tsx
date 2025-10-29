@@ -12,9 +12,10 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ open, onOpenChange }: AuthModalProps) {
-  const { signInWithGoogle, isLoading } = useAuth();
+  const { signInWithGoogle, signInAsTestUser, isLoading } = useAuth();
   const { toast } = useToast();
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isSigningInAsTest, setIsSigningInAsTest] = useState(false);
 
   const handleGoogleSignIn = async () => {
     if (isSigningIn) return;
@@ -38,6 +39,20 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
       }
     } finally {
       setIsSigningIn(false);
+    }
+  };
+
+  const handleTestSignIn = async () => {
+    if (isSigningInAsTest) return;
+    
+    try {
+      setIsSigningInAsTest(true);
+      await signInAsTestUser();
+      onOpenChange(false); // Close modal on success
+    } catch (error: any) {
+      console.error('Test sign in failed:', error);
+    } finally {
+      setIsSigningInAsTest(false);
     }
   };
 
@@ -87,6 +102,35 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                 </svg>
                 התחבר עם Google
               </>
+            )}
+          </Button>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                או
+              </span>
+            </div>
+          </div>
+
+          <Button
+            onClick={handleTestSignIn}
+            disabled={isSigningInAsTest || isLoading}
+            className="w-full h-12 text-lg"
+            variant="outline"
+            size="lg"
+            data-testid="button-test-signin"
+          >
+            {isSigningInAsTest ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                מתחבר כמשתמש בדיקה...
+              </>
+            ) : (
+              '🧪 התחבר כמשתמש בדיקה (Test User)'
             )}
           </Button>
           

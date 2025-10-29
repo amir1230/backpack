@@ -10,6 +10,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInAsTestUser: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -111,6 +112,65 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const signInAsTestUser = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Test user credentials (must be created in Supabase first)
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: 'test@globemate.com',
+        password: 'testuser123456'
+      });
+      
+      if (error) {
+        // If test user doesn't exist, try to create it
+        if (error.message.includes('Invalid login credentials')) {
+          const { error: signUpError } = await supabase.auth.signUp({
+            email: 'test@globemate.com',
+            password: 'testuser123456',
+            options: {
+              data: {
+                name: 'Test User',
+                full_name: 'Test User'
+              }
+            }
+          });
+          
+          if (signUpError) {
+            throw signUpError;
+          }
+          
+          // Try signing in again
+          const { error: retryError } = await supabase.auth.signInWithPassword({
+            email: 'test@globemate.com',
+            password: 'testuser123456'
+          });
+          
+          if (retryError) {
+            throw retryError;
+          }
+        } else {
+          throw error;
+        }
+      }
+      
+      toast({
+        title: t('auth.signed_in_successfully') || 'Signed in successfully',
+        description: 'התחברת כמשתמש בדיקה / Signed in as test user',
+      });
+      
+    } catch (error: any) {
+      console.error('Test sign in error:', error);
+      toast({
+        title: t('auth.login_error') || 'Login Error',
+        description: error.message || t('auth.try_again_later'),
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const signOut = async () => {
     try {
       setIsLoading(true);
@@ -139,6 +199,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading,
     isAuthenticated: !!user,
     signInWithGoogle,
+    signInAsTestUser,
     signOut,
   };
 
