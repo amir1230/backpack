@@ -828,16 +828,32 @@ export function useLocalizedPlaceNames() {
 
 // Simple hook for translating city/country names
 export function useLocalization() {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const isHebrew = i18n.language === 'he';
 
   const translateCity = (cityName: string): string => {
     if (!isHebrew) return cityName;
+    
+    const translationKey = `cities.${cityName}`;
+    const translated = t(translationKey);
+    
+    if (translated !== translationKey) {
+      return translated;
+    }
+    
     return PLACE_TRANSLATIONS[cityName] || cityName;
   };
 
   const translateCountry = (countryName: string): string => {
     if (!isHebrew) return countryName;
+    
+    const translationKey = `trips.countries.${countryName}`;
+    const translated = t(translationKey);
+    
+    if (translated !== translationKey) {
+      return translated;
+    }
+    
     return PLACE_TRANSLATIONS[countryName] || countryName;
   };
 
