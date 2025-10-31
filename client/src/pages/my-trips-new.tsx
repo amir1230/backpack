@@ -1565,11 +1565,11 @@ export default function MyTripsNew() {
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className={`w-full font-normal p-3 ${!startDate && "text-muted-foreground"} ${i18n.language === 'he' ? 'justify-end flex-row-reverse' : 'justify-start text-left'}`}
+                          className={`w-full font-normal p-3 ${!startDate && "text-muted-foreground"} ${i18n.language === 'he' ? 'justify-start text-right' : 'justify-start text-left'}`}
                           data-testid="select-start-date"
                         >
-                          <Calendar className={`h-4 w-4 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
                           {startDate ? format(startDate, i18n.language === 'he' ? "dd/MM/yyyy" : "PPP", { locale: i18n.language === 'he' ? he : enUS }) : <span>{t('trips.select_start_date')}</span>}
+                          <Calendar className={`h-4 w-4 ${i18n.language === 'he' ? 'mr-2' : 'ml-2'} flex-shrink-0`} />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -1596,11 +1596,11 @@ export default function MyTripsNew() {
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className={`w-full font-normal p-3 ${!endDate && "text-muted-foreground"} ${i18n.language === 'he' ? 'justify-end flex-row-reverse' : 'justify-start text-left'}`}
+                          className={`w-full font-normal p-3 ${!endDate && "text-muted-foreground"} ${i18n.language === 'he' ? 'justify-start text-right' : 'justify-start text-left'}`}
                           data-testid="select-end-date"
                         >
-                          <Calendar className={`h-4 w-4 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
                           {endDate ? format(endDate, i18n.language === 'he' ? "dd/MM/yyyy" : "PPP", { locale: i18n.language === 'he' ? he : enUS }) : <span>{t('trips.select_end_date')}</span>}
+                          <Calendar className={`h-4 w-4 ${i18n.language === 'he' ? 'mr-2' : 'ml-2'} flex-shrink-0`} />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
