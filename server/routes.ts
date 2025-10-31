@@ -2264,7 +2264,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   // AI-powered travel suggestions (guest-friendly)
   app.post('/api/ai/travel-suggestions', async (req, res) => {
     try {
-      const { destination, travelStyle, budget, duration, interests, preferredCountries, language, adults, children, tripType } = req.body;
+      const { destination, travelStyle, budget, duration, interests, preferredCountries, language, adults, children, tripType, startDate, endDate } = req.body;
       
       // Normalize language parameter
       const normalizedLanguage = (language || req.headers['accept-language'] || 'en').toString().toLowerCase();
@@ -2310,7 +2310,15 @@ export async function registerRoutes(app: Express): Promise<void> {
       });
       
       console.log("Generated suggestions:", suggestions);
-      res.json(suggestions);
+      
+      // Add startDate and endDate to each suggestion
+      const suggestionsWithDates = suggestions.map((suggestion: any) => ({
+        ...suggestion,
+        startDate: startDate,
+        endDate: endDate
+      }));
+      
+      res.json(suggestionsWithDates);
     } catch (error) {
       console.error("Error generating travel suggestions:", error);
       console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");

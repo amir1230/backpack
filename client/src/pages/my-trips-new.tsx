@@ -260,6 +260,8 @@ interface TripSuggestion {
   highlights: string[];
   travelStyle: string[];
   duration: string;
+  startDate?: string;
+  endDate?: string;
   realPlaces?: RealPlace[];
 }
 
@@ -693,7 +695,7 @@ export default function MyTripsNew() {
 
   // API calls
   const generateAISuggestionsMutation = useMutation({
-    mutationFn: async (data: Omit<TripFormData, 'duration'> & { duration: number }) => {
+    mutationFn: async (data: Omit<TripFormData, 'duration'> & { duration: number; startDate?: string; endDate?: string }) => {
       try {
         const response = await apiRequest('/api/ai/travel-suggestions', {
           method: 'POST',
@@ -702,6 +704,8 @@ export default function MyTripsNew() {
             travelStyle: data.travelStyle,
             budget: data.budget,
             duration: data.duration,
+            startDate: data.startDate,
+            endDate: data.endDate,
             interests: data.interests,
             language: i18n.language,
             adults: data.adults || 2,
@@ -771,6 +775,8 @@ export default function MyTripsNew() {
       const requestData = {
         destination: effectiveDestination,
         duration: calculateDurationInDays(startDate, endDate),
+        startDate: startDate?.toISOString(),
+        endDate: endDate?.toISOString(),
         interests: selectedInterests,
         travelStyle: selectedInterests, // Use interests for travel style too
         budget: budget || 1000,
@@ -1090,6 +1096,8 @@ export default function MyTripsNew() {
         interests: selectedInterests,
         budget: budget,
         duration: calculateDurationInDays(startDate, endDate),
+        startDate: startDate?.toISOString(),
+        endDate: endDate?.toISOString(),
       };
 
       console.log('Sending data to API:', data);
@@ -1788,7 +1796,15 @@ export default function MyTripsNew() {
                                 <Calendar className="w-4 h-4 text-blue-600" />
                                 <span className="font-semibold text-blue-800 text-sm">{t('trips.duration')}</span>
                               </div>
-                              <p className="text-blue-700 text-sm text-right">{suggestion.duration}</p>
+                              {suggestion.startDate && suggestion.endDate ? (
+                                <p className="text-blue-700 text-sm text-right">
+                                  {format(new Date(suggestion.startDate), i18n.language === 'he' ? "dd/MM/yyyy" : "PPP", { locale: i18n.language === 'he' ? he : enUS })}
+                                  {' - '}
+                                  {format(new Date(suggestion.endDate), i18n.language === 'he' ? "dd/MM/yyyy" : "PPP", { locale: i18n.language === 'he' ? he : enUS })}
+                                </p>
+                              ) : (
+                                <p className="text-blue-700 text-sm text-right">{suggestion.duration}</p>
+                              )}
                             </div>
                           </div>
 
