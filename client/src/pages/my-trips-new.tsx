@@ -22,6 +22,10 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { he, enUS } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 // import { RealPlaceLinks } from "@/components/RealPlaceLinks";
@@ -71,7 +75,8 @@ const createTripFormSchema = (t: any) => z.object({
   destination: z.string().min(1, t('trips.select_destination')),
   travelStyle: z.array(z.string()).optional(), // Keep for backward compatibility but optional
   budget: z.number().min(100, t('trips.budget_required')),
-  duration: z.string().min(1, t('trips.select_duration')),
+  startDate: z.date().optional(),
+  endDate: z.date().optional(),
   interests: z.array(z.string()).min(1, t('trips.select_interests')),
 });
 
@@ -80,7 +85,8 @@ type TripFormData = {
   specificCity: string;
   travelStyle: string[];
   budget: number;
-  duration: string;
+  startDate?: Date;
+  endDate?: Date;
   interests: string[];
   adults: number;
   children: number;
@@ -541,7 +547,15 @@ export default function MyTripsNew() {
     { value: "3+ months", label: t('trips.duration_3_months'), days: 90 },
   ];
 
-  // Helper function to convert duration string to number of days
+  // Helper function to calculate duration in days from dates
+  const calculateDurationInDays = (start?: Date, end?: Date): number => {
+    if (!start || !end) return 7; // default to 7 days if dates not set
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 7;
+  };
+  
+  // Helper function to convert duration string to number of days (backward compatibility)
   const getDurationInDays = (durationString: string): number => {
     const duration = DURATIONS.find(d => d.value === durationString);
     return duration?.days || 7; // default to 7 days if not found
@@ -597,6 +611,8 @@ export default function MyTripsNew() {
   const [specificCity, setSpecificCity] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("");
   const [tripType, setTripType] = useState<string>("");
+  const [startDate, setStartDate] = useState<Date>();
+  const [endDate, setEndDate] = useState<Date>();
   
   const WORLD_DESTINATIONS = getWorldDestinations();
   
@@ -754,7 +770,7 @@ export default function MyTripsNew() {
 
       const requestData = {
         destination: effectiveDestination,
-        duration: getDurationInDays(formData.duration || "1-2 weeks"),
+        duration: calculateDurationInDays(startDate, endDate),
         interests: selectedInterests,
         travelStyle: selectedInterests, // Use interests for travel style too
         budget: budget || 1000,
@@ -1073,7 +1089,7 @@ export default function MyTripsNew() {
         travelStyle: selectedInterests, // Use interests for both
         interests: selectedInterests,
         budget: budget,
-        duration: getDurationInDays(formData.duration || "1-2 weeks"),
+        duration: calculateDurationInDays(startDate, endDate),
       };
 
       console.log('Sending data to API:', data);
@@ -1539,26 +1555,69 @@ export default function MyTripsNew() {
                   </Select>
                 </div>
 
-                {/* Duration */}
-                <div>
-                  <Label htmlFor="duration" className={`text-sm font-medium text-slate-700 mb-2 block ${i18n.language === 'he' ? 'text-left' : ''}`}>
-                    {t('trips.trip_duration')}
-                  </Label>
-                  <Select onValueChange={(value) => {
-                    form.setValue('duration', value);
-                    console.log('Duration set to:', value);
-                  }}>
-                    <SelectTrigger className="w-full p-3">
-                      <SelectValue placeholder={t('trips.how_long_travel')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DURATIONS.map((duration) => (
-                        <SelectItem key={duration.value} value={duration.value}>
-                          {duration.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                {/* Travel Dates */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className={`text-sm font-medium text-slate-700 mb-2 block ${i18n.language === 'he' ? 'text-left' : ''}`}>
+                      {t('trips.start_date')}
+                    </Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={`w-full justify-start text-left font-normal p-3 ${!startDate && "text-muted-foreground"}`}
+                          data-testid="select-start-date"
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          {startDate ? format(startDate, "PPP", { locale: i18n.language === 'he' ? he : enUS }) : <span>{t('trips.select_start_date')}</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={startDate}
+                          onSelect={(date) => {
+                            setStartDate(date);
+                            form.setValue('startDate', date);
+                          }}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                          locale={i18n.language === 'he' ? he : enUS}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div>
+                    <Label className={`text-sm font-medium text-slate-700 mb-2 block ${i18n.language === 'he' ? 'text-left' : ''}`}>
+                      {t('trips.end_date')}
+                    </Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={`w-full justify-start text-left font-normal p-3 ${!endDate && "text-muted-foreground"}`}
+                          data-testid="select-end-date"
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          {endDate ? format(endDate, "PPP", { locale: i18n.language === 'he' ? he : enUS }) : <span>{t('trips.select_end_date')}</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={endDate}
+                          onSelect={(date) => {
+                            setEndDate(date);
+                            form.setValue('endDate', date);
+                          }}
+                          disabled={(date) => !startDate || date < startDate}
+                          initialFocus
+                          locale={i18n.language === 'he' ? he : enUS}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </div>
 
                 {/* Budget */}
