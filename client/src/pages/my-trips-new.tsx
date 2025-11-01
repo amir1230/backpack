@@ -630,8 +630,6 @@ export default function MyTripsNew() {
   const [specificCity, setSpecificCity] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("");
   const [tripType, setTripType] = useState<string>("");
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
   
   const WORLD_DESTINATIONS = getWorldDestinations();
   
@@ -718,6 +716,28 @@ export default function MyTripsNew() {
       }
       return sum;
     }, 0);
+  };
+
+  // Calculate overall trip start date (earliest start date from all destinations)
+  const getOverallStartDate = (): Date | undefined => {
+    const validDates = destinations
+      .filter(dest => dest.startDate)
+      .map(dest => dest.startDate!);
+    
+    if (validDates.length === 0) return undefined;
+    
+    return new Date(Math.min(...validDates.map(d => d.getTime())));
+  };
+
+  // Calculate overall trip end date (latest end date from all destinations)
+  const getOverallEndDate = (): Date | undefined => {
+    const validDates = destinations
+      .filter(dest => dest.endDate)
+      .map(dest => dest.endDate!);
+    
+    if (validDates.length === 0) return undefined;
+    
+    return new Date(Math.max(...validDates.map(d => d.getTime())));
   };
 
   // Helper function for toggling interests
@@ -1167,6 +1187,10 @@ export default function MyTripsNew() {
 
       // Calculate total duration from all destinations
       const totalDays = getTotalDays();
+      
+      // Calculate overall trip dates from destinations
+      const overallStartDate = getOverallStartDate();
+      const overallEndDate = getOverallEndDate();
 
       const data = {
         ...formData,
@@ -1176,8 +1200,8 @@ export default function MyTripsNew() {
         interests: selectedInterests,
         budget: budget,
         duration: totalDays,
-        startDate: startDate?.toISOString(),
-        endDate: endDate?.toISOString(),
+        startDate: overallStartDate?.toISOString(),
+        endDate: overallEndDate?.toISOString(),
       };
 
       console.log('Sending data to API:', data);
@@ -1844,71 +1868,6 @@ export default function MyTripsNew() {
                     <p className="text-sm font-semibold text-blue-800">
                       {t('trips.total_trip_duration')}: {getTotalDays()} {t('trips.days')}
                     </p>
-                  </div>
-                </div>
-
-                {/* Travel Dates */}
-                <div className={`gap-4 ${i18n.language === 'he' ? 'flex flex-row-reverse' : 'grid grid-cols-2'}`}>
-                  <div className={i18n.language === 'he' ? 'flex-1' : ''}>
-                    <Label className={`text-sm font-medium text-slate-700 mb-2 block ${i18n.language === 'he' ? 'text-left' : ''}`}>
-                      {t('trips.start_date')}
-                    </Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={`w-full font-normal p-3 ${!startDate && "text-muted-foreground"} ${i18n.language === 'he' ? 'justify-start flex-row-reverse text-left' : 'justify-start text-left'}`}
-                          data-testid="select-start-date"
-                        >
-                          {startDate ? format(startDate, i18n.language === 'he' ? "dd/MM/yyyy" : "PPP", { locale: i18n.language === 'he' ? he : enUS }) : <span>{t('trips.select_start_date')}</span>}
-                          <Calendar className={`h-4 w-4 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'} flex-shrink-0`} />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <CalendarComponent
-                          mode="single"
-                          selected={startDate}
-                          onSelect={(date) => {
-                            setStartDate(date);
-                            form.setValue('startDate', date);
-                          }}
-                          disabled={(date) => date < new Date()}
-                          initialFocus
-                          locale={i18n.language === 'he' ? he : enUS}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-
-                  <div className={i18n.language === 'he' ? 'flex-1' : ''}>
-                    <Label className={`text-sm font-medium text-slate-700 mb-2 block ${i18n.language === 'he' ? 'text-left' : ''}`}>
-                      {t('trips.end_date')}
-                    </Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={`w-full font-normal p-3 ${!endDate && "text-muted-foreground"} ${i18n.language === 'he' ? 'justify-start flex-row-reverse text-left' : 'justify-start text-left'}`}
-                          data-testid="select-end-date"
-                        >
-                          {endDate ? format(endDate, i18n.language === 'he' ? "dd/MM/yyyy" : "PPP", { locale: i18n.language === 'he' ? he : enUS }) : <span>{t('trips.select_end_date')}</span>}
-                          <Calendar className={`h-4 w-4 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'} flex-shrink-0`} />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <CalendarComponent
-                          mode="single"
-                          selected={endDate}
-                          onSelect={(date) => {
-                            setEndDate(date);
-                            form.setValue('endDate', date);
-                          }}
-                          disabled={(date) => !startDate || date < startDate}
-                          initialFocus
-                          locale={i18n.language === 'he' ? he : enUS}
-                        />
-                      </PopoverContent>
-                    </Popover>
                   </div>
                 </div>
 
