@@ -2111,14 +2111,14 @@ export default function MyTripsNew() {
                         {/* Multi-City Destination Breakdown */}
                         {suggestion.destinationBreakdown && suggestion.destinationBreakdown.length > 0 && (
                           <div className="space-y-4 border-t pt-4">
-                            <div className="flex items-center gap-2 flex-row-reverse">
+                            <div className={`flex items-center gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                               <MapPin className="w-5 h-5 text-purple-600" />
                               <h4 className="font-semibold text-gray-800">{t('trips.destination_breakdown')}</h4>
                             </div>
                             {suggestion.destinationBreakdown.map((dest, idx) => (
                               <div key={idx} className="bg-purple-50 p-4 rounded-lg space-y-2">
                                 <div className="flex items-center justify-between">
-                                  <div className="text-right flex-1">
+                                  <div className={`flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
                                     <h5 className="font-bold text-purple-900">
                                       {translateCity(dest.destination)}, {translateCountry(dest.country)}
                                     </h5>
@@ -2128,10 +2128,10 @@ export default function MyTripsNew() {
                                     <p className="text-sm text-purple-600">{dest.duration}</p>
                                   </div>
                                 </div>
-                                <p className="text-sm text-gray-700 text-right">{dest.description}</p>
+                                <p className={`text-sm text-gray-700 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{dest.description}</p>
                                 <div className="space-y-1">
                                   {dest.highlights.map((highlight, hIdx) => (
-                                    <div key={hIdx} className="flex items-center text-sm text-gray-700 text-right flex-row-reverse gap-2">
+                                    <div key={hIdx} className={`flex items-center text-sm text-gray-700 gap-2 ${i18n.language === 'he' ? 'text-right flex-row-reverse' : 'text-left'}`}>
                                       <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
                                       <span>{translateText(highlight, i18n.language)}</span>
                                     </div>
@@ -2145,17 +2145,17 @@ export default function MyTripsNew() {
                         {/* Transportation Recommendations */}
                         {suggestion.transportation && suggestion.transportation.length > 0 && (
                           <div className="space-y-4 border-t pt-4">
-                            <div className="flex items-center gap-2 flex-row-reverse">
+                            <div className={`flex items-center gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                               <Plane className="w-5 h-5 text-blue-600" />
                               <h4 className="font-semibold text-gray-800">{t('trips.transportation')}</h4>
                             </div>
                             {suggestion.transportation.map((transport, idx) => (
                               <div key={idx} className="bg-blue-50 p-4 rounded-lg space-y-2">
-                                <div className="text-right">
+                                <div className={i18n.language === 'he' ? 'text-right' : 'text-left'}>
                                   <h5 className="font-bold text-blue-900">
                                     {translateCity(transport.from)} → {translateCity(transport.to)}
                                   </h5>
-                                  <div className="flex gap-4 justify-end text-sm text-blue-700 mt-1">
+                                  <div className={`flex gap-4 text-sm text-blue-700 mt-1 ${i18n.language === 'he' ? 'justify-end' : 'justify-start'}`}>
                                     {transport.estimatedCost && (
                                       <span>{t('trips.cost')}: {transport.estimatedCost}</span>
                                     )}
@@ -2166,7 +2166,7 @@ export default function MyTripsNew() {
                                 </div>
                                 <div className="space-y-1">
                                   {transport.recommendations.map((rec, rIdx) => (
-                                    <div key={rIdx} className="flex items-center text-sm text-gray-700 text-right flex-row-reverse gap-2">
+                                    <div key={rIdx} className={`flex items-center text-sm text-gray-700 gap-2 ${i18n.language === 'he' ? 'text-right flex-row-reverse' : 'text-left'}`}>
                                       <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                                       <span>{rec}</span>
                                     </div>
