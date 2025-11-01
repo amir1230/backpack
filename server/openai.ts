@@ -328,6 +328,11 @@ Return ONLY a JSON object with this exact structure:
   ]
 }`;
 
+    console.log('🚀 Sending prompt to OpenAI (multi-city:', isMultiCity, ')');
+    if (isMultiCity) {
+      console.log('📍 Multi-city destinations:', preferences.destinations);
+    }
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -345,14 +350,27 @@ Return ONLY a JSON object with this exact structure:
     });
 
     const content = response.choices[0].message.content;
-    console.log('OpenAI response content:', content);
+    console.log('✅ OpenAI response received (length:', content?.length, ')');
     
     if (!content) {
       throw new Error('No content received from OpenAI');
     }
     
     const result = JSON.parse(content);
-    console.log('Parsed OpenAI result:', result);
+    console.log('📦 Parsed OpenAI result:', JSON.stringify(result, null, 2));
+    
+    // Check if destinationBreakdown exists for multi-city trips
+    if (isMultiCity) {
+      const firstSuggestion = result.suggestions?.[0];
+      console.log('🔍 First suggestion has destinationBreakdown?', !!firstSuggestion?.destinationBreakdown);
+      console.log('🔍 First suggestion has transportation?', !!firstSuggestion?.transportation);
+      if (firstSuggestion?.destinationBreakdown) {
+        console.log('📍 Breakdown count:', firstSuggestion.destinationBreakdown.length);
+      }
+      if (firstSuggestion?.transportation) {
+        console.log('✈️ Transportation count:', firstSuggestion.transportation.length);
+      }
+    }
     
     // Handle different response formats
     const suggestions = result.suggestions || result.trips || result;
