@@ -2167,8 +2167,8 @@ export default function MyTripsNew() {
                               <h4 className="font-semibold text-gray-800">{t('trips.transportation')}</h4>
                             </div>
                             {suggestion.transportation.map((transport, idx) => (
-                              <div key={idx} className="bg-blue-50 p-4 rounded-lg space-y-2">
-                                <div className={i18n.language === 'he' ? 'text-right' : 'text-left'}>
+                              <div key={idx} className="bg-blue-50 p-4 rounded-lg space-y-2" dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
+                                <div>
                                   <h5 className="font-bold text-blue-900">
                                     {translateCity(transport.from)} → {translateCity(transport.to)}
                                   </h5>
@@ -2183,8 +2183,8 @@ export default function MyTripsNew() {
                                 </div>
                                 <div className="space-y-1">
                                   {transport.recommendations.map((rec, rIdx) => (
-                                    <div key={rIdx} className={`flex items-center text-sm text-gray-700 gap-2 ${i18n.language === 'he' ? 'text-right flex-row-reverse' : 'text-left'}`}>
-                                      <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                    <div key={rIdx} className="flex items-center text-sm text-gray-700 gap-2">
+                                      <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
                                       <span>{rec}</span>
                                     </div>
                                   ))}
