@@ -2190,7 +2190,7 @@ export default function MyTripsNew() {
                                     {translateCity(dest.destination)}, {translateCountry(dest.country)}
                                   </h5>
                                   {dest.dateRange && (
-                                    <p className="text-sm text-purple-700">{formatDateRange(dest.dateRange, i18n.language)}</p>
+                                    <p className="text-sm text-purple-700" dir="ltr">{formatDateRange(dest.dateRange, i18n.language)}</p>
                                   )}
                                   <p className="text-sm text-purple-600">{dest.duration}</p>
                                 </div>
