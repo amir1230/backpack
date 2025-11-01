@@ -1713,64 +1713,127 @@ export default function MyTripsNew() {
                         </div>
 
                         {/* Date Range */}
-                        <div className={`grid grid-cols-2 gap-4 ${i18n.language === 'he' ? 'flex flex-row-reverse' : ''}`}>
-                          {/* Start Date */}
-                          <div className={`flex items-center gap-4 ${i18n.language === 'he' ? 'flex-row-reverse flex-1' : ''}`}>
-                            <Label className={`text-sm text-slate-600 min-w-[100px] ${i18n.language === 'he' ? 'text-left' : 'text-right'}`}>
-                              {t('trips.start_date')}
-                            </Label>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  className={`flex-1 font-normal ${!destination.startDate && "text-muted-foreground"} ${i18n.language === 'he' ? 'justify-start flex-row-reverse text-left' : 'justify-start text-left'}`}
-                                  data-testid={`select-start-date-${index}`}
-                                >
-                                  {destination.startDate ? format(destination.startDate, i18n.language === 'he' ? "dd/MM/yyyy" : "PPP", { locale: i18n.language === 'he' ? he : enUS }) : <span>{t('trips.select_start_date')}</span>}
-                                  <Calendar className={`h-4 w-4 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'} flex-shrink-0`} />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start">
-                                <CalendarComponent
-                                  mode="single"
-                                  selected={destination.startDate}
-                                  onSelect={(date) => updateDestination(index, 'startDate', date)}
-                                  disabled={(date) => date < new Date() || (destination.endDate && date > destination.endDate)}
-                                  initialFocus
-                                  locale={i18n.language === 'he' ? he : enUS}
-                                />
-                              </PopoverContent>
-                            </Popover>
-                          </div>
-
-                          {/* End Date */}
-                          <div className={`flex items-center gap-4 ${i18n.language === 'he' ? 'flex-row-reverse flex-1' : ''}`}>
-                            <Label className={`text-sm text-slate-600 min-w-[100px] ${i18n.language === 'he' ? 'text-left' : 'text-right'}`}>
-                              {t('trips.end_date')}
-                            </Label>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  className={`flex-1 font-normal ${!destination.endDate && "text-muted-foreground"} ${i18n.language === 'he' ? 'justify-start flex-row-reverse text-left' : 'justify-start text-left'}`}
-                                  data-testid={`select-end-date-${index}`}
-                                >
-                                  {destination.endDate ? format(destination.endDate, i18n.language === 'he' ? "dd/MM/yyyy" : "PPP", { locale: i18n.language === 'he' ? he : enUS }) : <span>{t('trips.select_end_date')}</span>}
-                                  <Calendar className={`h-4 w-4 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'} flex-shrink-0`} />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start">
-                                <CalendarComponent
-                                  mode="single"
-                                  selected={destination.endDate}
-                                  onSelect={(date) => updateDestination(index, 'endDate', date)}
-                                  disabled={(date) => date < new Date() || (destination.startDate && date < destination.startDate)}
-                                  initialFocus
-                                  locale={i18n.language === 'he' ? he : enUS}
-                                />
-                              </PopoverContent>
-                            </Popover>
-                          </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          {/* In Hebrew, show End Date first (on the right), otherwise Start Date first (on the left) */}
+                          {i18n.language === 'he' ? (
+                            <>
+                              {/* End Date */}
+                              <div className="flex items-center gap-4 flex-row-reverse">
+                                <Label className="text-sm text-slate-600 min-w-[100px] text-left">
+                                  {t('trips.end_date')}
+                                </Label>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      className={`flex-1 font-normal ${!destination.endDate && "text-muted-foreground"} justify-start flex-row-reverse text-left`}
+                                      data-testid={`select-end-date-${index}`}
+                                    >
+                                      {destination.endDate ? format(destination.endDate, "dd/MM/yyyy", { locale: he }) : <span>{t('trips.select_end_date')}</span>}
+                                      <Calendar className="h-4 w-4 ml-2 flex-shrink-0" />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0" align="start">
+                                    <CalendarComponent
+                                      mode="single"
+                                      selected={destination.endDate}
+                                      onSelect={(date) => updateDestination(index, 'endDate', date)}
+                                      disabled={(date) => date < new Date() || (destination.startDate && date < destination.startDate)}
+                                      initialFocus
+                                      locale={he}
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                              </div>
+                              {/* Start Date */}
+                              <div className="flex items-center gap-4 flex-row-reverse">
+                                <Label className="text-sm text-slate-600 min-w-[100px] text-left">
+                                  {t('trips.start_date')}
+                                </Label>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      className={`flex-1 font-normal ${!destination.startDate && "text-muted-foreground"} justify-start flex-row-reverse text-left`}
+                                      data-testid={`select-start-date-${index}`}
+                                    >
+                                      {destination.startDate ? format(destination.startDate, "dd/MM/yyyy", { locale: he }) : <span>{t('trips.select_start_date')}</span>}
+                                      <Calendar className="h-4 w-4 ml-2 flex-shrink-0" />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0" align="start">
+                                    <CalendarComponent
+                                      mode="single"
+                                      selected={destination.startDate}
+                                      onSelect={(date) => updateDestination(index, 'startDate', date)}
+                                      disabled={(date) => date < new Date() || (destination.endDate && date > destination.endDate)}
+                                      initialFocus
+                                      locale={he}
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              {/* Start Date */}
+                              <div className="flex items-center gap-4">
+                                <Label className="text-sm text-slate-600 min-w-[100px] text-right">
+                                  {t('trips.start_date')}
+                                </Label>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      className={`flex-1 font-normal ${!destination.startDate && "text-muted-foreground"} justify-start text-left`}
+                                      data-testid={`select-start-date-${index}`}
+                                    >
+                                      {destination.startDate ? format(destination.startDate, "PPP", { locale: enUS }) : <span>{t('trips.select_start_date')}</span>}
+                                      <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0" align="start">
+                                    <CalendarComponent
+                                      mode="single"
+                                      selected={destination.startDate}
+                                      onSelect={(date) => updateDestination(index, 'startDate', date)}
+                                      disabled={(date) => date < new Date() || (destination.endDate && date > destination.endDate)}
+                                      initialFocus
+                                      locale={enUS}
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                              </div>
+                              {/* End Date */}
+                              <div className="flex items-center gap-4">
+                                <Label className="text-sm text-slate-600 min-w-[100px] text-right">
+                                  {t('trips.end_date')}
+                                </Label>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      className={`flex-1 font-normal ${!destination.endDate && "text-muted-foreground"} justify-start text-left`}
+                                      data-testid={`select-end-date-${index}`}
+                                    >
+                                      {destination.endDate ? format(destination.endDate, "PPP", { locale: enUS }) : <span>{t('trips.select_end_date')}</span>}
+                                      <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0" align="start">
+                                    <CalendarComponent
+                                      mode="single"
+                                      selected={destination.endDate}
+                                      onSelect={(date) => updateDestination(index, 'endDate', date)}
+                                      disabled={(date) => date < new Date() || (destination.startDate && date < destination.startDate)}
+                                      initialFocus
+                                      locale={enUS}
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     </Card>
