@@ -1616,7 +1616,6 @@ export default function MyTripsNew() {
                                 <SelectValue placeholder={t('trips.choose_city')} />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">{t('trips.any_city_in_country')}</SelectItem>
                                 {destination.country && getWorldDestinations()[destination.country]?.map((city: string) => (
                                   <SelectItem key={city} value={city}>
                                     {translateCity(city)}
