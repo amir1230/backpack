@@ -2524,43 +2524,43 @@ export default function MyTripsNew() {
                               <CardContent className="space-y-4">
                                 {/* Route */}
                                 <div className="bg-white p-4 rounded-lg">
-                                  <div className={`flex items-center gap-3`}>
+                                  <div className="flex items-center justify-between">
                                     {i18n.language === 'he' ? (
                                       <>
-                                        {/* In Hebrew RTL: source on right, destination on left (reads naturally right-to-left) */}
-                                        <div className="flex-1 text-right">
-                                          <p className="font-semibold text-gray-800">
-                                            {translateCity(day.transitInfo.from.split(',')[0])}
-                                          </p>
-                                          <p className="text-xs text-gray-500">מקור</p>
-                                        </div>
-                                        <div className="flex items-center justify-center">
-                                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                                            <Plane className="w-4 h-4 text-orange-600" />
-                                          </div>
-                                        </div>
-                                        <div className="flex-1 text-right">
+                                        {/* In Hebrew RTL: source on far right, destination on far left */}
+                                        <div className="text-left">
                                           <p className="font-semibold text-gray-800">
                                             {translateCity(day.transitInfo.to.split(',')[0])}
                                           </p>
                                           <p className="text-xs text-gray-500">יעד</p>
                                         </div>
+                                        <div className="flex items-center justify-center px-4">
+                                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                                            <Plane className="w-4 h-4 text-orange-600" />
+                                          </div>
+                                        </div>
+                                        <div className="text-right">
+                                          <p className="font-semibold text-gray-800">
+                                            {translateCity(day.transitInfo.from.split(',')[0])}
+                                          </p>
+                                          <p className="text-xs text-gray-500">מקור</p>
+                                        </div>
                                       </>
                                     ) : (
                                       <>
-                                        {/* In English: source on left, destination on right */}
-                                        <div className="flex-1 text-left">
+                                        {/* In English: source on far left, destination on far right */}
+                                        <div className="text-left">
                                           <p className="font-semibold text-gray-800">
                                             {translateCity(day.transitInfo.from.split(',')[0])}
                                           </p>
                                           <p className="text-xs text-gray-500">From</p>
                                         </div>
-                                        <div className="flex items-center justify-center">
+                                        <div className="flex items-center justify-center px-4">
                                           <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
                                             <Plane className="w-4 h-4 text-orange-600" />
                                           </div>
                                         </div>
-                                        <div className="flex-1 text-left">
+                                        <div className="text-right">
                                           <p className="font-semibold text-gray-800">
                                             {translateCity(day.transitInfo.to.split(',')[0])}
                                           </p>
