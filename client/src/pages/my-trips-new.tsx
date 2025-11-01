@@ -2594,7 +2594,9 @@ export default function MyTripsNew() {
                                       {i18n.language === 'he' ? 'עלות משוערת' : 'Estimated Cost'}
                                     </p>
                                     <p className="font-semibold text-green-700">
-                                      {day.transitInfo.estimatedCost}
+                                      {i18n.language === 'he' && day.transitInfo.estimatedCost.includes(' - ') 
+                                        ? day.transitInfo.estimatedCost.split(' - ').reverse().join(' - ')
+                                        : day.transitInfo.estimatedCost}
                                     </p>
                                   </div>
                                 </div>
