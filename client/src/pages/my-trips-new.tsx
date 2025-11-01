@@ -404,7 +404,8 @@ const formatDateRange = (dateRange: string, lang: string): string => {
     const [, startMonth, startDay, startYear, endMonth, endDay, endYear] = numericMatch;
     const startFormatted = `${startDay.padStart(2, '0')}/${startMonth.padStart(2, '0')}/${startYear}`;
     const endFormatted = `${endDay.padStart(2, '0')}/${endMonth.padStart(2, '0')}/${endYear}`;
-    return `${startFormatted} - ${endFormatted}`;
+    // In Hebrew (RTL), reverse the order so it displays correctly
+    return `${endFormatted} - ${startFormatted}`;
   }
   
   // Parse text date range like "November 4 - November 10, 2025"
@@ -435,7 +436,8 @@ const formatDateRange = (dateRange: string, lang: string): string => {
     const startFormatted = `${startDay.padStart(2, '0')}/${startMonthNum}/${year}`;
     const endFormatted = `${endDay.padStart(2, '0')}/${endMonthNum}/${year}`;
     
-    return `${startFormatted} - ${endFormatted}`;
+    // In Hebrew (RTL), reverse the order so it displays correctly
+    return `${endFormatted} - ${startFormatted}`;
   }
   
   return dateRange;
