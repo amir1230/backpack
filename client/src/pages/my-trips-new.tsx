@@ -1364,7 +1364,8 @@ export default function MyTripsNew() {
         const allItineraries: any[] = [];
         let dayCounter = 1; // Running counter for continuous day numbering
         
-        for (const dest of suggestion.destinationBreakdown) {
+        for (let i = 0; i < suggestion.destinationBreakdown.length; i++) {
+          const dest = suggestion.destinationBreakdown[i];
           const daysForDestination = calculateDaysFromDateRange(dest.dateRange);
           console.log(`Generating ${daysForDestination}-day itinerary for ${dest.destination}, ${dest.country}`);
           
@@ -1401,6 +1402,43 @@ export default function MyTripsNew() {
           }));
           
           allItineraries.push(...enrichedItinerary);
+          
+          // Add transit day between destinations (if not the last destination)
+          if (i < suggestion.destinationBreakdown.length - 1) {
+            const nextDest = suggestion.destinationBreakdown[i + 1];
+            
+            // Find the transportation recommendation for this leg
+            const transitInfo = suggestion.transportationRecommendations?.find((rec: any) => 
+              rec.from === dest.destination && rec.to === nextDest.destination
+            );
+            
+            if (transitInfo) {
+              const transitDay = {
+                day: dayCounter++,
+                location: i18n.language === 'he' ? `מעבר: ${dest.destination} → ${nextDest.destination}` : `Transit: ${dest.destination} → ${nextDest.destination}`,
+                activities: [
+                  i18n.language === 'he' 
+                    ? `נסיעה מ-${dest.destination} ל-${nextDest.destination}`
+                    : `Travel from ${dest.destination} to ${nextDest.destination}`
+                ],
+                estimatedCost: 0,
+                tips: [],
+                isTransitDay: true,
+                transitInfo: {
+                  from: `${dest.destination}, ${dest.country}`,
+                  to: `${nextDest.destination}, ${nextDest.country}`,
+                  method: transitInfo.method || transitInfo.type || 'Flight',
+                  duration: transitInfo.duration || transitInfo.estimatedTime || 'N/A',
+                  estimatedCost: transitInfo.estimatedCost || transitInfo.cost || 'N/A',
+                  details: transitInfo.details || transitInfo.notes || ''
+                },
+                destinationName: i18n.language === 'he' ? 'מעבר' : 'Transit',
+                countryName: ''
+              };
+              
+              allItineraries.push(transitDay);
+            }
+          }
         }
         
         console.log('Generated complete multi-city itinerary:', allItineraries);
@@ -2453,10 +2491,95 @@ export default function MyTripsNew() {
                         ? `${day.day}-${day.destinationName}-${day.countryName}`
                         : `${day.day}`;
                       
+                      // Transit day - special rendering
+                      if (day.isTransitDay && day.transitInfo) {
+                        return (
+                          <div key={stableKey}>
+                            <Card className={`bg-gradient-to-r from-orange-50 to-yellow-50 ${i18n.language === 'he' ? 'border-r-4 border-r-orange-500' : 'border-l-4 border-l-orange-500'} ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                              <CardHeader className="pb-3">
+                                <CardTitle className={`flex items-center text-lg ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                                  <Plane className={`w-5 h-5 text-orange-600 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                                  {t('trips.day')} {day.day} – {i18n.language === 'he' ? 'יום מעבר' : 'Transit Day'}
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-4">
+                                {/* Route */}
+                                <div className="bg-white p-4 rounded-lg">
+                                  <div className={`flex items-center gap-3 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                                    <div className="flex-1">
+                                      <p className={`font-semibold text-gray-800 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                        {translateCity(day.transitInfo.from.split(',')[0])}
+                                      </p>
+                                      <p className={`text-xs text-gray-500 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                        {i18n.language === 'he' ? 'מקור' : 'From'}
+                                      </p>
+                                    </div>
+                                    <div className="flex items-center justify-center">
+                                      <div className={`w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center ${i18n.language === 'he' ? 'rotate-180' : ''}`}>
+                                        <Plane className="w-4 h-4 text-orange-600" />
+                                      </div>
+                                    </div>
+                                    <div className="flex-1">
+                                      <p className={`font-semibold text-gray-800 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                        {translateCity(day.transitInfo.to.split(',')[0])}
+                                      </p>
+                                      <p className={`text-xs text-gray-500 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                        {i18n.language === 'he' ? 'יעד' : 'To'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Transportation Details */}
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="bg-white p-3 rounded-lg">
+                                    <p className={`text-xs text-gray-500 mb-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                      {i18n.language === 'he' ? 'אמצעי תחבורה' : 'Method'}
+                                    </p>
+                                    <p className={`font-semibold text-gray-800 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                      {day.transitInfo.method}
+                                    </p>
+                                  </div>
+                                  <div className="bg-white p-3 rounded-lg">
+                                    <p className={`text-xs text-gray-500 mb-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                      {i18n.language === 'he' ? 'זמן נסיעה' : 'Duration'}
+                                    </p>
+                                    <p className={`font-semibold text-gray-800 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                      {day.transitInfo.duration}
+                                    </p>
+                                  </div>
+                                  <div className="bg-white p-3 rounded-lg col-span-2">
+                                    <p className={`text-xs text-gray-500 mb-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                      {i18n.language === 'he' ? 'עלות משוערת' : 'Estimated Cost'}
+                                    </p>
+                                    <p className={`font-semibold text-green-700 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
+                                      {day.transitInfo.estimatedCost}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {/* Additional Details */}
+                                {day.transitInfo.details && (
+                                  <div className="bg-blue-50 p-3 rounded-lg">
+                                    <div className={`flex items-start gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                                      <Lightbulb className={`w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                                      <p className={`text-sm text-blue-800 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
+                                        {day.transitInfo.details}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          </div>
+                        );
+                      }
+
+                      // Regular day rendering
                       return (
                         <div key={stableKey}>
                           {/* Show destination header for multi-city trips */}
-                          {isNewDestination && day.destinationName && (
+                          {isNewDestination && day.destinationName && !day.isTransitDay && (
                             <div className="bg-purple-100 p-4 rounded-lg mb-4" dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
                               <div className={`flex items-center gap-2 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
                                 <MapPin className="w-6 h-6 text-purple-600" />

@@ -5,12 +5,27 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true 
 });
 
+export interface TransitInfo {
+  from: string;
+  to: string;
+  method: string;
+  duration: string;
+  estimatedCost: string;
+  details?: string;
+}
+
 export interface ItineraryDay {
   day: number;
   location: string;
   activities: string[];
   estimatedCost: number;
   tips: string[];
+  // Transit day fields (optional)
+  isTransitDay?: boolean;
+  transitInfo?: TransitInfo;
+  destinationName?: string;
+  countryName?: string;
+  dateRange?: string;
 }
 
 export interface ItineraryRequest {
