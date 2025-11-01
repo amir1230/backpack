@@ -2135,19 +2135,17 @@ export default function MyTripsNew() {
                               <h4 className="font-semibold text-gray-800">{t('trips.destination_breakdown')}</h4>
                             </div>
                             {suggestion.destinationBreakdown.map((dest, idx) => (
-                              <div key={idx} className="bg-purple-50 p-4 rounded-lg space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <div className={`flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                                    <h5 className="font-bold text-purple-900">
-                                      {translateCity(dest.destination)}, {translateCountry(dest.country)}
-                                    </h5>
-                                    {dest.dateRange && (
-                                      <p className="text-sm text-purple-700">{dest.dateRange}</p>
-                                    )}
-                                    <p className="text-sm text-purple-600">{dest.duration}</p>
-                                  </div>
+                              <div key={idx} className={`bg-purple-50 p-4 rounded-lg space-y-2 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
+                                <div>
+                                  <h5 className="font-bold text-purple-900">
+                                    {translateCity(dest.destination)}, {translateCountry(dest.country)}
+                                  </h5>
+                                  {dest.dateRange && (
+                                    <p className="text-sm text-purple-700">{dest.dateRange}</p>
+                                  )}
+                                  <p className="text-sm text-purple-600">{dest.duration}</p>
                                 </div>
-                                <p className={`text-sm text-gray-700 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{dest.description}</p>
+                                <p className="text-sm text-gray-700">{dest.description}</p>
                                 <div className="space-y-1">
                                   {dest.highlights.map((highlight, hIdx) => (
                                     <div key={hIdx} className={`flex items-center text-sm text-gray-700 gap-2 ${i18n.language === 'he' ? 'text-right flex-row-reverse' : 'text-left'}`}>
