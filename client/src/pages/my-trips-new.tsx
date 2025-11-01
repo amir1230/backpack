@@ -396,42 +396,49 @@ const translateFullText = async (text: string, targetLang: string): Promise<stri
 const formatDateRange = (dateRange: string, lang: string): string => {
   if (!dateRange || lang !== 'he') return dateRange;
   
-  // Parse date range like "November 4 - November 10, 2025" or "Dec 1 - Dec 3, 2025"
-  const dateRangeRegex = /(\w+)\s+(\d+)\s*-\s*(\w+)\s+(\d+),?\s*(\d{4})/;
-  const match = dateRange.match(dateRangeRegex);
+  // Parse numeric date range like "11/4/2025 - 11/10/2025" (MM/DD/YYYY format)
+  const numericRegex = /(\d{1,2})\/(\d{1,2})\/(\d{4})\s*-\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/;
+  const numericMatch = dateRange.match(numericRegex);
   
-  if (!match) {
-    console.log('[formatDateRange] No match for:', dateRange);
-    return dateRange;
+  if (numericMatch) {
+    const [, startMonth, startDay, startYear, endMonth, endDay, endYear] = numericMatch;
+    const startFormatted = `${startDay.padStart(2, '0')}/${startMonth.padStart(2, '0')}/${startYear}`;
+    const endFormatted = `${endDay.padStart(2, '0')}/${endMonth.padStart(2, '0')}/${endYear}`;
+    return `${startFormatted} - ${endFormatted}`;
   }
   
-  const [, startMonth, startDay, endMonth, endDay, year] = match;
+  // Parse text date range like "November 4 - November 10, 2025"
+  const textRegex = /(\w+)\s+(\d+)\s*-\s*(\w+)\s+(\d+),?\s*(\d{4})/;
+  const textMatch = dateRange.match(textRegex);
   
-  const monthMap: { [key: string]: string } = {
-    'January': '01', 'Jan': '01',
-    'February': '02', 'Feb': '02',
-    'March': '03', 'Mar': '03',
-    'April': '04', 'Apr': '04',
-    'May': '05',
-    'June': '06', 'Jun': '06',
-    'July': '07', 'Jul': '07',
-    'August': '08', 'Aug': '08',
-    'September': '09', 'Sep': '09',
-    'October': '10', 'Oct': '10',
-    'November': '11', 'Nov': '11',
-    'December': '12', 'Dec': '12'
-  };
+  if (textMatch) {
+    const [, startMonth, startDay, endMonth, endDay, year] = textMatch;
+    
+    const monthMap: { [key: string]: string } = {
+      'January': '01', 'Jan': '01',
+      'February': '02', 'Feb': '02',
+      'March': '03', 'Mar': '03',
+      'April': '04', 'Apr': '04',
+      'May': '05',
+      'June': '06', 'Jun': '06',
+      'July': '07', 'Jul': '07',
+      'August': '08', 'Aug': '08',
+      'September': '09', 'Sep': '09',
+      'October': '10', 'Oct': '10',
+      'November': '11', 'Nov': '11',
+      'December': '12', 'Dec': '12'
+    };
+    
+    const startMonthNum = monthMap[startMonth] || '01';
+    const endMonthNum = monthMap[endMonth] || '01';
+    
+    const startFormatted = `${startDay.padStart(2, '0')}/${startMonthNum}/${year}`;
+    const endFormatted = `${endDay.padStart(2, '0')}/${endMonthNum}/${year}`;
+    
+    return `${startFormatted} - ${endFormatted}`;
+  }
   
-  const startMonthNum = monthMap[startMonth] || '01';
-  const endMonthNum = monthMap[endMonth] || '01';
-  
-  const startFormatted = `${startDay.padStart(2, '0')}/${startMonthNum}/${year}`;
-  const endFormatted = `${endDay.padStart(2, '0')}/${endMonthNum}/${year}`;
-  
-  const result = `${startFormatted} - ${endFormatted}`;
-  console.log('[formatDateRange] Input:', dateRange, '→ Output:', result);
-  
-  return result;
+  return dateRange;
 };
 
 // Translation function for travel style tags and highlights
