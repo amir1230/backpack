@@ -76,7 +76,8 @@ const createTripFormSchema = (t: any) => z.object({
   destinations: z.array(z.object({
     country: z.string().min(1, t('trips.select_destination')),
     city: z.string().optional(),
-    days: z.number().int().min(1, t('trips.days_required')).max(30, t('trips.days_max')),
+    startDate: z.date({required_error: t('trips.start_date_required')}).optional(),
+    endDate: z.date({required_error: t('trips.end_date_required')}).optional(),
   })).min(1, t('trips.select_at_least_one_destination')),
   travelStyle: z.array(z.string()).optional(), // Keep for backward compatibility but optional
   budget: z.number().min(100, t('trips.budget_required')),
@@ -88,7 +89,8 @@ const createTripFormSchema = (t: any) => z.object({
 type Destination = {
   country: string;
   city?: string;
-  days: number;
+  startDate?: Date;
+  endDate?: Date;
 };
 
 type TripFormData = {
@@ -654,7 +656,7 @@ export default function MyTripsNew() {
 
   // State for multi-city destinations
   const [destinations, setDestinations] = useState<Destination[]>([
-    { country: "", city: "", days: 3 }
+    { country: "", city: "", startDate: undefined, endDate: undefined }
   ]);
 
   // State for search functionality in Select components
@@ -665,7 +667,7 @@ export default function MyTripsNew() {
   const form = useForm<TripFormData>({
     resolver: zodResolver(createTripFormSchema(t)),
     defaultValues: {
-      destinations: [{ country: "", city: "", days: 3 }],
+      destinations: [{ country: "", city: "", startDate: undefined, endDate: undefined }],
       destination: "",
       specificCity: "",
       travelStyle: [],
@@ -679,7 +681,7 @@ export default function MyTripsNew() {
 
   // Helper functions for managing destinations
   const addDestination = () => {
-    const newDestinations = [...destinations, { country: "", city: "", days: 3 }];
+    const newDestinations = [...destinations, { country: "", city: "", startDate: undefined, endDate: undefined }];
     setDestinations(newDestinations);
     form.setValue('destinations', newDestinations);
     setCountrySearchValues([...countrySearchValues, ""]);
@@ -696,7 +698,7 @@ export default function MyTripsNew() {
     }
   };
 
-  const updateDestination = (index: number, field: keyof Destination, value: string | number) => {
+  const updateDestination = (index: number, field: keyof Destination, value: string | Date | undefined) => {
     const newDestinations = [...destinations];
     newDestinations[index] = { ...newDestinations[index], [field]: value };
     setDestinations(newDestinations);
@@ -705,7 +707,14 @@ export default function MyTripsNew() {
 
   // Calculate total days from all destinations
   const getTotalDays = () => {
-    return destinations.reduce((sum, dest) => sum + (dest.days || 0), 0);
+    return destinations.reduce((sum, dest) => {
+      if (dest.startDate && dest.endDate) {
+        const diffTime = Math.abs(dest.endDate.getTime() - dest.startDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return sum + diffDays;
+      }
+      return sum;
+    }, 0);
   };
 
   // Helper function for toggling interests
@@ -1141,10 +1150,16 @@ export default function MyTripsNew() {
       }
 
       // Build destination string with all stops
-      // Example: "Paris, France (3 days) → Rome, Italy (4 days) → Barcelona, Spain (3 days)"
+      // Example: "Paris, France (01/05/2024 - 03/05/2024) → Rome, Italy (04/05/2024 - 08/05/2024)"
       const destinationString = validDestinations.map(dest => {
         const cityPart = dest.city ? `${dest.city}, ` : '';
-        return `${cityPart}${dest.country} (${dest.days} ${t('trips.days')})`;
+        let datesPart = '';
+        if (dest.startDate && dest.endDate) {
+          const startFormatted = format(dest.startDate, i18n.language === 'he' ? "dd/MM/yyyy" : "PPP", { locale: i18n.language === 'he' ? he : enUS });
+          const endFormatted = format(dest.endDate, i18n.language === 'he' ? "dd/MM/yyyy" : "PPP", { locale: i18n.language === 'he' ? he : enUS });
+          datesPart = ` (${startFormatted} - ${endFormatted})`;
+        }
+        return `${cityPart}${dest.country}${datesPart}`;
       }).join(' → ');
 
       // Calculate total duration from all destinations
@@ -1694,20 +1709,65 @@ export default function MyTripsNew() {
                           </Select>
                         </div>
 
-                        {/* Days */}
-                        <div className={`flex items-center gap-4 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
-                          <Label className={`text-sm text-slate-600 min-w-[180px] ${i18n.language === 'he' ? 'text-left' : 'text-right'}`}>
-                            {t('trips.days_in_destination')}
-                          </Label>
-                          <Input
-                            type="number"
-                            min="1"
-                            max="30"
-                            value={destination.days}
-                            onChange={(e) => updateDestination(index, 'days', parseInt(e.target.value) || 1)}
-                            className="flex-1"
-                            data-testid={`days-input-${index}`}
-                          />
+                        {/* Date Range */}
+                        <div className="grid grid-cols-2 gap-4">
+                          {/* Start Date */}
+                          <div className={`flex items-center gap-4 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                            <Label className={`text-sm text-slate-600 min-w-[100px] ${i18n.language === 'he' ? 'text-left' : 'text-right'}`}>
+                              {t('trips.start_date')}
+                            </Label>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className={`flex-1 font-normal ${!destination.startDate && "text-muted-foreground"} ${i18n.language === 'he' ? 'justify-start flex-row-reverse text-left' : 'justify-start text-left'}`}
+                                  data-testid={`select-start-date-${index}`}
+                                >
+                                  {destination.startDate ? format(destination.startDate, i18n.language === 'he' ? "dd/MM/yyyy" : "PPP", { locale: i18n.language === 'he' ? he : enUS }) : <span>{t('trips.select_start_date')}</span>}
+                                  <Calendar className={`h-4 w-4 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'} flex-shrink-0`} />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <CalendarComponent
+                                  mode="single"
+                                  selected={destination.startDate}
+                                  onSelect={(date) => updateDestination(index, 'startDate', date)}
+                                  disabled={(date) => date < new Date() || (destination.endDate && date > destination.endDate)}
+                                  initialFocus
+                                  locale={i18n.language === 'he' ? he : enUS}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+
+                          {/* End Date */}
+                          <div className={`flex items-center gap-4 ${i18n.language === 'he' ? 'flex-row-reverse' : ''}`}>
+                            <Label className={`text-sm text-slate-600 min-w-[100px] ${i18n.language === 'he' ? 'text-left' : 'text-right'}`}>
+                              {t('trips.end_date')}
+                            </Label>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className={`flex-1 font-normal ${!destination.endDate && "text-muted-foreground"} ${i18n.language === 'he' ? 'justify-start flex-row-reverse text-left' : 'justify-start text-left'}`}
+                                  data-testid={`select-end-date-${index}`}
+                                >
+                                  {destination.endDate ? format(destination.endDate, i18n.language === 'he' ? "dd/MM/yyyy" : "PPP", { locale: i18n.language === 'he' ? he : enUS }) : <span>{t('trips.select_end_date')}</span>}
+                                  <Calendar className={`h-4 w-4 ${i18n.language === 'he' ? 'ml-2' : 'mr-2'} flex-shrink-0`} />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <CalendarComponent
+                                  mode="single"
+                                  selected={destination.endDate}
+                                  onSelect={(date) => updateDestination(index, 'endDate', date)}
+                                  disabled={(date) => date < new Date() || (destination.startDate && date < destination.startDate)}
+                                  initialFocus
+                                  locale={i18n.language === 'he' ? he : enUS}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
                         </div>
                       </div>
                     </Card>
