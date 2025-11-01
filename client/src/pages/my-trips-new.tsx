@@ -1362,6 +1362,7 @@ export default function MyTripsNew() {
         
         // Generate itinerary for each destination
         const allItineraries: any[] = [];
+        let dayCounter = 1; // Running counter for continuous day numbering
         
         for (const dest of suggestion.destinationBreakdown) {
           const daysForDestination = calculateDaysFromDateRange(dest.dateRange);
@@ -1390,9 +1391,10 @@ export default function MyTripsNew() {
           
           const itineraryData = await response.json();
           
-          // Add destination info to each day in the itinerary
+          // Add destination info and renumber days sequentially
           const enrichedItinerary = itineraryData.map((day: any) => ({
             ...day,
+            day: dayCounter++, // Assign unique sequential day number
             destinationName: dest.destination,
             countryName: dest.country,
             dateRange: dest.dateRange
@@ -2446,8 +2448,13 @@ export default function MyTripsNew() {
                       const isNewDestination = dayIndex === 0 || 
                         (day.destinationName && itinerary[dayIndex - 1].destinationName !== day.destinationName);
                       
+                      // Use composite key for stability (combines day number with destination)
+                      const stableKey = day.destinationName 
+                        ? `${day.day}-${day.destinationName}-${day.countryName}`
+                        : `${day.day}`;
+                      
                       return (
-                        <div key={day.day}>
+                        <div key={stableKey}>
                           {/* Show destination header for multi-city trips */}
                           {isNewDestination && day.destinationName && (
                             <div className="bg-purple-100 p-4 rounded-lg mb-4" dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
