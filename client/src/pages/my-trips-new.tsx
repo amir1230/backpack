@@ -392,6 +392,42 @@ const translateFullText = async (text: string, targetLang: string): Promise<stri
   }
 };
 
+// Function to format date ranges for Hebrew (DD/MM/YYYY)
+const formatDateRange = (dateRange: string, lang: string): string => {
+  if (!dateRange || lang !== 'he') return dateRange;
+  
+  // Parse date range like "November 4 - November 10, 2025" or "Dec 1 - Dec 3, 2025"
+  const dateRangeRegex = /(\w+)\s+(\d+)\s*-\s*(\w+)\s+(\d+),?\s*(\d{4})/;
+  const match = dateRange.match(dateRangeRegex);
+  
+  if (!match) return dateRange;
+  
+  const [, startMonth, startDay, endMonth, endDay, year] = match;
+  
+  const monthMap: { [key: string]: string } = {
+    'January': '01', 'Jan': '01',
+    'February': '02', 'Feb': '02',
+    'March': '03', 'Mar': '03',
+    'April': '04', 'Apr': '04',
+    'May': '05',
+    'June': '06', 'Jun': '06',
+    'July': '07', 'Jul': '07',
+    'August': '08', 'Aug': '08',
+    'September': '09', 'Sep': '09',
+    'October': '10', 'Oct': '10',
+    'November': '11', 'Nov': '11',
+    'December': '12', 'Dec': '12'
+  };
+  
+  const startMonthNum = monthMap[startMonth] || '01';
+  const endMonthNum = monthMap[endMonth] || '01';
+  
+  const startFormatted = `${startDay.padStart(2, '0')}/${startMonthNum}/${year}`;
+  const endFormatted = `${endDay.padStart(2, '0')}/${endMonthNum}/${year}`;
+  
+  return `${startFormatted} - ${endFormatted}`;
+};
+
 // Translation function for travel style tags and highlights
 const translateText = (text: string, targetLang: string): string => {
   if (!text) return text;
@@ -2141,7 +2177,7 @@ export default function MyTripsNew() {
                                     {translateCity(dest.destination)}, {translateCountry(dest.country)}
                                   </h5>
                                   {dest.dateRange && (
-                                    <p className="text-sm text-purple-700">{dest.dateRange}</p>
+                                    <p className="text-sm text-purple-700">{formatDateRange(dest.dateRange, i18n.language)}</p>
                                   )}
                                   <p className="text-sm text-purple-600">{dest.duration}</p>
                                 </div>
