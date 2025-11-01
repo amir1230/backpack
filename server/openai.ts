@@ -153,15 +153,25 @@ export async function generateTravelSuggestions(
     
     // Build the location constraint based on trip type
     const locationConstraint = isMultiCity
-      ? `CRITICAL: This is a MULTI-CITY trip across these destinations:
+      ? `⚠️ CRITICAL MULTI-CITY TRIP REQUIREMENTS ⚠️
+
+This is a MULTI-CITY trip with ${preferences.destinations!.length} destinations that the user wants to visit:
 ${multiCityStr}
 
-You MUST create trip suggestions that cover ALL these destinations in the order listed. Each suggestion should include:
-1. A destinationBreakdown array with details for EACH destination (city/country, description, highlights, recommended duration)
-2. A transportation array with specific recommendations for traveling BETWEEN each consecutive destination (flights, trains, buses, etc.)
-3. Overall trip description that connects all destinations into a cohesive journey
+🚨 MANDATORY REQUIREMENTS - READ CAREFULLY:
+1. You MUST create suggestions that include ALL ${preferences.destinations!.length} destinations
+2. DO NOT create suggestions for only one city - the user wants to visit multiple cities
+3. EVERY suggestion must visit: ${preferences.destinations!.map(d => `${d.city || ''} ${d.country}`.trim()).join(' AND ')}
+4. Use the "destinationBreakdown" field to provide details for EACH destination separately
+5. Use the "transportation" field to suggest how to travel between consecutive destinations
 
-The suggestions should differ in themes/styles (adventure, cultural, luxury, etc.) but must include all ${preferences.destinations!.length} destinations.`
+Required JSON structure for multi-city:
+- destinationBreakdown: Array with ${preferences.destinations!.length} objects (one per destination)
+- transportation: Array with ${preferences.destinations!.length - 1} objects (between each pair of cities)
+- Overall "destination" field should be a creative name for the multi-city journey
+- Overall "description" should explain the full multi-city experience
+
+Example: If user selected Paris → Rome → Barcelona, your suggestion should cover ALL THREE cities with breakdown and transportation between them.`
       : specificCity 
         ? `CRITICAL: The user has selected a SPECIFIC CITY: ${specificCity} in ${countriesStr}
 You MUST provide 3 trip suggestions ONLY for ${specificCity} specifically. All suggestions must be about ${specificCity}, not other cities in ${countriesStr}.`
