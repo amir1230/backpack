@@ -236,7 +236,7 @@ REQUIRED JSON STRUCTURE FOR MULTI-CITY:
       "destination": "Creative multi-city journey name",
       "country": "All countries separated by ' & ' (e.g., 'Italy & United Kingdom' or 'France & Spain & Germany')",
       "description": "2-3 sentence overview of full journey",
-      "bestTimeToVisit": "Best season",
+      "bestTimeToVisit": "Specific months (e.g., 'April to June', 'September to November', 'December to February')",
       "estimatedBudget": {"low": number, "high": number},
       "highlights": ["Highlight from destination 1", "Highlight from destination 2", "Highlight from destination 3"],
       "travelStyle": ["style1", "style2"],
