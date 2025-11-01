@@ -1408,36 +1408,37 @@ export default function MyTripsNew() {
             const nextDest = suggestion.destinationBreakdown[i + 1];
             
             // Find the transportation recommendation for this leg
-            const transitInfo = suggestion.transportationRecommendations?.find((rec: any) => 
+            // Check both 'transportation' (actual field) and 'transportationRecommendations' (legacy)
+            const transportationArray = suggestion.transportation || suggestion.transportationRecommendations || [];
+            const transitInfo = transportationArray.find((rec: any) => 
               rec.from === dest.destination && rec.to === nextDest.destination
             );
             
-            if (transitInfo) {
-              const transitDay = {
-                day: dayCounter++,
-                location: i18n.language === 'he' ? `מעבר: ${dest.destination} → ${nextDest.destination}` : `Transit: ${dest.destination} → ${nextDest.destination}`,
-                activities: [
-                  i18n.language === 'he' 
-                    ? `נסיעה מ-${dest.destination} ל-${nextDest.destination}`
-                    : `Travel from ${dest.destination} to ${nextDest.destination}`
-                ],
-                estimatedCost: 0,
-                tips: [],
-                isTransitDay: true,
-                transitInfo: {
-                  from: `${dest.destination}, ${dest.country}`,
-                  to: `${nextDest.destination}, ${nextDest.country}`,
-                  method: transitInfo.method || transitInfo.type || 'Flight',
-                  duration: transitInfo.duration || transitInfo.estimatedTime || 'N/A',
-                  estimatedCost: transitInfo.estimatedCost || transitInfo.cost || 'N/A',
-                  details: transitInfo.details || transitInfo.notes || ''
-                },
-                destinationName: i18n.language === 'he' ? 'מעבר' : 'Transit',
-                countryName: ''
-              };
-              
-              allItineraries.push(transitDay);
-            }
+            // Create transit day even if no specific transport info found (use defaults)
+            const transitDay = {
+              day: dayCounter++,
+              location: i18n.language === 'he' ? `מעבר: ${dest.destination} → ${nextDest.destination}` : `Transit: ${dest.destination} → ${nextDest.destination}`,
+              activities: [
+                i18n.language === 'he' 
+                  ? `נסיעה מ-${dest.destination} ל-${nextDest.destination}`
+                  : `Travel from ${dest.destination} to ${nextDest.destination}`
+              ],
+              estimatedCost: 0,
+              tips: [],
+              isTransitDay: true,
+              transitInfo: {
+                from: `${dest.destination}, ${dest.country}`,
+                to: `${nextDest.destination}, ${nextDest.country}`,
+                method: transitInfo?.method || transitInfo?.type || (i18n.language === 'he' ? 'טיסה' : 'Flight'),
+                duration: transitInfo?.duration || transitInfo?.estimatedTime || (i18n.language === 'he' ? 'לא צוין' : 'N/A'),
+                estimatedCost: transitInfo?.estimatedCost || transitInfo?.cost || (i18n.language === 'he' ? 'לא צוין' : 'N/A'),
+                details: transitInfo?.details || transitInfo?.notes || ''
+              },
+              destinationName: i18n.language === 'he' ? 'מעבר' : 'Transit',
+              countryName: ''
+            };
+            
+            allItineraries.push(transitDay);
           }
         }
         
