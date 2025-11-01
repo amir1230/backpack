@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { googlePlaces } from './googlePlaces';
+import { googlePlaces } from './googlePlaces.js';
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -182,173 +182,101 @@ You MUST provide trip suggestions ONLY for destinations within these countries. 
       ? `${adults} adult${adults > 1 ? 's' : ''} and ${children} child${children > 1 ? 'ren' : ''}`
       : `${adults} adult${adults > 1 ? 's' : ''}`;
     
-    const prompt = `You are GlobeMate – a smart, friendly, and social travel planner built for Gen Z and solo travelers.  
-Your mission is to help travelers discover personalized, exciting, and budget-conscious trips across the world.
+    // Build concise user prompt (critical instructions now in system message)
+    const prompt = `Create 3 diverse trip suggestions with these preferences:
 
-${isHebrew ? 'IMPORTANT: Respond in Hebrew. All text fields (destination, country, description, bestTimeToVisit, highlights) must be in Hebrew.' : ''}
-
-${locationConstraint}
-
-${isMultiCity ? `
-EXAMPLE MULTI-CITY RESPONSE (for reference - adapt to user's actual destinations):
-{
-  "suggestions": [
-    {
-      "destination": "European Adventure",
-      "country": "France",
-      "description": "Experience the magic of three iconic European cities...",
-      "bestTimeToVisit": "April to June",
-      "estimatedBudget": {"low": 2500, "high": 4000},
-      "highlights": ["Eiffel Tower in Paris", "Colosseum in Rome", "Sagrada Familia in Barcelona"],
-      "travelStyle": ["cultural", "adventure"],
-      "duration": "14 days",
-      "destinationBreakdown": [
-        {
-          "destination": "Paris",
-          "country": "France",
-          "description": "The City of Light offers world-class museums, charming cafes, and iconic landmarks.",
-          "highlights": ["Visit the Louvre Museum", "Climb the Eiffel Tower", "Stroll along the Seine"],
-          "duration": "4 days",
-          "dateRange": "Dec 1 - Dec 4"
-        },
-        {
-          "destination": "Rome",
-          "country": "Italy",
-          "description": "Ancient history meets modern Italian culture in the Eternal City.",
-          "highlights": ["Explore the Colosseum", "Visit Vatican Museums", "Toss a coin in Trevi Fountain"],
-          "duration": "5 days",
-          "dateRange": "Dec 5 - Dec 9"
-        }
-      ],
-      "transportation": [
-        {
-          "from": "Paris",
-          "to": "Rome",
-          "recommendations": ["Direct flight via Ryanair or EasyJet (~$60-100)", "Night train for a scenic journey (~$120-180)", "FlixBus budget option (~$80, 18 hours)"],
-          "estimatedCost": "$60-180",
-          "estimatedTime": "2-18 hours depending on option"
-        }
-      ]
-    }
-  ]
-}
-` : ''}
-
-CRITICAL: This trip is for ${travelerComposition} as a ${tripType} trip. 
-${children > 0 ? 'IMPORTANT: This is a family trip with children. All suggestions MUST be family-friendly with child-appropriate activities, accommodations, and safety considerations.' : ''}
-${tripType === 'honeymoon' ? 'IMPORTANT: This is a honeymoon trip. Focus on romantic destinations, couple activities, and intimate experiences.' : ''}
-${tripType === 'solo' ? 'IMPORTANT: This is a solo trip. Focus on safe destinations, solo-friendly activities, and social opportunities.' : ''}
-${tripType === 'couples' ? 'IMPORTANT: This is a couples trip. Focus on romantic and couple-friendly activities.' : ''}
-${tripType === 'family' && children === 0 ? 'IMPORTANT: This is a family trip for adults. Include multi-generational activities and comfortable accommodations.' : ''}
-${tripType === 'friends' ? 'IMPORTANT: This is a group of friends traveling together. Focus on fun group activities and social experiences.' : ''}
-
-Using the following preferences:
-- Traveler Composition: ${travelerComposition}
-- Trip Type: ${tripType}
-- Travel Style: ${travelStylesStr}
+Trip Details:
+- Travelers: ${travelerComposition} (${tripType} trip)
+- Travel Styles: ${travelStylesStr}
 - Budget: ${budgetStr}
 - Duration: ${durationStr}
 - Interests: ${interestsStr}
-${specificCity ? `- Specific City (REQUIRED): ${specificCity}` : `- Target Countries (REQUIRED): ${countriesStr}`}
-
-Provide 3 trip suggestions in a JSON format.  
-Each suggestion should feel exciting and tailored, not generic.
 
 ${isMultiCity ? `
-For MULTI-CITY trips, each suggestion MUST include:
-- destination: Overall trip title (e.g., "European Adventure" or "Southeast Asia Explorer")
-- country: Primary/starting country
-- description: 2–3 sentence overview connecting all destinations (inspiring and clear)
-- bestTimeToVisit: e.g., "April to June"
-- estimatedBudget: {low, high} in USD for the ENTIRE multi-city trip
-- highlights: 3–5 key highlights across ALL destinations
-- travelStyle: relevant styles (e.g., adventure, culture, relax)
-- duration: total trip duration (e.g., "14 days")
-- destinationBreakdown: ARRAY with one object per destination:
-  [
-    {
-      "destination": "City/Region name",
-      "country": "Country name",
-      "description": "What makes this destination special in 1-2 sentences",
-      "highlights": ["Activity 1", "Activity 2", "Activity 3"],
-      "duration": "Recommended days here",
-      "dateRange": "Date range from user's input (e.g., 'Dec 1 - Dec 3')"
-    }
-  ]
-- transportation: ARRAY with recommendations for traveling BETWEEN destinations:
-  [
-    {
-      "from": "Starting city",
-      "to": "Destination city",
-      "recommendations": ["Flight via Ryanair (~$50)", "High-speed train (~4 hours, $80)", "Budget bus (~6 hours, $25)"],
-      "estimatedCost": "$50-80",
-      "estimatedTime": "1-4 hours"
-    }
-  ]
+Multi-City Destinations (visit ALL ${preferences.destinations!.length} cities):
+${preferences.destinations!.map((d, i) => {
+  const cityPart = d.city ? `${d.city}, ` : '';
+  const dates = d.startDate && d.endDate 
+    ? ` (${new Date(d.startDate).toLocaleDateString()} - ${new Date(d.endDate).toLocaleDateString()})`
+    : '';
+  return `${i+1}. ${cityPart}${d.country}${dates}`;
+}).join('\n')}
+` : specificCity 
+  ? `Specific City: ${specificCity} in ${countriesStr}` 
+  : `Countries: ${countriesStr}`}
 
-CRITICAL: Include transportation between EVERY pair of consecutive destinations!
-` : `
-For single-destination trips, each suggestion includes:
-- destination (${specificCity ? `must be ${specificCity}` : 'city or region name'})
-- country
-- description: 2–3 sentence overview (inspiring and clear)
-- bestTimeToVisit: e.g., "April to June"
-- estimatedBudget: {low, high} in USD
-- highlights: 3–5 key attractions or activities ${specificCity ? `specifically in ${specificCity}` : ''}
-- travelStyle: relevant styles (e.g., adventure, culture, relax)
-- duration: how long to stay (e.g., "7–10 days")
+${children > 0 ? 'Family-friendly with child-appropriate activities.' : ''}
+${tripType === 'honeymoon' ? 'Romantic and intimate experiences for couples.' : ''}
+${tripType === 'solo' ? 'Safe solo-friendly activities and social opportunities.' : ''}
+${tripType === 'couples' ? 'Romantic couple-friendly activities.' : ''}
 
-${specificCity ? `IMPORTANT: All 3 suggestions must be about ${specificCity}. Provide different aspects, neighborhoods, or themes of ${specificCity}, but the destination field must always be ${specificCity}.` : 'Make sure the suggestions are diverse — different vibes, locations and experiences.'}
-`}
-
-Speak like a local travel buddy, not a formal guide.
-
-Return ONLY a JSON object with this exact structure:
-{
-  "suggestions": [
-    {
-      "destination": "string",
-      "country": "string",
-      "description": "string",
-      "bestTimeToVisit": "string",
-      "estimatedBudget": {"low": number, "high": number},
-      "highlights": ["string", "string", "string"],
-      "travelStyle": ["string", "string"],
-      "duration": "string"${isMultiCity ? `,
-      "destinationBreakdown": [
-        {
-          "destination": "string",
-          "country": "string",
-          "description": "string",
-          "highlights": ["string", "string", "string"],
-          "duration": "string",
-          "dateRange": "string"
-        }
-      ],
-      "transportation": [
-        {
-          "from": "string",
-          "to": "string",
-          "recommendations": ["string", "string"],
-          "estimatedCost": "string",
-          "estimatedTime": "string"
-        }
-      ]` : ''}
-    }
-  ]
-}`;
+Make each suggestion exciting, personalized, and diverse in theme/style.`;
 
     console.log('🚀 Sending prompt to OpenAI (multi-city:', isMultiCity, ')');
     if (isMultiCity) {
       console.log('📍 Multi-city destinations:', preferences.destinations);
     }
 
+    // Build strict system message for multi-city trips
+    const systemMessage = isMultiCity 
+      ? `You are GlobeMate, a smart and friendly travel planner. 
+
+MANDATORY RULES FOR THIS MULTI-CITY TRIP:
+1. The user selected ${preferences.destinations!.length} destinations: ${preferences.destinations!.map(d => `${d.city || ''} ${d.country}`.trim()).join(' → ')}
+2. You MUST create suggestions that cover ALL ${preferences.destinations!.length} destinations
+3. EVERY suggestion must include a "destinationBreakdown" array with EXACTLY ${preferences.destinations!.length} objects (one per destination)
+4. EVERY suggestion must include a "transportation" array with EXACTLY ${preferences.destinations!.length - 1} objects (between consecutive destinations)
+5. The "destination" field should be a creative name for the full multi-city journey (not just the first city)
+6. DO NOT create suggestions for only one destination - cover all ${preferences.destinations!.length} cities
+
+REQUIRED JSON STRUCTURE FOR MULTI-CITY:
+{
+  "suggestions": [
+    {
+      "destination": "Creative multi-city journey name",
+      "country": "Primary starting country",
+      "description": "2-3 sentence overview of full journey",
+      "bestTimeToVisit": "Best season",
+      "estimatedBudget": {"low": number, "high": number},
+      "highlights": ["Highlight from destination 1", "Highlight from destination 2", "Highlight from destination 3"],
+      "travelStyle": ["style1", "style2"],
+      "duration": "Total trip duration",
+      "destinationBreakdown": [
+        {
+          "destination": "City 1 name",
+          "country": "Country 1",
+          "description": "What makes this city special",
+          "highlights": ["Activity 1", "Activity 2", "Activity 3"],
+          "duration": "Days in this city",
+          "dateRange": "Date range for this city"
+        },
+        // ... EXACTLY ${preferences.destinations!.length} objects total
+      ],
+      "transportation": [
+        {
+          "from": "City 1",
+          "to": "City 2",
+          "recommendations": ["Option 1 with cost/time", "Option 2 with cost/time"],
+          "estimatedCost": "Cost range",
+          "estimatedTime": "Time range"
+        },
+        // ... EXACTLY ${preferences.destinations!.length - 1} objects total
+      ]
+    }
+  ]
+}
+
+${preferences.language === 'he' ? 'LANGUAGE: Respond in Hebrew - all text fields must be in Hebrew.' : 'LANGUAGE: Respond in English'}
+
+Return ONLY valid JSON with NO extra text. Be authentic and inspiring.`
+      : `You are GlobeMate, a smart and friendly travel planner for Gen Z and solo travelers exploring the world. Provide exciting, personalized trip suggestions in JSON format. Be authentic, inspiring, and speak like a travel buddy, not a formal guide.${preferences.language === 'he' ? ' Respond in Hebrew - all descriptions, highlights, and text must be in Hebrew.' : ''}`;
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: `You are GlobeMate, a smart and friendly travel planner for Gen Z and solo travelers exploring the world. Provide exciting, personalized trip suggestions in JSON format. Be authentic, inspiring, and speak like a travel buddy, not a formal guide.${preferences.language === 'he' ? ' Respond in Hebrew - all descriptions, highlights, and text must be in Hebrew.' : ''}`
+          content: systemMessage
         },
         {
           role: "user",
