@@ -983,6 +983,7 @@
     "days_max": "Maximum 30 days per destination",
     "start_date_required": "Start date is required",
     "end_date_required": "End date is required",
+    "end_date_must_be_after_start": "End date must be after start date",
     "select_start_date": "Select start date",
     "select_end_date": "Select end date",
     "total_trip_duration": "Total Trip Duration",

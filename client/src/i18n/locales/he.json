@@ -1300,6 +1300,7 @@
     "days_max": "מקסימום 30 ימים ליעד",
     "start_date_required": "יש לבחור תאריך התחלה",
     "end_date_required": "יש לבחור תאריך סיום",
+    "end_date_must_be_after_start": "תאריך הסיום חייב להיות אחרי תאריך ההתחלה",
     "select_start_date": "בחר תאריך התחלה",
     "select_end_date": "בחר תאריך סיום",
     "total_trip_duration": "סה\"כ משך הטיול",

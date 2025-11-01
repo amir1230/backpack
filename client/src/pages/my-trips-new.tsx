@@ -76,8 +76,11 @@ const createTripFormSchema = (t: any) => z.object({
   destinations: z.array(z.object({
     country: z.string().min(1, t('trips.select_destination')),
     city: z.string().optional(),
-    startDate: z.date({required_error: t('trips.start_date_required')}).optional(),
-    endDate: z.date({required_error: t('trips.end_date_required')}).optional(),
+    startDate: z.date({required_error: t('trips.start_date_required')}),
+    endDate: z.date({required_error: t('trips.end_date_required')}),
+  }).refine((data) => data.endDate > data.startDate, {
+    message: t('trips.end_date_must_be_after_start'),
+    path: ['endDate'],
   })).min(1, t('trips.select_at_least_one_destination')),
   travelStyle: z.array(z.string()).optional(), // Keep for backward compatibility but optional
   budget: z.number().min(100, t('trips.budget_required')),
@@ -89,8 +92,8 @@ const createTripFormSchema = (t: any) => z.object({
 type Destination = {
   country: string;
   city?: string;
-  startDate?: Date;
-  endDate?: Date;
+  startDate: Date;
+  endDate: Date;
 };
 
 type TripFormData = {
