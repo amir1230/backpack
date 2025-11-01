@@ -2170,7 +2170,7 @@ export default function MyTripsNew() {
                               <div key={idx} className="bg-blue-50 p-4 rounded-lg space-y-2" dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
                                 <div>
                                   <h5 className="font-bold text-blue-900" dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
-                                    {translateCity(transport.from)} → {translateCity(transport.to)}
+                                    {translateCity(transport.from)} {i18n.language === 'he' ? '←' : '→'} {translateCity(transport.to)}
                                   </h5>
                                   <div className="space-y-1 mt-2">
                                     {transport.estimatedCost && (
