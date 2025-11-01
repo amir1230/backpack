@@ -800,6 +800,7 @@ export default function MyTripsNew() {
           method: 'POST',
           body: JSON.stringify({
             destination: data.destination,
+            destinations: data.destinations, // CRITICAL: Send multi-city destinations
             travelStyle: data.travelStyle,
             budget: data.budget,
             duration: data.duration,
