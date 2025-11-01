@@ -2136,7 +2136,7 @@ export default function MyTripsNew() {
                             </div>
                             {suggestion.destinationBreakdown.map((dest, idx) => (
                               <div key={idx} className="bg-purple-50 p-4 rounded-lg space-y-2">
-                                <div className={i18n.language === 'he' ? 'text-right' : 'text-left'}>
+                                <div className={i18n.language === 'he' ? 'text-right' : 'text-left'} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
                                   <h5 className="font-bold text-purple-900">
                                     {translateCity(dest.destination)}, {translateCountry(dest.country)}
                                   </h5>
