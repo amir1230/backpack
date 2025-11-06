@@ -32,9 +32,7 @@ import {
   Calendar as CalendarIcon,
   Loader2
 } from "lucide-react";
-
-// Currency conversion rate (USD to ILS)
-const USD_TO_ILS = 3.7;
+import { formatCurrency } from '@/utils/currency';
 
 interface ItineraryDay {
   day: number;
@@ -76,6 +74,7 @@ export default function ItineraryDetail() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
 
   // State
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -396,7 +395,7 @@ export default function ItineraryDetail() {
   // Authentication check
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center" dir={isRTL ? 'rtl' : 'ltr'}>
         <Card className="w-96">
           <CardHeader>
             <CardTitle className="text-center">{t("itinerary.authentication_required")}</CardTitle>
@@ -417,7 +416,7 @@ export default function ItineraryDetail() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className="text-center">
           <Loader2 className="w-8 h-8 mx-auto mb-4 animate-spin text-primary" />
           <p>{t("itinerary.loading_itinerary")}</p>
@@ -429,7 +428,7 @@ export default function ItineraryDetail() {
   // Error state
   if (error || !itinerary) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center" dir={isRTL ? 'rtl' : 'ltr'}>
         <Card className="w-96">
           <CardHeader>
             <CardTitle className="text-center text-red-600">{t("common.error")}</CardTitle>
@@ -448,7 +447,7 @@ export default function ItineraryDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Print Styles */}
       <style dangerouslySetInnerHTML={{
         __html: `
@@ -594,9 +593,7 @@ export default function ItineraryDetail() {
                       <div className="font-medium">{t("trips.day_number", { day: day.day })}</div>
                       <div className="text-sm opacity-80">{day.location}</div>
                       <div className="text-xs opacity-60 mt-1">
-                        {day.activities.length} {t("itinerary.activities")} • {i18n.language === 'he' 
-                          ? `₪${Math.round(day.estimatedCost * USD_TO_ILS).toLocaleString('he-IL')}` 
-                          : `$${day.estimatedCost}`}
+                        {day.activities.length} {t("itinerary.activities")} • {formatCurrency(day.estimatedCost, i18n.language as 'en' | 'he')}
                       </div>
                     </button>
                   ))}
@@ -622,9 +619,7 @@ export default function ItineraryDetail() {
                             </CardTitle>
                             <CardDescription className="flex items-center mt-2">
                               <DollarSign className="w-4 h-4 mr-1" />
-                              {t("trips.estimated_cost")}: {i18n.language === 'he' 
-                                ? `₪${Math.round(day.estimatedCost * USD_TO_ILS).toLocaleString('he-IL')}` 
-                                : `$${day.estimatedCost}`}
+                              {t("trips.estimated_cost")}: {formatCurrency(day.estimatedCost, i18n.language as 'en' | 'he')}
                             </CardDescription>
                           </div>
                           <Button 

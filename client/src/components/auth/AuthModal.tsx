@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from '../ui/button.js';
 import { useAuth } from '../../context/AuthContext.js';
 import { useToast } from '../../hooks/use-toast.js';
+import { useTranslation } from 'react-i18next';
 import { withTimeout } from '../../utils/withTimeout.js';
 import { Loader2 } from 'lucide-react';
 
@@ -14,8 +15,11 @@ interface AuthModalProps {
 export function AuthModal({ open, onOpenChange }: AuthModalProps) {
   const { signInWithGoogle, signInAsTestUser, isLoading } = useAuth();
   const { toast } = useToast();
+  const { t, i18n } = useTranslation();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isSigningInAsTest, setIsSigningInAsTest] = useState(false);
+  
+  const isHebrew = i18n.language.startsWith('he');
 
   const handleGoogleSignIn = async () => {
     if (isSigningIn) return;
@@ -23,7 +27,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
     try {
       setIsSigningIn(true);
       
-      // הוספת timeout למניעת "תקיעות"
+      // Add timeout to prevent hanging
       await withTimeout(signInWithGoogle(), 10000);
       
       // Modal will close automatically after successful auth
@@ -32,8 +36,8 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
       
       if (error.message === 'timeout') {
         toast({
-          title: "התחברות נתקעה",
-          description: "נראה שנתקע, נסה שוב",
+          title: isHebrew ? "התחברות נתקעה" : "Sign In Stuck",
+          description: isHebrew ? "נראה שנתקע, נסה שוב" : "It seems stuck, please try again",
           variant: "destructive",
         });
       }
@@ -58,13 +62,15 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" dir="rtl">
+      <DialogContent className="sm:max-w-md" dir={isHebrew ? 'rtl' : 'ltr'}>
         <DialogHeader className="text-center">
           <DialogTitle className="text-2xl font-bold">
-            ברוך הבא ל-GlobeMate
+            {isHebrew ? 'ברוך הבא ל-GlobeMate' : 'Welcome to GlobeMate'}
           </DialogTitle>
           <DialogDescription className="text-center">
-            התחבר כדי לתכנן את המסע הבא שלך ברחבי העולם
+            {isHebrew 
+              ? 'התחבר כדי לתכנן את המסע הבא שלך ברחבי העולם'
+              : 'Sign in to plan your next journey around the world'}
           </DialogDescription>
         </DialogHeader>
         
@@ -77,12 +83,12 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
           >
             {isSigningIn ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                מתחבר...
+                <Loader2 className={`${isHebrew ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} />
+                {isHebrew ? 'מתחבר...' : 'Signing in...'}
               </>
             ) : (
               <>
-                <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                <svg className={`${isHebrew ? 'ml-2' : 'mr-2'} h-4 w-4`} viewBox="0 0 24 24">
                   <path
                     fill="currentColor"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -100,7 +106,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                התחבר עם Google
+                {isHebrew ? 'התחבר עם Google' : 'Sign in with Google'}
               </>
             )}
           </Button>
@@ -111,7 +117,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-background px-2 text-muted-foreground">
-                או
+                {isHebrew ? 'או' : 'OR'}
               </span>
             </div>
           </div>
@@ -126,16 +132,18 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
           >
             {isSigningInAsTest ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                מתחבר כמשתמש בדיקה...
+                <Loader2 className={`${isHebrew ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} />
+                {isHebrew ? 'מתחבר כמשתמש בדיקה...' : 'Signing in as test user...'}
               </>
             ) : (
-              '🧪 התחבר כמשתמש בדיקה (Test User)'
+              isHebrew ? '🧪 התחבר כמשתמש בדיקה (Test User)' : '🧪 Sign in as Test User'
             )}
           </Button>
           
           <p className="text-sm text-muted-foreground text-center">
-            על ידי התחברות, אתה מסכים לתנאי השימוש ולמדיניות הפרטיות שלנו
+            {isHebrew 
+              ? 'על ידי התחברות, אתה מסכים לתנאי השימוש ולמדיניות הפרטיות שלנו'
+              : 'By signing in, you agree to our Terms of Service and Privacy Policy'}
           </p>
         </div>
       </DialogContent>

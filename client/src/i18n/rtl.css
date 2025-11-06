@@ -28,27 +28,22 @@
   text-align: end;
 }
 
-/* Navigation adjustments for RTL */
-[dir="rtl"] .fixed.right-0 {
-  right: auto;
-  left: 0;
+/* ========================================
+   SIDEBAR AND LAYOUT POSITIONING
+   ======================================== */
+
+/* Navigation adjustments - Sidebar positioning is now handled in components */
+/* LTR: Sidebar on LEFT, content has padding-left */
+/* RTL: Sidebar on RIGHT, content has padding-right */
+/* This is now controlled via conditional classes in the components */
+
+/* Ensure content doesn't overlap with sidebar */
+[dir="ltr"] main {
+  /* Padding is controlled by conditional class in App.tsx */
 }
 
-[dir="rtl"] .md\\:pr-64 {
-  padding-right: 0;
-  padding-left: 16rem; /* 64 * 0.25rem */
-}
-
-/* Ensure sidebar moves to left in RTL */
-[dir="rtl"] aside.fixed.right-0 {
-  right: auto;
-  left: 0;
-}
-
-/* Adjust main content padding for RTL sidebar */
-[dir="rtl"] main.md\\:pr-64 {
-  padding-right: 0;
-  padding-left: 16rem;
+[dir="rtl"] main {
+  /* Padding is controlled by conditional class in App.tsx */
 }
 
 /* Enhanced text alignment for RTL */
@@ -224,9 +219,15 @@
   transform: rotate(180deg);
 }
 
-/* Shadow adjustments for RTL sidebar */
+/* Shadow adjustments for sidebars */
+/* RTL: Sidebar on right, shadow goes left */
 [dir="rtl"] .shadow-2xl {
   box-shadow: -25px 0 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* LTR: Sidebar on left, shadow goes right */
+[dir="ltr"] aside.shadow-2xl {
+  box-shadow: 25px 0 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 /* Form input adjustments */

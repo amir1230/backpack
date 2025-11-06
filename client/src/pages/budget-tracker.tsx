@@ -39,9 +39,7 @@ import {
   ShoppingBag,
   Trash2
 } from "lucide-react";
-
-// Currency conversion rate (USD to ILS)
-const USD_TO_ILS = 3.7;
+import { formatCurrency } from '@/utils/currency';
 
 // Note: expenseSchema moved inside component to access t() function
 
@@ -423,9 +421,7 @@ export default function BudgetTracker() {
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">{t('budget.total_spent')}</span>
                       <span className="text-lg font-semibold text-primary">
-                        {i18n.language === 'he' 
-                          ? `₪${Math.round(totalSpent * USD_TO_ILS).toLocaleString('he-IL')}` 
-                          : `$${totalSpent.toFixed(2)}`}
+                        {formatCurrency(totalSpent, i18n.language as 'en' | 'he', { decimals: 2 })}
                       </span>
                     </div>
                     {selectedTrip && budget > 0 && (
@@ -433,9 +429,7 @@ export default function BudgetTracker() {
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">{t('budget.budget')}</span>
                           <span className="text-lg font-semibold text-slate-700">
-                            {i18n.language === 'he' 
-                              ? `₪${Math.round(budget * USD_TO_ILS).toLocaleString('he-IL')}` 
-                              : `$${budget.toFixed(2)}`}
+                            {formatCurrency(budget, i18n.language as 'en' | 'he', { decimals: 2 })}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
@@ -443,9 +437,7 @@ export default function BudgetTracker() {
                           <span className={`text-lg font-semibold ${
                             budget - totalSpent >= 0 ? 'text-green-600' : 'text-red-600'
                           }`}>
-                            {i18n.language === 'he' 
-                              ? `₪${Math.round((budget - totalSpent) * USD_TO_ILS).toLocaleString('he-IL')}` 
-                              : `$${(budget - totalSpent).toFixed(2)}`}
+                            {formatCurrency(budget - totalSpent, i18n.language as 'en' | 'he', { decimals: 2 })}
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-3">
@@ -491,9 +483,7 @@ export default function BudgetTracker() {
                               <span className={`font-medium ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>{t(category.labelKey)}</span>
                             </div>
                             <span className="font-semibold">
-                              {i18n.language === 'he' 
-                                ? `₪${Math.round(category.total * USD_TO_ILS).toLocaleString('he-IL')}` 
-                                : `$${category.total.toFixed(2)}`}
+                              {formatCurrency(category.total, i18n.language as 'en' | 'he', { decimals: 2 })}
                             </span>
                           </div>
                           {category.total > 0 && (
@@ -546,9 +536,7 @@ export default function BudgetTracker() {
                             </div>
                             <div className="flex items-center gap-2">
                               <div className="font-semibold text-gray-800">
-                                {i18n.language === 'he' 
-                                  ? `₪${Math.round(parseFloat(expense.amount) * USD_TO_ILS).toLocaleString('he-IL')}` 
-                                  : `$${parseFloat(expense.amount).toFixed(2)}`}
+                                {formatCurrency(parseFloat(expense.amount), i18n.language as 'en' | 'he', { decimals: 2 })}
                               </div>
                               <Button
                                 variant="ghost"
@@ -622,9 +610,7 @@ export default function BudgetTracker() {
                         <div className={i18n.language === 'he' ? 'text-right' : ''}>
                           <p className="text-sm text-gray-600 font-bold">{t('budget.total_spent')}</p>
                           <p className="text-2xl font-bold">
-                            {i18n.language === 'he' 
-                              ? `₪${Math.round((analytics?.expenses?.total || 0) * USD_TO_ILS).toLocaleString('he-IL')}` 
-                              : `$${analytics?.expenses?.total?.toFixed(2) || '0.00'}`}
+                            {formatCurrency(analytics?.expenses?.total || 0, i18n.language as 'en' | 'he', { decimals: 2 })}
                           </p>
                         </div>
                         <DollarSign className="w-8 h-8 text-orange-500" />
@@ -638,9 +624,7 @@ export default function BudgetTracker() {
                         <div className={i18n.language === 'he' ? 'text-right' : ''}>
                           <p className="text-sm text-gray-600 font-bold">{t('budget.avg_per_trip')}</p>
                           <p className="text-2xl font-bold">
-                            {i18n.language === 'he' 
-                              ? `₪${Math.round((analytics?.expenses?.avgPerTrip || 0) * USD_TO_ILS).toLocaleString('he-IL')}` 
-                              : `$${analytics?.expenses?.avgPerTrip?.toFixed(2) || '0.00'}`}
+                            {formatCurrency(analytics?.expenses?.avgPerTrip || 0, i18n.language as 'en' | 'he', { decimals: 2 })}
                           </p>
                         </div>
                         <BarChart3 className="w-8 h-8 text-purple-500" />
@@ -736,9 +720,7 @@ export default function BudgetTracker() {
                                   : `Most spending: ${t(categoryTotals[0]?.labelKey)}`}
                               </h4>
                               <p className="text-sm text-blue-700">
-                                {i18n.language === 'he' 
-                                  ? `₪${Math.round((categoryTotals[0]?.total || 0) * USD_TO_ILS).toLocaleString('he-IL')} (${((categoryTotals[0]?.total || 0) / totalSpent * 100).toFixed(1)}% מסך ההוצאות)`
-                                  : `$${categoryTotals[0]?.total?.toFixed(2)} (${((categoryTotals[0]?.total || 0) / totalSpent * 100).toFixed(1)}% of total)`}
+                                {formatCurrency(categoryTotals[0]?.total || 0, i18n.language as 'en' | 'he', { decimals: 2 })} ({((categoryTotals[0]?.total || 0) / totalSpent * 100).toFixed(1)}% {i18n.language === 'he' ? 'מסך ההוצאות' : 'of total'})
                               </p>
                             </div>
                           </div>

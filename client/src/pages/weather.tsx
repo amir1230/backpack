@@ -134,6 +134,7 @@ const getContinentSeasonalInfo = (continent: Continent, t: any) => {
 
 export default function WeatherPage() {
   const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
   const { getPlaceName } = useLocalizedPlaceNames();
   const [selectedContinent, setSelectedContinent] = useState<Continent | ''>('');
   const [selectedCountry, setSelectedCountry] = useState('');
@@ -192,7 +193,7 @@ export default function WeatherPage() {
   const SeasonIcon = seasonalInfo?.icon || Sun;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 p-4" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">

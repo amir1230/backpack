@@ -1,4 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { supabase } from "./supabase.js";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -6,12 +7,12 @@ async function throwIfResNotOk(res: Response) {
     try {
       const json = JSON.parse(text);
       // Extract message from various possible structures
-      const errorMessage = 
-        json.message || 
-        json.error?.message || 
-        json.error || 
-        (typeof json === 'string' ? json : text);
-      
+      const errorMessage =
+        json.message ||
+        json.error?.message ||
+        json.error ||
+        (typeof json === "string" ? json : text);
+
       throw new Error(errorMessage);
     } catch (e) {
       // If JSON parse fails, check if e is our thrown error
@@ -24,18 +25,37 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE || '';
+const API_BASE = import.meta.env.VITE_API_BASE || "";
+
+// Helper function to get auth headers
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      return {
+        Authorization: `Bearer ${session.access_token}`,
+      };
+    }
+  } catch (error) {
+    console.error("Error getting auth headers:", error);
+  }
+  return {};
+}
 
 export async function apiRequest(
   url: string,
   options: RequestInit = {}
 ): Promise<Response> {
+  const authHeaders = await getAuthHeaders();
   const res = await fetch(`${API_BASE}${url}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
       "Cache-Control": "no-cache",
-      "Pragma": "no-cache",
+      Pragma: "no-cache",
+      ...authHeaders,
       ...options.headers,
     },
     credentials: "include",
@@ -44,11 +64,13 @@ export async function apiRequest(
 
   // If unauthorized, allow in demo mode
   if (res.status === 401) {
-    console.log("Unauthorized request detected, but allowing access in demo mode");
+    console.log(
+      "Unauthorized request detected, but allowing access in demo mode"
+    );
     // Create a mock success response for demo mode
     return new Response(JSON.stringify({ message: "Demo mode" }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" },
     });
   }
 
@@ -56,7 +78,7 @@ export async function apiRequest(
     console.warn("Endpoint not found, returning empty demo response:", url);
     return new Response(JSON.stringify({ items: [], total: 0 }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" },
     });
   }
 
@@ -72,16 +94,20 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     // Build URL from query key - handle both simple strings and arrays with params
     let url = queryKey[0] as string;
-    if (queryKey.length > 1 && queryKey[1] !== null && queryKey[1] !== undefined) {
+    if (
+      queryKey.length > 1 &&
+      queryKey[1] !== null &&
+      queryKey[1] !== undefined
+    ) {
       const param = queryKey[1];
       // If it's an object (filters), convert to query params
-      if (typeof param === 'object' && !Array.isArray(param)) {
+      if (typeof param === "object" && !Array.isArray(param)) {
         const queryParams = new URLSearchParams();
         Object.entries(param).forEach(([key, value]) => {
-          if (value !== null && value !== undefined && value !== '') {
+          if (value !== null && value !== undefined && value !== "") {
             if (Array.isArray(value)) {
               if (value.length > 0) {
-                queryParams.append(key, value.join(','));
+                queryParams.append(key, value.join(","));
               }
             } else {
               queryParams.append(key, String(value));
@@ -97,14 +123,16 @@ export const getQueryFn: <T>(options: {
         url = `${url}/${param}`;
       }
     }
-    
+
+    const authHeaders = await getAuthHeaders();
     const res = await fetch(`${API_BASE}${url}`, {
       credentials: "include",
       cache: "no-cache",
       headers: {
         "Cache-Control": "no-cache",
-        "Pragma": "no-cache"
-      }
+        Pragma: "no-cache",
+        ...authHeaders,
+      },
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
@@ -115,20 +143,28 @@ export const getQueryFn: <T>(options: {
     if (res.status === 401) {
       console.log("Unauthorized request in demo mode, returning empty array");
       // Return empty array for different endpoint types
-      if (queryKey[0]?.toString().includes('/trips/user')) {
+      if (queryKey[0]?.toString().includes("/trips/user")) {
         return [];
       }
-      if (queryKey[0]?.toString().includes('/expenses')) {
+      if (queryKey[0]?.toString().includes("/expenses")) {
         return [];
       }
-      if (queryKey[0]?.toString().includes('/analytics')) {
-        return { totalSpent: 0, categories: [], recentExpenses: [], monthlyData: [] };
+      if (queryKey[0]?.toString().includes("/analytics")) {
+        return {
+          totalSpent: 0,
+          categories: [],
+          recentExpenses: [],
+          monthlyData: [],
+        };
       }
       return [];
     }
 
     if (res.status === 404) {
-      console.warn("Endpoint not found in queryFn, returning empty array:", queryKey[0]);
+      console.warn(
+        "Endpoint not found in queryFn, returning empty array:",
+        queryKey[0]
+      );
       return { items: [], total: 0 };
     }
 

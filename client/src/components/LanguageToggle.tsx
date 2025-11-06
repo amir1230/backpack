@@ -10,21 +10,35 @@ export function LanguageToggle() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    // Normalize language to handle cases like 'en-US', 'he-IL'
+    const normalizedLang = i18n.language.startsWith('he') ? 'he' : 'en';
+    
     // Set HTML dir attribute based on language
-    document.documentElement.dir = i18n.language === 'he' ? 'rtl' : 'ltr';
-    document.documentElement.lang = i18n.language;
+    document.documentElement.dir = normalizedLang === 'he' ? 'rtl' : 'ltr';
+    document.documentElement.lang = normalizedLang;
     
     // Update page titles to be localized
     if (document.title.includes('GlobeMate')) {
       const baseName = 'GlobeMate';
-      document.title = i18n.language === 'he' ? `${baseName} - מתכנן הטיולים` : `${baseName} - Travel Planner`;
+      document.title = normalizedLang === 'he' ? `${baseName} - מתכנן הטיולים` : `${baseName} - Travel Planner`;
     }
   }, [i18n.language]);
 
   const toggleLanguage = async () => {
-    const newLang = i18n.language === 'en' ? 'he' : 'en';
+    // Normalize current language - handle cases like 'en-US', 'en-GB', etc.
+    const currentLang = i18n.language.startsWith('he') ? 'he' : 'en';
+    const newLang = currentLang === 'en' ? 'he' : 'en';
+    
+    console.log(`Toggling language from ${currentLang} to ${newLang}`);
     
     await i18n.changeLanguage(newLang);
+    
+    // Explicitly save to localStorage to ensure persistence
+    localStorage.setItem('i18nextLng', newLang);
+    
+    // Update document attributes immediately
+    document.documentElement.dir = newLang === 'he' ? 'rtl' : 'ltr';
+    document.documentElement.lang = newLang;
     
     // Enhanced query invalidation to cover all locale-dependent queries
     queryClient.invalidateQueries({
@@ -64,7 +78,7 @@ export function LanguageToggle() {
     >
       <Globe className="w-4 h-4" />
       <span className="text-sm font-medium">
-        {i18n.language === 'en' ? 'עב' : 'EN'}
+        {i18n.language.startsWith('he') ? 'EN' : 'עב'}
       </span>
     </Button>
   );

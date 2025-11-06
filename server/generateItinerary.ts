@@ -1,10 +1,16 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY
-});
+// Check if we have a valid OpenAI API key
+const hasValidOpenAIKey = process.env.OPENAI_API_KEY && 
+  process.env.OPENAI_API_KEY.startsWith('sk-') && 
+  !process.env.OPENAI_API_KEY.includes('placeholder') &&
+  process.env.OPENAI_API_KEY.length > 40;
 
-console.log('OpenAI API Key exists:', !!process.env.OPENAI_API_KEY);
+const openai = hasValidOpenAIKey 
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null;
+
+console.log('🔑 generateItinerary.ts - OpenAI Status:', hasValidOpenAIKey ? 'Valid API key' : 'No valid key - will use mock data');
 
 export interface ItineraryDay {
   day: number;
@@ -32,6 +38,23 @@ export async function generateItinerary(request: ItineraryRequest): Promise<Itin
   console.log('generateItinerary called with request:', request);
   
   const { destination, duration, interests, travelStyle, budget, language, adults = 2, children = 0, tripType = 'family', customRequest } = request;
+  
+  // If no valid OpenAI key, return mock itinerary
+  if (!openai || !hasValidOpenAIKey) {
+    console.log('⚠️ No valid OpenAI API key - returning mock itinerary');
+    const isHebrew = language === 'he';
+    return Array.from({ length: Math.min(duration, 7) }, (_, i) => ({
+      day: i + 1,
+      location: destination,
+      activities: isHebrew 
+        ? [`סיור באתרים מקומיים`, `חקור את מרכז העיר`, `נסה מטבח מקומי`]
+        : [`Visit local attractions`, `Explore the city center`, `Try local cuisine`],
+      estimatedCost: Math.round(budget / duration),
+      tips: isHebrew 
+        ? [`הבא נעליים נוחות להליכה`, `נסה את המנות המקומיות`]
+        : [`Bring comfortable walking shoes`, `Try the local specialties`]
+    }));
+  }
   
   // Validate inputs
   if (!destination) {

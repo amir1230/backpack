@@ -681,7 +681,6 @@ const PLACE_TRANSLATIONS: Record<string, string> = {
   'Mombasa': 'מומבסה',
   'Masai Mara': 'מסאי מארה',
   'Nakuru': 'נאקורו',
-  'Kisumu': 'קיסומו',
 
   // Common location types/words
   'Airport': 'נמל תעופה',

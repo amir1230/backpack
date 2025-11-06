@@ -2,29 +2,74 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage.js";
-import { MediaOrchestrator } from './integrations/media/mediaOrchestrator.js';
+import { MediaOrchestrator } from "./integrations/media/mediaOrchestrator.js";
 
 // Create MediaOrchestrator singleton for rate limiting persistence
 const mediaOrchestrator = new MediaOrchestrator(storage);
 import { config } from "./config.js";
 // Removed Replit OAuth - using Supabase Auth only
 
-// Simple middleware that doesn't check auth (client-side auth via Supabase)
-const noAuth = (req: any, res: any, next: any) => {
-  // In development, use a consistent dev user instead of anonymous
-  // This allows testing features that require user identity
-  const isDevelopment = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
-  const devUserId = 'dev-user-12345';
-  
-  req.user = { 
-    claims: { 
-      sub: isDevelopment ? devUserId : 'anonymous',
-      email: isDevelopment ? 'dev@globemate.test' : undefined,
-      name: isDevelopment ? 'Dev User' : undefined
-    },
-    id: isDevelopment ? devUserId : 'anonymous'
-  };
-  next();
+// Authentication middleware that verifies Supabase JWT tokens
+const noAuth = async (req: any, res: any, next: any) => {
+  try {
+    // Get the Authorization header
+    const authHeader = req.headers.authorization;
+
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      // Extract the token
+      const token = authHeader.substring(7);
+
+      try {
+        // Verify the token with Supabase
+        const {
+          data: { user },
+          error,
+        } = await supabaseAdmin.auth.getUser(token);
+
+        if (error || !user) {
+          console.error("Token verification failed:", error?.message);
+          // Fall through to anonymous user
+        } else {
+          // Set the authenticated user
+          req.user = {
+            claims: {
+              sub: user.id,
+              email: user.email,
+              name: user.user_metadata?.name || user.user_metadata?.full_name,
+            },
+            id: user.id,
+          };
+          return next();
+        }
+      } catch (tokenError) {
+        console.error("Error verifying token:", tokenError);
+        // Fall through to anonymous user
+      }
+    }
+
+    // No valid token - use development/anonymous user
+    const isDevelopment =
+      process.env.NODE_ENV === "development" || !process.env.NODE_ENV;
+    const devUserId = "dev-user-12345";
+
+    req.user = {
+      claims: {
+        sub: isDevelopment ? devUserId : "anonymous",
+        email: isDevelopment ? "dev@globemate.test" : undefined,
+        name: isDevelopment ? "Dev User" : undefined,
+      },
+      id: isDevelopment ? devUserId : "anonymous",
+    };
+    next();
+  } catch (error) {
+    console.error("Auth middleware error:", error);
+    // Continue with anonymous user on error
+    req.user = {
+      claims: { sub: "anonymous" },
+      id: "anonymous",
+    };
+    next();
+  }
 };
 import { db, pool } from "./db.js";
 import { googlePlaces } from "./googlePlaces.js";
@@ -33,8 +78,8 @@ import { weatherService } from "./weatherService.js";
 import { travelTimingService } from "./travelTimingService.js";
 import { eq, sql, asc, and } from "drizzle-orm";
 import { registerCollectorRoutes } from "./collectorRoutes.js";
-import type { Request, Response, Router } from 'express';
-import { supabaseAdmin } from './supabase.js';
+import type { Request, Response, Router } from "express";
+import { supabaseAdmin } from "./supabase.js";
 // import { rewardsService } from './rewardsService.js'; // Temporarily commented out due to compilation issues
 // Temporarily commenting out schema imports until we fix the shared module
 // import {
@@ -50,7 +95,15 @@ import { supabaseAdmin } from './supabase.js';
 //   insertTravelBuddyApplicationSchema,
 //   insertLocationReviewSchema,
 // } from "@shared/schema";
-import { insertJourneySchema, insertSavedJourneySchema, hotelInquiries, destinations as destinationsTable, attractions, attractionsI18n, locationPhotos } from "@shared/schema";
+import {
+  insertJourneySchema,
+  insertSavedJourneySchema,
+  hotelInquiries,
+  destinations as destinationsTable,
+  attractions,
+  attractionsI18n,
+  locationPhotos,
+} from "@shared/schema";
 import {
   generateTravelSuggestions,
   generateItinerary,
@@ -59,7 +112,7 @@ import {
   chatAssistant,
   conversationalTripAssistant,
   generateConversationalSuggestions,
-  enrichSuggestionsWithRealPlaces
+  enrichSuggestionsWithRealPlaces,
 } from "./openai.js";
 import { generateItinerary as generateDetailedItinerary } from "./generateItinerary.js";
 
@@ -77,36 +130,40 @@ const userItineraries: Record<string, UserItineraryDay[]> = {};
 export async function registerRoutes(app: Express): Promise<void> {
   // Using Supabase Auth only - no server-side auth middleware needed
 
-  // Basic health endpoint  
-  app.get('/api/health', (_req, res) => res.json({ ok: true, time: new Date().toISOString() }));
+  // Basic health endpoint
+  app.get("/api/health", (_req, res) =>
+    res.json({ ok: true, time: new Date().toISOString() })
+  );
 
   // Database test endpoint
   // Import admin middleware
-  const { requireAdmin, createDevAdminSession } = await import('./lib/adminAuth.js');
-  const { I18nService } = await import('./lib/i18nService.js');
+  const { requireAdmin, createDevAdminSession } = await import(
+    "./lib/adminAuth.js"
+  );
+  const { I18nService } = await import("./lib/i18nService.js");
 
   // Development-only route to create admin session for testing
-  if (process.env.NODE_ENV !== 'production') {
-    app.post('/api/dev/create-admin-session', (req, res) => {
+  if (process.env.NODE_ENV !== "production") {
+    app.post("/api/dev/create-admin-session", (req, res) => {
       try {
         createDevAdminSession(req, req.body.email);
-        res.json({ 
-          success: true, 
-          message: 'Admin session created for development',
-          email: req.body.email || 'admin@globemate.com'
+        res.json({
+          success: true,
+          message: "Admin session created for development",
+          email: req.body.email || "admin@globemate.com",
         });
       } catch (error) {
-        res.status(500).json({ error: 'Failed to create admin session' });
+        res.status(500).json({ error: "Failed to create admin session" });
       }
     });
 
     // Create test user with auto-confirmed email
-    app.post('/api/dev/create-test-user', async (req, res) => {
+    app.post("/api/dev/create-test-user", async (req, res) => {
       try {
         const { email, password } = req.body;
-        
+
         if (!email || !password) {
-          return res.status(400).json({ error: 'Email and password required' });
+          return res.status(400).json({ error: "Email and password required" });
         }
 
         // Use Supabase Admin API to create user with confirmed email
@@ -115,237 +172,320 @@ export async function registerRoutes(app: Express): Promise<void> {
           password,
           email_confirm: true, // Auto-confirm email
           user_metadata: {
-            name: 'Test User',
-            full_name: 'Test User'
-          }
+            name: "Test User",
+            full_name: "Test User",
+          },
         });
 
         if (error) {
           // If user already exists, that's ok
-          if (error.message.includes('already registered')) {
-            return res.json({ 
-              success: true, 
-              message: 'Test user already exists',
-              email
+          if (error.message.includes("already registered")) {
+            return res.json({
+              success: true,
+              message: "Test user already exists",
+              email,
             });
           }
           throw error;
         }
 
-        res.json({ 
-          success: true, 
-          message: 'Test user created successfully with confirmed email',
+        res.json({
+          success: true,
+          message: "Test user created successfully with confirmed email",
           email,
-          userId: data.user?.id
+          userId: data.user?.id,
         });
       } catch (error: any) {
-        console.error('Error creating test user:', error);
-        res.status(500).json({ error: error.message || 'Failed to create test user' });
+        console.error("Error creating test user:", error);
+        res
+          .status(500)
+          .json({ error: error.message || "Failed to create test user" });
       }
     });
   }
 
   // Admin translation routes
-  app.get('/api/admin/translations/:entityType', requireAdmin, async (req, res) => {
-    try {
-      const { entityType } = req.params;
-      const { locale = 'en', search } = req.query;
-      
-      if (!['destinations', 'accommodations', 'attractions', 'restaurants'].includes(entityType)) {
-        return res.status(400).json({ error: 'Invalid entity type' });
-      }
-      
-      const results = await I18nService.getEntitiesWithTranslations(
-        entityType as any, 
-        locale as any, 
-        search as string
-      );
-      
-      res.json({ success: true, data: results });
-    } catch (error) {
-      console.error('Error fetching admin translations:', error);
-      res.status(500).json({ error: 'Failed to fetch translations' });
-    }
-  });
+  app.get(
+    "/api/admin/translations/:entityType",
+    requireAdmin,
+    async (req, res) => {
+      try {
+        const { entityType } = req.params;
+        const { locale = "en", search } = req.query;
 
-  app.post('/api/admin/translations/:entityType/:entityId', requireAdmin, async (req, res) => {
-    try {
-      const { entityType, entityId } = req.params;
-      const { locale, name, description } = req.body;
-      
-      if (!['destinations', 'accommodations', 'attractions', 'restaurants'].includes(entityType)) {
-        return res.status(400).json({ error: 'Invalid entity type' });
-      }
-      
-      const result = await I18nService.saveTranslation(
-        entityType as any,
-        parseInt(entityId),
-        locale,
-        name,
-        description
-      );
-      
-      res.json({ success: true, data: result });
-    } catch (error) {
-      console.error('Error saving translation:', error);
-      res.status(500).json({ error: 'Failed to save translation' });
-    }
-  });
+        if (
+          ![
+            "destinations",
+            "accommodations",
+            "attractions",
+            "restaurants",
+          ].includes(entityType)
+        ) {
+          return res.status(400).json({ error: "Invalid entity type" });
+        }
 
-  app.delete('/api/admin/translations/:entityType/:entityId/:locale', requireAdmin, async (req, res) => {
-    try {
-      const { entityType, entityId, locale } = req.params;
-      
-      if (!['destinations', 'accommodations', 'attractions', 'restaurants'].includes(entityType)) {
-        return res.status(400).json({ error: 'Invalid entity type' });
-      }
-      
-      const result = await I18nService.deleteTranslation(
-        entityType as any,
-        parseInt(entityId),
-        locale as any
-      );
-      
-      res.json({ success: true, data: result });
-    } catch (error) {
-      console.error('Error deleting translation:', error);
-      res.status(500).json({ error: 'Failed to delete translation' });
-    }
-  });
+        const results = await I18nService.getEntitiesWithTranslations(
+          entityType as any,
+          locale as any,
+          search as string
+        );
 
-  app.get('/api/admin/translations/stats/:locale', requireAdmin, async (req, res) => {
-    try {
-      const { locale } = req.params;
-      const stats = await I18nService.getTranslationStats(locale as any);
-      res.json({ success: true, data: stats });
-    } catch (error) {
-      console.error('Error fetching translation stats:', error);
-      res.status(500).json({ error: 'Failed to fetch translation statistics' });
+        res.json({ success: true, data: results });
+      } catch (error) {
+        console.error("Error fetching admin translations:", error);
+        res.status(500).json({ error: "Failed to fetch translations" });
+      }
     }
-  });
+  );
+
+  app.post(
+    "/api/admin/translations/:entityType/:entityId",
+    requireAdmin,
+    async (req, res) => {
+      try {
+        const { entityType, entityId } = req.params;
+        const { locale, name, description } = req.body;
+
+        if (
+          ![
+            "destinations",
+            "accommodations",
+            "attractions",
+            "restaurants",
+          ].includes(entityType)
+        ) {
+          return res.status(400).json({ error: "Invalid entity type" });
+        }
+
+        const result = await I18nService.saveTranslation(
+          entityType as any,
+          parseInt(entityId),
+          locale,
+          name,
+          description
+        );
+
+        res.json({ success: true, data: result });
+      } catch (error) {
+        console.error("Error saving translation:", error);
+        res.status(500).json({ error: "Failed to save translation" });
+      }
+    }
+  );
+
+  app.delete(
+    "/api/admin/translations/:entityType/:entityId/:locale",
+    requireAdmin,
+    async (req, res) => {
+      try {
+        const { entityType, entityId, locale } = req.params;
+
+        if (
+          ![
+            "destinations",
+            "accommodations",
+            "attractions",
+            "restaurants",
+          ].includes(entityType)
+        ) {
+          return res.status(400).json({ error: "Invalid entity type" });
+        }
+
+        const result = await I18nService.deleteTranslation(
+          entityType as any,
+          parseInt(entityId),
+          locale as any
+        );
+
+        res.json({ success: true, data: result });
+      } catch (error) {
+        console.error("Error deleting translation:", error);
+        res.status(500).json({ error: "Failed to delete translation" });
+      }
+    }
+  );
+
+  app.get(
+    "/api/admin/translations/stats/:locale",
+    requireAdmin,
+    async (req, res) => {
+      try {
+        const { locale } = req.params;
+        const stats = await I18nService.getTranslationStats(locale as any);
+        res.json({ success: true, data: stats });
+      } catch (error) {
+        console.error("Error fetching translation stats:", error);
+        res
+          .status(500)
+          .json({ error: "Failed to fetch translation statistics" });
+      }
+    }
+  );
 
   // Localized search endpoint
-  app.get('/api/search/localized', async (req, res) => {
+  app.get("/api/search/localized", async (req, res) => {
     try {
-      const { q: query, locale = 'en', types } = req.query;
-      
-      if (!query || typeof query !== 'string') {
-        return res.status(400).json({ error: 'Query parameter required' });
+      const { q: query, locale = "en", types } = req.query;
+
+      if (!query || typeof query !== "string") {
+        return res.status(400).json({ error: "Query parameter required" });
       }
-      
-      const entityTypes = types ? (types as string).split(',') : undefined;
+
+      const entityTypes = types ? (types as string).split(",") : undefined;
       const results = await I18nService.searchLocalized(
         query,
         locale as any,
         entityTypes as any
       );
-      
+
       res.json({ success: true, data: results });
     } catch (error) {
-      console.error('Error performing localized search:', error);
-      res.status(500).json({ error: 'Search failed' });
+      console.error("Error performing localized search:", error);
+      res.status(500).json({ error: "Search failed" });
     }
   });
 
   // Localized data endpoints for each entity type
-  app.get('/api/localized/destinations', async (req, res) => {
+  app.get("/api/localized/destinations", async (req, res) => {
     try {
-      const { locale = 'en', search, limit, offset, country, city, minRating } = req.query;
+      const {
+        locale = "en",
+        search,
+        limit,
+        offset,
+        country,
+        city,
+        minRating,
+      } = req.query;
       const results = await I18nService.getEntitiesWithTranslations(
-        'destinations',
+        "destinations",
         locale as any,
         search as string
       );
-      
+
       res.json({ success: true, data: results });
     } catch (error) {
-      console.error('Error fetching localized destinations:', error);
-      res.status(500).json({ error: 'Failed to fetch destinations' });
+      console.error("Error fetching localized destinations:", error);
+      res.status(500).json({ error: "Failed to fetch destinations" });
     }
   });
 
-  app.get('/api/localized/attractions', async (req, res) => {
+  app.get("/api/localized/attractions", async (req, res) => {
     try {
-      const { locale = 'en', search, limit, offset, country, city, minRating } = req.query;
+      const {
+        locale = "en",
+        search,
+        limit,
+        offset,
+        country,
+        city,
+        minRating,
+      } = req.query;
       const results = await I18nService.getEntitiesWithTranslations(
-        'attractions',
+        "attractions",
         locale as any,
         search as string
       );
-      
+
       res.json({ success: true, data: results });
     } catch (error) {
-      console.error('Error fetching localized attractions:', error);
-      res.status(500).json({ error: 'Failed to fetch attractions' });
+      console.error("Error fetching localized attractions:", error);
+      res.status(500).json({ error: "Failed to fetch attractions" });
     }
   });
 
-  app.get('/api/localized/restaurants', async (req, res) => {
+  app.get("/api/localized/restaurants", async (req, res) => {
     try {
-      const { locale = 'en', search, limit, offset, country, city, minRating } = req.query;
+      const {
+        locale = "en",
+        search,
+        limit,
+        offset,
+        country,
+        city,
+        minRating,
+      } = req.query;
       const results = await I18nService.getEntitiesWithTranslations(
-        'restaurants',
+        "restaurants",
         locale as any,
         search as string
       );
-      
+
       res.json({ success: true, data: results });
     } catch (error) {
-      console.error('Error fetching localized restaurants:', error);
-      res.status(500).json({ error: 'Failed to fetch restaurants' });
+      console.error("Error fetching localized restaurants:", error);
+      res.status(500).json({ error: "Failed to fetch restaurants" });
     }
   });
 
-  app.get('/api/localized/accommodations', async (req, res) => {
+  app.get("/api/localized/accommodations", async (req, res) => {
     try {
-      const { locale = 'en', search, limit, offset, country, city, minRating } = req.query;
+      const {
+        locale = "en",
+        search,
+        limit,
+        offset,
+        country,
+        city,
+        minRating,
+      } = req.query;
       const results = await I18nService.getEntitiesWithTranslations(
-        'accommodations',
+        "accommodations",
         locale as any,
         search as string
       );
-      
+
       res.json({ success: true, data: results });
     } catch (error) {
-      console.error('Error fetching localized accommodations:', error);
-      res.status(500).json({ error: 'Failed to fetch accommodations' });
+      console.error("Error fetching localized accommodations:", error);
+      res.status(500).json({ error: "Failed to fetch accommodations" });
     }
   });
 
   // Get individual localized entity by ID
-  app.get('/api/localized/:entityType/:entityId', async (req, res) => {
+  app.get("/api/localized/:entityType/:entityId", async (req, res) => {
     try {
       const { entityType, entityId } = req.params;
-      const { locale = 'en' } = req.query;
-      
-      if (!['destinations', 'accommodations', 'attractions', 'restaurants'].includes(entityType)) {
-        return res.status(400).json({ error: 'Invalid entity type' });
+      const { locale = "en" } = req.query;
+
+      if (
+        ![
+          "destinations",
+          "accommodations",
+          "attractions",
+          "restaurants",
+        ].includes(entityType)
+      ) {
+        return res.status(400).json({ error: "Invalid entity type" });
       }
-      
+
       const results = await I18nService.getEntitiesWithTranslations(
         entityType as any,
         locale as any,
         undefined
       );
-      
-      const entity = results.find(item => item.id === parseInt(entityId));
-      
+
+      const entity = results.find((item) => item.id === parseInt(entityId));
+
       if (!entity) {
-        return res.status(404).json({ error: 'Entity not found' });
+        return res.status(404).json({ error: "Entity not found" });
       }
-      
+
       res.json({ success: true, data: entity });
     } catch (error) {
-      console.error(`Error fetching localized ${req.params.entityType}:`, error);
-      res.status(500).json({ error: 'Failed to fetch entity' });
+      console.error(
+        `Error fetching localized ${req.params.entityType}:`,
+        error
+      );
+      res.status(500).json({ error: "Failed to fetch entity" });
     }
   });
 
   // Get attractions for a specific destination with translations
-  app.get('/api/destinations/:destinationId/attractions', async (req, res) => {
+  app.get("/api/destinations/:destinationId/attractions", async (req, res) => {
     try {
       const { destinationId } = req.params;
-      const { locale = 'en' } = req.query;
+      const { locale = "en" } = req.query;
 
       // Query attractions for this destination with translations and photos
       const attractionsQuery = await db
@@ -377,7 +517,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           locationPhotos,
           and(
             eq(locationPhotos.entityId, attractions.id),
-            eq(locationPhotos.entityType, 'attraction'),
+            eq(locationPhotos.entityType, "attraction"),
             eq(locationPhotos.isPrimary, true)
           )
         )
@@ -385,7 +525,7 @@ export async function registerRoutes(app: Express): Promise<void> {
         .orderBy(attractions.name);
 
       // Format the response to use translated fields
-      const formattedAttractions = attractionsQuery.map(attr => ({
+      const formattedAttractions = attractionsQuery.map((attr) => ({
         id: attr.id,
         destinationId: attr.destinationId,
         name: attr.translatedName || attr.name,
@@ -403,16 +543,16 @@ export async function registerRoutes(app: Express): Promise<void> {
 
       res.json({ success: true, data: formattedAttractions });
     } catch (error) {
-      console.error('Error fetching destination attractions:', error);
-      res.status(500).json({ error: 'Failed to fetch attractions' });
+      console.error("Error fetching destination attractions:", error);
+      res.status(500).json({ error: "Failed to fetch attractions" });
     }
   });
 
-  app.get('/api/test-db', async (_req, res) => {
+  app.get("/api/test-db", async (_req, res) => {
     try {
       const client = await pool.connect();
-      console.log('Database connected successfully');
-      
+      console.log("Database connected successfully");
+
       // Test if places table exists
       const tableCheck = await client.query(`
         SELECT EXISTS (
@@ -421,10 +561,10 @@ export async function registerRoutes(app: Express): Promise<void> {
           AND table_name = 'places'
         );
       `);
-      
+
       const placesTableExists = tableCheck.rows[0].exists;
-      console.log('Places table exists:', placesTableExists);
-      
+      console.log("Places table exists:", placesTableExists);
+
       if (!placesTableExists) {
         // Create places table
         await client.query(`
@@ -439,7 +579,7 @@ export async function registerRoutes(app: Express): Promise<void> {
             updated_at TIMESTAMP DEFAULT NOW()
           );
         `);
-        
+
         // Insert sample data
         await client.query(`
           INSERT INTO places (name, location, country, rating, description) VALUES
@@ -449,34 +589,35 @@ export async function registerRoutes(app: Express): Promise<void> {
           ('Angel Falls', 'Canaima National Park', 'Venezuela', 4.6, 'World''s highest uninterrupted waterfall'),
           ('Torres del Paine', 'Patagonia', 'Chile', 4.4, 'Dramatic granite peaks and pristine wilderness');
         `);
-        
-        console.log('Places table created and seeded with sample data');
+
+        console.log("Places table created and seeded with sample data");
       }
-      
+
       // Get count of places
-      const countResult = await client.query('SELECT COUNT(*) FROM places');
+      const countResult = await client.query("SELECT COUNT(*) FROM places");
       const count = countResult.rows[0].count;
-      
+
       client.release();
-      
-      res.json({ 
-        success: true, 
-        database: 'connected',
+
+      res.json({
+        success: true,
+        database: "connected",
         placesTableExists,
         placesCount: parseInt(count),
-        message: 'Database connection and places table verified'
+        message: "Database connection and places table verified",
       });
     } catch (error) {
-      console.error('Database test error:', error);
-      res.status(500).json({ 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Database connection failed' 
+      console.error("Database test error:", error);
+      res.status(500).json({
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Database connection failed",
       });
     }
   });
 
   // Create itinerary tables endpoint (development only)
-  app.post('/api/setup/create-itinerary-tables', async (_req, res) => {
+  app.post("/api/setup/create-itinerary-tables", async (_req, res) => {
     try {
       // Create tables using direct SQL through db client
       await pool.query(`
@@ -489,7 +630,7 @@ export async function registerRoutes(app: Express): Promise<void> {
             updated_at timestamp DEFAULT NOW()
         );
       `);
-      
+
       await pool.query(`
         CREATE TABLE IF NOT EXISTS itinerary_items (
             id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -505,39 +646,39 @@ export async function registerRoutes(app: Express): Promise<void> {
             created_at timestamp DEFAULT NOW()
         );
       `);
-      
-      res.json({ 
-        success: true, 
-        message: "Itinerary tables created successfully" 
+
+      res.json({
+        success: true,
+        message: "Itinerary tables created successfully",
       });
     } catch (error) {
-      console.error('Error creating itinerary tables:', error);
-      res.status(500).json({ 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to create tables' 
+      console.error("Error creating itinerary tables:", error);
+      res.status(500).json({
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Failed to create tables",
       });
     }
   });
 
-
   // --- Debug cookie endpoints (temporary for diagnosis) ---
-  app.get('/api/debug/set-cookie', (req, res) => {
-    res.cookie('bb_debug', 'ok', {
+  app.get("/api/debug/set-cookie", (req, res) => {
+    res.cookie("bb_debug", "ok", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'lax',
-      path: '/',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "lax" : "lax",
+      path: "/",
       maxAge: 1000 * 60 * 10,
     });
     res.json({ ok: true });
   });
 
-  app.get('/api/debug/echo-cookie', (req, res) => {
+  app.get("/api/debug/echo-cookie", (req, res) => {
     res.json({ cookiesSeen: req.headers.cookie || null });
   });
 
   // Auth routes - simplified (no server-side auth validation)
-  app.get('/api/auth/user', noAuth, async (req: any, res) => {
+  app.get("/api/auth/user", noAuth, async (req: any, res) => {
     try {
       // Handle localhost test user
       const userId = req.user.claims?.sub || req.user.id;
@@ -550,15 +691,15 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // User preferences endpoints
-  app.get('/api/user/preferences', noAuth, async (req: any, res) => {
+  app.get("/api/user/preferences", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const user = await storage.getUser(userId);
-      
+
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       res.json({
         interests: user.interests || [],
         travelStyles: user.travelStyles || [],
@@ -573,7 +714,7 @@ export async function registerRoutes(app: Express): Promise<void> {
         personalityTraits: user.personalityTraits || [],
         bio: user.bio,
         onboardingCompleted: user.onboardingCompleted || false,
-        registrationCompleted: user.registrationCompleted || false
+        registrationCompleted: user.registrationCompleted || false,
       });
     } catch (error) {
       console.error("Error fetching user preferences:", error);
@@ -581,25 +722,28 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/user/preferences', noAuth, async (req: any, res) => {
+  app.post("/api/user/preferences", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const preferences = req.body;
-      
+
       // Map travelStyle to travelStyles for database storage
       if (preferences.travelStyle) {
         preferences.travelStyles = preferences.travelStyle;
         delete preferences.travelStyle;
       }
-      
+
       // Mark onboarding as completed
       preferences.onboardingCompleted = true;
-      
-      const updatedUser = await storage.updateUserPreferences(userId, preferences);
-      
+
+      const updatedUser = await storage.updateUserPreferences(
+        userId,
+        preferences
+      );
+
       res.json({
         message: "Preferences updated successfully",
-        user: updatedUser
+        user: updatedUser,
       });
     } catch (error) {
       console.error("Error updating user preferences:", error);
@@ -608,19 +752,22 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Registry completion endpoint
-  app.post('/api/user/registry', noAuth, async (req: any, res) => {
+  app.post("/api/user/registry", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const registryData = req.body;
-      
+
       // Mark registration as completed
       registryData.registrationCompleted = true;
-      
-      const updatedUser = await storage.updateUserPreferences(userId, registryData);
-      
+
+      const updatedUser = await storage.updateUserPreferences(
+        userId,
+        registryData
+      );
+
       res.json({
         message: "Registration completed successfully",
-        user: updatedUser
+        user: updatedUser,
       });
     } catch (error) {
       console.error("Error completing registry:", error);
@@ -629,7 +776,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Trip routes
-  app.get('/api/trips', async (req, res) => {
+  app.get("/api/trips", async (req, res) => {
     try {
       const trips = await storage.getPublicTrips();
       res.json(trips);
@@ -639,14 +786,14 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get('/api/trips/user', noAuth, async (req: any, res) => {
+  app.get("/api/trips/user", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
-      
+
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
-      
+
       const trips = await storage.getUserTrips(userId);
       res.json(trips);
     } catch (error) {
@@ -655,65 +802,82 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/trips', noAuth, async (req: any, res) => {
+  app.post("/api/trips", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
-      
+
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
-      
+
       // Validate and normalize budget to ensure it's a number
       let budget = req.body.budget;
-      if (typeof budget === 'string') {
+      if (typeof budget === "string") {
         // Extract numeric value from formatted string
         const numbers = budget.match(/\d+/g);
-        budget = numbers && numbers.length > 0 ? parseFloat(numbers[numbers.length - 1]) : null;
-        console.warn('⚠️ Budget was a string, extracted numeric value:', budget);
-      } else if (typeof budget === 'number') {
+        budget =
+          numbers && numbers.length > 0
+            ? parseFloat(numbers[numbers.length - 1])
+            : null;
+        console.warn(
+          "⚠️ Budget was a string, extracted numeric value:",
+          budget
+        );
+      } else if (typeof budget === "number") {
         budget = budget;
       } else {
         budget = null;
       }
-      
+
       const tripData = { ...req.body, userId, budget };
-      
-      console.log('📝 Creating trip - User ID:', userId);
-      console.log('📝 Normalized budget:', budget, typeof budget);
-      
+
+      console.log("📝 Creating trip - User ID:", userId);
+      console.log("📝 Normalized budget:", budget, typeof budget);
+
       const trip = await storage.createTrip(tripData);
-      
-      console.log('✅ Trip created successfully:', trip.id);
+
+      console.log("✅ Trip created successfully:", trip.id);
       res.status(201).json(trip);
     } catch (error) {
       console.error("Error creating trip:", error);
-      res.status(400).json({ message: "Failed to create trip", error: error instanceof Error ? error.message : String(error) });
+      res
+        .status(400)
+        .json({
+          message: "Failed to create trip",
+          error: error instanceof Error ? error.message : String(error),
+        });
     }
   });
 
-  app.delete('/api/trips/:id', noAuth, async (req: any, res) => {
+  app.delete("/api/trips/:id", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const tripId = parseInt(req.params.id);
-      
+
       console.log(`🗑️ DELETE request - Trip ID: ${tripId}, User ID: ${userId}`);
       console.log(`🔍 Request user object:`, JSON.stringify(req.user, null, 2));
-      
+
       await storage.deleteTrip(tripId, userId);
-      
+
       console.log(`✅ Trip ${tripId} deleted successfully for user ${userId}`);
       res.json({ success: true, message: "Trip deleted successfully" });
     } catch (error) {
       console.error("❌ Error deleting trip:", error);
-      res.status(400).json({ success: false, message: "Failed to delete trip", error: String(error) });
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: "Failed to delete trip",
+          error: String(error),
+        });
     }
   });
 
   // Itinerary routes
-  app.get('/api/itineraries', noAuth, async (req: any, res) => {
+  app.get("/api/itineraries", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
-      if (!userId || userId === 'anonymous') {
+      if (!userId || userId === "anonymous") {
         return res.status(401).json({ message: "Authentication required" });
       }
       const itineraries = await storage.getUserItineraries(userId);
@@ -724,13 +888,15 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/itineraries', noAuth, async (req: any, res) => {
+  app.post("/api/itineraries", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
-      if (!userId || userId === 'anonymous') {
-        return res.status(401).json({ message: "Authentication required to save itinerary" });
+      if (!userId || userId === "anonymous") {
+        return res
+          .status(401)
+          .json({ message: "Authentication required to save itinerary" });
       }
-      
+
       const { title, plan_json } = req.body;
       if (!plan_json) {
         return res.status(400).json({ message: "Plan data is required" });
@@ -739,7 +905,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       const itineraryData = {
         userId,
         title: title || `Itinerary - ${new Date().toLocaleDateString()}`,
-        planJson: plan_json
+        planJson: plan_json,
       };
 
       const newItinerary = await storage.createItinerary(itineraryData);
@@ -750,13 +916,13 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.delete('/api/itineraries/:id', noAuth, async (req: any, res) => {
+  app.delete("/api/itineraries/:id", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
-      if (!userId || userId === 'anonymous') {
+      if (!userId || userId === "anonymous") {
         return res.status(401).json({ message: "Authentication required" });
       }
-      
+
       const itineraryId = req.params.id;
       await storage.deleteItinerary(itineraryId, userId);
       res.json({ message: "Itinerary deleted successfully" });
@@ -767,40 +933,59 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Translation endpoint for dynamic text translation
-  app.post('/api/translate', noAuth, async (req: any, res) => {
+  app.post("/api/translate", noAuth, async (req: any, res) => {
     try {
       const { text, targetLang } = req.body;
-      
+
       if (!text || !targetLang) {
-        return res.status(400).json({ message: "Text and targetLang are required" });
+        return res
+          .status(400)
+          .json({ message: "Text and targetLang are required" });
+      }
+
+      // Check if we have a valid OpenAI API key
+      const hasValidKey =
+        process.env.OPENAI_API_KEY &&
+        process.env.OPENAI_API_KEY.startsWith("sk-") &&
+        !process.env.OPENAI_API_KEY.includes("placeholder") &&
+        process.env.OPENAI_API_KEY.length > 40;
+
+      // If no valid OpenAI key, return original text (no translation available)
+      if (!hasValidKey) {
+        console.log(
+          "⚠️ No valid OpenAI API key - translation not available, returning original text"
+        );
+        return res.json({ translatedText: text });
       }
 
       // Use OpenAI to translate the text
-      const targetLanguage = targetLang === 'he' ? 'Hebrew' : 'English';
+      const targetLanguage = targetLang === "he" ? "Hebrew" : "English";
       const systemPrompt = `You are a professional translator. Translate the following text to ${targetLanguage}. Return ONLY the translated text without any additional explanation or commentary.`;
 
-      const OpenAI = (await import('openai')).default;
+      const OpenAI = (await import("openai")).default;
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: text }
+          { role: "user", content: text },
         ],
         temperature: 0.3,
       });
 
-      const translatedText = response.choices[0]?.message?.content?.trim() || text;
-      
+      const translatedText =
+        response.choices[0]?.message?.content?.trim() || text;
+
       res.json({ translatedText });
     } catch (error) {
       console.error("Translation error:", error);
-      res.status(500).json({ message: "Failed to translate text", translatedText: req.body.text });
+      // Return original text on error instead of failing
+      res.json({ translatedText: req.body.text });
     }
   });
 
-  app.get('/api/trips/:id', async (req, res) => {
+  app.get("/api/trips/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const trip = await storage.getTripById(id);
@@ -815,10 +1000,10 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Journey routes (multi-destination routes)
-  app.get('/api/journeys', async (req, res) => {
+  app.get("/api/journeys", async (req, res) => {
     try {
       const filters: any = {};
-      
+
       if (req.query.season) {
         filters.season = req.query.season as string;
       }
@@ -835,10 +1020,10 @@ export async function registerRoutes(app: Express): Promise<void> {
         filters.maxNights = parseInt(req.query.maxNights as string);
       }
       if (req.query.tags) {
-        filters.tags = (req.query.tags as string).split(',');
+        filters.tags = (req.query.tags as string).split(",");
       }
       if (req.query.audienceTags) {
-        filters.audienceTags = (req.query.audienceTags as string).split(',');
+        filters.audienceTags = (req.query.audienceTags as string).split(",");
       }
       if (req.query.limit) {
         filters.limit = parseInt(req.query.limit as string);
@@ -846,7 +1031,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       if (req.query.offset) {
         filters.offset = parseInt(req.query.offset as string);
       }
-      
+
       const journeys = await storage.getJourneys(filters);
       res.json(journeys);
     } catch (error) {
@@ -855,15 +1040,15 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get('/api/journeys/:id', async (req, res) => {
+  app.get("/api/journeys/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const journey = await storage.getJourneyById(id);
-      
+
       if (!journey) {
         return res.status(404).json({ message: "Journey not found" });
       }
-      
+
       res.json(journey);
     } catch (error) {
       console.error("Error fetching journey:", error);
@@ -871,22 +1056,27 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/journeys', async (req, res) => {
+  app.post("/api/journeys", async (req, res) => {
     try {
       const validatedData = insertJourneySchema.parse(req.body);
       const journey = await storage.createJourney(validatedData);
       res.status(201).json(journey);
     } catch (error) {
       console.error("Error creating journey:", error);
-      res.status(400).json({ message: "Failed to create journey", error: error instanceof Error ? error.message : "Unknown error" });
+      res
+        .status(400)
+        .json({
+          message: "Failed to create journey",
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
     }
   });
 
   // Saved Journeys routes
-  app.post('/api/saved-journeys', noAuth, async (req: any, res) => {
+  app.post("/api/saved-journeys", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
-      
+
       // Validate request body
       const validatedData = insertSavedJourneySchema.parse({
         userId,
@@ -895,29 +1085,41 @@ export async function registerRoutes(app: Express): Promise<void> {
       });
 
       // Check if already saved
-      const alreadySaved = await storage.isJourneySaved(userId, validatedData.journeyId);
+      const alreadySaved = await storage.isJourneySaved(
+        userId,
+        validatedData.journeyId
+      );
       if (alreadySaved) {
         return res.status(400).json({ message: "Journey already saved" });
       }
 
-      const savedJourney = await storage.saveJourney(userId, validatedData.journeyId, validatedData.notes);
+      const savedJourney = await storage.saveJourney(
+        userId,
+        validatedData.journeyId,
+        validatedData.notes
+      );
       res.status(201).json(savedJourney);
     } catch (error) {
-      if (error instanceof Error && error.name === 'ZodError') {
-        return res.status(400).json({ message: "Invalid request data", error: error.message });
+      if (error instanceof Error && error.name === "ZodError") {
+        return res
+          .status(400)
+          .json({ message: "Invalid request data", error: error.message });
       }
       console.error("Error saving journey:", error);
       res.status(500).json({ message: "Failed to save journey" });
     }
   });
 
-  app.get('/api/saved-journeys', noAuth, async (req: any, res) => {
+  app.get("/api/saved-journeys", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const savedJourneys = await storage.getUserSavedJourneys(userId);
-      console.log('📦 Saved Journeys API Response:', JSON.stringify(savedJourneys, null, 2));
+      console.log(
+        "📦 Saved Journeys API Response:",
+        JSON.stringify(savedJourneys, null, 2)
+      );
       if (savedJourneys.length > 0) {
-        console.log('📦 First Journey Object:', savedJourneys[0].journey);
+        console.log("📦 First Journey Object:", savedJourneys[0].journey);
       }
       res.json(savedJourneys);
     } catch (error) {
@@ -926,32 +1128,42 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get('/api/saved-journeys/check/:journeyId', noAuth, async (req: any, res) => {
-    try {
-      const userId = req.user.claims?.sub || req.user.id;
-      const journeyId = parseInt(req.params.journeyId);
-      
-      if (isNaN(journeyId)) {
-        return res.status(400).json({ message: "Invalid journeyId - must be a number" });
-      }
-      
-      const isSaved = await storage.isJourneySaved(userId, journeyId);
-      res.json({ isSaved });
-    } catch (error) {
-      console.error("Error checking saved journey:", error);
-      res.status(500).json({ message: "Failed to check if journey is saved" });
-    }
-  });
+  app.get(
+    "/api/saved-journeys/check/:journeyId",
+    noAuth,
+    async (req: any, res) => {
+      try {
+        const userId = req.user.claims?.sub || req.user.id;
+        const journeyId = parseInt(req.params.journeyId);
 
-  app.delete('/api/saved-journeys/:id', noAuth, async (req: any, res) => {
+        if (isNaN(journeyId)) {
+          return res
+            .status(400)
+            .json({ message: "Invalid journeyId - must be a number" });
+        }
+
+        const isSaved = await storage.isJourneySaved(userId, journeyId);
+        res.json({ isSaved });
+      } catch (error) {
+        console.error("Error checking saved journey:", error);
+        res
+          .status(500)
+          .json({ message: "Failed to check if journey is saved" });
+      }
+    }
+  );
+
+  app.delete("/api/saved-journeys/:id", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const id = parseInt(req.params.id);
-      
+
       if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid saved journey ID - must be a number" });
+        return res
+          .status(400)
+          .json({ message: "Invalid saved journey ID - must be a number" });
       }
-      
+
       await storage.removeSavedJourney(id, userId);
       res.json({ message: "Journey removed from saved list" });
     } catch (error) {
@@ -961,11 +1173,13 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Review routes
-  app.get('/api/reviews', async (req, res) => {
+  app.get("/api/reviews", async (req, res) => {
     try {
       const { destination } = req.query;
       if (destination) {
-        const reviews = await storage.getReviewsByDestination(destination as string);
+        const reviews = await storage.getReviewsByDestination(
+          destination as string
+        );
         res.json(reviews);
       } else {
         const reviews = await storage.getRecentReviews();
@@ -977,7 +1191,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/reviews', noAuth, async (req: any, res) => {
+  app.post("/api/reviews", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const reviewData = { ...req.body, userId };
@@ -990,7 +1204,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Expense routes
-  app.get('/api/expenses/trip/:tripId', noAuth, async (req, res) => {
+  app.get("/api/expenses/trip/:tripId", noAuth, async (req, res) => {
     try {
       const tripId = parseInt(req.params.tripId);
       const expenses = await storage.getTripExpenses(tripId);
@@ -1001,7 +1215,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get('/api/expenses/user', noAuth, async (req: any, res) => {
+  app.get("/api/expenses/user", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const expenses = await storage.getUserExpenses(userId);
@@ -1012,12 +1226,19 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/expenses', noAuth, async (req: any, res) => {
+  app.post("/api/expenses", noAuth, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub || 'anonymous';
+      const userId = req.user?.claims?.sub || "anonymous";
       const { tripId, category, amount, description, location } = req.body;
 
-      console.log("Received expense request:", { tripId, category, amount, description, location, userId });
+      console.log("Received expense request:", {
+        tripId,
+        category,
+        amount,
+        description,
+        location,
+        userId,
+      });
 
       // Validate required fields
       if (!tripId) {
@@ -1029,66 +1250,97 @@ export async function registerRoutes(app: Express): Promise<void> {
       if (!amount || parseFloat(amount) <= 0) {
         return res.status(400).json({ message: "אנא הזן סכום תקין" });
       }
-      if (!description || description.trim() === '') {
+      if (!description || description.trim() === "") {
         return res.status(400).json({ message: "אנא הזן תיאור" });
       }
 
       const parsedTripId = parseInt(tripId);
-      
+
       // Verify the trip exists and belongs to the user
       const trip = await storage.getTripById(parsedTripId);
       console.log("Found trip:", trip);
-      
+
       if (!trip) {
         return res.status(400).json({ message: "הטיול שנבחר לא נמצא במערכת" });
       }
-      
+
       // In demo mode, allow anonymous users to add expenses to anonymous trips
-      if (trip.userId !== userId && !(trip.userId === 'anonymous' && userId === 'anonymous')) {
-        return res.status(403).json({ message: "אין לך הרשאה להוסיף הוצאות לטיול זה" });
+      if (
+        trip.userId !== userId &&
+        !(trip.userId === "anonymous" && userId === "anonymous")
+      ) {
+        return res
+          .status(403)
+          .json({ message: "אין לך הרשאה להוסיף הוצאות לטיול זה" });
       }
 
-      const expenseData = { tripId: parsedTripId, category, amount, description, location, userId };
+      const expenseData = {
+        tripId: parsedTripId,
+        category,
+        amount,
+        description,
+        location,
+        userId,
+      };
       console.log("Creating expense with data:", expenseData);
-      
+
       const expense = await storage.createExpense(expenseData);
       res.status(201).json(expense);
     } catch (error: any) {
       console.error("Error creating expense:", error);
-      
+
       // Check for specific database errors
-      if (error.code === '23503') {
+      if (error.code === "23503") {
         return res.status(400).json({ message: "הטיול שנבחר לא קיים במערכת" });
       }
-      
-      res.status(400).json({ message: error.message || "שגיאה בהוספת הוצאה, אנא נסה שוב" });
+
+      res
+        .status(400)
+        .json({ message: error.message || "שגיאה בהוספת הוצאה, אנא נסה שוב" });
     }
   });
 
-  app.delete('/api/expenses/:id', noAuth, async (req: any, res) => {
+  app.delete("/api/expenses/:id", noAuth, async (req: any, res) => {
     try {
       const expenseId = parseInt(req.params.id);
-      
+
       if (isNaN(expenseId)) {
-        return res.status(400).json({ message: 'Invalid expense ID' });
+        return res.status(400).json({ message: "Invalid expense ID" });
       }
 
       await storage.deleteExpense(expenseId);
       res.json({ success: true });
     } catch (error: any) {
-      console.error('Error deleting expense:', error);
+      console.error("Error deleting expense:", error);
       res.status(500).json({ message: error.message });
     }
   });
 
   // Hotel Inquiries (hotel-deals page)
-  app.post('/api/hotel-inquiries', async (req, res) => {
+  app.post("/api/hotel-inquiries", async (req, res) => {
     try {
       console.log("Received hotel inquiry request:", req.body);
-      const { destination, checkIn, checkOut, adults, children, budget, phone, email, notes, whatsappConsent } = req.body;
-      
+      const {
+        destination,
+        checkIn,
+        checkOut,
+        adults,
+        children,
+        budget,
+        phone,
+        email,
+        notes,
+        whatsappConsent,
+      } = req.body;
+
       if (!destination || !checkIn || !checkOut || !phone || !email) {
-        console.error("Missing required fields:", { destination, checkIn, checkOut, phone, email });
+        console.error("Missing required fields:", {
+          destination,
+          checkIn,
+          checkOut,
+          phone,
+          email,
+        });
         return res.status(400).json({ message: "Missing required fields" });
       }
 
@@ -1102,27 +1354,30 @@ export async function registerRoutes(app: Express): Promise<void> {
         phone,
         email,
         notes,
-        whatsappConsent: whatsappConsent || false
+        whatsappConsent: whatsappConsent || false,
       });
 
-      const inquiry = await db.insert(hotelInquiries).values({
-        destination,
-        checkIn: new Date(checkIn),
-        checkOut: new Date(checkOut),
-        adults: adults || 2,
-        children: children || 0,
-        budget,
-        phone,
-        email,
-        notes,
-        whatsappConsent: whatsappConsent || false
-      }).returning();
+      const inquiry = await db
+        .insert(hotelInquiries)
+        .values({
+          destination,
+          checkIn: new Date(checkIn),
+          checkOut: new Date(checkOut),
+          adults: adults || 2,
+          children: children || 0,
+          budget,
+          phone,
+          email,
+          notes,
+          whatsappConsent: whatsappConsent || false,
+        })
+        .returning();
 
       console.log("Successfully created inquiry:", inquiry[0]);
 
       // Send email notification
       try {
-        const { sendHotelInquiryEmail } = await import('./email.js');
+        const { sendHotelInquiryEmail } = await import("./email.js");
         await sendHotelInquiryEmail({
           destination,
           checkIn,
@@ -1133,7 +1388,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           phone,
           email,
           notes,
-          whatsappConsent: whatsappConsent || false
+          whatsappConsent: whatsappConsent || false,
         });
         console.log("✅ Notification email sent to support@globemate.co.il");
       } catch (emailError) {
@@ -1144,16 +1399,19 @@ export async function registerRoutes(app: Express): Promise<void> {
       res.status(201).json({ success: true, inquiry: inquiry[0] });
     } catch (error) {
       console.error("Error creating hotel inquiry:", error);
-      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
-      res.status(500).json({ 
+      console.error(
+        "Error stack:",
+        error instanceof Error ? error.stack : "No stack trace"
+      );
+      res.status(500).json({
         message: "Failed to submit inquiry",
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   });
 
   // Chat routes
-  app.get('/api/chat/rooms', async (req, res) => {
+  app.get("/api/chat/rooms", async (req, res) => {
     try {
       const rooms = await storage.getChatRooms();
       res.json(rooms);
@@ -1164,7 +1422,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Alternative endpoint with dash for chat-rooms (used by frontend)
-  app.get('/api/chat-rooms', async (req, res) => {
+  app.get("/api/chat-rooms", async (req, res) => {
     try {
       const rooms = await storage.getChatRooms();
       res.json(rooms);
@@ -1174,7 +1432,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get('/api/chat/messages/:roomId', async (req, res) => {
+  app.get("/api/chat/messages/:roomId", async (req, res) => {
     try {
       const roomId = parseInt(req.params.roomId);
       const messages = await storage.getChatMessages(roomId);
@@ -1185,40 +1443,45 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/chat/messages', async (req, res) => {
+  app.post("/api/chat/messages", async (req, res) => {
     try {
-      const { room_id, message, author_name, message_type, attachments } = req.body;
-      
+      const { room_id, message, author_name, message_type, attachments } =
+        req.body;
+
       if (!room_id || (!message?.trim() && !attachments?.length)) {
-        return res.status(400).json({ message: "Room ID and message content or attachments are required" });
+        return res
+          .status(400)
+          .json({
+            message: "Room ID and message content or attachments are required",
+          });
       }
 
       const messageData = {
         roomId: parseInt(room_id),
-        message: message?.trim() || '',
-        authorName: author_name || 'Guest',
+        message: message?.trim() || "",
+        authorName: author_name || "Guest",
         userId: null, // Guest mode for now
-        messageType: message_type || 'text'
+        messageType: message_type || "text",
       };
 
       const newMessage = await storage.createChatMessage(messageData);
-      
+
       // If there are attachments, create them
       if (attachments && attachments.length > 0) {
         for (const attachment of attachments) {
           await storage.createChatAttachment({
-            path: attachment.path || attachment.url || '',
+            path: attachment.path || attachment.url || "",
             messageId: newMessage.id,
             url: attachment.url,
             filename: attachment.filename,
             mimeType: attachment.mimeType,
             sizeBytes: attachment.sizeBytes,
             width: attachment.width,
-            height: attachment.height
+            height: attachment.height,
           });
         }
       }
-      
+
       res.status(201).json(newMessage);
     } catch (error) {
       console.error("Error creating chat message:", error);
@@ -1227,7 +1490,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Direct Messages routes
-  app.get('/api/dms', async (req, res) => {
+  app.get("/api/dms", async (req, res) => {
     try {
       const { user_name } = req.query;
       const rooms = await storage.getDMRooms(user_name as string);
@@ -1238,12 +1501,14 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/dms/start', async (req, res) => {
+  app.post("/api/dms/start", async (req, res) => {
     try {
       const { participant1, participant2 } = req.body;
-      
+
       if (!participant1 || !participant2) {
-        return res.status(400).json({ message: "Both participant names are required" });
+        return res
+          .status(400)
+          .json({ message: "Both participant names are required" });
       }
 
       // Check if DM room already exists
@@ -1257,15 +1522,15 @@ export async function registerRoutes(app: Express): Promise<void> {
         name: `DM: ${participant1} & ${participant2}`,
         description: `Direct message between ${participant1} and ${participant2}`,
         is_private: true,
-        room_type: 'dm'
+        room_type: "dm",
       };
 
       const newRoom = await storage.createChatRoom(roomData);
-      
+
       // Add both participants to the room
       await storage.addRoomMember(newRoom.id, participant1);
       await storage.addRoomMember(newRoom.id, participant2);
-      
+
       res.status(201).json(newRoom);
     } catch (error) {
       console.error("Error starting DM:", error);
@@ -1274,41 +1539,50 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // File upload endpoint for attachments
-  app.post('/api/upload-attachment', async (req, res) => {
+  app.post("/api/upload-attachment", async (req, res) => {
     try {
-      const multer = await import('multer');
-      const upload = multer.default({ 
+      const multer = await import("multer");
+      const upload = multer.default({
         storage: multer.default.memoryStorage(),
-        limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+        limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
       });
-      
+
       // Use multer middleware to parse the uploaded file
-      upload.single('file')(req, res, async (err) => {
+      upload.single("file")(req, res, async (err) => {
         if (err) {
-          console.error('Multer error:', err);
-          return res.status(400).json({ message: 'File upload error' });
+          console.error("Multer error:", err);
+          return res.status(400).json({ message: "File upload error" });
         }
-        
+
         if (!req.file) {
-          return res.status(400).json({ message: 'No file uploaded' });
+          return res.status(400).json({ message: "No file uploaded" });
         }
-        
+
         try {
-          const { uploadFile, getFileUrl, ensureBucketExists } = await import('./supabase.js');
-          
+          const { uploadFile, getFileUrl, ensureBucketExists } = await import(
+            "./supabase.js"
+          );
+
           // Ensure the attachments bucket exists
-          await ensureBucketExists('attachments');
-          
+          await ensureBucketExists("attachments");
+
           // Generate unique filename
-          const fileExtension = req.file.originalname.split('.').pop() || '';
-          const uniqueFileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExtension}`;
-          
+          const fileExtension = req.file.originalname.split(".").pop() || "";
+          const uniqueFileName = `${Date.now()}-${Math.random()
+            .toString(36)
+            .substring(2)}.${fileExtension}`;
+
           // Upload to Supabase Storage
-          await uploadFile('attachments', uniqueFileName, req.file.buffer, req.file.mimetype);
-          
+          await uploadFile(
+            "attachments",
+            uniqueFileName,
+            req.file.buffer,
+            req.file.mimetype
+          );
+
           // Get public URL
-          const fileUrl = await getFileUrl('attachments', uniqueFileName);
-          
+          const fileUrl = await getFileUrl("attachments", uniqueFileName);
+
           // Return file metadata
           res.json({
             url: fileUrl,
@@ -1316,12 +1590,11 @@ export async function registerRoutes(app: Express): Promise<void> {
             mimeType: req.file.mimetype,
             sizeBytes: req.file.size,
             width: undefined, // TODO: Extract image dimensions if needed
-            height: undefined
+            height: undefined,
           });
-          
         } catch (storageError) {
-          console.error('Storage error:', storageError);
-          res.status(500).json({ message: 'Failed to store file' });
+          console.error("Storage error:", storageError);
+          res.status(500).json({ message: "Failed to store file" });
         }
       });
     } catch (error) {
@@ -1331,7 +1604,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Connection routes
-  app.get('/api/connections', noAuth, async (req: any, res) => {
+  app.get("/api/connections", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const connections = await storage.getUserConnections(userId);
@@ -1342,7 +1615,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/connections', noAuth, async (req: any, res) => {
+  app.post("/api/connections", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const connectionData = { ...req.body, requesterId: userId };
@@ -1354,7 +1627,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.patch('/api/connections/:id', noAuth, async (req, res) => {
+  app.patch("/api/connections/:id", noAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const { status } = req.body;
@@ -1367,141 +1640,149 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Debug endpoint for authentication testing
-  app.get('/api/debug/auth', noAuth, async (req: any, res) => {
-    res.json({ 
-      authenticated: true, 
+  app.get("/api/debug/auth", noAuth, async (req: any, res) => {
+    res.json({
+      authenticated: true,
       user: req.user?.claims?.sub || req.user?.id,
-      timestamp: new Date().toISOString() 
+      timestamp: new Date().toISOString(),
     });
   });
 
   // ===== INGESTION DASHBOARD API ENDPOINTS =====
-  
+
   // Get ingestion jobs data
-  app.get('/api/ingestion-jobs', async (req, res) => {
+  app.get("/api/ingestion-jobs", async (req, res) => {
     try {
       const { country, kind, search } = req.query;
-      
+
       // Create mock data based on existing destinations
       const mockJobs = [
         {
-          id: 'job_1',
-          destination_name: 'Machu Picchu',
-          country: 'Peru',
-          kind: 'attraction',
+          id: "job_1",
+          destination_name: "Machu Picchu",
+          country: "Peru",
+          kind: "attraction",
           count: 25,
-          status: 'succeeded',
+          status: "succeeded",
           updated_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+          created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
         },
         {
-          id: 'job_2',
-          destination_name: 'Salar de Uyuni',
-          country: 'Bolivia',
-          kind: 'restaurant',
+          id: "job_2",
+          destination_name: "Salar de Uyuni",
+          country: "Bolivia",
+          kind: "restaurant",
           count: 12,
-          status: 'running',
+          status: "running",
           updated_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-          created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
+          created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
         },
         {
-          id: 'job_3',
-          destination_name: 'Cartagena',
-          country: 'Colombia',
-          kind: 'accommodation',
+          id: "job_3",
+          destination_name: "Cartagena",
+          country: "Colombia",
+          kind: "accommodation",
           count: 18,
-          status: 'queued',
+          status: "queued",
           updated_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-          created_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+          created_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
         },
         {
-          id: 'job_4',
-          destination_name: 'Christ the Redeemer',
-          country: 'Brazil',
-          kind: 'attraction',
+          id: "job_4",
+          destination_name: "Christ the Redeemer",
+          country: "Brazil",
+          kind: "attraction",
           count: 31,
-          status: 'succeeded',
+          status: "succeeded",
           updated_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-          created_at: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
+          created_at: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
         },
         {
-          id: 'job_5',
-          destination_name: 'Torres del Paine',
-          country: 'Chile',
-          kind: 'accommodation',
+          id: "job_5",
+          destination_name: "Torres del Paine",
+          country: "Chile",
+          kind: "accommodation",
           count: 7,
-          status: 'failed',
+          status: "failed",
           updated_at: new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString(),
-          created_at: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString()
+          created_at: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
         },
         {
-          id: 'job_6',
-          destination_name: 'Angel Falls',
-          country: 'Venezuela',
-          kind: 'restaurant',
+          id: "job_6",
+          destination_name: "Angel Falls",
+          country: "Venezuela",
+          kind: "restaurant",
           count: 39,
-          status: 'succeeded',
+          status: "succeeded",
           updated_at: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-          created_at: new Date(Date.now() - 96 * 60 * 60 * 1000).toISOString()
-        }
+          created_at: new Date(Date.now() - 96 * 60 * 60 * 1000).toISOString(),
+        },
       ];
-      
+
       // Apply filters
       let filteredJobs = mockJobs;
-      if (country && country !== 'all') {
-        filteredJobs = filteredJobs.filter((job: any) => job.country === country);
+      if (country && country !== "all") {
+        filteredJobs = filteredJobs.filter(
+          (job: any) => job.country === country
+        );
       }
-      if (kind && kind !== 'all') {
+      if (kind && kind !== "all") {
         filteredJobs = filteredJobs.filter((job: any) => job.kind === kind);
       }
       if (search) {
-        filteredJobs = filteredJobs.filter((job: any) => 
-          job.destination_name.toLowerCase().includes(search.toString().toLowerCase())
+        filteredJobs = filteredJobs.filter((job: any) =>
+          job.destination_name
+            .toLowerCase()
+            .includes(search.toString().toLowerCase())
         );
       }
-      
+
       res.json(filteredJobs);
     } catch (error) {
-      console.error('Error fetching ingestion jobs:', error);
-      res.status(500).json({ error: 'Failed to fetch ingestion jobs' });
+      console.error("Error fetching ingestion jobs:", error);
+      res.status(500).json({ error: "Failed to fetch ingestion jobs" });
     }
   });
-  
+
   // Get ingestion summary data
-  app.get('/api/ingestion-summary', async (req, res) => {
+  app.get("/api/ingestion-summary", async (req, res) => {
     try {
       // Create mock summary data - simplified version
       const mockSummary = [
         {
-          destination_name: 'Machu Picchu',
-          country: 'Peru',
+          destination_name: "Machu Picchu",
+          country: "Peru",
           total_attractions: 25,
           total_restaurants: 15,
           total_accommodations: 30,
-          last_updated: new Date().toISOString()
+          last_updated: new Date().toISOString(),
         },
         {
-          destination_name: 'Salar de Uyuni',
-          country: 'Bolivia',
+          destination_name: "Salar de Uyuni",
+          country: "Bolivia",
           total_attractions: 18,
           total_restaurants: 8,
           total_accommodations: 12,
-          last_updated: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+          last_updated: new Date(
+            Date.now() - 24 * 60 * 60 * 1000
+          ).toISOString(),
         },
         {
-          destination_name: 'Cartagena',
-          country: 'Colombia',
+          destination_name: "Cartagena",
+          country: "Colombia",
           total_attractions: 22,
           total_restaurants: 28,
           total_accommodations: 35,
-          last_updated: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-        }
+          last_updated: new Date(
+            Date.now() - 2 * 24 * 60 * 60 * 1000
+          ).toISOString(),
+        },
       ];
-      
+
       res.json(mockSummary);
     } catch (error) {
-      console.error('Error fetching ingestion summary:', error);
-      res.status(500).json({ error: 'Failed to fetch ingestion summary' });
+      console.error("Error fetching ingestion summary:", error);
+      res.status(500).json({ error: "Failed to fetch ingestion summary" });
     }
   });
 
@@ -1509,53 +1790,67 @@ export async function registerRoutes(app: Express): Promise<void> {
   registerCollectorRoutes(app);
 
   // ===== DUFFEL FLIGHTS API INTEGRATION =====
-  
+
   // Search flights using Duffel API
-  app.post('/api/flights/search', noAuth, async (req: any, res) => {
+  app.post("/api/flights/search", noAuth, async (req: any, res) => {
     try {
-      const { origin, destination, departureDate, returnDate, passengers, cabinClass } = req.body;
-      
-      console.log('Flight search request:', { origin, destination, departureDate, returnDate, passengers, cabinClass });
-      
+      const {
+        origin,
+        destination,
+        departureDate,
+        returnDate,
+        passengers,
+        cabinClass,
+      } = req.body;
+
+      console.log("Flight search request:", {
+        origin,
+        destination,
+        departureDate,
+        returnDate,
+        passengers,
+        cabinClass,
+      });
+
       if (!origin || !destination || !departureDate || !passengers) {
-        return res.status(400).json({ error: 'Missing required fields' });
+        return res.status(400).json({ error: "Missing required fields" });
       }
 
       const apiKey = process.env.DUFFEL_API_KEY;
-      const baseUrl = process.env.DUFFEL_BASE_URL || 'https://api.duffel.com';
+      const baseUrl = process.env.DUFFEL_BASE_URL || "https://api.duffel.com";
 
       if (!apiKey) {
-        console.error('Duffel API key not configured');
-        return res.status(500).json({ error: 'Duffel API key not configured' });
+        console.error("Duffel API key not configured");
+        return res.status(500).json({ error: "Duffel API key not configured" });
       }
 
       // Parse base URL to extract hostname
       const urlObj = new URL(baseUrl);
       const hostname = urlObj.hostname;
 
-      console.log('Using Duffel API:', { baseUrl, hostname });
+      console.log("Using Duffel API:", { baseUrl, hostname });
 
       // Build slices (one-way or round-trip)
       const slices: any[] = [
         {
           origin,
           destination,
-          departure_date: departureDate
-        }
+          departure_date: departureDate,
+        },
       ];
 
       if (returnDate) {
         slices.push({
           origin: destination,
           destination: origin,
-          departure_date: returnDate
+          departure_date: returnDate,
         });
       }
 
       // Build passengers array
       const passengersList = [];
       for (let i = 0; i < (passengers.adults || 1); i++) {
-        passengersList.push({ type: 'adult' });
+        passengersList.push({ type: "adult" });
       }
       if (passengers.children) {
         for (let i = 0; i < passengers.children; i++) {
@@ -1568,273 +1863,305 @@ export async function registerRoutes(app: Express): Promise<void> {
         data: {
           slices,
           passengers: passengersList,
-          cabin_class: cabinClass || 'economy'
-        }
+          cabin_class: cabinClass || "economy",
+        },
       };
 
       // Make request to Duffel API
-      const https = await import('https');
+      const https = await import("https");
       const postData = JSON.stringify(offerRequest);
 
       const options = {
         hostname: hostname,
-        path: '/air/offer_requests',
-        method: 'POST',
+        path: "/air/offer_requests",
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(postData),
-          'Duffel-Version': 'v2',
-          'Accept': 'application/json'
-        }
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(postData),
+          "Duffel-Version": "v2",
+          Accept: "application/json",
+        },
       };
 
       const apiResponse = await new Promise<any>((resolve, reject) => {
         const apiReq = https.request(options, (apiRes) => {
-          let data = '';
-          apiRes.on('data', (chunk) => { data += chunk; });
-          apiRes.on('end', () => {
+          let data = "";
+          apiRes.on("data", (chunk) => {
+            data += chunk;
+          });
+          apiRes.on("end", () => {
             try {
-              console.log('Duffel API response status:', apiRes.statusCode);
-              console.log('Duffel API response data:', data.substring(0, 500));
+              console.log("Duffel API response status:", apiRes.statusCode);
+              console.log("Duffel API response data:", data.substring(0, 500));
               const parsed = JSON.parse(data);
               if (apiRes.statusCode === 200 || apiRes.statusCode === 201) {
                 resolve(parsed);
               } else {
-                console.error('Duffel API error:', parsed.errors);
-                reject(new Error(parsed.errors?.[0]?.message || JSON.stringify(parsed.errors) || 'Duffel API error'));
+                console.error("Duffel API error:", parsed.errors);
+                reject(
+                  new Error(
+                    parsed.errors?.[0]?.message ||
+                      JSON.stringify(parsed.errors) ||
+                      "Duffel API error"
+                  )
+                );
               }
             } catch (e) {
-              console.error('Failed to parse Duffel response:', data);
-              reject(new Error('Failed to parse Duffel response'));
+              console.error("Failed to parse Duffel response:", data);
+              reject(new Error("Failed to parse Duffel response"));
             }
           });
         });
-        apiReq.on('error', (error) => {
-          console.error('HTTP request error:', error);
+        apiReq.on("error", (error) => {
+          console.error("HTTP request error:", error);
           reject(error);
         });
         apiReq.write(postData);
         apiReq.end();
       });
 
-      console.log('Number of offers found:', apiResponse.data?.offers?.length || 0);
-      
+      console.log(
+        "Number of offers found:",
+        apiResponse.data?.offers?.length || 0
+      );
+
       res.json({
         success: true,
         offers: apiResponse.data?.offers || [],
-        requestId: apiResponse.data?.id
+        requestId: apiResponse.data?.id,
       });
-
     } catch (error: any) {
-      console.error('Flights search error:', error);
-      console.error('Error stack:', error.stack);
-      res.status(500).json({ error: error.message || 'Failed to search flights' });
+      console.error("Flights search error:", error);
+      console.error("Error stack:", error.stack);
+      res
+        .status(500)
+        .json({ error: error.message || "Failed to search flights" });
     }
   });
 
   // Get offer details
-  app.get('/api/flights/offer/:offerId', noAuth, async (req: any, res) => {
+  app.get("/api/flights/offer/:offerId", noAuth, async (req: any, res) => {
     try {
       const { offerId } = req.params;
       const apiKey = process.env.DUFFEL_API_KEY;
-      const baseUrl = process.env.DUFFEL_BASE_URL || 'https://api.duffel.com';
+      const baseUrl = process.env.DUFFEL_BASE_URL || "https://api.duffel.com";
 
       if (!apiKey) {
-        return res.status(500).json({ error: 'Duffel API key not configured' });
+        return res.status(500).json({ error: "Duffel API key not configured" });
       }
 
       // Parse base URL to extract hostname
       const urlObj = new URL(baseUrl);
       const hostname = urlObj.hostname;
 
-      const https = await import('https');
+      const https = await import("https");
       const options = {
         hostname: hostname,
         path: `/air/offers/${offerId}`,
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Duffel-Version': 'v2',
-          'Accept': 'application/json'
-        }
+          Authorization: `Bearer ${apiKey}`,
+          "Duffel-Version": "v2",
+          Accept: "application/json",
+        },
       };
 
       const apiResponse = await new Promise<any>((resolve, reject) => {
         const apiReq = https.request(options, (apiRes) => {
-          let data = '';
-          apiRes.on('data', (chunk) => { data += chunk; });
-          apiRes.on('end', () => {
+          let data = "";
+          apiRes.on("data", (chunk) => {
+            data += chunk;
+          });
+          apiRes.on("end", () => {
             try {
               const parsed = JSON.parse(data);
               if (apiRes.statusCode === 200) {
                 resolve(parsed);
               } else {
-                reject(new Error(parsed.errors?.[0]?.message || 'Duffel API error'));
+                reject(
+                  new Error(parsed.errors?.[0]?.message || "Duffel API error")
+                );
               }
             } catch (e) {
-              reject(new Error('Failed to parse Duffel response'));
+              reject(new Error("Failed to parse Duffel response"));
             }
           });
         });
-        apiReq.on('error', reject);
+        apiReq.on("error", reject);
         apiReq.end();
       });
 
       res.json({
         success: true,
-        offer: apiResponse.data
+        offer: apiResponse.data,
       });
-
     } catch (error: any) {
-      console.error('Offer details error:', error);
-      res.status(500).json({ error: error.message || 'Failed to get offer details' });
+      console.error("Offer details error:", error);
+      res
+        .status(500)
+        .json({ error: error.message || "Failed to get offer details" });
     }
   });
 
   // Flight Bookings endpoints
-  
+
   // Create a new flight booking
-  app.post('/api/flights/bookings', async (req: any, res) => {
+  app.post("/api/flights/bookings", async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub || req.user?.id;
       if (!userId) {
-        return res.status(401).json({ error: 'Authentication required' });
+        return res.status(401).json({ error: "Authentication required" });
       }
       const bookingData = req.body;
-      
+
       // Add userId to booking data
       const booking = await storage.createFlightBooking({
         ...bookingData,
-        userId
+        userId,
       });
-      
+
       res.json({
         success: true,
-        booking
+        booking,
       });
     } catch (error: any) {
-      console.error('Create booking error:', error);
-      res.status(500).json({ error: error.message || 'Failed to create booking' });
+      console.error("Create booking error:", error);
+      res
+        .status(500)
+        .json({ error: error.message || "Failed to create booking" });
     }
   });
-  
+
   // Get all user bookings
-  app.get('/api/flights/bookings', async (req: any, res) => {
+  app.get("/api/flights/bookings", async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub || req.user?.id;
       if (!userId) {
-        return res.status(401).json({ error: 'Authentication required' });
+        return res.status(401).json({ error: "Authentication required" });
       }
       const bookings = await storage.getUserFlightBookings(userId);
-      
+
       res.json({
         success: true,
-        bookings
+        bookings,
       });
     } catch (error: any) {
-      console.error('Get bookings error:', error);
-      res.status(500).json({ error: error.message || 'Failed to get bookings' });
+      console.error("Get bookings error:", error);
+      res
+        .status(500)
+        .json({ error: error.message || "Failed to get bookings" });
     }
   });
-  
+
   // Get upcoming bookings
-  app.get('/api/flights/bookings/upcoming', async (req: any, res) => {
+  app.get("/api/flights/bookings/upcoming", async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub || req.user?.id;
       if (!userId) {
-        return res.status(401).json({ error: 'Authentication required' });
+        return res.status(401).json({ error: "Authentication required" });
       }
       const bookings = await storage.getUpcomingFlightBookings(userId);
-      
+
       res.json({
         success: true,
-        bookings
+        bookings,
       });
     } catch (error: any) {
-      console.error('Get upcoming bookings error:', error);
-      res.status(500).json({ error: error.message || 'Failed to get upcoming bookings' });
+      console.error("Get upcoming bookings error:", error);
+      res
+        .status(500)
+        .json({ error: error.message || "Failed to get upcoming bookings" });
     }
   });
-  
+
   // Get past bookings
-  app.get('/api/flights/bookings/past', async (req: any, res) => {
+  app.get("/api/flights/bookings/past", async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub || req.user?.id;
       if (!userId) {
-        return res.status(401).json({ error: 'Authentication required' });
+        return res.status(401).json({ error: "Authentication required" });
       }
       const bookings = await storage.getPastFlightBookings(userId);
-      
+
       res.json({
         success: true,
-        bookings
+        bookings,
       });
     } catch (error: any) {
-      console.error('Get past bookings error:', error);
-      res.status(500).json({ error: error.message || 'Failed to get past bookings' });
+      console.error("Get past bookings error:", error);
+      res
+        .status(500)
+        .json({ error: error.message || "Failed to get past bookings" });
     }
   });
-  
+
   // Track flight using OpenSky Network API
-  app.get('/api/flights/track/:callsign', noAuth, async (req: any, res) => {
+  app.get("/api/flights/track/:callsign", noAuth, async (req: any, res) => {
     try {
       const { callsign } = req.params;
-      
+
       // OpenSky Network API - Free, no API key required
       // Get all current flights and filter by callsign
-      const https = await import('https');
+      const https = await import("https");
       const options = {
-        hostname: 'opensky-network.org',
+        hostname: "opensky-network.org",
         path: `/api/states/all`,
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Accept': 'application/json'
-        }
+          Accept: "application/json",
+        },
       };
-      
+
       const apiResponse = await new Promise<any>((resolve, reject) => {
         const apiReq = https.request(options, (apiRes) => {
-          let data = '';
-          apiRes.on('data', (chunk) => { data += chunk; });
-          apiRes.on('end', () => {
+          let data = "";
+          apiRes.on("data", (chunk) => {
+            data += chunk;
+          });
+          apiRes.on("end", () => {
             try {
               const parsed = JSON.parse(data);
               if (apiRes.statusCode === 200) {
                 resolve(parsed);
               } else {
-                reject(new Error('OpenSky API error'));
+                reject(new Error("OpenSky API error"));
               }
             } catch (e) {
-              reject(new Error('Failed to parse OpenSky response'));
+              reject(new Error("Failed to parse OpenSky response"));
             }
           });
         });
-        apiReq.on('error', reject);
+        apiReq.on("error", reject);
         apiReq.end();
       });
-      
+
       // Parse OpenSky response
       // Response format: { time, states: [[icao24, callsign, origin_country, time_position, last_contact, longitude, latitude, baro_altitude, on_ground, velocity, true_track, vertical_rate, sensors, geo_altitude, squawk, spi, position_source]] }
-      
+
       // Filter by callsign (state[1])
       const targetCallsign = callsign.toUpperCase().trim();
-      
+
       console.log(`🔍 Searching for flight: ${targetCallsign}`);
-      console.log(`📊 Total flights in response: ${apiResponse.states?.length || 0}`);
-      
+      console.log(
+        `📊 Total flights in response: ${apiResponse.states?.length || 0}`
+      );
+
       // Find matching flight by callsign
       const matchingState = apiResponse.states?.find((state: any) => {
         const stateCallsign = state[1]?.trim().toUpperCase();
-        return stateCallsign === targetCallsign || stateCallsign?.includes(targetCallsign);
+        return (
+          stateCallsign === targetCallsign ||
+          stateCallsign?.includes(targetCallsign)
+        );
       });
-      
+
       if (matchingState) {
         console.log(`✅ Found flight: ${matchingState[1]?.trim()}`);
       } else {
         console.log(`❌ Flight ${targetCallsign} not found in current flights`);
       }
-      
+
       if (matchingState) {
         const state = matchingState;
         const flightData = {
@@ -1847,118 +2174,123 @@ export async function registerRoutes(app: Express): Promise<void> {
           velocity: state[9], // m/s
           heading: state[10], // degrees
           vertical_rate: state[11], // m/s
-          last_contact: new Date(state[4] * 1000).toISOString()
+          last_contact: new Date(state[4] * 1000).toISOString(),
         };
-        
+
         res.json({
           success: true,
-          flight: flightData
+          flight: flightData,
         });
       } else {
         res.json({
           success: false,
-          message: 'Flight not found or not currently in the air'
+          message: "Flight not found or not currently in the air",
         });
       }
-      
     } catch (error: any) {
-      console.error('Flight tracking error:', error);
-      res.status(500).json({ error: error.message || 'Failed to track flight' });
+      console.error("Flight tracking error:", error);
+      res
+        .status(500)
+        .json({ error: error.message || "Failed to track flight" });
     }
   });
 
   // ===== ENHANCED GLOBAL TRAVEL DATA ENDPOINTS =====
-  
+
   // Seed database with comprehensive travel data (includes South America and other regions)
-  app.post('/api/data/seed', async (req: any, res) => {
+  app.post("/api/data/seed", async (req: any, res) => {
     try {
       const result = await seedSouthAmericanData();
       res.json(result);
     } catch (error) {
-      console.error('Seeding error:', error);
-      res.status(500).json({ error: 'Failed to seed data' });
+      console.error("Seeding error:", error);
+      res.status(500).json({ error: "Failed to seed data" });
     }
   });
 
   // Temporary public endpoint to load sample data
-  app.get('/api/data/load-samples', async (req: any, res) => {
+  app.get("/api/data/load-samples", async (req: any, res) => {
     try {
       const result = await seedSouthAmericanData();
-      res.json({ 
+      res.json({
         success: true,
-        message: 'Sample data loaded successfully',
-        result 
+        message: "Sample data loaded successfully",
+        result,
       });
     } catch (error) {
-      console.error('Loading samples error:', error);
-      res.status(500).json({ 
+      console.error("Loading samples error:", error);
+      res.status(500).json({
         success: false,
-        error: 'Failed to load samples', 
-        details: error instanceof Error ? error.message : 'Unknown error' 
+        error: "Failed to load samples",
+        details: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
 
   // Basic places endpoint - returns places from existing database tables
-  app.get('/api/places', async (req, res) => {
+  app.get("/api/places", async (req, res) => {
     try {
-      console.log('Fetching places from existing tables...');
-      
+      console.log("Fetching places from existing tables...");
+
       // Use the existing 'places' table that already has data
       const client = await pool.connect();
       try {
-        const placesResult = await client.query('SELECT * FROM places ORDER BY rating DESC LIMIT 50');
-        const places = placesResult.rows.map(place => ({
+        const placesResult = await client.query(
+          "SELECT * FROM places ORDER BY rating DESC LIMIT 50"
+        );
+        const places = placesResult.rows.map((place) => ({
           ...place,
-          type: 'destination'
+          type: "destination",
         }));
-        
+
         console.log(`Retrieved ${places.length} places from database`);
         res.json({ total: places.length, items: places });
-        
       } catch (dbError) {
-        console.error('Database query error:', dbError);
-        res.json({ 
-          total: 0, 
-          items: [], 
-          message: 'Places data is being loaded. The database is connected but tables may be syncing.',
-          error: 'Could not fetch places data'
+        console.error("Database query error:", dbError);
+        res.json({
+          total: 0,
+          items: [],
+          message:
+            "Places data is being loaded. The database is connected but tables may be syncing.",
+          error: "Could not fetch places data",
         });
       } finally {
         client.release();
       }
     } catch (error) {
-      console.error('Error fetching places:', error);
-      res.status(500).json({ error: 'Failed to fetch places' });
+      console.error("Error fetching places:", error);
+      res.status(500).json({ error: "Failed to fetch places" });
     }
   });
 
   // ===== GOOGLE PLACES API INTEGRATION =====
-  
+
   // Search places using Google Places API
-  app.get('/api/places/search', noAuth, async (req: any, res) => {
+  app.get("/api/places/search", noAuth, async (req: any, res) => {
     try {
       const { query, type, location } = req.query;
       if (!query) {
-        return res.status(400).json({ error: 'Query parameter is required' });
+        return res.status(400).json({ error: "Query parameter is required" });
       }
-      
+
       const results = await googlePlaces.searchPlaces(query, type, location);
       res.json({ results });
     } catch (error) {
-      console.error('Places search error:', error);
-      res.status(500).json({ error: 'Failed to search places' });
+      console.error("Places search error:", error);
+      res.status(500).json({ error: "Failed to search places" });
     }
   });
 
   // Nearby search using lat/lng
-  app.get('/api/places/nearby', noAuth, async (req: any, res) => {
+  app.get("/api/places/nearby", noAuth, async (req: any, res) => {
     try {
       const { lat, lng, radius, type } = req.query;
       if (!lat || !lng) {
-        return res.status(400).json({ error: 'lat and lng parameters are required' });
+        return res
+          .status(400)
+          .json({ error: "lat and lng parameters are required" });
       }
-      
+
       const results = await googlePlaces.nearbySearch(
         parseFloat(lat),
         parseFloat(lng),
@@ -1967,35 +2299,69 @@ export async function registerRoutes(app: Express): Promise<void> {
       );
       res.json({ results });
     } catch (error) {
-      console.error('Nearby search error:', error);
-      res.status(500).json({ error: 'Failed to search nearby places' });
+      console.error("Nearby search error:", error);
+      res.status(500).json({ error: "Failed to search nearby places" });
     }
   });
 
   // Import Google Places data to our database
-  app.post('/api/places/import', noAuth, async (req: any, res) => {
+  app.post("/api/places/import", noAuth, async (req: any, res) => {
     try {
       const { placeId, category, destinationId } = req.body;
       if (!placeId || !category || !destinationId) {
-        return res.status(400).json({ error: 'placeId, category, and destinationId are required' });
+        return res
+          .status(400)
+          .json({ error: "placeId, category, and destinationId are required" });
       }
 
       let imported = null;
       switch (category) {
-        case 'accommodation':
-          const placeResult = { place_id: placeId, name: '', formatted_address: '', geometry: { location: { lat: 0, lng: 0 } }, types: [] };
-          imported = await googlePlaces.importAccommodation(placeResult, destinationId);
+        case "accommodation":
+          const placeResult = {
+            place_id: placeId,
+            name: "",
+            formatted_address: "",
+            geometry: { location: { lat: 0, lng: 0 } },
+            types: [],
+          };
+          imported = await googlePlaces.importAccommodation(
+            placeResult,
+            destinationId
+          );
           break;
-        case 'restaurant':
-          const restaurantResult = { place_id: placeId, name: '', formatted_address: '', geometry: { location: { lat: 0, lng: 0 } }, types: [] };
-          imported = await googlePlaces.importRestaurant(restaurantResult, destinationId);
+        case "restaurant":
+          const restaurantResult = {
+            place_id: placeId,
+            name: "",
+            formatted_address: "",
+            geometry: { location: { lat: 0, lng: 0 } },
+            types: [],
+          };
+          imported = await googlePlaces.importRestaurant(
+            restaurantResult,
+            destinationId
+          );
           break;
-        case 'attraction':
-          const attractionResult = { place_id: placeId, name: '', formatted_address: '', geometry: { location: { lat: 0, lng: 0 } }, types: [] };
-          imported = await googlePlaces.importAttraction(attractionResult, destinationId);
+        case "attraction":
+          const attractionResult = {
+            place_id: placeId,
+            name: "",
+            formatted_address: "",
+            geometry: { location: { lat: 0, lng: 0 } },
+            types: [],
+          };
+          imported = await googlePlaces.importAttraction(
+            attractionResult,
+            destinationId
+          );
           break;
         default:
-          return res.status(400).json({ error: 'Invalid category. Must be accommodation, restaurant, or attraction' });
+          return res
+            .status(400)
+            .json({
+              error:
+                "Invalid category. Must be accommodation, restaurant, or attraction",
+            });
       }
 
       if (imported) {
@@ -2003,208 +2369,484 @@ export async function registerRoutes(app: Express): Promise<void> {
         await googlePlaces.importReviews(placeId, category);
       }
 
-      res.json({ imported, message: 'Place imported successfully' });
+      res.json({ imported, message: "Place imported successfully" });
     } catch (error) {
-      console.error('Places import error:', error);
-      res.status(500).json({ error: 'Failed to import place' });
+      console.error("Places import error:", error);
+      res.status(500).json({ error: "Failed to import place" });
     }
   });
 
   // Get tourist attractions for a specific location using Google Places
-  app.get('/api/places/attractions/:location', async (req, res) => {
+  app.get("/api/places/attractions/:location", async (req, res) => {
     try {
       const { location } = req.params;
-      
+
       if (!location) {
-        return res.status(400).json({ error: 'Location parameter is required' });
+        return res
+          .status(400)
+          .json({ error: "Location parameter is required" });
       }
 
       // Search for tourist attractions using Google Places API
       const results = await googlePlaces.searchPlaces(
-        location, 
-        'tourist_attraction',
+        location,
+        "tourist_attraction",
         location
       );
 
       // Limit to 10 most popular results and format response
-      const formattedResults = results.slice(0, 10).map(place => ({
+      const formattedResults = results.slice(0, 10).map((place) => ({
         name: place.name,
         formatted_address: place.formatted_address,
         rating: place.rating,
         place_id: place.place_id,
         types: place.types,
-        photo_reference: place.photos && place.photos.length > 0 ? place.photos[0].photo_reference : null,
+        photo_reference:
+          place.photos && place.photos.length > 0
+            ? place.photos[0].photo_reference
+            : null,
         user_ratings_total: place.user_ratings_total,
         price_level: place.price_level,
         opening_hours: place.opening_hours,
-        business_status: place.business_status
+        business_status: place.business_status,
       }));
 
       res.json(formattedResults);
     } catch (error) {
-      console.error('Error fetching tourist attractions:', error);
-      res.status(500).json({ 
-        error: 'Failed to fetch tourist attractions',
-        message: error instanceof Error ? error.message : 'Unknown error'
+      console.error("Error fetching tourist attractions:", error);
+      res.status(500).json({
+        error: "Failed to fetch tourist attractions",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
 
   // ===== TRIPADVISOR-READY STRUCTURE =====
-  
+
   // TripAdvisor API placeholder endpoints (ready for future integration)
-  app.get('/api/tripadvisor/search', noAuth, async (req: any, res) => {
+  app.get("/api/tripadvisor/search", noAuth, async (req: any, res) => {
     // TODO: Integrate TripAdvisor API when access is granted
-    res.json({ 
-      message: 'TripAdvisor API integration pending approval',
-      fallback: 'Using enhanced database and Google Places data',
-      docs: 'https://www.tripadvisor.com/APIAccessSupport'
+    res.json({
+      message: "TripAdvisor API integration pending approval",
+      fallback: "Using enhanced database and Google Places data",
+      docs: "https://www.tripadvisor.com/APIAccessSupport",
     });
   });
 
-  app.get('/api/tripadvisor/location/:locationId', noAuth, async (req: any, res) => {
-    // TODO: TripAdvisor location details endpoint
-    const { locationId } = req.params;
-    
-    // Fallback to our database
-    const accommodation = await storage.getAccommodationByLocationId(locationId);
-    const restaurant = await storage.getRestaurantByLocationId(locationId);
-    const attraction = await storage.getAttractionByLocationId(locationId);
-    
-    const location = accommodation || restaurant || attraction;
-    if (location) {
-      res.json({ location, source: 'database' });
-    } else {
-      res.status(404).json({ error: 'Location not found' });
-    }
-  });
+  app.get(
+    "/api/tripadvisor/location/:locationId",
+    noAuth,
+    async (req: any, res) => {
+      // TODO: TripAdvisor location details endpoint
+      const { locationId } = req.params;
 
-  app.get('/api/tripadvisor/reviews/:locationId', noAuth, async (req: any, res) => {
-    // TODO: TripAdvisor reviews endpoint
-    const { locationId } = req.params;
-    const { category } = req.query;
-    
-    // Fallback to our database
-    const reviews = await storage.getLocationReviews(locationId, category as string);
-    res.json({ reviews, source: 'database' });
-  });
+      // Fallback to our database
+      const accommodation = await storage.getAccommodationByLocationId(
+        locationId
+      );
+      const restaurant = await storage.getRestaurantByLocationId(locationId);
+      const attraction = await storage.getAttractionByLocationId(locationId);
+
+      const location = accommodation || restaurant || attraction;
+      if (location) {
+        res.json({ location, source: "database" });
+      } else {
+        res.status(404).json({ error: "Location not found" });
+      }
+    }
+  );
+
+  app.get(
+    "/api/tripadvisor/reviews/:locationId",
+    noAuth,
+    async (req: any, res) => {
+      // TODO: TripAdvisor reviews endpoint
+      const { locationId } = req.params;
+      const { category } = req.query;
+
+      // Fallback to our database
+      const reviews = await storage.getLocationReviews(
+        locationId,
+        category as string
+      );
+      res.json({ reviews, source: "database" });
+    }
+  );
 
   // AI-powered trip generation
-  app.post('/api/ai/generate-trip', noAuth, async (req: any, res) => {
+  app.post("/api/ai/generate-trip", noAuth, async (req: any, res) => {
     try {
-      const { destination, duration, budget, travelStyle, interests } = req.body;
-      
-      console.log('Trip generation request:', { destination, duration, budget, travelStyle, interests });
-      
+      const { destination, duration, budget, travelStyle, interests } =
+        req.body;
+
+      console.log("Trip generation request:", {
+        destination,
+        duration,
+        budget,
+        travelStyle,
+        interests,
+      });
+
       // Validate required fields
       if (!destination || !duration || !budget || !travelStyle) {
-        return res.status(400).json({ 
-          message: "Missing required fields: destination, duration, budget, and travelStyle are required" 
+        return res.status(400).json({
+          message:
+            "Missing required fields: destination, duration, budget, and travelStyle are required",
         });
       }
-      
+
       // Enhanced destination-specific trip data (Global destinations)
       const destinationData = {
         // South America
-        'Peru': {
-          activities: ['Machu Picchu trek', 'Sacred Valley exploration', 'Cusco city tour', 'Amazon rainforest adventure', 'Lima food tour'],
-          description: 'Discover ancient Inca civilization, stunning mountain landscapes, and rich cultural heritage in Peru.',
-          highlights: ['Machu Picchu', 'Sacred Valley', 'Rainbow Mountain', 'Amazon jungle', 'Colonial architecture']
+        Peru: {
+          activities: [
+            "Machu Picchu trek",
+            "Sacred Valley exploration",
+            "Cusco city tour",
+            "Amazon rainforest adventure",
+            "Lima food tour",
+          ],
+          description:
+            "Discover ancient Inca civilization, stunning mountain landscapes, and rich cultural heritage in Peru.",
+          highlights: [
+            "Machu Picchu",
+            "Sacred Valley",
+            "Rainbow Mountain",
+            "Amazon jungle",
+            "Colonial architecture",
+          ],
         },
-        'Colombia': {
-          activities: ['Cartagena colonial tour', 'Coffee region exploration', 'Medellín city experience', 'Tayrona National Park', 'Salsa dancing lessons'],
-          description: 'Experience vibrant culture, stunning Caribbean coast, and world-renowned coffee regions in Colombia.',
-          highlights: ['Cartagena old city', 'Coffee plantations', 'Caribbean beaches', 'Pablo Escobar tour', 'Street art scene']
+        Colombia: {
+          activities: [
+            "Cartagena colonial tour",
+            "Coffee region exploration",
+            "Medellín city experience",
+            "Tayrona National Park",
+            "Salsa dancing lessons",
+          ],
+          description:
+            "Experience vibrant culture, stunning Caribbean coast, and world-renowned coffee regions in Colombia.",
+          highlights: [
+            "Cartagena old city",
+            "Coffee plantations",
+            "Caribbean beaches",
+            "Pablo Escobar tour",
+            "Street art scene",
+          ],
         },
-        'Bolivia': {
-          activities: ['Salar de Uyuni tour', 'La Paz cable car ride', 'Death Road cycling', 'Lake Titicaca visit', 'Sucre colonial exploration'],
-          description: 'Explore otherworldly salt flats, high-altitude adventures, and indigenous culture in Bolivia.',
-          highlights: ['Salt flats mirror effect', 'Floating islands', 'World\'s most dangerous road', 'Witch markets', 'Colonial Sucre']
+        Bolivia: {
+          activities: [
+            "Salar de Uyuni tour",
+            "La Paz cable car ride",
+            "Death Road cycling",
+            "Lake Titicaca visit",
+            "Sucre colonial exploration",
+          ],
+          description:
+            "Explore otherworldly salt flats, high-altitude adventures, and indigenous culture in Bolivia.",
+          highlights: [
+            "Salt flats mirror effect",
+            "Floating islands",
+            "World's most dangerous road",
+            "Witch markets",
+            "Colonial Sucre",
+          ],
         },
-        'Chile': {
-          activities: ['Atacama Desert stargazing', 'Patagonia hiking', 'Santiago wine tours', 'Easter Island exploration', 'Valparaíso street art tour'],
-          description: 'Journey through diverse landscapes from desert to glaciers, with world-class wine and unique culture.',
-          highlights: ['Atacama geysers', 'Torres del Paine', 'Moai statues', 'Wine valleys', 'Colorful port cities']
+        Chile: {
+          activities: [
+            "Atacama Desert stargazing",
+            "Patagonia hiking",
+            "Santiago wine tours",
+            "Easter Island exploration",
+            "Valparaíso street art tour",
+          ],
+          description:
+            "Journey through diverse landscapes from desert to glaciers, with world-class wine and unique culture.",
+          highlights: [
+            "Atacama geysers",
+            "Torres del Paine",
+            "Moai statues",
+            "Wine valleys",
+            "Colorful port cities",
+          ],
         },
-        'Argentina': {
-          activities: ['Buenos Aires tango shows', 'Iguazu Falls visit', 'Patagonia glacier trekking', 'Mendoza wine tasting', 'Bariloche lake district'],
-          description: 'Experience passionate tango culture, incredible natural wonders, and world-famous beef and wine.',
-          highlights: ['Iguazu waterfalls', 'Perito Moreno glacier', 'Tango shows', 'Wine country', 'Lake district']
+        Argentina: {
+          activities: [
+            "Buenos Aires tango shows",
+            "Iguazu Falls visit",
+            "Patagonia glacier trekking",
+            "Mendoza wine tasting",
+            "Bariloche lake district",
+          ],
+          description:
+            "Experience passionate tango culture, incredible natural wonders, and world-famous beef and wine.",
+          highlights: [
+            "Iguazu waterfalls",
+            "Perito Moreno glacier",
+            "Tango shows",
+            "Wine country",
+            "Lake district",
+          ],
         },
-        'Brazil': {
-          activities: ['Rio de Janeiro beaches', 'Amazon rainforest tour', 'Salvador cultural immersion', 'Iguazu Falls Brazilian side', 'São Paulo food scene'],
-          description: 'Immerse yourself in carnival culture, pristine beaches, and the world\'s largest rainforest.',
-          highlights: ['Christ the Redeemer', 'Copacabana beach', 'Amazon wildlife', 'Carnival festivals', 'Capoeira performances']
+        Brazil: {
+          activities: [
+            "Rio de Janeiro beaches",
+            "Amazon rainforest tour",
+            "Salvador cultural immersion",
+            "Iguazu Falls Brazilian side",
+            "São Paulo food scene",
+          ],
+          description:
+            "Immerse yourself in carnival culture, pristine beaches, and the world's largest rainforest.",
+          highlights: [
+            "Christ the Redeemer",
+            "Copacabana beach",
+            "Amazon wildlife",
+            "Carnival festivals",
+            "Capoeira performances",
+          ],
         },
-        'Ecuador': {
-          activities: ['Galápagos wildlife tour', 'Quito colonial exploration', 'Amazon lodge stay', 'Cotopaxi volcano hike', 'Otavalo market visit'],
-          description: 'Discover unique wildlife, colonial architecture, and diverse ecosystems from coast to jungle.',
-          highlights: ['Galápagos islands', 'Equatorial monuments', 'Cloud forests', 'Indigenous markets', 'Active volcanoes']
+        Ecuador: {
+          activities: [
+            "Galápagos wildlife tour",
+            "Quito colonial exploration",
+            "Amazon lodge stay",
+            "Cotopaxi volcano hike",
+            "Otavalo market visit",
+          ],
+          description:
+            "Discover unique wildlife, colonial architecture, and diverse ecosystems from coast to jungle.",
+          highlights: [
+            "Galápagos islands",
+            "Equatorial monuments",
+            "Cloud forests",
+            "Indigenous markets",
+            "Active volcanoes",
+          ],
         },
         // Europe
-        'France': {
-          activities: ['Eiffel Tower visit', 'Louvre Museum tour', 'French Riviera beaches', 'Loire Valley châteaux', 'Wine tasting in Bordeaux'],
-          description: 'Experience world-class art, exquisite cuisine, iconic landmarks, and romantic ambiance in France.',
-          highlights: ['Eiffel Tower', 'Versailles Palace', 'Provence lavender fields', 'French cuisine', 'Wine regions']
+        France: {
+          activities: [
+            "Eiffel Tower visit",
+            "Louvre Museum tour",
+            "French Riviera beaches",
+            "Loire Valley châteaux",
+            "Wine tasting in Bordeaux",
+          ],
+          description:
+            "Experience world-class art, exquisite cuisine, iconic landmarks, and romantic ambiance in France.",
+          highlights: [
+            "Eiffel Tower",
+            "Versailles Palace",
+            "Provence lavender fields",
+            "French cuisine",
+            "Wine regions",
+          ],
         },
-        'Italy': {
-          activities: ['Colosseum tour', 'Venice gondola rides', 'Tuscan countryside', 'Amalfi Coast', 'Vatican City'],
-          description: 'Immerse yourself in ancient history, Renaissance art, stunning coastlines, and world-renowned cuisine.',
-          highlights: ['Roman ruins', 'Vatican Museums', 'Leaning Tower of Pisa', 'Gelato tasting', 'Italian vineyards']
+        Italy: {
+          activities: [
+            "Colosseum tour",
+            "Venice gondola rides",
+            "Tuscan countryside",
+            "Amalfi Coast",
+            "Vatican City",
+          ],
+          description:
+            "Immerse yourself in ancient history, Renaissance art, stunning coastlines, and world-renowned cuisine.",
+          highlights: [
+            "Roman ruins",
+            "Vatican Museums",
+            "Leaning Tower of Pisa",
+            "Gelato tasting",
+            "Italian vineyards",
+          ],
         },
-        'Spain': {
-          activities: ['Sagrada Familia', 'Flamenco shows', 'Tapas tours', 'Alhambra Palace', 'Beach clubs in Ibiza'],
-          description: 'Discover vibrant culture, stunning architecture, passionate music, and Mediterranean beaches.',
-          highlights: ['Gaudi architecture', 'La Tomatina festival', 'Camino de Santiago', 'Paella', 'Running of the Bulls']
+        Spain: {
+          activities: [
+            "Sagrada Familia",
+            "Flamenco shows",
+            "Tapas tours",
+            "Alhambra Palace",
+            "Beach clubs in Ibiza",
+          ],
+          description:
+            "Discover vibrant culture, stunning architecture, passionate music, and Mediterranean beaches.",
+          highlights: [
+            "Gaudi architecture",
+            "La Tomatina festival",
+            "Camino de Santiago",
+            "Paella",
+            "Running of the Bulls",
+          ],
         },
-        'United Kingdom': {
-          activities: ['British Museum', 'Buckingham Palace', 'Scottish Highlands', 'Stonehenge', 'Afternoon tea'],
-          description: 'Explore royal history, diverse landscapes, iconic landmarks, and charming countryside.',
-          highlights: ['Tower of London', 'Edinburgh Castle', 'Lake District', 'Harry Potter sites', 'English pubs']
+        "United Kingdom": {
+          activities: [
+            "British Museum",
+            "Buckingham Palace",
+            "Scottish Highlands",
+            "Stonehenge",
+            "Afternoon tea",
+          ],
+          description:
+            "Explore royal history, diverse landscapes, iconic landmarks, and charming countryside.",
+          highlights: [
+            "Tower of London",
+            "Edinburgh Castle",
+            "Lake District",
+            "Harry Potter sites",
+            "English pubs",
+          ],
         },
-        'Greece': {
-          activities: ['Acropolis tour', 'Santorini sunsets', 'Island hopping', 'Ancient Delphi', 'Greek cooking class'],
-          description: 'Experience ancient mythology, stunning islands, crystal-clear waters, and Mediterranean cuisine.',
-          highlights: ['Parthenon', 'Mykonos beaches', 'Meteora monasteries', 'Greek islands', 'Olive groves']
+        Greece: {
+          activities: [
+            "Acropolis tour",
+            "Santorini sunsets",
+            "Island hopping",
+            "Ancient Delphi",
+            "Greek cooking class",
+          ],
+          description:
+            "Experience ancient mythology, stunning islands, crystal-clear waters, and Mediterranean cuisine.",
+          highlights: [
+            "Parthenon",
+            "Mykonos beaches",
+            "Meteora monasteries",
+            "Greek islands",
+            "Olive groves",
+          ],
         },
         // Asia
-        'Japan': {
-          activities: ['Tokyo city tour', 'Mt. Fuji visit', 'Kyoto temples', 'Cherry blossom viewing', 'Sushi making class'],
-          description: 'Discover ancient traditions, cutting-edge technology, serene temples, and exquisite cuisine.',
-          highlights: ['Bullet trains', 'Geisha districts', 'Anime culture', 'Hot springs', 'Zen gardens']
+        Japan: {
+          activities: [
+            "Tokyo city tour",
+            "Mt. Fuji visit",
+            "Kyoto temples",
+            "Cherry blossom viewing",
+            "Sushi making class",
+          ],
+          description:
+            "Discover ancient traditions, cutting-edge technology, serene temples, and exquisite cuisine.",
+          highlights: [
+            "Bullet trains",
+            "Geisha districts",
+            "Anime culture",
+            "Hot springs",
+            "Zen gardens",
+          ],
         },
-        'Thailand': {
-          activities: ['Bangkok temples', 'Island beach hopping', 'Thai cooking class', 'Elephant sanctuary', 'Night markets'],
-          description: 'Experience tropical paradise, ornate temples, delicious street food, and warm hospitality.',
-          highlights: ['Floating markets', 'Phi Phi Islands', 'Full moon parties', 'Thai massage', 'Tuk-tuk rides']
+        Thailand: {
+          activities: [
+            "Bangkok temples",
+            "Island beach hopping",
+            "Thai cooking class",
+            "Elephant sanctuary",
+            "Night markets",
+          ],
+          description:
+            "Experience tropical paradise, ornate temples, delicious street food, and warm hospitality.",
+          highlights: [
+            "Floating markets",
+            "Phi Phi Islands",
+            "Full moon parties",
+            "Thai massage",
+            "Tuk-tuk rides",
+          ],
         },
-        'China': {
-          activities: ['Great Wall hike', 'Forbidden City', 'Terracotta Warriors', 'Li River cruise', 'Dim sum tour'],
-          description: 'Explore ancient wonders, modern megacities, diverse landscapes, and rich cultural heritage.',
-          highlights: ['Great Wall', 'Beijing skyline', 'Pandas', 'Chinese cuisine', 'Silk Road']
+        China: {
+          activities: [
+            "Great Wall hike",
+            "Forbidden City",
+            "Terracotta Warriors",
+            "Li River cruise",
+            "Dim sum tour",
+          ],
+          description:
+            "Explore ancient wonders, modern megacities, diverse landscapes, and rich cultural heritage.",
+          highlights: [
+            "Great Wall",
+            "Beijing skyline",
+            "Pandas",
+            "Chinese cuisine",
+            "Silk Road",
+          ],
         },
-        'India': {
-          activities: ['Taj Mahal visit', 'Varanasi Ganges ceremony', 'Kerala backwaters', 'Jaipur palaces', 'Street food tours'],
-          description: 'Immerse yourself in vibrant colors, spiritual traditions, diverse landscapes, and aromatic cuisine.',
-          highlights: ['Taj Mahal', 'Holi festival', 'Bollywood', 'Yoga retreats', 'Spice markets']
+        India: {
+          activities: [
+            "Taj Mahal visit",
+            "Varanasi Ganges ceremony",
+            "Kerala backwaters",
+            "Jaipur palaces",
+            "Street food tours",
+          ],
+          description:
+            "Immerse yourself in vibrant colors, spiritual traditions, diverse landscapes, and aromatic cuisine.",
+          highlights: [
+            "Taj Mahal",
+            "Holi festival",
+            "Bollywood",
+            "Yoga retreats",
+            "Spice markets",
+          ],
         },
         // Oceania
-        'Australia': {
-          activities: ['Great Barrier Reef diving', 'Sydney Opera House', 'Outback adventure', 'Uluru sunset', 'Beach surfing'],
-          description: 'Discover unique wildlife, stunning coastlines, vibrant cities, and vast wilderness.',
-          highlights: ['Great Barrier Reef', 'Sydney Harbour', 'Kangaroos', 'Beach culture', 'Aboriginal heritage']
+        Australia: {
+          activities: [
+            "Great Barrier Reef diving",
+            "Sydney Opera House",
+            "Outback adventure",
+            "Uluru sunset",
+            "Beach surfing",
+          ],
+          description:
+            "Discover unique wildlife, stunning coastlines, vibrant cities, and vast wilderness.",
+          highlights: [
+            "Great Barrier Reef",
+            "Sydney Harbour",
+            "Kangaroos",
+            "Beach culture",
+            "Aboriginal heritage",
+          ],
         },
-        'New Zealand': {
-          activities: ['Milford Sound cruise', 'Hobbit movie sites', 'Queenstown adventure sports', 'Maori cultural experience', 'Glacier hiking'],
-          description: 'Experience breathtaking landscapes, adventure activities, Maori culture, and Middle-earth scenery.',
-          highlights: ['Lord of the Rings locations', 'Fjords', 'Bungee jumping', 'Geothermal areas', 'Hiking trails']
-        }
+        "New Zealand": {
+          activities: [
+            "Milford Sound cruise",
+            "Hobbit movie sites",
+            "Queenstown adventure sports",
+            "Maori cultural experience",
+            "Glacier hiking",
+          ],
+          description:
+            "Experience breathtaking landscapes, adventure activities, Maori culture, and Middle-earth scenery.",
+          highlights: [
+            "Lord of the Rings locations",
+            "Fjords",
+            "Bungee jumping",
+            "Geothermal areas",
+            "Hiking trails",
+          ],
+        },
       };
 
-      const selectedDestination = destinationData[destination as keyof typeof destinationData] || {
-        activities: ['Explore local culture', 'Visit main attractions', 'Try local cuisine', 'Meet local people', 'Discover hidden gems'],
-        description: `Explore the amazing ${destination} with authentic ${travelStyle?.join(' and ') || 'adventure'} experiences.`,
-        highlights: ['Cultural sites', 'Local markets', 'Traditional food', 'Natural landscapes', 'Historical monuments']
+      const selectedDestination = destinationData[
+        destination as keyof typeof destinationData
+      ] || {
+        activities: [
+          "Explore local culture",
+          "Visit main attractions",
+          "Try local cuisine",
+          "Meet local people",
+          "Discover hidden gems",
+        ],
+        description: `Explore the amazing ${destination} with authentic ${
+          travelStyle?.join(" and ") || "adventure"
+        } experiences.`,
+        highlights: [
+          "Cultural sites",
+          "Local markets",
+          "Traditional food",
+          "Natural landscapes",
+          "Historical monuments",
+        ],
       };
 
       // Use enhanced destination-specific data for reliable trip generation
@@ -2214,70 +2856,114 @@ export async function registerRoutes(app: Express): Promise<void> {
         highlights: selectedDestination.activities.slice(0, 5),
         estimatedBudget: {
           low: Math.max(budget * 0.8, 500),
-          high: Math.max(budget * 1.2, 800)
-        }
+          high: Math.max(budget * 1.2, 800),
+        },
       };
 
       const response = {
-        title: `${destination} ${travelStyle?.includes('adventure') ? 'Adventure' : travelStyle?.includes('cultural') ? 'Cultural Journey' : 'Experience'}`,
+        title: `${destination} ${
+          travelStyle?.includes("adventure")
+            ? "Adventure"
+            : travelStyle?.includes("cultural")
+            ? "Cultural Journey"
+            : "Experience"
+        }`,
         description: trip.description,
         destinations: [
           {
             name: destination,
-            days: duration === "1-2 weeks" ? 10 : duration === "2-4 weeks" ? 21 : 14,
+            days:
+              duration === "1-2 weeks"
+                ? 10
+                : duration === "2-4 weeks"
+                ? 21
+                : 14,
             activities: trip.highlights || selectedDestination.activities,
-            estimatedCost: trip.estimatedBudget?.low || budget * 0.8
-          }
+            estimatedCost: trip.estimatedBudget?.low || budget * 0.8,
+          },
         ],
         totalEstimatedCost: trip.estimatedBudget?.high || budget * 1.2,
-        recommendations: selectedDestination.highlights
+        recommendations: selectedDestination.highlights,
       };
-      
-      console.log('Sending trip response:', response);
+
+      console.log("Sending trip response:", response);
       res.json(response);
     } catch (error) {
       console.error("Error generating trip:", error);
-      console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
-      
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      
+      console.error(
+        "Error stack:",
+        error instanceof Error ? error.stack : "No stack trace"
+      );
+
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
       // Provide more specific error information
       if (errorMessage.includes("API key")) {
-        res.status(500).json({ 
+        res.status(500).json({
           message: "OpenAI API key issue. Please check configuration.",
-          error: errorMessage 
+          error: errorMessage,
         });
       } else if (errorMessage.includes("rate limit")) {
-        res.status(500).json({ 
+        res.status(500).json({
           message: "OpenAI rate limit reached. Please try again later.",
-          error: errorMessage 
+          error: errorMessage,
         });
       } else {
-        res.status(500).json({ 
+        res.status(500).json({
           message: "Failed to generate trip with AI",
-          error: errorMessage 
+          error: errorMessage,
         });
       }
     }
   });
 
   // AI-powered travel suggestions (guest-friendly)
-  app.post('/api/ai/travel-suggestions', async (req, res) => {
+  app.post("/api/ai/travel-suggestions", async (req, res) => {
     try {
-      const { destination, destinations, travelStyle, budget, duration, interests, preferredCountries, language, adults, children, tripType, startDate, endDate } = req.body;
-      
+      console.log("🚀 Travel suggestions request received");
+      console.log("📦 Request body:", JSON.stringify(req.body, null, 2));
+
+      const {
+        destination,
+        destinations,
+        travelStyle,
+        budget,
+        duration,
+        interests,
+        preferredCountries,
+        language,
+        adults,
+        children,
+        tripType,
+        startDate,
+        endDate,
+      } = req.body;
+
       // Normalize language parameter
-      const normalizedLanguage = (language || req.headers['accept-language'] || 'en').toString().toLowerCase();
-      const isHebrew = normalizedLanguage.startsWith('he');
-      const finalLanguage = isHebrew ? 'he' : 'en';
-      
-      console.log('Travel suggestions request - Language:', language, 'Normalized:', finalLanguage);
-      console.log('Destinations array:', destinations);
-      
+      const normalizedLanguage = (
+        language ||
+        req.headers["accept-language"] ||
+        "en"
+      )
+        .toString()
+        .toLowerCase();
+      const isHebrew = normalizedLanguage.startsWith("he");
+      const finalLanguage = isHebrew ? "he" : "en";
+
+      console.log(
+        "Travel suggestions request - Language:",
+        language,
+        "Normalized:",
+        finalLanguage
+      );
+      console.log("Destinations array:", destinations);
+
       // Validate required inputs
       if (!travelStyle || !budget || !duration || !interests) {
-        return res.status(400).json({ 
-          message: "Missing required fields: travelStyle, budget, duration, and interests are required" 
+        return res.status(400).json({
+          message:
+            "Missing required fields: travelStyle, budget, duration, and interests are required",
         });
       }
 
@@ -2285,18 +2971,29 @@ export async function registerRoutes(app: Express): Promise<void> {
       let specificCity: string | undefined;
       let country: string;
       let multiCityDestinations: any[] = [];
-      
-      if (destinations && Array.isArray(destinations) && destinations.length > 0) {
+
+      if (
+        destinations &&
+        Array.isArray(destinations) &&
+        destinations.length > 0
+      ) {
         // New multi-city format
         multiCityDestinations = destinations;
         // Use first destination as primary for AI context
         country = destinations[0].country;
         specificCity = destinations[0].city || undefined;
-        
-        console.log("Multi-city trip with destinations:", multiCityDestinations);
-      } else if (destination && typeof destination === 'string' && destination.includes(',')) {
+
+        console.log(
+          "Multi-city trip with destinations:",
+          multiCityDestinations
+        );
+      } else if (
+        destination &&
+        typeof destination === "string" &&
+        destination.includes(",")
+      ) {
         // Legacy format: "City, Country"
-        const parts = destination.split(',').map(part => part.trim());
+        const parts = destination.split(",").map((part) => part.trim());
         specificCity = parts[0];
         country = parts[1];
       } else {
@@ -2304,101 +3001,178 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       console.log("Generating travel suggestions with data:", {
-        specificCity, country, travelStyle, budget, duration, interests, preferredCountries, adults, children, tripType, multiCityDestinations
+        specificCity,
+        country,
+        travelStyle,
+        budget,
+        duration,
+        interests,
+        preferredCountries,
+        adults,
+        children,
+        tripType,
+        multiCityDestinations,
       });
 
+      console.log("🤖 Calling generateTravelSuggestions...");
       const suggestions = await generateTravelSuggestions({
         travelStyle,
         budget,
         duration,
         interests,
-        preferredCountries: Array.isArray(destination) ? destination : [country],
+        preferredCountries: Array.isArray(destination)
+          ? destination
+          : [country],
         specificCity,
         language: finalLanguage,
         adults: adults || 2,
         children: children || 0,
-        tripType: tripType || 'family',
-        destinations: multiCityDestinations.length > 0 ? multiCityDestinations : undefined
+        tripType: tripType || "family",
+        destinations:
+          multiCityDestinations.length > 0 ? multiCityDestinations : undefined,
       });
-      
-      console.log("Generated suggestions:", suggestions);
-      
+
+      console.log(
+        "✅ Generated suggestions successfully:",
+        suggestions.length,
+        "suggestions"
+      );
+
       // Add startDate and endDate to each suggestion
       const suggestionsWithDates = suggestions.map((suggestion: any) => ({
         ...suggestion,
         startDate: startDate,
-        endDate: endDate
+        endDate: endDate,
       }));
-      
+
       res.json(suggestionsWithDates);
     } catch (error) {
-      console.error("Error generating travel suggestions:", error);
-      console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
-      
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      
+      console.error("❌ Error generating travel suggestions:", error);
+      console.error("Error type:", error?.constructor?.name);
+      console.error(
+        "Error message:",
+        error instanceof Error ? error.message : String(error)
+      );
+      console.error(
+        "Error stack:",
+        error instanceof Error ? error.stack : "No stack trace"
+      );
+
+      // Log additional error details
+      if (error && typeof error === "object") {
+        console.error(
+          "Error details:",
+          JSON.stringify(error, Object.getOwnPropertyNames(error), 2)
+        );
+      }
+
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
       // Provide more specific error information
-      if (errorMessage.includes("API key")) {
-        res.status(500).json({ 
+      if (
+        errorMessage.includes("API key") ||
+        errorMessage.includes("api_key")
+      ) {
+        res.status(500).json({
           message: "OpenAI API key issue. Please check configuration.",
-          error: errorMessage 
+          error: errorMessage,
+          details: "The OpenAI API key may be invalid or missing.",
         });
       } else if (errorMessage.includes("rate limit")) {
-        res.status(500).json({ 
+        res.status(500).json({
           message: "OpenAI rate limit reached. Please try again later.",
-          error: errorMessage 
+          error: errorMessage,
+        });
+      } else if (errorMessage.includes("insufficient_quota")) {
+        res.status(500).json({
+          message:
+            "OpenAI API quota exceeded. Please check your OpenAI account.",
+          error: errorMessage,
         });
       } else {
-        res.status(500).json({ 
+        res.status(500).json({
           message: "Failed to generate trip suggestions. Please try again.",
-          error: errorMessage 
+          error: errorMessage,
+          stack:
+            process.env.NODE_ENV === "development"
+              ? error instanceof Error
+                ? error.stack
+                : undefined
+              : undefined,
         });
       }
     }
   });
 
   // AI-powered itinerary generation
-  app.post('/api/ai/itinerary', noAuth, async (req, res) => {
+  app.post("/api/ai/itinerary", noAuth, async (req, res) => {
     try {
-      const { destination, duration, interests, travelStyle, budget, language, adults, children, tripType } = req.body;
-      
+      const {
+        destination,
+        duration,
+        interests,
+        travelStyle,
+        budget,
+        language,
+        adults,
+        children,
+        tripType,
+      } = req.body;
+
       // Normalize language parameter
-      const normalizedLanguage = (language || req.headers['accept-language'] || 'en').toString().toLowerCase();
-      const isHebrew = normalizedLanguage.startsWith('he');
-      const finalLanguage = isHebrew ? 'he' : 'en';
-      
-      console.log('Itinerary request - Language:', language, 'Normalized:', finalLanguage);
-      
-      console.log('Generating itinerary with data:', {
-        destination, duration, interests, travelStyle, budget
+      const normalizedLanguage = (
+        language ||
+        req.headers["accept-language"] ||
+        "en"
+      )
+        .toString()
+        .toLowerCase();
+      const isHebrew = normalizedLanguage.startsWith("he");
+      const finalLanguage = isHebrew ? "he" : "en";
+
+      console.log(
+        "Itinerary request - Language:",
+        language,
+        "Normalized:",
+        finalLanguage
+      );
+
+      console.log("Generating itinerary with data:", {
+        destination,
+        duration,
+        interests,
+        travelStyle,
+        budget,
       });
-      
+
       // Validate required fields
       if (!destination) {
-        return res.status(400).json({ 
-          message: "Destination is required" 
+        return res.status(400).json({
+          message: "Destination is required",
         });
       }
-      
+
       // Convert duration string to number of days
       let durationDays = 7; // default
-      if (typeof duration === 'string') {
+      if (typeof duration === "string") {
         const match = duration.match(/(\d+)/);
         if (match) {
           durationDays = parseInt(match[1]);
         }
-      } else if (typeof duration === 'number') {
+      } else if (typeof duration === "number") {
         durationDays = duration;
       }
-      
+
       // Ensure arrays are properly formatted
       const cleanInterests = Array.isArray(interests) ? interests : [];
       const cleanTravelStyle = Array.isArray(travelStyle) ? travelStyle : [];
-      const cleanBudget = typeof budget === 'number' ? budget : 1000;
-      
+      const cleanBudget = typeof budget === "number" ? budget : 1000;
+
       // Use the generateDetailedItinerary function for better results
       const itinerary = await generateDetailedItinerary({
-        userId: (req.user as any)?.claims?.sub || (req.user as any)?.id || 'guest',
+        userId:
+          (req.user as any)?.claims?.sub || (req.user as any)?.id || "guest",
         destination: destination,
         duration: durationDays,
         interests: cleanInterests,
@@ -2407,97 +3181,140 @@ export async function registerRoutes(app: Express): Promise<void> {
         language: finalLanguage,
         adults: adults || 2,
         children: children || 0,
-        tripType: tripType || 'family'
+        tripType: tripType || "family",
       });
-      
-      console.log('Generated itinerary successfully:', itinerary.length, 'days');
+
+      console.log(
+        "Generated itinerary successfully:",
+        itinerary.length,
+        "days"
+      );
       res.json(itinerary);
     } catch (error) {
       console.error("Error generating itinerary:", error);
-      console.error("Error stack:", error instanceof Error ? error.stack : "No stack");
-      
+      console.error(
+        "Error stack:",
+        error instanceof Error ? error.stack : "No stack"
+      );
+
       // More detailed error handling
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
       if (errorMessage.includes("API key")) {
-        res.status(500).json({ 
+        res.status(500).json({
           message: "OpenAI API configuration issue",
-          error: "API key problem"
+          error: "API key problem",
         });
       } else if (errorMessage.includes("rate limit")) {
-        res.status(500).json({ 
-          message: "OpenAI rate limit reached. Please try again in a few minutes.",
-          error: "Rate limit exceeded"
+        res.status(500).json({
+          message:
+            "OpenAI rate limit reached. Please try again in a few minutes.",
+          error: "Rate limit exceeded",
         });
       } else {
-        res.status(500).json({ 
+        res.status(500).json({
           message: "Failed to generate itinerary",
-          error: errorMessage
+          error: errorMessage,
         });
       }
     }
   });
 
   // Generate custom journey based on inspiration
-  app.post('/api/ai/generate-custom-journey', noAuth, async (req, res) => {
+  app.post("/api/ai/generate-custom-journey", noAuth, async (req, res) => {
     try {
-      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id || 'guest';
-      const { journeyId, adults, children, tripType, startDate, budget, customRequest, language } = req.body;
-      
+      const userId =
+        (req.user as any)?.claims?.sub || (req.user as any)?.id || "guest";
+      const {
+        journeyId,
+        adults,
+        children,
+        tripType,
+        startDate,
+        budget,
+        customRequest,
+        language,
+      } = req.body;
+
       // Normalize language parameter
-      const normalizedLanguage = (language || req.headers['accept-language'] || 'en').toString().toLowerCase();
-      const isHebrew = normalizedLanguage.startsWith('he');
-      const finalLanguage = isHebrew ? 'he' : 'en';
-      
-      console.log('Custom journey request:', { journeyId, adults, children, tripType, startDate, budget });
-      
+      const normalizedLanguage = (
+        language ||
+        req.headers["accept-language"] ||
+        "en"
+      )
+        .toString()
+        .toLowerCase();
+      const isHebrew = normalizedLanguage.startsWith("he");
+      const finalLanguage = isHebrew ? "he" : "en";
+
+      console.log("Custom journey request:", {
+        journeyId,
+        adults,
+        children,
+        tripType,
+        startDate,
+        budget,
+      });
+
       // Validate required fields
       if (!journeyId) {
         return res.status(400).json({ message: "Journey ID is required" });
       }
-      
+
       // Get the original journey for inspiration
       const journey = await storage.getJourneyById(parseInt(journeyId));
       if (!journey) {
         return res.status(404).json({ message: "Journey not found" });
       }
-      
+
       // Extract destinations from journey
-      const destinations = Array.isArray(journey.destinations) 
-        ? journey.destinations.map((d: any) => d.name).join(', ')
-        : 'Multiple destinations';
-      
+      const destinations = Array.isArray(journey.destinations)
+        ? journey.destinations.map((d: any) => d.name).join(", ")
+        : "Multiple destinations";
+
       // Calculate duration from journey
       const duration = journey.totalNights || 14;
-      
+
       // Generate customized itinerary using AI
       const itinerary = await generateDetailedItinerary({
         userId,
         destination: destinations,
         duration,
-        interests: ['culture', 'food', 'sightseeing'], // Default interests based on journey type
+        interests: ["culture", "food", "sightseeing"], // Default interests based on journey type
         travelStyle: [tripType],
         budget: budget ? parseFloat(budget) : 2000,
         language: finalLanguage,
         adults: adults || 2,
         children: children || 0,
-        tripType: tripType || 'family',
-        customRequest: customRequest || undefined
+        tripType: tripType || "family",
+        customRequest: customRequest || undefined,
       });
-      
+
       // Create trip title and description based on language
-      const tripTitle = finalLanguage === 'he' 
-        ? `מסע מותאם אישית מבוסס על ${journey.title}`
-        : `Custom Journey inspired by ${journey.title}`;
-      
+      const tripTitle =
+        finalLanguage === "he"
+          ? `מסע מותאם אישית מבוסס על ${journey.title}`
+          : `Custom Journey inspired by ${journey.title}`;
+
       // Generate description in the correct language (customRequest is used for AI prompting only, not for description)
-      let tripDescription = '';
-      if (finalLanguage === 'he') {
-        tripDescription = `מסע מותאם אישית ${tripType === 'couple' ? 'לזוג' : tripType === 'family' ? 'למשפחה' : tripType === 'solo' ? 'לטיול סולו' : 'לחברים'} המבוסס על ${journey.title}. ${itinerary.length} ימים של חוויות בלתי נשכחות ב-${destinations}.`;
+      let tripDescription = "";
+      if (finalLanguage === "he") {
+        tripDescription = `מסע מותאם אישית ${
+          tripType === "couple"
+            ? "לזוג"
+            : tripType === "family"
+            ? "למשפחה"
+            : tripType === "solo"
+            ? "לטיול סולו"
+            : "לחברים"
+        } המבוסס על ${journey.title}. ${
+          itinerary.length
+        } ימים של חוויות בלתי נשכחות ב-${destinations}.`;
       } else {
         tripDescription = `A custom ${tripType} journey inspired by ${journey.title}. ${itinerary.length} days of unforgettable experiences in ${destinations}.`;
       }
-      
+
       // Create new trip in database
       const newTrip = await storage.createTrip({
         userId,
@@ -2510,32 +3327,36 @@ export async function registerRoutes(app: Express): Promise<void> {
         itinerary,
         adults: adults || 2,
         children: children || 0,
-        isPublic: false
+        isPublic: false,
       });
-      
-      console.log('Created custom journey with ID:', newTrip.id);
-      
+
+      console.log("Created custom journey with ID:", newTrip.id);
+
       // Return the new trip ID
-      res.status(201).json({ 
+      res.status(201).json({
         tripId: newTrip.id,
-        message: finalLanguage === 'he' ? 'המסע נוצר בהצלחה' : 'Journey created successfully'
+        message:
+          finalLanguage === "he"
+            ? "המסע נוצר בהצלחה"
+            : "Journey created successfully",
       });
     } catch (error) {
       console.error("Error generating custom journey:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      res.status(500).json({ 
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      res.status(500).json({
         message: "Failed to generate custom journey",
-        error: errorMessage
+        error: errorMessage,
       });
     }
   });
 
   // AI-powered budget analysis
-  app.post('/api/ai/budget-analysis', noAuth, async (req: any, res) => {
+  app.post("/api/ai/budget-analysis", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { tripId, totalBudget } = req.body;
-      
+
       let expenses;
       if (tripId) {
         expenses = await storage.getTripExpenses(tripId);
@@ -2544,11 +3365,11 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       // Transform expenses to match the expected format
-      const transformedExpenses = expenses.map(expense => ({
+      const transformedExpenses = expenses.map((expense) => ({
         category: expense.category,
         amount: parseFloat(expense.amount),
         description: expense.description,
-        location: expense.location || undefined
+        location: expense.location || undefined,
       }));
 
       const analysis = await analyzeBudget(transformedExpenses, totalBudget);
@@ -2560,17 +3381,20 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // AI-powered recommendations
-  app.post('/api/ai/recommendations', async (req, res) => {
+  app.post("/api/ai/recommendations", async (req, res) => {
     try {
       const { destination } = req.body;
       const reviews = await storage.getReviewsByDestination(destination);
       // Transform reviews to match the expected format
-      const transformedReviews = reviews.map(review => ({
+      const transformedReviews = reviews.map((review) => ({
         rating: review.rating,
         comment: review.comment,
-        tags: Array.isArray(review.tags) ? review.tags : []
+        tags: Array.isArray(review.tags) ? review.tags : [],
       }));
-      const recommendations = await generateRecommendations(destination, transformedReviews);
+      const recommendations = await generateRecommendations(
+        destination,
+        transformedReviews
+      );
       res.json(recommendations);
     } catch (error) {
       console.error("Error generating recommendations:", error);
@@ -2579,66 +3403,74 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Test real places enrichment endpoint
-  app.post('/api/ai/enrich-places', async (req, res) => {
+  app.post("/api/ai/enrich-places", async (req, res) => {
     try {
       const { suggestions } = req.body;
-      
+
       if (!suggestions || !Array.isArray(suggestions)) {
-        return res.status(400).json({ 
-          message: "Invalid input: suggestions array required" 
+        return res.status(400).json({
+          message: "Invalid input: suggestions array required",
         });
       }
-      
-      console.log('Enriching suggestions with real places...');
-      const enrichedSuggestions = await enrichSuggestionsWithRealPlaces(suggestions);
-      
-      res.json({ 
+
+      console.log("Enriching suggestions with real places...");
+      const enrichedSuggestions = await enrichSuggestionsWithRealPlaces(
+        suggestions
+      );
+
+      res.json({
         enrichedSuggestions,
-        message: 'Successfully enriched suggestions with real places from Google Places API'
+        message:
+          "Successfully enriched suggestions with real places from Google Places API",
       });
     } catch (error) {
       console.error("Error enriching places:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         message: "Failed to enrich suggestions with real places",
-        error: error instanceof Error ? error.message : "Unknown error"
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
 
   // Test OpenAI API endpoint
-  app.get('/api/ai/test', async (req, res) => {
+  app.get("/api/ai/test", async (req, res) => {
     try {
-      console.log('Testing OpenAI API...');
+      console.log("Testing OpenAI API...");
       const testResponse = await generateTravelSuggestions({
-        travelStyle: ['adventure'],
+        travelStyle: ["adventure"],
         budget: 1000,
-        duration: '1-2 weeks',
-        interests: ['hiking'],
-        preferredCountries: ['Peru']
+        duration: "1-2 weeks",
+        interests: ["hiking"],
+        preferredCountries: ["Peru"],
       });
-      console.log('OpenAI test successful:', testResponse);
-      res.json({ status: 'success', suggestions: testResponse });
+      console.log("OpenAI test successful:", testResponse);
+      res.json({ status: "success", suggestions: testResponse });
     } catch (error) {
-      console.error('OpenAI test failed:', error);
-      res.status(500).json({ 
-        status: 'error', 
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
+      console.error("OpenAI test failed:", error);
+      res.status(500).json({
+        status: "error",
+        message: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
       });
     }
   });
 
   // Enhanced AI chat assistant with conversation history
-  app.post('/api/ai/chat', noAuth, async (req: any, res) => {
+  app.post("/api/ai/chat", noAuth, async (req: any, res) => {
     try {
-      const { message, chatHistory = [], previousSuggestions = [], language = 'en' } = req.body;
-      
+      const {
+        message,
+        chatHistory = [],
+        previousSuggestions = [],
+        language = "en",
+      } = req.body;
+
       // Build context with optional user data if authenticated
       const context: any = {
         chatHistory,
-        previousSuggestions
+        previousSuggestions,
       };
-      
+
       // Add user context if user is authenticated
       if (req.user?.claims?.sub) {
         const userId = req.user.claims.sub;
@@ -2652,78 +3484,137 @@ export async function registerRoutes(app: Express): Promise<void> {
         }
       }
 
-      const response = await conversationalTripAssistant(message, context, language);
-      
+      const response = await conversationalTripAssistant(
+        message,
+        context,
+        language
+      );
+
       // If AI indicates it's ready to generate suggestions, generate them
-      if (response.type === 'suggestions') {
-        const suggestions = await generateConversationalSuggestions(chatHistory, previousSuggestions, language);
+      if (response.type === "suggestions") {
+        const suggestions = await generateConversationalSuggestions(
+          chatHistory,
+          previousSuggestions,
+          language
+        );
         response.suggestions = suggestions;
-        
+
         // Store suggestions for this user session (could be expanded to database storage)
         // For now, we'll return them in the response for client-side management
       }
-      
+
       res.json(response);
     } catch (error) {
       console.error("Error in chat assistant:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         message: "Failed to get chat response",
-        error: error instanceof Error ? error.message : "Unknown error"
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
 
   // Generate trip suggestions based on conversation
-  app.post('/api/ai/conversational-suggestions', noAuth, async (req: any, res) => {
-    try {
-      const { chatHistory = [], previousSuggestions = [], language = 'en' } = req.body;
-      
-      const suggestions = await generateConversationalSuggestions(chatHistory, previousSuggestions, language);
-      res.json({ suggestions });
-    } catch (error) {
-      console.error("Error generating conversational suggestions:", error);
-      res.status(500).json({ message: "Failed to generate suggestions from conversation" });
+  app.post(
+    "/api/ai/conversational-suggestions",
+    noAuth,
+    async (req: any, res) => {
+      try {
+        const {
+          chatHistory = [],
+          previousSuggestions = [],
+          language = "en",
+        } = req.body;
+
+        const suggestions = await generateConversationalSuggestions(
+          chatHistory,
+          previousSuggestions,
+          language
+        );
+        res.json({ suggestions });
+      } catch (error) {
+        console.error("Error generating conversational suggestions:", error);
+        res
+          .status(500)
+          .json({
+            message: "Failed to generate suggestions from conversation",
+          });
+      }
     }
-  });
+  );
 
   // Generate trip suggestions from form data (MyTripsScreen)
-  app.post('/api/get-suggestions', async (req, res) => {
+  app.post("/api/get-suggestions", async (req, res) => {
     try {
-      const { destination, dailyBudget, travelStyle, interests, duration, language = 'en' } = req.body;
-      
-      if (!destination || !duration || !travelStyle || travelStyle.length === 0) {
-        return res.status(400).json({ message: "Missing required fields: destination, duration, and travel style" });
+      const {
+        destination,
+        dailyBudget,
+        travelStyle,
+        interests,
+        duration,
+        language = "en",
+      } = req.body;
+
+      if (
+        !destination ||
+        !duration ||
+        !travelStyle ||
+        travelStyle.length === 0
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "Missing required fields: destination, duration, and travel style",
+          });
       }
 
-      console.log("Generating suggestions for:", { destination, dailyBudget, travelStyle, interests, duration });
+      console.log("Generating suggestions for:", {
+        destination,
+        dailyBudget,
+        travelStyle,
+        interests,
+        duration,
+      });
 
       // Build message for AI based on form inputs
-      const interestsText = interests && interests.length > 0 ? ` I enjoy ${interests.join(', ')}.` : '';
-      const travelStyleText = Array.isArray(travelStyle) ? travelStyle.join(', ') : travelStyle;
+      const interestsText =
+        interests && interests.length > 0
+          ? ` I enjoy ${interests.join(", ")}.`
+          : "";
+      const travelStyleText = Array.isArray(travelStyle)
+        ? travelStyle.join(", ")
+        : travelStyle;
       const message = `I want to visit ${destination} for ${duration}. My daily budget is $${dailyBudget}. I'm interested in ${travelStyleText} travel style.${interestsText} Please suggest 3 different trip options for me.`;
 
-      const chatHistory = [{ role: 'user' as const, content: message }];
-      const suggestions = await generateConversationalSuggestions(chatHistory, [], language);
+      const chatHistory = [{ role: "user" as const, content: message }];
+      const suggestions = await generateConversationalSuggestions(
+        chatHistory,
+        [],
+        language
+      );
 
       console.log("Generated suggestions:", suggestions);
       res.json({ suggestions: suggestions || [] });
     } catch (error) {
       console.error("Get suggestions error:", error);
-      console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
-      res.status(500).json({ 
+      console.error(
+        "Error stack:",
+        error instanceof Error ? error.stack : "No stack trace"
+      );
+      res.status(500).json({
         message: "Failed to generate trip suggestions",
-        error: error instanceof Error ? error.message : "Unknown error"
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
 
   // Get user's saved trips (simplified for guest user)
-  app.get('/api/my-trips/:userId', async (req, res) => {
+  app.get("/api/my-trips/:userId", async (req, res) => {
     try {
       const { userId } = req.params;
-      
+
       // For guest user, get recent public trips as placeholder
-      if (userId === 'guest') {
+      if (userId === "guest") {
         const publicTrips = await storage.getPublicTrips();
         return res.json(publicTrips.slice(0, 6)); // Limit to 6 recent trips
       }
@@ -2739,52 +3630,58 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
     } catch (error) {
       console.error("Get user trips error:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         message: "Failed to fetch user trips",
-        error: error instanceof Error ? error.message : "Unknown error"
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
 
   // Generate detailed day-by-day itinerary
-  app.post('/api/generate-itinerary', async (req, res) => {
+  app.post("/api/generate-itinerary", async (req, res) => {
     try {
-      const { userId, destination, duration, interests, travelStyle, budget } = req.body;
-      
+      const { userId, destination, duration, interests, travelStyle, budget } =
+        req.body;
+
       if (!destination || !duration || !budget) {
-        return res.status(400).json({ message: "Missing required fields: destination, duration, budget" });
+        return res
+          .status(400)
+          .json({
+            message: "Missing required fields: destination, duration, budget",
+          });
       }
 
       const itineraryRequest = {
-        userId: userId || 'guest',
+        userId: userId || "guest",
         destination,
         duration: parseInt(duration) || 7,
         interests: interests || [],
         travelStyle: travelStyle || [],
-        budget: parseInt(budget) || 50
+        budget: parseInt(budget) || 50,
       };
 
       const itinerary = await generateDetailedItinerary(itineraryRequest);
       res.json({ itinerary });
     } catch (error) {
       console.error("Generate itinerary error:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         message: "Failed to generate itinerary",
-        error: error instanceof Error ? error.message : "Unknown error"
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
 
   // Add place to user's custom itinerary
-  app.post('/api/itinerary/:userId/add', async (req, res) => {
+  app.post("/api/itinerary/:userId/add", async (req, res) => {
     try {
       const { userId } = req.params;
       const { day, location, activity, estimatedCost, tip } = req.body;
-      
+
       // Validate required fields
       if (!userId || !day || !location || !activity) {
-        return res.status(400).json({ 
-          message: "Missing required fields: day, location, activity are required" 
+        return res.status(400).json({
+          message:
+            "Missing required fields: day, location, activity are required",
         });
       }
 
@@ -2794,8 +3691,10 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       // Find if day already exists in itinerary
-      let dayEntry = userItineraries[userId].find(d => d.day === parseInt(day));
-      
+      let dayEntry = userItineraries[userId].find(
+        (d) => d.day === parseInt(day)
+      );
+
       if (dayEntry) {
         // Add activity to existing day
         dayEntry.activities.push(activity);
@@ -2810,10 +3709,10 @@ export async function registerRoutes(app: Express): Promise<void> {
           location: location,
           activities: [activity],
           estimatedCost: parseInt(estimatedCost) || 0,
-          tips: tip ? [tip] : []
+          tips: tip ? [tip] : [],
         };
         userItineraries[userId].push(newDay);
-        
+
         // Sort by day number
         userItineraries[userId].sort((a, b) => a.day - b.day);
       }
@@ -2826,20 +3725,20 @@ export async function registerRoutes(app: Express): Promise<void> {
           location,
           activity,
           estimatedCost: parseInt(estimatedCost) || 0,
-          tip: tip || null
-        }
+          tip: tip || null,
+        },
       });
     } catch (error) {
       console.error("Error adding to itinerary:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         message: "Failed to add activity to itinerary",
-        error: error instanceof Error ? error.message : "Unknown error"
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
 
-  // Save trip suggestion to user's trips  
-  app.post('/api/my-trips/:userId/save', async (req, res) => {
+  // Save trip suggestion to user's trips
+  app.post("/api/my-trips/:userId/save", async (req, res) => {
     try {
       const { userId } = req.params;
       const trip = req.body;
@@ -2847,73 +3746,77 @@ export async function registerRoutes(app: Express): Promise<void> {
       console.log("Saving trip for user:", userId, "Trip data:", trip);
 
       if (!trip || !trip.destination) {
-        return res.status(400).json({ message: "Missing trip data - destination is required" });
+        return res
+          .status(400)
+          .json({ message: "Missing trip data - destination is required" });
       }
 
       await storage.saveUserTrip(userId, trip);
-      res.status(200).json({ success: true, message: "Trip saved successfully" });
+      res
+        .status(200)
+        .json({ success: true, message: "Trip saved successfully" });
     } catch (error) {
       console.error("Failed to save trip:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         message: "Failed to save trip",
-        error: error instanceof Error ? error.message : "Unknown error"
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
 
   // Get user's custom itinerary
-  app.get('/api/itinerary/:userId', async (req, res) => {
+  app.get("/api/itinerary/:userId", async (req, res) => {
     try {
       const { userId } = req.params;
-      
+
       const itinerary = userItineraries[userId] || [];
-      res.json({ 
+      res.json({
         userId,
         itinerary,
         totalDays: itinerary.length,
-        totalCost: itinerary.reduce((sum, day) => sum + day.estimatedCost, 0)
+        totalCost: itinerary.reduce((sum, day) => sum + day.estimatedCost, 0),
       });
     } catch (error) {
       console.error("Error fetching user itinerary:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         message: "Failed to fetch user itinerary",
-        error: error instanceof Error ? error.message : "Unknown error"
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
 
   // Clear user's custom itinerary
-  app.delete('/api/itinerary/:userId', async (req, res) => {
+  app.delete("/api/itinerary/:userId", async (req, res) => {
     try {
       const { userId } = req.params;
-      
+
       delete userItineraries[userId];
-      
-      res.json({ 
+
+      res.json({
         message: "User itinerary cleared successfully",
-        userId
+        userId,
       });
     } catch (error) {
       console.error("Error clearing user itinerary:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         message: "Failed to clear user itinerary",
-        error: error instanceof Error ? error.message : "Unknown error"
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
 
   // Legacy AI chat assistant for backward compatibility
-  app.post('/api/ai/chat-legacy', noAuth, async (req: any, res) => {
+  app.post("/api/ai/chat-legacy", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { message } = req.body;
-      
+
       // Get user context
       const userTrips = await storage.getUserTrips(userId);
       const context = {
         userTrips,
         currentLocation: req.body.currentLocation,
-        travelPreferences: req.body.travelPreferences
+        travelPreferences: req.body.travelPreferences,
       };
 
       const response = await chatAssistant(message, context);
@@ -2926,21 +3829,24 @@ export async function registerRoutes(app: Express): Promise<void> {
 
   // Weather & Travel Conditions API
   // Weather API with real weather data and travel recommendations
-  app.get('/api/weather/:destination', async (req, res) => {
+  app.get("/api/weather/:destination", async (req, res) => {
     try {
       const { destination } = req.params;
-      const { country = 'Peru' } = req.query;
-      
+      const { country = "Peru" } = req.query;
+
       let weatherData;
       try {
         // Get current weather from OpenWeather API
-        weatherData = await weatherService.getCurrentWeather(destination, country as string);
-        
+        weatherData = await weatherService.getCurrentWeather(
+          destination,
+          country as string
+        );
+
         if (!weatherData) {
           throw new Error("Weather data not available");
         }
       } catch (weatherError) {
-        console.log('Weather service error, using mock data:', weatherError);
+        console.log("Weather service error, using mock data:", weatherError);
         // Mock weather data for fallback
         weatherData = {
           location: destination,
@@ -2954,8 +3860,8 @@ export async function registerRoutes(app: Express): Promise<void> {
           forecast: [
             { day: "Today", temp: 22, condition: "Partly Cloudy" },
             { day: "Tomorrow", temp: 24, condition: "Sunny" },
-            { day: "Day 3", temp: 20, condition: "Light Rain" }
-          ]
+            { day: "Day 3", temp: 20, condition: "Light Rain" },
+          ],
         };
       }
 
@@ -2967,20 +3873,29 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Travel recommendations based on weather and climate data
-  app.get('/api/weather/:destination/recommendations', async (req, res) => {
+  app.get("/api/weather/:destination/recommendations", async (req, res) => {
     try {
       const { destination } = req.params;
-      const { country = 'Peru' } = req.query;
-      
+      const { country = "Peru" } = req.query;
+
       let recommendations;
       try {
         // Get current weather for better recommendations
-        const weatherData = await weatherService.getCurrentWeather(destination, country as string);
-        
+        const weatherData = await weatherService.getCurrentWeather(
+          destination,
+          country as string
+        );
+
         // Generate travel recommendations
-        recommendations = weatherService.generateTravelRecommendation(destination, weatherData || undefined);
+        recommendations = weatherService.generateTravelRecommendation(
+          destination,
+          weatherData || undefined
+        );
       } catch (weatherError) {
-        console.log('Weather recommendations error, using mock data:', weatherError);
+        console.log(
+          "Weather recommendations error, using mock data:",
+          weatherError
+        );
         // Mock travel recommendations
         recommendations = {
           destination,
@@ -2989,65 +3904,78 @@ export async function registerRoutes(app: Express): Promise<void> {
           recommendations: [
             "Pack light layers for variable weather",
             "Bring waterproof jacket for occasional rain",
-            "Comfortable walking shoes recommended"
+            "Comfortable walking shoes recommended",
           ],
-          activities: [
-            "Outdoor sightseeing",
-            "Walking tours", 
-            "Photography"
-          ]
+          activities: ["Outdoor sightseeing", "Walking tours", "Photography"],
         };
       }
-      
+
       res.json(recommendations);
     } catch (error) {
       console.error("Error generating travel recommendations:", error);
-      res.status(500).json({ message: "Failed to generate travel recommendations" });
+      res
+        .status(500)
+        .json({ message: "Failed to generate travel recommendations" });
     }
   });
 
   // Batch weather API for multiple destinations by coordinates
-  app.post('/api/weather/batch', async (req, res) => {
+  app.post("/api/weather/batch", async (req, res) => {
     try {
       const { destinations } = req.body;
-      
+
       if (!destinations || !Array.isArray(destinations)) {
         return res.status(400).json({ message: "Invalid destinations data" });
       }
-      
+
       const weatherResults = new Map<string, any>();
-      
+
       // Process each destination
       for (const dest of destinations) {
         try {
           if (!dest.lat || !dest.lon || isNaN(dest.lat) || isNaN(dest.lon)) {
             continue; // Skip destinations without valid coordinates
           }
-          
+
           // Call OpenWeather API with coordinates
           const response = await fetch(
             `https://api.openweathermap.org/data/2.5/weather?lat=${dest.lat}&lon=${dest.lon}&appid=${process.env.OPENWEATHER_API_KEY}&units=metric`
           );
-          
+
           if (!response.ok) {
-            console.warn(`Weather API failed for ${dest.name}: ${response.statusText}`);
+            console.warn(
+              `Weather API failed for ${dest.name}: ${response.statusText}`
+            );
             continue;
           }
-          
+
           const data = await response.json();
-          
+
           // Map weather icon to emoji
           const getWeatherIcon = (iconCode: string): string => {
             const iconMap: { [key: string]: string } = {
-              '01d': '☀️', '01n': '🌙', '02d': '⛅', '02n': '☁️',
-              '03d': '☁️', '03n': '☁️', '04d': '☁️', '04n': '☁️',
-              '09d': '🌧️', '09n': '🌧️', '10d': '🌦️', '10n': '🌧️',
-              '11d': '⛈️', '11n': '⛈️', '13d': '❄️', '13n': '❄️',
-              '50d': '🌫️', '50n': '🌫️'
+              "01d": "☀️",
+              "01n": "🌙",
+              "02d": "⛅",
+              "02n": "☁️",
+              "03d": "☁️",
+              "03n": "☁️",
+              "04d": "☁️",
+              "04n": "☁️",
+              "09d": "🌧️",
+              "09n": "🌧️",
+              "10d": "🌦️",
+              "10n": "🌧️",
+              "11d": "⛈️",
+              "11n": "⛈️",
+              "13d": "❄️",
+              "13n": "❄️",
+              "50d": "🌫️",
+              "50n": "🌫️",
             };
-            return iconMap[iconCode] || '🌤️';
+            return iconMap[iconCode] || "🌤️";
           };
-          
+
           weatherResults.set(dest.id, {
             id: dest.id,
             temperature: Math.round(data.main.temp),
@@ -3057,21 +3985,19 @@ export async function registerRoutes(app: Express): Promise<void> {
             condition: data.weather[0].description,
             humidity: data.main.humidity,
             windSpeed: Math.round(data.wind.speed * 3.6), // Convert m/s to km/h
-            precipitation: data.rain?.['1h'] || data.snow?.['1h'] || 0,
+            precipitation: data.rain?.["1h"] || data.snow?.["1h"] || 0,
             icon: getWeatherIcon(data.weather[0].icon),
-            lastUpdated: new Date().toISOString()
+            lastUpdated: new Date().toISOString(),
           });
-          
         } catch (error) {
           console.warn(`Failed to get weather for ${dest.name}:`, error);
           continue; // Continue with other destinations
         }
       }
-      
+
       // Convert Map to object for JSON response
       const responseData = Object.fromEntries(weatherResults);
       res.json(responseData);
-      
     } catch (error) {
       console.error("Error in batch weather request:", error);
       res.status(500).json({ message: "Failed to fetch weather data" });
@@ -3088,65 +4014,99 @@ export async function registerRoutes(app: Express): Promise<void> {
     try {
       const { destination } = req.params;
       const { country } = req.query;
-      
-      console.log('Travel timing request for:', destination, 'country:', country);
-      
+
+      console.log(
+        "Travel timing request for:",
+        destination,
+        "country:",
+        country
+      );
+
       // Direct access to travel timing database for debugging
-      const destinationKey = destination.toLowerCase().replace(/[^a-z]/g, '');
-      console.log('Looking for destination key:', destinationKey);
-      
-      const timingInfo = travelTimingService.getBestTimeInfo(destination, country as string);
-      console.log('Travel timing result:', timingInfo ? 'Found' : 'Not found');
-      
+      const destinationKey = destination.toLowerCase().replace(/[^a-z]/g, "");
+      console.log("Looking for destination key:", destinationKey);
+
+      const timingInfo = travelTimingService.getBestTimeInfo(
+        destination,
+        country as string
+      );
+      console.log("Travel timing result:", timingInfo ? "Found" : "Not found");
+
       if (!timingInfo) {
-        console.log('Available destinations:', ['lima', 'cusco', 'bogota', 'buenosaires', 'riodejaneiro', 'santiago']);
-        return res.status(404).json({ 
-          error: 'Travel timing information not available for this destination',
-          availableDestinations: ['lima', 'cusco', 'bogota', 'buenosaires', 'riodejaneiro', 'santiago']
+        console.log("Available destinations:", [
+          "lima",
+          "cusco",
+          "bogota",
+          "buenosaires",
+          "riodejaneiro",
+          "santiago",
+        ]);
+        return res.status(404).json({
+          error: "Travel timing information not available for this destination",
+          availableDestinations: [
+            "lima",
+            "cusco",
+            "bogota",
+            "buenosaires",
+            "riodejaneiro",
+            "santiago",
+          ],
         });
       }
-      
+
       res.json(timingInfo);
     } catch (error) {
-      console.error('Travel timing error:', error);
-      res.status(500).json({ error: 'Failed to fetch travel timing information' });
+      console.error("Travel timing error:", error);
+      res
+        .status(500)
+        .json({ error: "Failed to fetch travel timing information" });
     }
   });
 
   app.get("/api/travel-timing/:destination/summary", async (req, res) => {
     try {
       const { destination } = req.params;
-      
+
       const summary = travelTimingService.getSeasonalSummary(destination);
-      const currentRating = travelTimingService.getCurrentMonthRating(destination);
-      
+      const currentRating =
+        travelTimingService.getCurrentMonthRating(destination);
+
       res.json({
         summary,
         currentRating,
-        destination
+        destination,
       });
     } catch (error) {
-      console.error('Travel timing summary error:', error);
-      res.status(500).json({ error: 'Failed to fetch travel timing summary' });
+      console.error("Travel timing summary error:", error);
+      res.status(500).json({ error: "Failed to fetch travel timing summary" });
     }
   });
 
   // Currency Exchange API
-  app.get('/api/currency/:from/:to', async (req, res) => {
+  app.get("/api/currency/:from/:to", async (req, res) => {
     try {
       const { from, to } = req.params;
       // This would integrate with a currency API like ExchangeRate-API
       const rates: Record<string, number> = {
-        'USD-PEN': 3.75, 'USD-COP': 4200, 'USD-BOB': 6.9, 'USD-CLP': 950,
-        'USD-ARS': 800, 'USD-BRL': 5.2, 'USD-UYU': 39, 'USD-PYG': 7200,
-        'USD-VES': 36, 'USD-GYD': 210, 'USD-SRD': 36, 'USD-FRF': 4.2
+        "USD-PEN": 3.75,
+        "USD-COP": 4200,
+        "USD-BOB": 6.9,
+        "USD-CLP": 950,
+        "USD-ARS": 800,
+        "USD-BRL": 5.2,
+        "USD-UYU": 39,
+        "USD-PYG": 7200,
+        "USD-VES": 36,
+        "USD-GYD": 210,
+        "USD-SRD": 36,
+        "USD-FRF": 4.2,
       };
       const rate = rates[`${from}-${to}`] || 1;
       res.json({
         from,
         to,
         rate,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       });
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
@@ -3155,25 +4115,25 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Safety & Travel Advisories API
-  app.get('/api/safety/:country', async (req, res) => {
+  app.get("/api/safety/:country", async (req, res) => {
     try {
       const { country } = req.params;
       const safetyInfo = {
         country,
-        riskLevel: ['low', 'moderate', 'high'][Math.floor(Math.random() * 3)],
+        riskLevel: ["low", "moderate", "high"][Math.floor(Math.random() * 3)],
         advisories: [
-          'Avoid displaying valuable items in public',
-          'Use registered taxi services',
-          'Stay in well-lit areas at night',
-          'Keep copies of important documents'
+          "Avoid displaying valuable items in public",
+          "Use registered taxi services",
+          "Stay in well-lit areas at night",
+          "Keep copies of important documents",
         ],
         emergencyNumbers: {
-          police: '105',
-          ambulance: '106',
-          fire: '116',
-          tourist_police: '0800-123456'
+          police: "105",
+          ambulance: "106",
+          fire: "116",
+          tourist_police: "0800-123456",
         },
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       };
       res.json(safetyInfo);
     } catch (error) {
@@ -3183,31 +4143,31 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Transportation Options API
-  app.get('/api/transport/:from/:to', async (req, res) => {
+  app.get("/api/transport/:from/:to", async (req, res) => {
     try {
       const { from, to } = req.params;
       const { type } = req.query; // bus, flight, train
-      
+
       const transportOptions = [
         {
-          type: 'flight',
-          provider: 'LATAM Airlines',
-          duration: '2h 30m',
+          type: "flight",
+          provider: "LATAM Airlines",
+          duration: "2h 30m",
           price: 180,
-          currency: 'USD',
-          departure: '08:00',
-          arrival: '10:30'
+          currency: "USD",
+          departure: "08:00",
+          arrival: "10:30",
         },
         {
-          type: 'bus',
-          provider: 'Cruz del Sur',
-          duration: '8h 45m',
+          type: "bus",
+          provider: "Cruz del Sur",
+          duration: "8h 45m",
           price: 25,
-          currency: 'USD',
-          departure: '22:00',
-          arrival: '06:45'
-        }
-      ].filter(option => !type || option.type === type);
+          currency: "USD",
+          departure: "22:00",
+          arrival: "06:45",
+        },
+      ].filter((option) => !type || option.type === type);
 
       res.json(transportOptions);
     } catch (error) {
@@ -3217,46 +4177,46 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Accommodation Search API
-  app.get('/api/accommodation/:destination', async (req, res) => {
+  app.get("/api/accommodation/:destination", async (req, res) => {
     try {
       const { destination } = req.params;
       const { checkin, checkout, guests, type } = req.query;
-      
+
       const accommodations = [
         {
           id: 1,
-          name: 'Backpacker Hostel Central',
-          type: 'hostel',
+          name: "Backpacker Hostel Central",
+          type: "hostel",
           price: 15,
-          currency: 'USD',
+          currency: "USD",
           rating: 4.2,
-          amenities: ['WiFi', 'Kitchen', 'Laundry', 'Common Area'],
+          amenities: ["WiFi", "Kitchen", "Laundry", "Common Area"],
           location: `${destination} City Center`,
-          availability: true
+          availability: true,
         },
         {
           id: 2,
-          name: 'Boutique Hotel Plaza',
-          type: 'hotel',
+          name: "Boutique Hotel Plaza",
+          type: "hotel",
           price: 85,
-          currency: 'USD',
+          currency: "USD",
           rating: 4.6,
-          amenities: ['WiFi', 'Restaurant', 'Pool', 'Spa'],
+          amenities: ["WiFi", "Restaurant", "Pool", "Spa"],
           location: `${destination} Historic District`,
-          availability: true
+          availability: true,
         },
         {
           id: 3,
-          name: 'Mountain View Lodge',
-          type: 'lodge',
+          name: "Mountain View Lodge",
+          type: "lodge",
           price: 120,
-          currency: 'USD',
+          currency: "USD",
           rating: 4.8,
-          amenities: ['WiFi', 'Restaurant', 'Hiking', 'Nature Tours'],
+          amenities: ["WiFi", "Restaurant", "Hiking", "Nature Tours"],
           location: `${destination} Mountains`,
-          availability: true
-        }
-      ].filter(acc => !type || acc.type === type);
+          availability: true,
+        },
+      ].filter((acc) => !type || acc.type === type);
 
       res.json(accommodations);
     } catch (error) {
@@ -3266,48 +4226,50 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Local Activities & Tours API
-  app.get('/api/activities/:destination', async (req, res) => {
+  app.get("/api/activities/:destination", async (req, res) => {
     try {
       const { destination } = req.params;
       const { category, duration } = req.query;
-      
+
       const activities = [
         {
           id: 1,
-          name: 'Historic City Walking Tour',
-          category: 'cultural',
-          duration: '3 hours',
+          name: "Historic City Walking Tour",
+          category: "cultural",
+          duration: "3 hours",
           price: 25,
-          currency: 'USD',
+          currency: "USD",
           rating: 4.5,
-          description: 'Explore the colonial architecture and learn about local history',
-          included: ['Guide', 'Museum entries', 'Light snacks']
+          description:
+            "Explore the colonial architecture and learn about local history",
+          included: ["Guide", "Museum entries", "Light snacks"],
         },
         {
           id: 2,
-          name: 'Mountain Hiking Adventure',
-          category: 'adventure',
-          duration: 'full day',
+          name: "Mountain Hiking Adventure",
+          category: "adventure",
+          duration: "full day",
           price: 65,
-          currency: 'USD',
+          currency: "USD",
           rating: 4.7,
-          description: 'Challenge yourself with breathtaking mountain trails',
-          included: ['Guide', 'Equipment', 'Lunch', 'Transportation']
+          description: "Challenge yourself with breathtaking mountain trails",
+          included: ["Guide", "Equipment", "Lunch", "Transportation"],
         },
         {
           id: 3,
-          name: 'Traditional Cooking Class',
-          category: 'cultural',
-          duration: '4 hours',
+          name: "Traditional Cooking Class",
+          category: "cultural",
+          duration: "4 hours",
           price: 40,
-          currency: 'USD',
+          currency: "USD",
           rating: 4.8,
-          description: 'Learn to cook authentic local dishes with a chef',
-          included: ['Ingredients', 'Recipes', 'Meal', 'Certificate']
-        }
-      ].filter(activity => 
-        (!category || activity.category === category) &&
-        (!duration || activity.duration.includes(duration as string))
+          description: "Learn to cook authentic local dishes with a chef",
+          included: ["Ingredients", "Recipes", "Meal", "Certificate"],
+        },
+      ].filter(
+        (activity) =>
+          (!category || activity.category === category) &&
+          (!duration || activity.duration.includes(duration as string))
       );
 
       res.json(activities);
@@ -3318,51 +4280,52 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Local Food & Restaurant API
-  app.get('/api/restaurants/:destination', async (req, res) => {
+  app.get("/api/restaurants/:destination", async (req, res) => {
     try {
       const { destination } = req.params;
       const { cuisine, priceRange } = req.query;
-      
+
       const restaurants = [
         {
           id: 1,
-          name: 'Mercado Central Food Court',
-          cuisine: 'local',
-          priceRange: 'budget',
+          name: "Mercado Central Food Court",
+          cuisine: "local",
+          priceRange: "budget",
           averagePrice: 8,
-          currency: 'USD',
+          currency: "USD",
           rating: 4.3,
-          specialties: ['Ceviche', 'Empanadas', 'Fresh Juices'],
+          specialties: ["Ceviche", "Empanadas", "Fresh Juices"],
           location: `${destination} Central Market`,
-          openHours: '06:00-18:00'
+          openHours: "06:00-18:00",
         },
         {
           id: 2,
-          name: 'Casa de la Abuela',
-          cuisine: 'traditional',
-          priceRange: 'mid',
+          name: "Casa de la Abuela",
+          cuisine: "traditional",
+          priceRange: "mid",
           averagePrice: 25,
-          currency: 'USD',
+          currency: "USD",
           rating: 4.6,
-          specialties: ['Lomo Saltado', 'Aji de Gallina', 'Chicha Morada'],
+          specialties: ["Lomo Saltado", "Aji de Gallina", "Chicha Morada"],
           location: `${destination} Old Town`,
-          openHours: '12:00-22:00'
+          openHours: "12:00-22:00",
         },
         {
           id: 3,
-          name: 'The Gourmet Corner',
-          cuisine: 'fusion',
-          priceRange: 'upscale',
+          name: "The Gourmet Corner",
+          cuisine: "fusion",
+          priceRange: "upscale",
           averagePrice: 55,
-          currency: 'USD',
+          currency: "USD",
           rating: 4.8,
-          specialties: ['Tasting Menu', 'Wine Pairing', 'Chef Specials'],
+          specialties: ["Tasting Menu", "Wine Pairing", "Chef Specials"],
           location: `${destination} Business District`,
-          openHours: '18:00-24:00'
-        }
-      ].filter(restaurant => 
-        (!cuisine || restaurant.cuisine === cuisine) &&
-        (!priceRange || restaurant.priceRange === priceRange)
+          openHours: "18:00-24:00",
+        },
+      ].filter(
+        (restaurant) =>
+          (!cuisine || restaurant.cuisine === cuisine) &&
+          (!priceRange || restaurant.priceRange === priceRange)
       );
 
       res.json(restaurants);
@@ -3373,70 +4336,73 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Travel Documents & Visa Requirements API
-  app.get('/api/visa-requirements/:fromCountry/:toCountry', async (req, res) => {
-    try {
-      const { fromCountry, toCountry } = req.params;
-      
-      const visaInfo = {
-        fromCountry,
-        toCountry,
-        visaRequired: Math.random() > 0.5,
-        stayDuration: '90 days',
-        requirements: [
-          'Valid passport (6+ months validity)',
-          'Proof of onward travel',
-          'Proof of sufficient funds',
-          'Yellow fever vaccination certificate (if applicable)'
-        ],
-        processing: {
-          time: '5-10 business days',
-          fee: Math.random() > 0.5 ? 50 : 0,
-          currency: 'USD'
-        },
-        lastUpdated: new Date().toISOString()
-      };
-      
-      res.json(visaInfo);
-    } catch (error) {
-      console.error("Error fetching visa requirements:", error);
-      res.status(500).json({ message: "Failed to fetch visa requirements" });
+  app.get(
+    "/api/visa-requirements/:fromCountry/:toCountry",
+    async (req, res) => {
+      try {
+        const { fromCountry, toCountry } = req.params;
+
+        const visaInfo = {
+          fromCountry,
+          toCountry,
+          visaRequired: Math.random() > 0.5,
+          stayDuration: "90 days",
+          requirements: [
+            "Valid passport (6+ months validity)",
+            "Proof of onward travel",
+            "Proof of sufficient funds",
+            "Yellow fever vaccination certificate (if applicable)",
+          ],
+          processing: {
+            time: "5-10 business days",
+            fee: Math.random() > 0.5 ? 50 : 0,
+            currency: "USD",
+          },
+          lastUpdated: new Date().toISOString(),
+        };
+
+        res.json(visaInfo);
+      } catch (error) {
+        console.error("Error fetching visa requirements:", error);
+        res.status(500).json({ message: "Failed to fetch visa requirements" });
+      }
     }
-  });
+  );
 
   // Travel Insurance API
-  app.get('/api/insurance/quotes', async (req, res) => {
+  app.get("/api/insurance/quotes", async (req, res) => {
     try {
       const { destination, duration, coverage, age } = req.query;
-      
+
       const quotes = [
         {
-          provider: 'World Nomads',
-          plan: 'Explorer',
+          provider: "World Nomads",
+          plan: "Explorer",
           price: 45,
-          currency: 'USD',
+          currency: "USD",
           coverage: {
             medical: 100000,
             evacuation: 1000000,
             baggage: 2500,
-            cancellation: 5000
+            cancellation: 5000,
           },
-          features: ['24/7 Support', 'Adventure Sports', 'COVID Coverage']
+          features: ["24/7 Support", "Adventure Sports", "COVID Coverage"],
         },
         {
-          provider: 'SafetyWing',
-          plan: 'Nomad Insurance',
+          provider: "SafetyWing",
+          plan: "Nomad Insurance",
           price: 37,
-          currency: 'USD',
+          currency: "USD",
           coverage: {
             medical: 250000,
             evacuation: 100000,
             baggage: 1000,
-            cancellation: 0
+            cancellation: 0,
           },
-          features: ['Flexible Plans', 'Worldwide Coverage', 'Telemedicine']
-        }
+          features: ["Flexible Plans", "Worldwide Coverage", "Telemedicine"],
+        },
       ];
-      
+
       res.json(quotes);
     } catch (error) {
       console.error("Error fetching insurance quotes:", error);
@@ -3445,45 +4411,45 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Travel Checklist & Tips API
-  app.get('/api/checklist/:destination/:duration', async (req, res) => {
+  app.get("/api/checklist/:destination/:duration", async (req, res) => {
     try {
       const { destination, duration } = req.params;
-      
+
       const checklist = {
         destination,
         duration,
         beforeTravel: [
-          'Check passport validity (6+ months)',
-          'Get travel insurance',
-          'Notify bank of travel plans',
-          'Download offline maps',
-          'Learn basic local phrases',
-          'Check vaccination requirements'
+          "Check passport validity (6+ months)",
+          "Get travel insurance",
+          "Notify bank of travel plans",
+          "Download offline maps",
+          "Learn basic local phrases",
+          "Check vaccination requirements",
         ],
         packing: [
-          'Weather-appropriate clothing',
-          'Universal power adapter',
-          'First aid kit',
-          'Copies of important documents',
-          'Portable charger',
-          'Reusable water bottle'
+          "Weather-appropriate clothing",
+          "Universal power adapter",
+          "First aid kit",
+          "Copies of important documents",
+          "Portable charger",
+          "Reusable water bottle",
         ],
         onArrival: [
-          'Get local SIM card or data plan',
-          'Exchange currency',
-          'Save emergency contacts',
-          'Register with embassy (long stays)',
-          'Download local transport apps'
+          "Get local SIM card or data plan",
+          "Exchange currency",
+          "Save emergency contacts",
+          "Register with embassy (long stays)",
+          "Download local transport apps",
         ],
         tips: [
-          'Always negotiate taxi fares beforehand',
-          'Keep valuables in hotel safe',
-          'Try local food but choose busy restaurants',
-          'Learn about local customs and etiquette',
-          'Keep emergency cash in different locations'
-        ]
+          "Always negotiate taxi fares beforehand",
+          "Keep valuables in hotel safe",
+          "Try local food but choose busy restaurants",
+          "Learn about local customs and etiquette",
+          "Keep emergency cash in different locations",
+        ],
       };
-      
+
       res.json(checklist);
     } catch (error) {
       console.error("Error fetching checklist:", error);
@@ -3492,37 +4458,37 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Emergency Contacts API
-  app.get('/api/emergency/:country', async (req, res) => {
+  app.get("/api/emergency/:country", async (req, res) => {
     try {
       const { country } = req.params;
-      
+
       const emergency = {
         country,
         contacts: {
-          police: '105',
-          ambulance: '106',
-          fire: '116',
-          tourist_police: '0800-123456',
-          embassy: '+1-555-0123'
+          police: "105",
+          ambulance: "106",
+          fire: "116",
+          tourist_police: "0800-123456",
+          embassy: "+1-555-0123",
         },
         hospitals: [
           {
-            name: 'Hospital Internacional',
-            phone: '+51-1-234-5678',
-            address: 'Av. Principal 123',
-            services: ['Emergency', 'English Speaking Staff']
-          }
+            name: "Hospital Internacional",
+            phone: "+51-1-234-5678",
+            address: "Av. Principal 123",
+            services: ["Emergency", "English Speaking Staff"],
+          },
         ],
         consulates: [
           {
-            country: 'United States',
-            phone: '+51-1-618-2000',
-            address: 'Av. La Encalada 1245',
-            hours: 'Mon-Fri 8:00-17:00'
-          }
-        ]
+            country: "United States",
+            phone: "+51-1-618-2000",
+            address: "Av. La Encalada 1245",
+            hours: "Mon-Fri 8:00-17:00",
+          },
+        ],
       };
-      
+
       res.json(emergency);
     } catch (error) {
       console.error("Error fetching emergency contacts:", error);
@@ -3530,23 +4496,21 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-
-
   // Offline Maps & Navigation API
-  app.get('/api/maps/:destination/download', async (req, res) => {
+  app.get("/api/maps/:destination/download", async (req, res) => {
     try {
       const { destination } = req.params;
-      
+
       const mapInfo = {
         destination,
         downloadUrl: `https://maps.example.com/offline/${destination}.map`,
-        size: '45MB',
+        size: "45MB",
         coverage: `${destination} city center and surrounding areas`,
-        features: ['GPS Navigation', 'Points of Interest', 'Public Transport'],
-        validFor: '30 days',
-        lastUpdated: new Date().toISOString()
+        features: ["GPS Navigation", "Points of Interest", "Public Transport"],
+        validFor: "30 days",
+        lastUpdated: new Date().toISOString(),
       };
-      
+
       res.json(mapInfo);
     } catch (error) {
       console.error("Error preparing map download:", error);
@@ -3555,28 +4519,28 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // User Preferences & Settings API
-  app.get('/api/user/preferences', noAuth, async (req: any, res) => {
+  app.get("/api/user/preferences", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       const preferences = {
         userId,
-        travelStyle: user?.travelStyle || 'adventure',
-        budget: 'mid',
-        interests: ['culture', 'food', 'nature'],
+        travelStyle: user?.travelStyle || "adventure",
+        budget: "mid",
+        interests: ["culture", "food", "nature"],
         notifications: {
           email: true,
           push: true,
           deals: true,
-          tips: true
+          tips: true,
         },
-        currency: 'USD',
-        language: 'en',
+        currency: "USD",
+        language: "en",
         privacy: {
           profileVisible: true,
           tripsPublic: false,
-          shareLocation: false
-        }
+          shareLocation: false,
+        },
       };
       res.json(preferences);
     } catch (error) {
@@ -3585,7 +4549,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.put('/api/user/preferences', noAuth, async (req: any, res) => {
+  app.put("/api/user/preferences", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const preferences = req.body;
@@ -3598,57 +4562,70 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Travel Deals & Offers API
-  app.get('/api/deals', async (req, res) => {
+  app.get("/api/deals", async (req, res) => {
     try {
       const { destination, type, category } = req.query;
-      
+
       const deals = [
         {
           id: 1,
-          title: '50% Off Peru Adventure Tours',
-          description: 'Limited time offer on Machu Picchu and Sacred Valley tours',
+          title: "50% Off Peru Adventure Tours",
+          description:
+            "Limited time offer on Machu Picchu and Sacred Valley tours",
           discount: 50,
           originalPrice: 300,
           dealPrice: 150,
-          currency: 'USD',
-          category: 'tours',
-          destination: 'Peru',
-          validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          provider: 'Inca Trail Adventures',
-          rating: 4.8
+          currency: "USD",
+          category: "tours",
+          destination: "Peru",
+          validUntil: new Date(
+            Date.now() + 7 * 24 * 60 * 60 * 1000
+          ).toISOString(),
+          provider: "Inca Trail Adventures",
+          rating: 4.8,
         },
         {
           id: 2,
-          title: 'Hostel Flash Sale - Colombia',
-          description: 'Book now and save on accommodations in Bogotá and Cartagena',
+          title: "Hostel Flash Sale - Colombia",
+          description:
+            "Book now and save on accommodations in Bogotá and Cartagena",
           discount: 30,
           originalPrice: 25,
           dealPrice: 18,
-          currency: 'USD',
-          category: 'accommodation',
-          destination: 'Colombia',
-          validUntil: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-          provider: 'Backpacker Hostels',
-          rating: 4.3
+          currency: "USD",
+          category: "accommodation",
+          destination: "Colombia",
+          validUntil: new Date(
+            Date.now() + 3 * 24 * 60 * 60 * 1000
+          ).toISOString(),
+          provider: "Backpacker Hostels",
+          rating: 4.3,
         },
         {
           id: 3,
-          title: 'Flight Sale: US to South America',
-          description: 'Round-trip flights starting from $399 to major SA cities',
+          title: "Flight Sale: US to South America",
+          description:
+            "Round-trip flights starting from $399 to major SA cities",
           discount: 25,
           originalPrice: 599,
           dealPrice: 399,
-          currency: 'USD',
-          category: 'flights',
-          destination: 'South America',
-          validUntil: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-          provider: 'SkyTravel',
-          rating: 4.1
-        }
-      ].filter(deal => 
-        (!destination || deal.destination.toLowerCase().includes(destination.toString().toLowerCase())) &&
-        (!type || deal.category === type) &&
-        (!category || deal.category === category)
+          currency: "USD",
+          category: "flights",
+          destination: "South America",
+          validUntil: new Date(
+            Date.now() + 14 * 24 * 60 * 60 * 1000
+          ).toISOString(),
+          provider: "SkyTravel",
+          rating: 4.1,
+        },
+      ].filter(
+        (deal) =>
+          (!destination ||
+            deal.destination
+              .toLowerCase()
+              .includes(destination.toString().toLowerCase())) &&
+          (!type || deal.category === type) &&
+          (!category || deal.category === category)
       );
 
       res.json(deals);
@@ -3659,38 +4636,39 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Notifications API
-  app.get('/api/notifications', noAuth, async (req: any, res) => {
+  app.get("/api/notifications", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      
+
       const notifications = [
         {
           id: 1,
-          type: 'deal',
-          title: 'New Deal Alert',
-          message: 'Peru adventure tours are 50% off this week!',
+          type: "deal",
+          title: "New Deal Alert",
+          message: "Peru adventure tours are 50% off this week!",
           read: false,
           createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          actionUrl: '/deals'
+          actionUrl: "/deals",
         },
         {
           id: 2,
-          type: 'trip',
-          title: 'Trip Reminder',
-          message: 'Your Colombia trip starts in 5 days. Don\'t forget to check-in!',
+          type: "trip",
+          title: "Trip Reminder",
+          message:
+            "Your Colombia trip starts in 5 days. Don't forget to check-in!",
           read: false,
           createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          actionUrl: '/trips'
+          actionUrl: "/trips",
         },
         {
           id: 3,
-          type: 'social',
-          title: 'New Review',
-          message: 'Someone commented on your Cusco review',
+          type: "social",
+          title: "New Review",
+          message: "Someone commented on your Cusco review",
           read: true,
           createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-          actionUrl: '/community'
-        }
+          actionUrl: "/community",
+        },
       ];
 
       res.json(notifications);
@@ -3700,7 +4678,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.put('/api/notifications/:id/read', noAuth, async (req: any, res) => {
+  app.put("/api/notifications/:id/read", noAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
       // In a real app, you'd update the notification in the database
@@ -3712,38 +4690,76 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Travel Analytics & Statistics API
-  app.get('/api/analytics/dashboard', noAuth, async (req: any, res) => {
+  app.get("/api/analytics/dashboard", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const userTrips = await storage.getUserTrips(userId);
       const userExpenses = await storage.getUserExpenses(userId);
-      
+
       const analytics = {
         trips: {
           total: userTrips.length,
-          completed: userTrips.filter((trip: any) => new Date(trip.endDate) < new Date()).length,
-          upcoming: userTrips.filter((trip: any) => new Date(trip.startDate) > new Date()).length,
-          countries: Array.from(new Set(userTrips.map((trip: any) => trip.destinations?.[0]?.country).filter(Boolean))).length
+          completed: userTrips.filter(
+            (trip: any) => new Date(trip.endDate) < new Date()
+          ).length,
+          upcoming: userTrips.filter(
+            (trip: any) => new Date(trip.startDate) > new Date()
+          ).length,
+          countries: Array.from(
+            new Set(
+              userTrips
+                .map((trip: any) => trip.destinations?.[0]?.country)
+                .filter(Boolean)
+            )
+          ).length,
         },
         expenses: {
-          total: userExpenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0),
+          total: userExpenses.reduce(
+            (sum: number, expense: any) => sum + parseFloat(expense.amount),
+            0
+          ),
           thisMonth: userExpenses
             .filter((expense: any) => {
               const expenseDate = new Date(expense.createdAt);
               const now = new Date();
-              return expenseDate.getMonth() === now.getMonth() && expenseDate.getFullYear() === now.getFullYear();
+              return (
+                expenseDate.getMonth() === now.getMonth() &&
+                expenseDate.getFullYear() === now.getFullYear()
+              );
             })
-            .reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0),
+            .reduce(
+              (sum: number, expense: any) => sum + parseFloat(expense.amount),
+              0
+            ),
           topCategory: userExpenses.reduce((acc: any, expense: any) => {
-            acc[expense.category] = (acc[expense.category] || 0) + parseFloat(expense.amount);
+            acc[expense.category] =
+              (acc[expense.category] || 0) + parseFloat(expense.amount);
             return acc;
           }, {}),
-          avgPerTrip: userTrips.length > 0 ? userExpenses.reduce((sum: number, expense: any) => sum + parseFloat(expense.amount), 0) / userTrips.length : 0
+          avgPerTrip:
+            userTrips.length > 0
+              ? userExpenses.reduce(
+                  (sum: number, expense: any) =>
+                    sum + parseFloat(expense.amount),
+                  0
+                ) / userTrips.length
+              : 0,
         },
         destinations: {
-          visited: Array.from(new Set(userTrips.map((trip: any) => trip.destinations?.[0]?.name).filter(Boolean))),
-          wishlist: ['Patagonia', 'Amazon Rainforest', 'Atacama Desert', 'Salar de Uyuni']
-        }
+          visited: Array.from(
+            new Set(
+              userTrips
+                .map((trip: any) => trip.destinations?.[0]?.name)
+                .filter(Boolean)
+            )
+          ),
+          wishlist: [
+            "Patagonia",
+            "Amazon Rainforest",
+            "Atacama Desert",
+            "Salar de Uyuni",
+          ],
+        },
       };
 
       res.json(analytics);
@@ -3754,39 +4770,96 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Search API (Universal Search)
-  app.get('/api/search', async (req, res) => {
+  app.get("/api/search", async (req, res) => {
     try {
       const { q, type, limit = 10 } = req.query;
-      const query = q?.toString().toLowerCase() || '';
-      
+      const query = q?.toString().toLowerCase() || "";
+
       const results = {
         destinations: [
-          { type: 'destination', name: 'Machu Picchu', country: 'Peru', rating: 4.9 },
-          { type: 'destination', name: 'Salar de Uyuni', country: 'Bolivia', rating: 4.8 },
-          { type: 'destination', name: 'Cartagena', country: 'Colombia', rating: 4.7 }
-        ].filter(item => !type || type === 'destinations').filter(item => 
-          item.name.toLowerCase().includes(query) || item.country.toLowerCase().includes(query)
-        ),
+          {
+            type: "destination",
+            name: "Machu Picchu",
+            country: "Peru",
+            rating: 4.9,
+          },
+          {
+            type: "destination",
+            name: "Salar de Uyuni",
+            country: "Bolivia",
+            rating: 4.8,
+          },
+          {
+            type: "destination",
+            name: "Cartagena",
+            country: "Colombia",
+            rating: 4.7,
+          },
+        ]
+          .filter((item) => !type || type === "destinations")
+          .filter(
+            (item) =>
+              item.name.toLowerCase().includes(query) ||
+              item.country.toLowerCase().includes(query)
+          ),
         activities: [
-          { type: 'activity', name: 'Inca Trail Hiking', location: 'Peru', rating: 4.8 },
-          { type: 'activity', name: 'Tango Lessons', location: 'Argentina', rating: 4.6 },
-          { type: 'activity', name: 'Amazon River Cruise', location: 'Brazil', rating: 4.7 }
-        ].filter(item => !type || type === 'activities').filter(item => 
-          item.name.toLowerCase().includes(query) || item.location.toLowerCase().includes(query)
-        ),
+          {
+            type: "activity",
+            name: "Inca Trail Hiking",
+            location: "Peru",
+            rating: 4.8,
+          },
+          {
+            type: "activity",
+            name: "Tango Lessons",
+            location: "Argentina",
+            rating: 4.6,
+          },
+          {
+            type: "activity",
+            name: "Amazon River Cruise",
+            location: "Brazil",
+            rating: 4.7,
+          },
+        ]
+          .filter((item) => !type || type === "activities")
+          .filter(
+            (item) =>
+              item.name.toLowerCase().includes(query) ||
+              item.location.toLowerCase().includes(query)
+          ),
         restaurants: [
-          { type: 'restaurant', name: 'Central Restaurant', location: 'Lima, Peru', rating: 4.9 },
-          { type: 'restaurant', name: 'La Puerta Falsa', location: 'Bogotá, Colombia', rating: 4.5 },
-          { type: 'restaurant', name: 'Parrilla Don Julio', location: 'Buenos Aires, Argentina', rating: 4.8 }
-        ].filter(item => !type || type === 'restaurants').filter(item => 
-          item.name.toLowerCase().includes(query) || item.location.toLowerCase().includes(query)
-        )
+          {
+            type: "restaurant",
+            name: "Central Restaurant",
+            location: "Lima, Peru",
+            rating: 4.9,
+          },
+          {
+            type: "restaurant",
+            name: "La Puerta Falsa",
+            location: "Bogotá, Colombia",
+            rating: 4.5,
+          },
+          {
+            type: "restaurant",
+            name: "Parrilla Don Julio",
+            location: "Buenos Aires, Argentina",
+            rating: 4.8,
+          },
+        ]
+          .filter((item) => !type || type === "restaurants")
+          .filter(
+            (item) =>
+              item.name.toLowerCase().includes(query) ||
+              item.location.toLowerCase().includes(query)
+          ),
       };
 
       const allResults = [
         ...results.destinations,
         ...results.activities,
-        ...results.restaurants
+        ...results.restaurants,
       ].slice(0, parseInt(limit.toString()));
 
       res.json(allResults);
@@ -3797,7 +4870,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Backup & Export API
-  app.get('/api/export/user-data', noAuth, async (req: any, res) => {
+  app.get("/api/export/user-data", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -3811,18 +4884,21 @@ export async function registerRoutes(app: Express): Promise<void> {
           firstName: user?.firstName,
           lastName: user?.lastName,
           email: user?.email,
-          createdAt: user?.createdAt
+          createdAt: user?.createdAt,
         },
         trips: userTrips,
         expenses: userExpenses,
         connections: userConnections,
         exportedAt: new Date().toISOString(),
-        format: 'json',
-        version: '1.0'
+        format: "json",
+        version: "1.0",
       };
 
-      res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Content-Disposition', `attachment; filename="globemate-data-${userId}-${Date.now()}.json"`);
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="globemate-data-${userId}-${Date.now()}.json"`
+      );
       res.json(exportData);
     } catch (error) {
       console.error("Error exporting user data:", error);
@@ -3831,35 +4907,35 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Health Check & System Status API
-  app.get('/api/health', async (req, res) => {
+  app.get("/api/health", async (req, res) => {
     try {
       const health = {
-        status: 'healthy',
+        status: "healthy",
         timestamp: new Date().toISOString(),
         services: {
-          database: 'connected',
-          openai: process.env.OPENAI_API_KEY ? 'configured' : 'not_configured',
-          storage: 'operational'
+          database: "connected",
+          openai: process.env.OPENAI_API_KEY ? "configured" : "not_configured",
+          storage: "operational",
         },
-        version: '1.0.0',
-        uptime: process.uptime()
+        version: "1.0.0",
+        uptime: process.uptime(),
       };
       res.json(health);
     } catch (error) {
       console.error("Health check failed:", error);
-      res.status(500).json({ 
-        status: 'unhealthy', 
-        error: error instanceof Error ? error.message : 'Unknown error' 
+      res.status(500).json({
+        status: "unhealthy",
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
 
   // Feedback & Support API
-  app.post('/api/feedback', noAuth, async (req: any, res) => {
+  app.post("/api/feedback", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { type, subject, message, rating } = req.body;
-      
+
       const feedback = {
         id: Date.now(),
         userId,
@@ -3867,12 +4943,15 @@ export async function registerRoutes(app: Express): Promise<void> {
         subject,
         message,
         rating,
-        status: 'submitted',
-        createdAt: new Date().toISOString()
+        status: "submitted",
+        createdAt: new Date().toISOString(),
       };
 
       // In a real app, you'd save this to database and possibly send email
-      res.json({ message: "Feedback submitted successfully", ticketId: feedback.id });
+      res.json({
+        message: "Feedback submitted successfully",
+        ticketId: feedback.id,
+      });
     } catch (error) {
       console.error("Error submitting feedback:", error);
       res.status(500).json({ message: "Failed to submit feedback" });
@@ -3880,7 +4959,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Achievement System API
-  app.get('/api/achievements', async (req, res) => {
+  app.get("/api/achievements", async (req, res) => {
     try {
       const achievements = await storage.getAllAchievements();
       res.json(achievements);
@@ -3890,17 +4969,17 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get('/api/achievements/user', noAuth, async (req: any, res) => {
+  app.get("/api/achievements/user", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const userAchievements = await storage.getUserAchievements(userId);
-      
+
       // Also check for new unlocked achievements
       const newAchievements = await storage.checkAndUnlockAchievements(userId);
-      
+
       res.json({
         userAchievements,
-        newlyUnlocked: newAchievements
+        newlyUnlocked: newAchievements,
       });
     } catch (error) {
       console.error("Error fetching user achievements:", error);
@@ -3908,14 +4987,14 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/achievements/check', noAuth, async (req: any, res) => {
+  app.post("/api/achievements/check", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const newAchievements = await storage.checkAndUnlockAchievements(userId);
-      
+
       res.json({
         newlyUnlocked: newAchievements,
-        count: newAchievements.length
+        count: newAchievements.length,
       });
     } catch (error) {
       console.error("Error checking achievements:", error);
@@ -3924,7 +5003,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Initialize default achievements if they don't exist
-  app.post('/api/achievements/init', async (req, res) => {
+  app.post("/api/achievements/init", async (req, res) => {
     try {
       const defaultAchievements = [
         {
@@ -3935,17 +5014,17 @@ export async function registerRoutes(app: Express): Promise<void> {
           badgeColor: "bg-blue-500",
           requirement: JSON.stringify({ type: "trip_count", value: 1 }),
           points: 10,
-          rarity: "common"
+          rarity: "common",
         },
         {
           name: "Trip Explorer",
           description: "Plan 5 different trips",
-          category: "travel", 
+          category: "travel",
           iconName: "Navigation",
           badgeColor: "bg-green-500",
           requirement: JSON.stringify({ type: "trip_count", value: 5 }),
           points: 50,
-          rarity: "rare"
+          rarity: "rare",
         },
         {
           name: "Country Collector",
@@ -3955,7 +5034,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           badgeColor: "bg-purple-500",
           requirement: JSON.stringify({ type: "country_count", value: 3 }),
           points: 75,
-          rarity: "epic"
+          rarity: "epic",
         },
         {
           name: "Budget Tracker",
@@ -3965,7 +5044,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           badgeColor: "bg-orange-500",
           requirement: JSON.stringify({ type: "expense_count", value: 10 }),
           points: 30,
-          rarity: "common"
+          rarity: "common",
         },
         {
           name: "Review Writer",
@@ -3975,7 +5054,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           badgeColor: "bg-yellow-500",
           requirement: JSON.stringify({ type: "review_count", value: 5 }),
           points: 40,
-          rarity: "rare"
+          rarity: "rare",
         },
         {
           name: "Big Spender",
@@ -3985,7 +5064,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           badgeColor: "bg-red-500",
           requirement: JSON.stringify({ type: "total_spent", value: 1000 }),
           points: 100,
-          rarity: "epic"
+          rarity: "epic",
         },
         {
           name: "Adventure Seeker",
@@ -3993,9 +5072,12 @@ export async function registerRoutes(app: Express): Promise<void> {
           category: "adventure",
           iconName: "Mountain",
           badgeColor: "bg-emerald-500",
-          requirement: JSON.stringify({ type: "trip_style", value: "adventure" }),
+          requirement: JSON.stringify({
+            type: "trip_style",
+            value: "adventure",
+          }),
           points: 25,
-          rarity: "common"
+          rarity: "common",
         },
         {
           name: "Cultural Explorer",
@@ -4003,9 +5085,12 @@ export async function registerRoutes(app: Express): Promise<void> {
           category: "cultural",
           iconName: "Camera",
           badgeColor: "bg-indigo-500",
-          requirement: JSON.stringify({ type: "trip_style", value: "cultural" }),
+          requirement: JSON.stringify({
+            type: "trip_style",
+            value: "cultural",
+          }),
           points: 25,
-          rarity: "common"
+          rarity: "common",
         },
         {
           name: "Social Butterfly",
@@ -4015,7 +5100,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           badgeColor: "bg-pink-500",
           requirement: JSON.stringify({ type: "connection_count", value: 10 }),
           points: 60,
-          rarity: "rare"
+          rarity: "rare",
         },
         {
           name: "World Explorer",
@@ -4025,8 +5110,8 @@ export async function registerRoutes(app: Express): Promise<void> {
           badgeColor: "bg-gradient-to-r from-yellow-400 to-orange-500",
           requirement: JSON.stringify({ type: "country_count", value: 20 }),
           points: 500,
-          rarity: "legendary"
-        }
+          rarity: "legendary",
+        },
       ];
 
       let createdCount = 0;
@@ -4034,22 +5119,27 @@ export async function registerRoutes(app: Express): Promise<void> {
         try {
           // Check if achievement already exists
           const existing = await storage.getAllAchievements();
-          const existingAchievement = existing.find(a => a.name === achievement.name);
+          const existingAchievement = existing.find(
+            (a) => a.name === achievement.name
+          );
 
           if (!existingAchievement) {
             // Achievement insert temporarily disabled until schema is fixed
-            console.log('Achievement would be created:', achievement);
+            console.log("Achievement would be created:", achievement);
             createdCount++;
           }
         } catch (error) {
-          console.error(`Error creating achievement ${achievement.name}:`, error);
+          console.error(
+            `Error creating achievement ${achievement.name}:`,
+            error
+          );
         }
       }
 
-      res.json({ 
+      res.json({
         message: `Initialized ${createdCount} achievements`,
         total: defaultAchievements.length,
-        created: createdCount
+        created: createdCount,
       });
     } catch (error) {
       console.error("Error initializing achievements:", error);
@@ -4058,16 +5148,17 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // API Documentation Endpoint
-  app.get('/api/docs', async (req, res) => {
+  app.get("/api/docs", async (req, res) => {
     const apiDocs = {
       title: "GlobeMate API Documentation",
       version: "1.0.0",
-      description: "Complete API reference for the GlobeMate global travel platform",
+      description:
+        "Complete API reference for the GlobeMate global travel platform",
       endpoints: {
         authentication: {
           "GET /api/auth/user": "Get authenticated user details",
           "GET /api/user/preferences": "Get user travel preferences",
-          "PUT /api/user/preferences": "Update user preferences"
+          "PUT /api/user/preferences": "Update user preferences",
         },
         trips: {
           "GET /api/trips": "Get public trips (community)",
@@ -4075,7 +5166,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           "POST /api/trips": "Create new trip",
           "GET /api/trips/:id": "Get specific trip",
           "PUT /api/trips/:id": "Update trip",
-          "DELETE /api/trips/:id": "Delete trip"
+          "DELETE /api/trips/:id": "Delete trip",
         },
         ai_features: {
           "POST /api/ai/generate-trip": "AI-powered trip generation",
@@ -4083,17 +5174,17 @@ export async function registerRoutes(app: Express): Promise<void> {
           "POST /api/ai/itinerary": "Generate detailed itinerary",
           "POST /api/ai/budget-analysis": "Analyze expenses with AI",
           "POST /api/ai/recommendations": "Get destination recommendations",
-          "POST /api/ai/chat": "Chat with travel assistant"
+          "POST /api/ai/chat": "Chat with travel assistant",
         },
         expenses: {
           "GET /api/expenses/user": "Get user's expenses",
           "GET /api/expenses/trip/:id": "Get trip expenses",
-          "POST /api/expenses": "Add new expense"
+          "POST /api/expenses": "Add new expense",
         },
         community: {
           "GET /api/reviews": "Get recent reviews",
           "POST /api/reviews": "Submit new review",
-          "GET /api/reviews/destination/:name": "Get destination reviews"
+          "GET /api/reviews/destination/:name": "Get destination reviews",
         },
         travel_info: {
           "GET /api/weather/:destination": "Get weather forecast",
@@ -4107,7 +5198,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           "GET /api/insurance/quotes": "Get insurance quotes",
           "GET /api/checklist/:destination/:duration": "Get travel checklist",
           "GET /api/emergency/:country": "Get emergency contacts",
-          "GET /api/maps/:destination/download": "Get offline maps"
+          "GET /api/maps/:destination/download": "Get offline maps",
         },
         social: {
           "GET /api/connections": "Get user connections",
@@ -4115,7 +5206,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           "PUT /api/connections/:id": "Update connection",
           "GET /api/chat/rooms": "Get chat rooms",
           "GET /api/chat/messages/:roomId": "Get chat messages",
-          "WebSocket /ws": "Real-time chat"
+          "WebSocket /ws": "Real-time chat",
         },
         platform: {
           "GET /api/deals": "Get travel deals",
@@ -4125,8 +5216,8 @@ export async function registerRoutes(app: Express): Promise<void> {
           "GET /api/search": "Universal search",
           "GET /api/export/user-data": "Export user data",
           "GET /api/health": "System health check",
-          "POST /api/feedback": "Submit feedback"
-        }
+          "POST /api/feedback": "Submit feedback",
+        },
       },
       totalEndpoints: 40,
       features: [
@@ -4137,13 +5228,12 @@ export async function registerRoutes(app: Express): Promise<void> {
         "Safety and travel advisories",
         "Accommodation and activity search",
         "User analytics and insights",
-        "Data export and backup"
-      ]
+        "Data export and backup",
+      ],
     };
-    
+
     res.json(apiDocs);
   });
-
 
   // WebSocket setup for real-time chat (disabled - server created in index.ts)
   // const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
@@ -4188,19 +5278,14 @@ export async function registerRoutes(app: Express): Promise<void> {
 
   // TripAdvisor-style data API routes
   // Platform Statistics API
-  app.get('/api/stats', async (req, res) => {
+  app.get("/api/stats", async (req, res) => {
     try {
       // Get real statistics from the database
-      const [
-        destinations,
-        reviews,
-        users,
-        journeys
-      ] = await Promise.all([
+      const [destinations, reviews, users, journeys] = await Promise.all([
         storage.getDestinations(),
         storage.getRecentReviews(),
         db.select().from(schema.users),
-        storage.getJourneys({ limit: 1000 })
+        storage.getJourneys({ limit: 1000 }),
       ]);
 
       // Calculate unique countries from destinations
@@ -4209,16 +5294,22 @@ export async function registerRoutes(app: Express): Promise<void> {
       );
 
       // Calculate average rating from reviews
-      const avgRating = reviews.length > 0
-        ? (reviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
-        : '0.0';
+      const avgRating =
+        reviews.length > 0
+          ? (
+              reviews.reduce(
+                (sum: number, r: any) => sum + (r.rating || 0),
+                0
+              ) / reviews.length
+            ).toFixed(1)
+          : "0.0";
 
       const stats = {
         countries: uniqueCountries.size,
         destinations: destinations.length,
         users: users.length,
         rating: parseFloat(avgRating),
-        journeys: journeys.length
+        journeys: journeys.length,
       };
 
       res.json(stats);
@@ -4227,16 +5318,21 @@ export async function registerRoutes(app: Express): Promise<void> {
       res.status(500).json({ message: "Failed to fetch statistics" });
     }
   });
-  
+
   // Destinations API - Returns database destinations in frontend-compatible format
-  app.get('/api/destinations', async (req, res) => {
+  app.get("/api/destinations", async (req, res) => {
     try {
       // Import tables
-      const { locationPhotos, destinationsI18n } = await import('../shared/schema.js');
-      
+      const { locationPhotos, destinationsI18n } = await import(
+        "../shared/schema.js"
+      );
+
       // Get language from query or headers (default to English)
-      const lang = (req.query.lang as string) || req.headers['accept-language']?.split(',')[0]?.split('-')[0] || 'en';
-      
+      const lang =
+        (req.query.lang as string) ||
+        req.headers["accept-language"]?.split(",")[0]?.split("-")[0] ||
+        "en";
+
       // Query database with photo and translation joins
       const dbDestinations = await db
         .select({
@@ -4253,38 +5349,44 @@ export async function registerRoutes(app: Express): Promise<void> {
           destinationsI18n,
           sql`${destinationsI18n.destinationId} = ${destinationsTable.id} AND ${destinationsI18n.locale} = ${lang}`
         );
-      
+
       // Transform database format to frontend format
-      const formattedDestinations = dbDestinations.map(row => ({
+      const formattedDestinations = dbDestinations.map((row) => ({
         id: row.destination.id,
         name: row.translation?.name || row.destination.name,
-        country: row.destination.country || '',
-        continent: row.destination.continent || 'Unknown',
-        types: ['city'],
-        description: row.translation?.description || row.destination.description || `Explore ${row.destination.name}`,
-        rating: parseFloat(row.destination.rating?.toString() || '4.5'),
+        country: row.destination.country || "",
+        continent: row.destination.continent || "Unknown",
+        types: ["city"],
+        description:
+          row.translation?.description ||
+          row.destination.description ||
+          `Explore ${row.destination.name}`,
+        rating: parseFloat(row.destination.rating?.toString() || "4.5"),
         userRatingsTotal: row.destination.userRatingsTotal || undefined, // Hide if null
         trending: row.destination.trending || false,
-        flag: row.destination.flag || '🌍',
-        lat: parseFloat(row.destination.lat?.toString() || '0'),
-        lng: parseFloat(row.destination.lon?.toString() || '0'),
+        flag: row.destination.flag || "🌍",
+        lat: parseFloat(row.destination.lat?.toString() || "0"),
+        lng: parseFloat(row.destination.lon?.toString() || "0"),
         photoRefs: [],
         placeId: row.destination.id,
         photoUrl: row.photo?.cachedUrl || undefined,
       }));
-      
+
       res.json(formattedDestinations);
     } catch (error) {
       console.error("[Destinations API] Error:", error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      res.status(500).json({ message: "Failed to fetch destinations", error: errorMessage });
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      res
+        .status(500)
+        .json({ message: "Failed to fetch destinations", error: errorMessage });
     }
   });
 
-  app.get('/api/destinations/search', async (req, res) => {
+  app.get("/api/destinations/search", async (req, res) => {
     try {
       const { q } = req.query;
-      if (!q || typeof q !== 'string') {
+      if (!q || typeof q !== "string") {
         return res.status(400).json({ message: "Search query is required" });
       }
       const destinations = await storage.searchDestinations(q);
@@ -4296,123 +5398,830 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Popular destinations from Google Places API with full details
-  app.get('/api/destinations/popular', async (req, res) => {
+  app.get("/api/destinations/popular", async (req, res) => {
     try {
       const popularCities = [
         // Europe
-        { name: 'Paris', country: 'France', continent: 'Europe', query: 'Paris Eiffel Tower', trending: true, flag: '🇫🇷' },
-        { name: 'London', country: 'UK', continent: 'Europe', query: 'London Big Ben', trending: true, flag: '🇬🇧' },
-        { name: 'Rome', country: 'Italy', continent: 'Europe', query: 'Rome Colosseum', trending: true, flag: '🇮🇹' },
-        { name: 'Barcelona', country: 'Spain', continent: 'Europe', query: 'Barcelona Sagrada Familia', trending: true, flag: '🇪🇸' },
-        { name: 'Amsterdam', country: 'Netherlands', continent: 'Europe', query: 'Amsterdam canals', trending: false, flag: '🇳🇱' },
-        { name: 'Prague', country: 'Czech Republic', continent: 'Europe', query: 'Prague Castle', trending: false, flag: '🇨🇿' },
-        { name: 'Vienna', country: 'Austria', continent: 'Europe', query: 'Vienna Schonbrunn Palace', trending: false, flag: '🇦🇹' },
-        { name: 'Athens', country: 'Greece', continent: 'Europe', query: 'Athens Acropolis', trending: false, flag: '🇬🇷' },
-        { name: 'Lisbon', country: 'Portugal', continent: 'Europe', query: 'Lisbon Belem Tower', trending: true, flag: '🇵🇹' },
-        { name: 'Berlin', country: 'Germany', continent: 'Europe', query: 'Berlin Brandenburg Gate', trending: false, flag: '🇩🇪' },
-        { name: 'Moscow', country: 'Russia', continent: 'Europe', query: 'Moscow Red Square', trending: false, flag: '🇷🇺' },
-        { name: 'Reykjavik', country: 'Iceland', continent: 'Europe', query: 'Reykjavik Hallgrimskirkja', trending: true, flag: '🇮🇸' },
-        { name: 'Santorini', country: 'Greece', continent: 'Europe', query: 'Santorini Oia', trending: true, flag: '🇬🇷' },
-        { name: 'Venice', country: 'Italy', continent: 'Europe', query: 'Venice Grand Canal', trending: false, flag: '🇮🇹' },
-        { name: 'Florence', country: 'Italy', continent: 'Europe', query: 'Florence Duomo', trending: false, flag: '🇮🇹' },
-        { name: 'Milan', country: 'Italy', continent: 'Europe', query: 'Milan Cathedral', trending: false, flag: '🇮🇹' },
-        { name: 'Madrid', country: 'Spain', continent: 'Europe', query: 'Madrid Royal Palace', trending: false, flag: '🇪🇸' },
-        { name: 'Seville', country: 'Spain', continent: 'Europe', query: 'Seville Cathedral', trending: false, flag: '🇪🇸' },
-        { name: 'Munich', country: 'Germany', continent: 'Europe', query: 'Munich Marienplatz', trending: false, flag: '🇩🇪' },
-        { name: 'Edinburgh', country: 'UK', continent: 'Europe', query: 'Edinburgh Castle', trending: false, flag: '🇬🇧' },
-        { name: 'Dublin', country: 'Ireland', continent: 'Europe', query: 'Dublin Temple Bar', trending: false, flag: '🇮🇪' },
-        { name: 'Copenhagen', country: 'Denmark', continent: 'Europe', query: 'Copenhagen Nyhavn', trending: false, flag: '🇩🇰' },
-        { name: 'Stockholm', country: 'Sweden', continent: 'Europe', query: 'Stockholm Old Town', trending: false, flag: '🇸🇪' },
-        { name: 'Oslo', country: 'Norway', continent: 'Europe', query: 'Oslo Opera House', trending: false, flag: '🇳🇴' },
-        { name: 'Budapest', country: 'Hungary', continent: 'Europe', query: 'Budapest Parliament', trending: false, flag: '🇭🇺' },
-        { name: 'Krakow', country: 'Poland', continent: 'Europe', query: 'Krakow Main Square', trending: false, flag: '🇵🇱' },
-        { name: 'Zurich', country: 'Switzerland', continent: 'Europe', query: 'Zurich Lake', trending: false, flag: '🇨🇭' },
-        { name: 'Brussels', country: 'Belgium', continent: 'Europe', query: 'Brussels Grand Place', trending: false, flag: '🇧🇪' },
-        
+        {
+          name: "Paris",
+          country: "France",
+          continent: "Europe",
+          query: "Paris Eiffel Tower",
+          trending: true,
+          flag: "🇫🇷",
+        },
+        {
+          name: "London",
+          country: "UK",
+          continent: "Europe",
+          query: "London Big Ben",
+          trending: true,
+          flag: "🇬🇧",
+        },
+        {
+          name: "Rome",
+          country: "Italy",
+          continent: "Europe",
+          query: "Rome Colosseum",
+          trending: true,
+          flag: "🇮🇹",
+        },
+        {
+          name: "Barcelona",
+          country: "Spain",
+          continent: "Europe",
+          query: "Barcelona Sagrada Familia",
+          trending: true,
+          flag: "🇪🇸",
+        },
+        {
+          name: "Amsterdam",
+          country: "Netherlands",
+          continent: "Europe",
+          query: "Amsterdam canals",
+          trending: false,
+          flag: "🇳🇱",
+        },
+        {
+          name: "Prague",
+          country: "Czech Republic",
+          continent: "Europe",
+          query: "Prague Castle",
+          trending: false,
+          flag: "🇨🇿",
+        },
+        {
+          name: "Vienna",
+          country: "Austria",
+          continent: "Europe",
+          query: "Vienna Schonbrunn Palace",
+          trending: false,
+          flag: "🇦🇹",
+        },
+        {
+          name: "Athens",
+          country: "Greece",
+          continent: "Europe",
+          query: "Athens Acropolis",
+          trending: false,
+          flag: "🇬🇷",
+        },
+        {
+          name: "Lisbon",
+          country: "Portugal",
+          continent: "Europe",
+          query: "Lisbon Belem Tower",
+          trending: true,
+          flag: "🇵🇹",
+        },
+        {
+          name: "Berlin",
+          country: "Germany",
+          continent: "Europe",
+          query: "Berlin Brandenburg Gate",
+          trending: false,
+          flag: "🇩🇪",
+        },
+        {
+          name: "Moscow",
+          country: "Russia",
+          continent: "Europe",
+          query: "Moscow Red Square",
+          trending: false,
+          flag: "🇷🇺",
+        },
+        {
+          name: "Reykjavik",
+          country: "Iceland",
+          continent: "Europe",
+          query: "Reykjavik Hallgrimskirkja",
+          trending: true,
+          flag: "🇮🇸",
+        },
+        {
+          name: "Santorini",
+          country: "Greece",
+          continent: "Europe",
+          query: "Santorini Oia",
+          trending: true,
+          flag: "🇬🇷",
+        },
+        {
+          name: "Venice",
+          country: "Italy",
+          continent: "Europe",
+          query: "Venice Grand Canal",
+          trending: false,
+          flag: "🇮🇹",
+        },
+        {
+          name: "Florence",
+          country: "Italy",
+          continent: "Europe",
+          query: "Florence Duomo",
+          trending: false,
+          flag: "🇮🇹",
+        },
+        {
+          name: "Milan",
+          country: "Italy",
+          continent: "Europe",
+          query: "Milan Cathedral",
+          trending: false,
+          flag: "🇮🇹",
+        },
+        {
+          name: "Madrid",
+          country: "Spain",
+          continent: "Europe",
+          query: "Madrid Royal Palace",
+          trending: false,
+          flag: "🇪🇸",
+        },
+        {
+          name: "Seville",
+          country: "Spain",
+          continent: "Europe",
+          query: "Seville Cathedral",
+          trending: false,
+          flag: "🇪🇸",
+        },
+        {
+          name: "Munich",
+          country: "Germany",
+          continent: "Europe",
+          query: "Munich Marienplatz",
+          trending: false,
+          flag: "🇩🇪",
+        },
+        {
+          name: "Edinburgh",
+          country: "UK",
+          continent: "Europe",
+          query: "Edinburgh Castle",
+          trending: false,
+          flag: "🇬🇧",
+        },
+        {
+          name: "Dublin",
+          country: "Ireland",
+          continent: "Europe",
+          query: "Dublin Temple Bar",
+          trending: false,
+          flag: "🇮🇪",
+        },
+        {
+          name: "Copenhagen",
+          country: "Denmark",
+          continent: "Europe",
+          query: "Copenhagen Nyhavn",
+          trending: false,
+          flag: "🇩🇰",
+        },
+        {
+          name: "Stockholm",
+          country: "Sweden",
+          continent: "Europe",
+          query: "Stockholm Old Town",
+          trending: false,
+          flag: "🇸🇪",
+        },
+        {
+          name: "Oslo",
+          country: "Norway",
+          continent: "Europe",
+          query: "Oslo Opera House",
+          trending: false,
+          flag: "🇳🇴",
+        },
+        {
+          name: "Budapest",
+          country: "Hungary",
+          continent: "Europe",
+          query: "Budapest Parliament",
+          trending: false,
+          flag: "🇭🇺",
+        },
+        {
+          name: "Krakow",
+          country: "Poland",
+          continent: "Europe",
+          query: "Krakow Main Square",
+          trending: false,
+          flag: "🇵🇱",
+        },
+        {
+          name: "Zurich",
+          country: "Switzerland",
+          continent: "Europe",
+          query: "Zurich Lake",
+          trending: false,
+          flag: "🇨🇭",
+        },
+        {
+          name: "Brussels",
+          country: "Belgium",
+          continent: "Europe",
+          query: "Brussels Grand Place",
+          trending: false,
+          flag: "🇧🇪",
+        },
+
         // Asia
-        { name: 'Tokyo', country: 'Japan', continent: 'Asia', query: 'Tokyo Tower Japan', trending: true, flag: '🇯🇵' },
-        { name: 'Dubai', country: 'United Arab Emirates', continent: 'Asia', query: 'Dubai Burj Khalifa', trending: true, flag: '🇦🇪' },
-        { name: 'Bangkok', country: 'Thailand', continent: 'Asia', query: 'Bangkok Grand Palace', trending: true, flag: '🇹🇭' },
-        { name: 'Istanbul', country: 'Turkey', continent: 'Asia', query: 'Istanbul Hagia Sophia', trending: false, flag: '🇹🇷' },
-        { name: 'Singapore', country: 'Singapore', continent: 'Asia', query: 'Singapore Marina Bay Sands', trending: true, flag: '🇸🇬' },
-        { name: 'Bali', country: 'Indonesia', continent: 'Asia', query: 'Bali Uluwatu Temple', trending: true, flag: '🇮🇩' },
-        { name: 'Mumbai', country: 'India', continent: 'Asia', query: 'Mumbai Gateway of India', trending: false, flag: '🇮🇳' },
-        { name: 'Seoul', country: 'South Korea', continent: 'Asia', query: 'Seoul Gyeongbokgung Palace', trending: true, flag: '🇰🇷' },
-        { name: 'Hong Kong', country: 'Hong Kong', continent: 'Asia', query: 'Hong Kong Victoria Peak', trending: true, flag: '🇭🇰' },
-        { name: 'Kyoto', country: 'Japan', continent: 'Asia', query: 'Kyoto Fushimi Inari', trending: false, flag: '🇯🇵' },
-        { name: 'Shanghai', country: 'China', continent: 'Asia', query: 'Shanghai Bund', trending: false, flag: '🇨🇳' },
-        { name: 'Beijing', country: 'China', continent: 'Asia', query: 'Beijing Forbidden City', trending: false, flag: '🇨🇳' },
-        { name: 'Hanoi', country: 'Vietnam', continent: 'Asia', query: 'Hanoi Old Quarter', trending: false, flag: '🇻🇳' },
-        { name: 'Ho Chi Minh City', country: 'Vietnam', continent: 'Asia', query: 'Ho Chi Minh City Notre Dame', trending: false, flag: '🇻🇳' },
-        { name: 'Kuala Lumpur', country: 'Malaysia', continent: 'Asia', query: 'Kuala Lumpur Petronas Towers', trending: false, flag: '🇲🇾' },
-        { name: 'Manila', country: 'Philippines', continent: 'Asia', query: 'Manila Rizal Park', trending: false, flag: '🇵🇭' },
-        { name: 'Jakarta', country: 'Indonesia', continent: 'Asia', query: 'Jakarta Monas', trending: false, flag: '🇮🇩' },
-        { name: 'Delhi', country: 'India', continent: 'Asia', query: 'Delhi India Gate', trending: false, flag: '🇮🇳' },
-        { name: 'Jaipur', country: 'India', continent: 'Asia', query: 'Jaipur Hawa Mahal', trending: false, flag: '🇮🇳' },
-        { name: 'Agra', country: 'India', continent: 'Asia', query: 'Agra Taj Mahal', trending: false, flag: '🇮🇳' },
-        { name: 'Tel Aviv', country: 'Israel', continent: 'Asia', query: 'Tel Aviv Beach', trending: false, flag: '🇮🇱' },
-        { name: 'Jerusalem', country: 'Israel', continent: 'Asia', query: 'Jerusalem Western Wall', trending: false, flag: '🇮🇱' },
-        { name: 'Colombo', country: 'Sri Lanka', continent: 'Asia', query: 'Colombo Gangaramaya Temple', trending: false, flag: '🇱🇰' },
-        { name: 'Kathmandu', country: 'Nepal', continent: 'Asia', query: 'Kathmandu Durbar Square', trending: false, flag: '🇳🇵' },
-        { name: 'Phuket', country: 'Thailand', continent: 'Asia', query: 'Phuket Big Buddha', trending: false, flag: '🇹🇭' },
-        
+        {
+          name: "Tokyo",
+          country: "Japan",
+          continent: "Asia",
+          query: "Tokyo Tower Japan",
+          trending: true,
+          flag: "🇯🇵",
+        },
+        {
+          name: "Dubai",
+          country: "United Arab Emirates",
+          continent: "Asia",
+          query: "Dubai Burj Khalifa",
+          trending: true,
+          flag: "🇦🇪",
+        },
+        {
+          name: "Bangkok",
+          country: "Thailand",
+          continent: "Asia",
+          query: "Bangkok Grand Palace",
+          trending: true,
+          flag: "🇹🇭",
+        },
+        {
+          name: "Istanbul",
+          country: "Turkey",
+          continent: "Asia",
+          query: "Istanbul Hagia Sophia",
+          trending: false,
+          flag: "🇹🇷",
+        },
+        {
+          name: "Singapore",
+          country: "Singapore",
+          continent: "Asia",
+          query: "Singapore Marina Bay Sands",
+          trending: true,
+          flag: "🇸🇬",
+        },
+        {
+          name: "Bali",
+          country: "Indonesia",
+          continent: "Asia",
+          query: "Bali Uluwatu Temple",
+          trending: true,
+          flag: "🇮🇩",
+        },
+        {
+          name: "Mumbai",
+          country: "India",
+          continent: "Asia",
+          query: "Mumbai Gateway of India",
+          trending: false,
+          flag: "🇮🇳",
+        },
+        {
+          name: "Seoul",
+          country: "South Korea",
+          continent: "Asia",
+          query: "Seoul Gyeongbokgung Palace",
+          trending: true,
+          flag: "🇰🇷",
+        },
+        {
+          name: "Hong Kong",
+          country: "Hong Kong",
+          continent: "Asia",
+          query: "Hong Kong Victoria Peak",
+          trending: true,
+          flag: "🇭🇰",
+        },
+        {
+          name: "Kyoto",
+          country: "Japan",
+          continent: "Asia",
+          query: "Kyoto Fushimi Inari",
+          trending: false,
+          flag: "🇯🇵",
+        },
+        {
+          name: "Shanghai",
+          country: "China",
+          continent: "Asia",
+          query: "Shanghai Bund",
+          trending: false,
+          flag: "🇨🇳",
+        },
+        {
+          name: "Beijing",
+          country: "China",
+          continent: "Asia",
+          query: "Beijing Forbidden City",
+          trending: false,
+          flag: "🇨🇳",
+        },
+        {
+          name: "Hanoi",
+          country: "Vietnam",
+          continent: "Asia",
+          query: "Hanoi Old Quarter",
+          trending: false,
+          flag: "🇻🇳",
+        },
+        {
+          name: "Ho Chi Minh City",
+          country: "Vietnam",
+          continent: "Asia",
+          query: "Ho Chi Minh City Notre Dame",
+          trending: false,
+          flag: "🇻🇳",
+        },
+        {
+          name: "Kuala Lumpur",
+          country: "Malaysia",
+          continent: "Asia",
+          query: "Kuala Lumpur Petronas Towers",
+          trending: false,
+          flag: "🇲🇾",
+        },
+        {
+          name: "Manila",
+          country: "Philippines",
+          continent: "Asia",
+          query: "Manila Rizal Park",
+          trending: false,
+          flag: "🇵🇭",
+        },
+        {
+          name: "Jakarta",
+          country: "Indonesia",
+          continent: "Asia",
+          query: "Jakarta Monas",
+          trending: false,
+          flag: "🇮🇩",
+        },
+        {
+          name: "Delhi",
+          country: "India",
+          continent: "Asia",
+          query: "Delhi India Gate",
+          trending: false,
+          flag: "🇮🇳",
+        },
+        {
+          name: "Jaipur",
+          country: "India",
+          continent: "Asia",
+          query: "Jaipur Hawa Mahal",
+          trending: false,
+          flag: "🇮🇳",
+        },
+        {
+          name: "Agra",
+          country: "India",
+          continent: "Asia",
+          query: "Agra Taj Mahal",
+          trending: false,
+          flag: "🇮🇳",
+        },
+        {
+          name: "Tel Aviv",
+          country: "Israel",
+          continent: "Asia",
+          query: "Tel Aviv Beach",
+          trending: false,
+          flag: "🇮🇱",
+        },
+        {
+          name: "Jerusalem",
+          country: "Israel",
+          continent: "Asia",
+          query: "Jerusalem Western Wall",
+          trending: false,
+          flag: "🇮🇱",
+        },
+        {
+          name: "Colombo",
+          country: "Sri Lanka",
+          continent: "Asia",
+          query: "Colombo Gangaramaya Temple",
+          trending: false,
+          flag: "🇱🇰",
+        },
+        {
+          name: "Kathmandu",
+          country: "Nepal",
+          continent: "Asia",
+          query: "Kathmandu Durbar Square",
+          trending: false,
+          flag: "🇳🇵",
+        },
+        {
+          name: "Phuket",
+          country: "Thailand",
+          continent: "Asia",
+          query: "Phuket Big Buddha",
+          trending: false,
+          flag: "🇹🇭",
+        },
+
         // North America
-        { name: 'New York', country: 'United States', continent: 'North America', query: 'New York Statue of Liberty', trending: true, flag: '🇺🇸' },
-        { name: 'Los Angeles', country: 'United States', continent: 'North America', query: 'Los Angeles Hollywood Sign', trending: false, flag: '🇺🇸' },
-        { name: 'Miami', country: 'United States', continent: 'North America', query: 'Miami South Beach', trending: false, flag: '🇺🇸' },
-        { name: 'Mexico City', country: 'Mexico', continent: 'North America', query: 'Mexico City Zocalo', trending: false, flag: '🇲🇽' },
-        { name: 'Las Vegas', country: 'United States', continent: 'North America', query: 'Las Vegas Strip', trending: true, flag: '🇺🇸' },
-        { name: 'San Francisco', country: 'United States', continent: 'North America', query: 'San Francisco Golden Gate', trending: false, flag: '🇺🇸' },
-        { name: 'Chicago', country: 'United States', continent: 'North America', query: 'Chicago Cloud Gate', trending: false, flag: '🇺🇸' },
-        { name: 'Toronto', country: 'Canada', continent: 'North America', query: 'Toronto CN Tower', trending: false, flag: '🇨🇦' },
-        { name: 'Vancouver', country: 'Canada', continent: 'North America', query: 'Vancouver Stanley Park', trending: false, flag: '🇨🇦' },
-        { name: 'Cancun', country: 'Mexico', continent: 'North America', query: 'Cancun beach', trending: true, flag: '🇲🇽' },
-        { name: 'Playa del Carmen', country: 'Mexico', continent: 'North America', query: 'Playa del Carmen beach', trending: false, flag: '🇲🇽' },
-        { name: 'Montreal', country: 'Canada', continent: 'North America', query: 'Montreal Old Port', trending: false, flag: '🇨🇦' },
-        
+        {
+          name: "New York",
+          country: "United States",
+          continent: "North America",
+          query: "New York Statue of Liberty",
+          trending: true,
+          flag: "🇺🇸",
+        },
+        {
+          name: "Los Angeles",
+          country: "United States",
+          continent: "North America",
+          query: "Los Angeles Hollywood Sign",
+          trending: false,
+          flag: "🇺🇸",
+        },
+        {
+          name: "Miami",
+          country: "United States",
+          continent: "North America",
+          query: "Miami South Beach",
+          trending: false,
+          flag: "🇺🇸",
+        },
+        {
+          name: "Mexico City",
+          country: "Mexico",
+          continent: "North America",
+          query: "Mexico City Zocalo",
+          trending: false,
+          flag: "🇲🇽",
+        },
+        {
+          name: "Las Vegas",
+          country: "United States",
+          continent: "North America",
+          query: "Las Vegas Strip",
+          trending: true,
+          flag: "🇺🇸",
+        },
+        {
+          name: "San Francisco",
+          country: "United States",
+          continent: "North America",
+          query: "San Francisco Golden Gate",
+          trending: false,
+          flag: "🇺🇸",
+        },
+        {
+          name: "Chicago",
+          country: "United States",
+          continent: "North America",
+          query: "Chicago Cloud Gate",
+          trending: false,
+          flag: "🇺🇸",
+        },
+        {
+          name: "Toronto",
+          country: "Canada",
+          continent: "North America",
+          query: "Toronto CN Tower",
+          trending: false,
+          flag: "🇨🇦",
+        },
+        {
+          name: "Vancouver",
+          country: "Canada",
+          continent: "North America",
+          query: "Vancouver Stanley Park",
+          trending: false,
+          flag: "🇨🇦",
+        },
+        {
+          name: "Cancun",
+          country: "Mexico",
+          continent: "North America",
+          query: "Cancun beach",
+          trending: true,
+          flag: "🇲🇽",
+        },
+        {
+          name: "Playa del Carmen",
+          country: "Mexico",
+          continent: "North America",
+          query: "Playa del Carmen beach",
+          trending: false,
+          flag: "🇲🇽",
+        },
+        {
+          name: "Montreal",
+          country: "Canada",
+          continent: "North America",
+          query: "Montreal Old Port",
+          trending: false,
+          flag: "🇨🇦",
+        },
+
         // South America
-        { name: 'Rio de Janeiro', country: 'Brazil', continent: 'South America', query: 'Rio Christ the Redeemer', trending: false, flag: '🇧🇷' },
-        { name: 'Buenos Aires', country: 'Argentina', continent: 'South America', query: 'Buenos Aires Obelisco', trending: false, flag: '🇦🇷' },
-        { name: 'Lima', country: 'Peru', continent: 'South America', query: 'Lima Plaza de Armas', trending: false, flag: '🇵🇪' },
-        { name: 'Cusco', country: 'Peru', continent: 'South America', query: 'Cusco Plaza', trending: false, flag: '🇵🇪' },
-        { name: 'Santiago', country: 'Chile', continent: 'South America', query: 'Santiago Cerro San Cristobal', trending: false, flag: '🇨🇱' },
-        { name: 'Bogota', country: 'Colombia', continent: 'South America', query: 'Bogota Bolivar Square', trending: false, flag: '🇨🇴' },
-        { name: 'Cartagena', country: 'Colombia', continent: 'South America', query: 'Cartagena Walled City', trending: false, flag: '🇨🇴' },
-        { name: 'Medellin', country: 'Colombia', continent: 'South America', query: 'Medellin Plaza Botero', trending: false, flag: '🇨🇴' },
-        { name: 'Quito', country: 'Ecuador', continent: 'South America', query: 'Quito Old Town', trending: false, flag: '🇪🇨' },
-        { name: 'La Paz', country: 'Bolivia', continent: 'South America', query: 'La Paz Witches Market', trending: false, flag: '🇧🇴' },
-        { name: 'Montevideo', country: 'Uruguay', continent: 'South America', query: 'Montevideo Rambla', trending: false, flag: '🇺🇾' },
-        { name: 'Sao Paulo', country: 'Brazil', continent: 'South America', query: 'Sao Paulo Paulista Avenue', trending: false, flag: '🇧🇷' },
-        
+        {
+          name: "Rio de Janeiro",
+          country: "Brazil",
+          continent: "South America",
+          query: "Rio Christ the Redeemer",
+          trending: false,
+          flag: "🇧🇷",
+        },
+        {
+          name: "Buenos Aires",
+          country: "Argentina",
+          continent: "South America",
+          query: "Buenos Aires Obelisco",
+          trending: false,
+          flag: "🇦🇷",
+        },
+        {
+          name: "Lima",
+          country: "Peru",
+          continent: "South America",
+          query: "Lima Plaza de Armas",
+          trending: false,
+          flag: "🇵🇪",
+        },
+        {
+          name: "Cusco",
+          country: "Peru",
+          continent: "South America",
+          query: "Cusco Plaza",
+          trending: false,
+          flag: "🇵🇪",
+        },
+        {
+          name: "Santiago",
+          country: "Chile",
+          continent: "South America",
+          query: "Santiago Cerro San Cristobal",
+          trending: false,
+          flag: "🇨🇱",
+        },
+        {
+          name: "Bogota",
+          country: "Colombia",
+          continent: "South America",
+          query: "Bogota Bolivar Square",
+          trending: false,
+          flag: "🇨🇴",
+        },
+        {
+          name: "Cartagena",
+          country: "Colombia",
+          continent: "South America",
+          query: "Cartagena Walled City",
+          trending: false,
+          flag: "🇨🇴",
+        },
+        {
+          name: "Medellin",
+          country: "Colombia",
+          continent: "South America",
+          query: "Medellin Plaza Botero",
+          trending: false,
+          flag: "🇨🇴",
+        },
+        {
+          name: "Quito",
+          country: "Ecuador",
+          continent: "South America",
+          query: "Quito Old Town",
+          trending: false,
+          flag: "🇪🇨",
+        },
+        {
+          name: "La Paz",
+          country: "Bolivia",
+          continent: "South America",
+          query: "La Paz Witches Market",
+          trending: false,
+          flag: "🇧🇴",
+        },
+        {
+          name: "Montevideo",
+          country: "Uruguay",
+          continent: "South America",
+          query: "Montevideo Rambla",
+          trending: false,
+          flag: "🇺🇾",
+        },
+        {
+          name: "Sao Paulo",
+          country: "Brazil",
+          continent: "South America",
+          query: "Sao Paulo Paulista Avenue",
+          trending: false,
+          flag: "🇧🇷",
+        },
+
         // Oceania
-        { name: 'Sydney', country: 'Australia', continent: 'Oceania', query: 'Sydney Opera House', trending: true, flag: '🇦🇺' },
-        { name: 'Melbourne', country: 'Australia', continent: 'Oceania', query: 'Melbourne Flinders Street', trending: false, flag: '🇦🇺' },
-        { name: 'Auckland', country: 'New Zealand', continent: 'Oceania', query: 'Auckland Sky Tower', trending: false, flag: '🇳🇿' },
-        { name: 'Brisbane', country: 'Australia', continent: 'Oceania', query: 'Brisbane South Bank', trending: false, flag: '🇦🇺' },
-        { name: 'Perth', country: 'Australia', continent: 'Oceania', query: 'Perth Kings Park', trending: false, flag: '🇦🇺' },
-        { name: 'Wellington', country: 'New Zealand', continent: 'Oceania', query: 'Wellington Cable Car', trending: false, flag: '🇳🇿' },
-        { name: 'Queenstown', country: 'New Zealand', continent: 'Oceania', query: 'Queenstown Lake Wakatipu', trending: false, flag: '🇳🇿' },
-        { name: 'Fiji', country: 'Fiji', continent: 'Oceania', query: 'Fiji Beach', trending: true, flag: '🇫🇯' },
-        
+        {
+          name: "Sydney",
+          country: "Australia",
+          continent: "Oceania",
+          query: "Sydney Opera House",
+          trending: true,
+          flag: "🇦🇺",
+        },
+        {
+          name: "Melbourne",
+          country: "Australia",
+          continent: "Oceania",
+          query: "Melbourne Flinders Street",
+          trending: false,
+          flag: "🇦🇺",
+        },
+        {
+          name: "Auckland",
+          country: "New Zealand",
+          continent: "Oceania",
+          query: "Auckland Sky Tower",
+          trending: false,
+          flag: "🇳🇿",
+        },
+        {
+          name: "Brisbane",
+          country: "Australia",
+          continent: "Oceania",
+          query: "Brisbane South Bank",
+          trending: false,
+          flag: "🇦🇺",
+        },
+        {
+          name: "Perth",
+          country: "Australia",
+          continent: "Oceania",
+          query: "Perth Kings Park",
+          trending: false,
+          flag: "🇦🇺",
+        },
+        {
+          name: "Wellington",
+          country: "New Zealand",
+          continent: "Oceania",
+          query: "Wellington Cable Car",
+          trending: false,
+          flag: "🇳🇿",
+        },
+        {
+          name: "Queenstown",
+          country: "New Zealand",
+          continent: "Oceania",
+          query: "Queenstown Lake Wakatipu",
+          trending: false,
+          flag: "🇳🇿",
+        },
+        {
+          name: "Fiji",
+          country: "Fiji",
+          continent: "Oceania",
+          query: "Fiji Beach",
+          trending: true,
+          flag: "🇫🇯",
+        },
+
         // Africa
-        { name: 'Cape Town', country: 'South Africa', continent: 'Africa', query: 'Cape Town Table Mountain', trending: false, flag: '🇿🇦' },
-        { name: 'Cairo', country: 'Egypt', continent: 'Africa', query: 'Cairo Pyramids of Giza', trending: false, flag: '🇪🇬' },
-        { name: 'Marrakech', country: 'Morocco', continent: 'Africa', query: 'Marrakech Jemaa el-Fnaa', trending: false, flag: '🇲🇦' },
-        { name: 'Nairobi', country: 'Kenya', continent: 'Africa', query: 'Nairobi National Park', trending: false, flag: '🇰🇪' },
-        { name: 'Johannesburg', country: 'South Africa', continent: 'Africa', query: 'Johannesburg Apartheid Museum', trending: false, flag: '🇿🇦' },
-        { name: 'Casablanca', country: 'Morocco', continent: 'Africa', query: 'Casablanca Hassan II Mosque', trending: false, flag: '🇲🇦' },
-        { name: 'Luxor', country: 'Egypt', continent: 'Africa', query: 'Luxor Temple', trending: false, flag: '🇪🇬' },
-        { name: 'Zanzibar', country: 'Tanzania', continent: 'Africa', query: 'Zanzibar Stone Town', trending: false, flag: '🇹🇿' },
-        { name: 'Tunis', country: 'Tunisia', continent: 'Africa', query: 'Tunis Medina', trending: false, flag: '🇹🇳' },
-        { name: 'Mauritius', country: 'Mauritius', continent: 'Africa', query: 'Mauritius Beach', trending: true, flag: '🇲🇺' },
-        
+        {
+          name: "Cape Town",
+          country: "South Africa",
+          continent: "Africa",
+          query: "Cape Town Table Mountain",
+          trending: false,
+          flag: "🇿🇦",
+        },
+        {
+          name: "Cairo",
+          country: "Egypt",
+          continent: "Africa",
+          query: "Cairo Pyramids of Giza",
+          trending: false,
+          flag: "🇪🇬",
+        },
+        {
+          name: "Marrakech",
+          country: "Morocco",
+          continent: "Africa",
+          query: "Marrakech Jemaa el-Fnaa",
+          trending: false,
+          flag: "🇲🇦",
+        },
+        {
+          name: "Nairobi",
+          country: "Kenya",
+          continent: "Africa",
+          query: "Nairobi National Park",
+          trending: false,
+          flag: "🇰🇪",
+        },
+        {
+          name: "Johannesburg",
+          country: "South Africa",
+          continent: "Africa",
+          query: "Johannesburg Apartheid Museum",
+          trending: false,
+          flag: "🇿🇦",
+        },
+        {
+          name: "Casablanca",
+          country: "Morocco",
+          continent: "Africa",
+          query: "Casablanca Hassan II Mosque",
+          trending: false,
+          flag: "🇲🇦",
+        },
+        {
+          name: "Luxor",
+          country: "Egypt",
+          continent: "Africa",
+          query: "Luxor Temple",
+          trending: false,
+          flag: "🇪🇬",
+        },
+        {
+          name: "Zanzibar",
+          country: "Tanzania",
+          continent: "Africa",
+          query: "Zanzibar Stone Town",
+          trending: false,
+          flag: "🇹🇿",
+        },
+        {
+          name: "Tunis",
+          country: "Tunisia",
+          continent: "Africa",
+          query: "Tunis Medina",
+          trending: false,
+          flag: "🇹🇳",
+        },
+        {
+          name: "Mauritius",
+          country: "Mauritius",
+          continent: "Africa",
+          query: "Mauritius Beach",
+          trending: true,
+          flag: "🇲🇺",
+        },
+
         // Caribbean
-        { name: 'Punta Cana', country: 'Dominican Republic', continent: 'Caribbean', query: 'Punta Cana beach', trending: true, flag: '🇩🇴' },
-        { name: 'Havana', country: 'Cuba', continent: 'Caribbean', query: 'Havana Malecon', trending: false, flag: '🇨🇺' },
-        { name: 'Nassau', country: 'Bahamas', continent: 'Caribbean', query: 'Nassau Paradise Island', trending: false, flag: '🇧🇸' },
-        { name: 'Montego Bay', country: 'Jamaica', continent: 'Caribbean', query: 'Montego Bay beach', trending: false, flag: '🇯🇲' },
-        { name: 'San Juan', country: 'Puerto Rico', continent: 'Caribbean', query: 'San Juan Old Town', trending: false, flag: '🇵🇷' },
-        { name: 'Santo Domingo', country: 'Dominican Republic', continent: 'Caribbean', query: 'Santo Domingo Colonial Zone', trending: false, flag: '🇩🇴' },
+        {
+          name: "Punta Cana",
+          country: "Dominican Republic",
+          continent: "Caribbean",
+          query: "Punta Cana beach",
+          trending: true,
+          flag: "🇩🇴",
+        },
+        {
+          name: "Havana",
+          country: "Cuba",
+          continent: "Caribbean",
+          query: "Havana Malecon",
+          trending: false,
+          flag: "🇨🇺",
+        },
+        {
+          name: "Nassau",
+          country: "Bahamas",
+          continent: "Caribbean",
+          query: "Nassau Paradise Island",
+          trending: false,
+          flag: "🇧🇸",
+        },
+        {
+          name: "Montego Bay",
+          country: "Jamaica",
+          continent: "Caribbean",
+          query: "Montego Bay beach",
+          trending: false,
+          flag: "🇯🇲",
+        },
+        {
+          name: "San Juan",
+          country: "Puerto Rico",
+          continent: "Caribbean",
+          query: "San Juan Old Town",
+          trending: false,
+          flag: "🇵🇷",
+        },
+        {
+          name: "Santo Domingo",
+          country: "Dominican Republic",
+          continent: "Caribbean",
+          query: "Santo Domingo Colonial Zone",
+          trending: false,
+          flag: "🇩🇴",
+        },
       ];
 
       const destinations = await Promise.all(
@@ -4421,140 +6230,213 @@ export async function registerRoutes(app: Express): Promise<void> {
             const results = await googlePlaces.searchPlaces(city.query);
             if (results && results.length > 0) {
               const place = results[0];
-              
+
               // Determine types based on Google Places types
               const cityTypes = [];
-              if (place.types.includes('locality') || place.types.includes('administrative_area_level_1')) {
-                cityTypes.push('city');
+              if (
+                place.types.includes("locality") ||
+                place.types.includes("administrative_area_level_1")
+              ) {
+                cityTypes.push("city");
               }
-              if (place.types.includes('natural_feature') || place.types.includes('park')) {
-                cityTypes.push('nature');
+              if (
+                place.types.includes("natural_feature") ||
+                place.types.includes("park")
+              ) {
+                cityTypes.push("nature");
               }
-              if (place.types.includes('tourist_attraction') || place.types.includes('point_of_interest')) {
-                cityTypes.push('culture');
+              if (
+                place.types.includes("tourist_attraction") ||
+                place.types.includes("point_of_interest")
+              ) {
+                cityTypes.push("culture");
               }
-              if (cityTypes.length === 0) cityTypes.push('city');
+              if (cityTypes.length === 0) cityTypes.push("city");
 
               // Create description based on city
               const descriptions: { [key: string]: string } = {
                 // Europe
-                'Paris': 'The City of Light offers iconic landmarks, world-class art, and exquisite cuisine',
-                'London': 'Historic capital with royal palaces, museums, and vibrant culture',
-                'Rome': 'The Eternal City filled with ancient history and Renaissance art',
-                'Barcelona': 'Stunning architecture, beautiful beaches, and vibrant culture',
-                'Amsterdam': 'Artistic heritage, canals, and cycling culture',
-                'Prague': 'Fairy-tale architecture and rich medieval history',
-                'Vienna': 'Imperial palaces, classical music, and elegant coffee houses',
-                'Athens': 'Cradle of Western civilization and ancient landmarks',
-                'Lisbon': 'Coastal capital with colorful architecture and historic trams',
-                'Berlin': 'Creative hub with rich history and dynamic nightlife',
-                'Moscow': 'Red Square, Kremlin, and onion-domed churches',
-                'Reykjavik': 'Gateway to natural wonders like Northern Lights and hot springs',
-                'Santorini': 'White-washed villages, stunning sunsets, and volcanic beaches',
-                'Venice': 'Romantic canals, gondolas, and historic architecture',
-                'Florence': 'Renaissance masterpieces, Duomo, and Tuscan charm',
-                'Milan': 'Fashion capital with Gothic cathedral and high-end shopping',
-                'Madrid': 'Royal capital with world-class museums and vibrant nightlife',
-                'Seville': 'Flamenco, tapas, and stunning Moorish architecture',
-                'Munich': 'Bavarian culture, beer gardens, and historic landmarks',
-                'Edinburgh': 'Medieval Old Town, Edinburgh Castle, and Scottish heritage',
-                'Dublin': 'Friendly pubs, literary history, and Georgian architecture',
-                'Copenhagen': 'Danish design, colorful Nyhavn, and cycling culture',
-                'Stockholm': 'Scandinavian beauty, archipelago islands, and historic Old Town',
-                'Oslo': 'Nordic nature, modern architecture, and Viking history',
-                'Budapest': 'Thermal baths, Danube views, and ruin bars',
-                'Krakow': 'Medieval square, Jewish quarter, and Polish history',
-                'Zurich': 'Swiss Alps gateway, pristine lake, and banking hub',
-                'Brussels': 'European capital, Belgian waffles, and Art Nouveau architecture',
-                
+                Paris:
+                  "The City of Light offers iconic landmarks, world-class art, and exquisite cuisine",
+                London:
+                  "Historic capital with royal palaces, museums, and vibrant culture",
+                Rome: "The Eternal City filled with ancient history and Renaissance art",
+                Barcelona:
+                  "Stunning architecture, beautiful beaches, and vibrant culture",
+                Amsterdam: "Artistic heritage, canals, and cycling culture",
+                Prague: "Fairy-tale architecture and rich medieval history",
+                Vienna:
+                  "Imperial palaces, classical music, and elegant coffee houses",
+                Athens: "Cradle of Western civilization and ancient landmarks",
+                Lisbon:
+                  "Coastal capital with colorful architecture and historic trams",
+                Berlin: "Creative hub with rich history and dynamic nightlife",
+                Moscow: "Red Square, Kremlin, and onion-domed churches",
+                Reykjavik:
+                  "Gateway to natural wonders like Northern Lights and hot springs",
+                Santorini:
+                  "White-washed villages, stunning sunsets, and volcanic beaches",
+                Venice: "Romantic canals, gondolas, and historic architecture",
+                Florence: "Renaissance masterpieces, Duomo, and Tuscan charm",
+                Milan:
+                  "Fashion capital with Gothic cathedral and high-end shopping",
+                Madrid:
+                  "Royal capital with world-class museums and vibrant nightlife",
+                Seville: "Flamenco, tapas, and stunning Moorish architecture",
+                Munich:
+                  "Bavarian culture, beer gardens, and historic landmarks",
+                Edinburgh:
+                  "Medieval Old Town, Edinburgh Castle, and Scottish heritage",
+                Dublin:
+                  "Friendly pubs, literary history, and Georgian architecture",
+                Copenhagen:
+                  "Danish design, colorful Nyhavn, and cycling culture",
+                Stockholm:
+                  "Scandinavian beauty, archipelago islands, and historic Old Town",
+                Oslo: "Nordic nature, modern architecture, and Viking history",
+                Budapest: "Thermal baths, Danube views, and ruin bars",
+                Krakow: "Medieval square, Jewish quarter, and Polish history",
+                Zurich: "Swiss Alps gateway, pristine lake, and banking hub",
+                Brussels:
+                  "European capital, Belgian waffles, and Art Nouveau architecture",
+
                 // Asia
-                'Tokyo': 'A fascinating blend of ancient tradition and cutting-edge modernity',
-                'Dubai': 'Futuristic city with luxury shopping and modern architecture',
-                'Bangkok': 'Vibrant street life, ornate shrines, and bustling markets',
-                'Istanbul': 'Where East meets West, rich history and stunning architecture',
-                'Singapore': 'Modern city-state with diverse culture and incredible food',
-                'Bali': 'Tropical paradise with stunning beaches, temples, and rice terraces',
-                'Mumbai': 'Bollywood, colonial architecture, and bustling markets',
-                'Seoul': 'Modern metropolis with ancient temples and vibrant K-culture',
-                'Hong Kong': 'Skyscrapers, dim sum, and harbor views',
-                'Kyoto': 'Ancient temples, traditional geishas, and zen gardens',
-                'Shanghai': 'Modern skyline, historic Bund, and vibrant culture',
-                'Beijing': 'Forbidden City, Great Wall, and Chinese imperial history',
-                'Hanoi': 'French colonial charm, street food, and Old Quarter',
-                'Ho Chi Minh City': 'Vietnamese energy, War museums, and street food scene',
-                'Kuala Lumpur': 'Petronas Towers, diverse culture, and street markets',
-                'Manila': 'Spanish heritage, vibrant nightlife, and Filipino warmth',
-                'Jakarta': 'Indonesian capital with diverse culture and bustling energy',
-                'Delhi': 'Ancient monuments, Mughal heritage, and colorful bazaars',
-                'Jaipur': 'Pink City with majestic palaces and vibrant markets',
-                'Agra': 'Home of the Taj Mahal and Mughal architecture',
-                'Tel Aviv': 'Mediterranean beaches, Bauhaus architecture, and vibrant nightlife',
-                'Jerusalem': 'Holy city with ancient sites and spiritual significance',
-                'Colombo': 'Colonial heritage, Buddhist temples, and coastal charm',
-                'Kathmandu': 'Gateway to Himalayas, ancient temples, and Nepali culture',
-                'Phuket': 'Thailand beaches, island paradise, and water sports',
-                
+                Tokyo:
+                  "A fascinating blend of ancient tradition and cutting-edge modernity",
+                Dubai:
+                  "Futuristic city with luxury shopping and modern architecture",
+                Bangkok:
+                  "Vibrant street life, ornate shrines, and bustling markets",
+                Istanbul:
+                  "Where East meets West, rich history and stunning architecture",
+                Singapore:
+                  "Modern city-state with diverse culture and incredible food",
+                Bali: "Tropical paradise with stunning beaches, temples, and rice terraces",
+                Mumbai:
+                  "Bollywood, colonial architecture, and bustling markets",
+                Seoul:
+                  "Modern metropolis with ancient temples and vibrant K-culture",
+                "Hong Kong": "Skyscrapers, dim sum, and harbor views",
+                Kyoto: "Ancient temples, traditional geishas, and zen gardens",
+                Shanghai: "Modern skyline, historic Bund, and vibrant culture",
+                Beijing:
+                  "Forbidden City, Great Wall, and Chinese imperial history",
+                Hanoi: "French colonial charm, street food, and Old Quarter",
+                "Ho Chi Minh City":
+                  "Vietnamese energy, War museums, and street food scene",
+                "Kuala Lumpur":
+                  "Petronas Towers, diverse culture, and street markets",
+                Manila:
+                  "Spanish heritage, vibrant nightlife, and Filipino warmth",
+                Jakarta:
+                  "Indonesian capital with diverse culture and bustling energy",
+                Delhi:
+                  "Ancient monuments, Mughal heritage, and colorful bazaars",
+                Jaipur: "Pink City with majestic palaces and vibrant markets",
+                Agra: "Home of the Taj Mahal and Mughal architecture",
+                "Tel Aviv":
+                  "Mediterranean beaches, Bauhaus architecture, and vibrant nightlife",
+                Jerusalem:
+                  "Holy city with ancient sites and spiritual significance",
+                Colombo:
+                  "Colonial heritage, Buddhist temples, and coastal charm",
+                Kathmandu:
+                  "Gateway to Himalayas, ancient temples, and Nepali culture",
+                Phuket: "Thailand beaches, island paradise, and water sports",
+
                 // North America
-                'New York': 'The city that never sleeps, iconic skyline and diverse culture',
-                'Los Angeles': 'Entertainment capital, beaches, and diverse neighborhoods',
-                'Miami': 'Art Deco architecture, beaches, and Latin culture',
-                'Mexico City': 'Ancient Aztec heritage, museums, and vibrant street life',
-                'Las Vegas': 'Entertainment paradise, casinos, and world-class shows',
-                'San Francisco': 'Golden Gate Bridge, cable cars, and tech innovation',
-                'Chicago': 'Architecture, deep-dish pizza, and lakefront beauty',
-                'Toronto': 'CN Tower, diverse culture, and cosmopolitan energy',
-                'Vancouver': 'Mountain meets ocean, outdoor adventures, and multiculturalism',
-                'Cancun': 'Turquoise Caribbean waters, Mayan ruins, and beach resorts',
-                'Playa del Carmen': 'Riviera Maya beaches, cenotes, and laid-back vibes',
-                'Montreal': 'French charm, festivals, and European atmosphere in North America',
-                
+                "New York":
+                  "The city that never sleeps, iconic skyline and diverse culture",
+                "Los Angeles":
+                  "Entertainment capital, beaches, and diverse neighborhoods",
+                Miami: "Art Deco architecture, beaches, and Latin culture",
+                "Mexico City":
+                  "Ancient Aztec heritage, museums, and vibrant street life",
+                "Las Vegas":
+                  "Entertainment paradise, casinos, and world-class shows",
+                "San Francisco":
+                  "Golden Gate Bridge, cable cars, and tech innovation",
+                Chicago: "Architecture, deep-dish pizza, and lakefront beauty",
+                Toronto: "CN Tower, diverse culture, and cosmopolitan energy",
+                Vancouver:
+                  "Mountain meets ocean, outdoor adventures, and multiculturalism",
+                Cancun:
+                  "Turquoise Caribbean waters, Mayan ruins, and beach resorts",
+                "Playa del Carmen":
+                  "Riviera Maya beaches, cenotes, and laid-back vibes",
+                Montreal:
+                  "French charm, festivals, and European atmosphere in North America",
+
                 // South America
-                'Rio de Janeiro': 'Iconic beaches, Christ the Redeemer, and Carnival celebrations',
-                'Buenos Aires': 'Tango, steakhouses, and European-style architecture',
-                'Lima': 'Peruvian cuisine capital, colonial architecture, and coastal cliffs',
-                'Cusco': 'Gateway to Machu Picchu and Inca heritage',
-                'Santiago': 'Andes Mountains backdrop, wine valleys, and modern museums',
-                'Bogota': 'Colombian capital with colonial charm and vibrant culture',
-                'Cartagena': 'Caribbean coast, walled colonial city, and colorful streets',
-                'Medellin': 'City of eternal spring, innovation, and transformation',
-                'Quito': 'Andean capital, colonial Old Town, and volcano views',
-                'La Paz': 'Highest capital, cable car network, and indigenous culture',
-                'Montevideo': 'Laid-back capital, beaches, and South American charm',
-                'Sao Paulo': 'Brazil economic powerhouse, art scene, and diverse culture',
-                
+                "Rio de Janeiro":
+                  "Iconic beaches, Christ the Redeemer, and Carnival celebrations",
+                "Buenos Aires":
+                  "Tango, steakhouses, and European-style architecture",
+                Lima: "Peruvian cuisine capital, colonial architecture, and coastal cliffs",
+                Cusco: "Gateway to Machu Picchu and Inca heritage",
+                Santiago:
+                  "Andes Mountains backdrop, wine valleys, and modern museums",
+                Bogota:
+                  "Colombian capital with colonial charm and vibrant culture",
+                Cartagena:
+                  "Caribbean coast, walled colonial city, and colorful streets",
+                Medellin:
+                  "City of eternal spring, innovation, and transformation",
+                Quito: "Andean capital, colonial Old Town, and volcano views",
+                "La Paz":
+                  "Highest capital, cable car network, and indigenous culture",
+                Montevideo:
+                  "Laid-back capital, beaches, and South American charm",
+                "Sao Paulo":
+                  "Brazil economic powerhouse, art scene, and diverse culture",
+
                 // Oceania
-                'Sydney': 'Harbor city known for the Opera House and beautiful beaches',
-                'Melbourne': 'Coffee culture, street art, and cultural capital',
-                'Auckland': 'City of Sails with harbors and volcanic landscapes',
-                'Brisbane': 'Subtropical capital with river cruises and outdoor lifestyle',
-                'Perth': 'Isolated beauty, pristine beaches, and laid-back lifestyle',
-                'Wellington': 'Compact capital, harbor views, and creative energy',
-                'Queenstown': 'Adventure capital with stunning alpine scenery',
-                'Fiji': 'Tropical island paradise with crystal waters and coral reefs',
-                
+                Sydney:
+                  "Harbor city known for the Opera House and beautiful beaches",
+                Melbourne: "Coffee culture, street art, and cultural capital",
+                Auckland: "City of Sails with harbors and volcanic landscapes",
+                Brisbane:
+                  "Subtropical capital with river cruises and outdoor lifestyle",
+                Perth:
+                  "Isolated beauty, pristine beaches, and laid-back lifestyle",
+                Wellington:
+                  "Compact capital, harbor views, and creative energy",
+                Queenstown: "Adventure capital with stunning alpine scenery",
+                Fiji: "Tropical island paradise with crystal waters and coral reefs",
+
                 // Africa
-                'Cape Town': 'Stunning landscapes, Table Mountain, and vibrant culture',
-                'Cairo': 'Ancient pyramids, pharaohs, and the Nile River',
-                'Marrakech': 'Bustling souks, palaces, and Moroccan culture',
-                'Nairobi': 'Safari gateway, wildlife, and modern African city',
-                'Johannesburg': 'Economic hub, apartheid history, and urban energy',
-                'Casablanca': 'Moroccan port city with Art Deco architecture and Hassan II Mosque',
-                'Luxor': 'Valley of the Kings, ancient temples, and pharaonic treasures',
-                'Zanzibar': 'Spice island paradise, Stone Town, and turquoise beaches',
-                'Tunis': 'Medina markets, Roman ruins, and Mediterranean charm',
-                'Mauritius': 'Indian Ocean paradise, luxury resorts, and multicultural fusion',
-                
+                "Cape Town":
+                  "Stunning landscapes, Table Mountain, and vibrant culture",
+                Cairo: "Ancient pyramids, pharaohs, and the Nile River",
+                Marrakech: "Bustling souks, palaces, and Moroccan culture",
+                Nairobi: "Safari gateway, wildlife, and modern African city",
+                Johannesburg:
+                  "Economic hub, apartheid history, and urban energy",
+                Casablanca:
+                  "Moroccan port city with Art Deco architecture and Hassan II Mosque",
+                Luxor:
+                  "Valley of the Kings, ancient temples, and pharaonic treasures",
+                Zanzibar:
+                  "Spice island paradise, Stone Town, and turquoise beaches",
+                Tunis: "Medina markets, Roman ruins, and Mediterranean charm",
+                Mauritius:
+                  "Indian Ocean paradise, luxury resorts, and multicultural fusion",
+
                 // Caribbean
-                'Punta Cana': 'Paradise beaches and all-inclusive resorts',
-                'Havana': 'Classic cars, salsa music, and colonial Spanish architecture',
-                'Nassau': 'Bahamas capital, crystal waters, and island lifestyle',
-                'Montego Bay': 'Jamaica beaches, reggae vibes, and water sports',
-                'San Juan': 'Historic fortresses, colorful streets, and Caribbean culture',
-                'Santo Domingo': 'First city of Americas, colonial zone, and merengue birthplace'
+                "Punta Cana": "Paradise beaches and all-inclusive resorts",
+                Havana:
+                  "Classic cars, salsa music, and colonial Spanish architecture",
+                Nassau: "Bahamas capital, crystal waters, and island lifestyle",
+                "Montego Bay":
+                  "Jamaica beaches, reggae vibes, and water sports",
+                "San Juan":
+                  "Historic fortresses, colorful streets, and Caribbean culture",
+                "Santo Domingo":
+                  "First city of Americas, colonial zone, and merengue birthplace",
               };
 
               return {
-                id: city.name.toLowerCase().replace(/\s+/g, ''),
+                id: city.name.toLowerCase().replace(/\s+/g, ""),
                 name: city.name,
                 country: city.country,
                 continent: city.continent,
@@ -4564,10 +6446,12 @@ export async function registerRoutes(app: Express): Promise<void> {
                 rating: place.rating || 4.5,
                 userRatingsTotal: place.user_ratings_total || 0,
                 types: cityTypes,
-                description: descriptions[city.name] || `Explore the beauty and culture of ${city.name}`,
+                description:
+                  descriptions[city.name] ||
+                  `Explore the beauty and culture of ${city.name}`,
                 trending: city.trending,
-                photoRefs: place.photos?.map(p => p.photo_reference) || [],
-                placeId: place.place_id
+                photoRefs: place.photos?.map((p) => p.photo_reference) || [],
+                placeId: place.place_id,
               };
             }
             return null;
@@ -4578,16 +6462,16 @@ export async function registerRoutes(app: Express): Promise<void> {
         })
       );
 
-      const validDestinations = destinations.filter(d => d !== null);
+      const validDestinations = destinations.filter((d) => d !== null);
       res.json(validDestinations);
     } catch (error) {
-      console.error('Error fetching popular destinations:', error);
-      res.status(500).json({ error: 'Failed to fetch popular destinations' });
+      console.error("Error fetching popular destinations:", error);
+      res.status(500).json({ error: "Failed to fetch popular destinations" });
     }
   });
 
   // Destinations Hub Feature Flags (must be before :locationId route)
-  app.get('/api/destinations/feature-flags', (_req, res) => {
+  app.get("/api/destinations/feature-flags", (_req, res) => {
     try {
       const featureFlags = {
         googlePlaces: !!process.env.GOOGLE_PLACES_API_KEY,
@@ -4599,102 +6483,111 @@ export async function registerRoutes(app: Express): Promise<void> {
       };
       res.json(featureFlags);
     } catch (error) {
-      console.error('Error fetching feature flags:', error);
-      res.status(500).json({ error: 'Failed to fetch feature flags' });
+      console.error("Error fetching feature flags:", error);
+      res.status(500).json({ error: "Failed to fetch feature flags" });
     }
   });
 
   // Weather service route (must be before :locationId route)
-  app.get('/api/destinations/weather', async (req, res) => {
+  app.get("/api/destinations/weather", async (req, res) => {
     try {
       const { lat, lon, lang, units } = req.query;
-      
+
       if (!lat || !lon) {
-        return res.status(400).json({ error: 'lat and lon parameters required' });
+        return res
+          .status(400)
+          .json({ error: "lat and lon parameters required" });
       }
-      
+
       // Import and use destinations weather service
-      const { weatherService } = await import('./services/destinations/weatherService.js');
+      const { weatherService } = await import(
+        "./services/destinations/weatherService.js"
+      );
       const weather = await weatherService.getByLatLng(
         Number(lat),
         Number(lon),
         {
-          lang: (lang as string) || 'en',
-          units: (units as 'metric' | 'imperial') || 'metric'
+          lang: (lang as string) || "en",
+          units: (units as "metric" | "imperial") || "metric",
         }
       );
-      
+
       res.json(weather);
     } catch (error: any) {
-      console.error('Error fetching weather:', error);
-      
-      if (error.message?.includes('not enabled')) {
-        return res.status(503).json({ 
-          error: 'Weather service not available',
+      console.error("Error fetching weather:", error);
+
+      if (error.message?.includes("not enabled")) {
+        return res.status(503).json({
+          error: "Weather service not available",
           message: error.message,
-          provider: 'openweather'
+          provider: "openweather",
         });
       }
-      
-      res.status(500).json({ 
-        error: 'Failed to fetch weather',
-        message: error.message 
+
+      res.status(500).json({
+        error: "Failed to fetch weather",
+        message: error.message,
       });
     }
   });
 
   // Google Maps API key endpoint (restricts exposure to authenticated requests only)
-  app.get('/api/maps/key', async (req, res) => {
+  app.get("/api/maps/key", async (req, res) => {
     try {
       const apiKey = process.env.GOOGLE_MAPS_API_KEY;
       if (!apiKey) {
-        return res.status(503).json({ error: 'Google Maps API key not configured' });
+        return res
+          .status(503)
+          .json({ error: "Google Maps API key not configured" });
       }
       res.json({ apiKey });
     } catch (error) {
-      console.error('Error fetching Google Maps key:', error);
-      res.status(500).json({ error: 'Failed to retrieve API key' });
+      console.error("Error fetching Google Maps key:", error);
+      res.status(500).json({ error: "Failed to retrieve API key" });
     }
   });
 
   // Public proxy endpoint for geo basics (handles security server-side)
-  app.get('/api/destinations/geo-basics', async (req, res) => {
+  app.get("/api/destinations/geo-basics", async (req, res) => {
     try {
-      const { getBasics } = await import('./services/destinations/geoService.js');
-      const { country, city, lang = 'en' } = req.query;
+      const { getBasics } = await import(
+        "./services/destinations/geoService.js"
+      );
+      const { country, city, lang = "en" } = req.query;
 
       if (!country) {
-        return res.status(400).json({ error: 'Country parameter is required' });
+        return res.status(400).json({ error: "Country parameter is required" });
       }
 
       // Map common abbreviations to full country names
       const countryMapping: Record<string, string> = {
-        'UK': 'United Kingdom',
-        'USA': 'United States',
-        'UAE': 'United Arab Emirates',
-        'US': 'United States',
+        UK: "United Kingdom",
+        USA: "United States",
+        UAE: "United Arab Emirates",
+        US: "United States",
       };
 
-      const countryName = countryMapping[country as string] || country as string;
+      const countryName =
+        countryMapping[country as string] || (country as string);
 
       const result = await getBasics({
         countryName,
         cityName: city as string,
-        lang: lang as 'en' | 'he',
+        lang: lang as "en" | "he",
       });
 
       if (!result) {
-        return res.status(404).json({ error: 'Location not found' });
+        return res.status(404).json({ error: "Location not found" });
       }
 
       res.json(result);
     } catch (error) {
-      console.error('Geo basics error:', error);
-      res.status(500).json({ error: 'Failed to fetch location data' });
+      console.error("Geo basics error:", error);
+      res.status(500).json({ error: "Failed to fetch location data" });
     }
   });
 
-  app.get('/api/destinations/:locationId', async (req, res) => {
+  app.get("/api/destinations/:locationId", async (req, res) => {
     try {
       const { locationId } = req.params;
       const destination = await storage.getDestinationByLocationId(locationId);
@@ -4709,11 +6602,11 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Accommodations API - using places table with category filter
-  app.get('/api/accommodations', async (req, res) => {
+  app.get("/api/accommodations", async (req, res) => {
     try {
       const { destinationId } = req.query;
-      console.log('Fetching accommodations from places table');
-      
+      console.log("Fetching accommodations from places table");
+
       let accommodations: any[] = [];
       const client = await pool.connect();
       try {
@@ -4734,9 +6627,9 @@ export async function registerRoutes(app: Express): Promise<void> {
              OR LOWER(name) LIKE '%hostel%'
           ORDER BY rating DESC
         `;
-        
+
         const result = await client.query(query);
-        accommodations = result.rows.map(place => ({
+        accommodations = result.rows.map((place) => ({
           id: place.id,
           locationId: `acc_${place.id}`,
           name: place.name,
@@ -4747,40 +6640,50 @@ export async function registerRoutes(app: Express): Promise<void> {
           description: place.description,
           amenities: ["wifi", "service"],
           createdAt: place.created_at,
-          updatedAt: place.updated_at
+          updatedAt: place.updated_at,
         }));
       } catch (dbError) {
-        console.error('Places database error:', dbError);
+        console.error("Places database error:", dbError);
         accommodations = [];
       } finally {
         client.release();
       }
-      
-      console.log('Retrieved accommodations from places:', accommodations.length);
+
+      console.log(
+        "Retrieved accommodations from places:",
+        accommodations.length
+      );
       res.json({
         success: true,
         count: accommodations.length,
-        accommodations: accommodations
+        accommodations: accommodations,
       });
     } catch (error) {
       console.error("Error fetching accommodations:", error);
-      res.status(500).json({ message: "Failed to fetch accommodations", error: error instanceof Error ? error.message : 'Unknown error' });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch accommodations",
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
     }
   });
 
-  app.get('/api/accommodations/search', async (req, res) => {
+  app.get("/api/accommodations/search", async (req, res) => {
     try {
       const { q, destinationId, priceLevel, rating } = req.query;
-      if (!q || typeof q !== 'string') {
+      if (!q || typeof q !== "string") {
         return res.status(400).json({ message: "Search query is required" });
       }
-      
+
       const filters = {
-        destinationId: destinationId ? parseInt(destinationId as string) : undefined,
+        destinationId: destinationId
+          ? parseInt(destinationId as string)
+          : undefined,
         priceLevel: priceLevel as string,
         rating: rating ? parseFloat(rating as string) : undefined,
       };
-      
+
       const accommodations = await storage.searchAccommodations(q, filters);
       res.json(accommodations);
     } catch (error) {
@@ -4789,10 +6692,12 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get('/api/accommodations/:locationId', async (req, res) => {
+  app.get("/api/accommodations/:locationId", async (req, res) => {
     try {
       const { locationId } = req.params;
-      const accommodation = await storage.getAccommodationByLocationId(locationId);
+      const accommodation = await storage.getAccommodationByLocationId(
+        locationId
+      );
       if (!accommodation) {
         return res.status(404).json({ message: "Accommodation not found" });
       }
@@ -4804,11 +6709,11 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Attractions API - using places table with category filter
-  app.get('/api/attractions', async (req, res) => {
+  app.get("/api/attractions", async (req, res) => {
     try {
       const { destinationId } = req.query;
-      console.log('Fetching attractions from places table');
-      
+      console.log("Fetching attractions from places table");
+
       let attractions: any[] = [];
       const client = await pool.connect();
       try {
@@ -4839,9 +6744,9 @@ export async function registerRoutes(app: Express): Promise<void> {
              OR LOWER(name) LIKE '%park%'
           ORDER BY rating DESC
         `;
-        
+
         const result = await client.query(query);
-        attractions = result.rows.map(place => ({
+        attractions = result.rows.map((place) => ({
           id: place.id,
           locationId: `att_${place.id}`,
           name: place.name,
@@ -4852,39 +6757,46 @@ export async function registerRoutes(app: Express): Promise<void> {
           description: place.description,
           address: `${place.name}, ${place.country}`,
           createdAt: place.created_at,
-          updatedAt: place.updated_at
+          updatedAt: place.updated_at,
         }));
       } catch (dbError) {
-        console.error('Places database error:', dbError);
+        console.error("Places database error:", dbError);
         attractions = [];
       } finally {
         client.release();
       }
-      
-      console.log('Retrieved attractions from places:', attractions.length);
+
+      console.log("Retrieved attractions from places:", attractions.length);
       res.json({
         success: true,
         count: attractions.length,
-        attractions: attractions
+        attractions: attractions,
       });
     } catch (error) {
       console.error("Error fetching attractions:", error);
-      res.status(500).json({ message: "Failed to fetch attractions", error: error instanceof Error ? error.message : 'Unknown error' });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch attractions",
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
     }
   });
 
-  app.get('/api/attractions/search', async (req, res) => {
+  app.get("/api/attractions/search", async (req, res) => {
     try {
       const { q, destinationId, category } = req.query;
-      if (!q || typeof q !== 'string') {
+      if (!q || typeof q !== "string") {
         return res.status(400).json({ message: "Search query is required" });
       }
-      
+
       const filters = {
-        destinationId: destinationId ? parseInt(destinationId as string) : undefined,
+        destinationId: destinationId
+          ? parseInt(destinationId as string)
+          : undefined,
         category: category as string,
       };
-      
+
       const attractions = await storage.searchAttractions(q, filters);
       res.json(attractions);
     } catch (error) {
@@ -4893,7 +6805,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get('/api/attractions/:locationId', async (req, res) => {
+  app.get("/api/attractions/:locationId", async (req, res) => {
     try {
       const { locationId } = req.params;
       const attraction = await storage.getAttractionByLocationId(locationId);
@@ -4908,11 +6820,11 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Restaurants API - using places table with category filter
-  app.get('/api/ta-restaurants', async (req, res) => {
+  app.get("/api/ta-restaurants", async (req, res) => {
     try {
       const { destinationId } = req.query;
-      console.log('Fetching restaurants from places table');
-      
+      console.log("Fetching restaurants from places table");
+
       let restaurants: any[] = [];
       const client = await pool.connect();
       try {
@@ -4950,9 +6862,9 @@ export async function registerRoutes(app: Express): Promise<void> {
              OR LOWER(name) LIKE '%bar%'
           ORDER BY rating DESC
         `;
-        
+
         const result = await client.query(query);
-        restaurants = result.rows.map(place => ({
+        restaurants = result.rows.map((place) => ({
           id: place.id,
           locationId: `res_${place.id}`,
           name: place.name,
@@ -4964,40 +6876,47 @@ export async function registerRoutes(app: Express): Promise<void> {
           description: place.description,
           address: `${place.name}, ${place.city || place.country}`,
           createdAt: place.created_at,
-          updatedAt: place.updated_at
+          updatedAt: place.updated_at,
         }));
       } catch (dbError) {
-        console.error('Places database error:', dbError);
+        console.error("Places database error:", dbError);
         restaurants = [];
       } finally {
         client.release();
       }
-      
-      console.log('Retrieved restaurants from places:', restaurants.length);
+
+      console.log("Retrieved restaurants from places:", restaurants.length);
       res.json({
         success: true,
         count: restaurants.length,
-        restaurants: restaurants
+        restaurants: restaurants,
       });
     } catch (error) {
       console.error("Error fetching restaurants:", error);
-      res.status(500).json({ message: "Failed to fetch restaurants", error: error instanceof Error ? error.message : 'Unknown error' });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch restaurants",
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
     }
   });
 
-  app.get('/api/ta-restaurants/search', async (req, res) => {
+  app.get("/api/ta-restaurants/search", async (req, res) => {
     try {
       const { q, destinationId, cuisine, priceLevel } = req.query;
-      if (!q || typeof q !== 'string') {
+      if (!q || typeof q !== "string") {
         return res.status(400).json({ message: "Search query is required" });
       }
-      
+
       const filters = {
-        destinationId: destinationId ? parseInt(destinationId as string) : undefined,
+        destinationId: destinationId
+          ? parseInt(destinationId as string)
+          : undefined,
         cuisine: cuisine as string,
         priceLevel: priceLevel as string,
       };
-      
+
       const restaurants = await storage.searchRestaurants(q, filters);
       res.json(restaurants);
     } catch (error) {
@@ -5006,7 +6925,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get('/api/ta-restaurants/:locationId', async (req, res) => {
+  app.get("/api/ta-restaurants/:locationId", async (req, res) => {
     try {
       const { locationId } = req.params;
       const restaurant = await storage.getRestaurantByLocationId(locationId);
@@ -5021,7 +6940,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Location Reviews API
-  app.get('/api/location-reviews/:locationId/:category', async (req, res) => {
+  app.get("/api/location-reviews/:locationId/:category", async (req, res) => {
     try {
       const { locationId, category } = req.params;
       const reviews = await storage.getLocationReviews(locationId, category);
@@ -5032,17 +6951,19 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get('/api/location-reviews/recent', async (req, res) => {
+  app.get("/api/location-reviews/recent", async (req, res) => {
     try {
       const reviews = await storage.getRecentLocationReviews();
       res.json(reviews);
     } catch (error) {
       console.error("Error fetching recent location reviews:", error);
-      res.status(500).json({ message: "Failed to fetch recent location reviews" });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch recent location reviews" });
     }
   });
 
-  app.post('/api/location-reviews', noAuth, async (req: any, res) => {
+  app.post("/api/location-reviews", noAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const reviewData = { ...req.body, userId };
@@ -5055,7 +6976,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Location Photos API
-  app.get('/api/location-photos/:locationId/:category', async (req, res) => {
+  app.get("/api/location-photos/:locationId/:category", async (req, res) => {
     try {
       const { locationId, category } = req.params;
       const photos = await storage.getLocationPhotos(locationId, category);
@@ -5067,19 +6988,27 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Location Subratings API
-  app.get('/api/location-subratings/:locationId/:category', async (req, res) => {
-    try {
-      const { locationId, category } = req.params;
-      const subratings = await storage.getLocationSubratings(locationId, category);
-      res.json(subratings);
-    } catch (error) {
-      console.error("Error fetching location subratings:", error);
-      res.status(500).json({ message: "Failed to fetch location subratings" });
+  app.get(
+    "/api/location-subratings/:locationId/:category",
+    async (req, res) => {
+      try {
+        const { locationId, category } = req.params;
+        const subratings = await storage.getLocationSubratings(
+          locationId,
+          category
+        );
+        res.json(subratings);
+      } catch (error) {
+        console.error("Error fetching location subratings:", error);
+        res
+          .status(500)
+          .json({ message: "Failed to fetch location subratings" });
+      }
     }
-  });
+  );
 
   // Location Ancestors API
-  app.get('/api/location-ancestors/:locationId', async (req, res) => {
+  app.get("/api/location-ancestors/:locationId", async (req, res) => {
     try {
       const { locationId } = req.params;
       const ancestors = await storage.getLocationAncestors(locationId);
@@ -5091,13 +7020,13 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // ===== ENHANCED COMMUNITY FEATURES API =====
-  
+
   // Place Reviews API (for real places with Google Places integration)
-  app.get('/api/place-reviews', async (req, res) => {
+  app.get("/api/place-reviews", async (req, res) => {
     try {
-      console.log('Fetching place reviews from existing table...');
-      const { placeId, location, placeType, limit = '10' } = req.query;
-      
+      console.log("Fetching place reviews from existing table...");
+      const { placeId, location, placeType, limit = "10" } = req.query;
+
       const client = await pool.connect();
       try {
         let query = `
@@ -5106,30 +7035,33 @@ export async function registerRoutes(app: Express): Promise<void> {
           LEFT JOIN places p ON pr.place_id = p.id 
         `;
         let params = [];
-        
+
         if (placeId) {
-          query += ' WHERE pr.place_id = $1';
+          query += " WHERE pr.place_id = $1";
           params.push(placeId);
         } else if (location) {
-          query += ' WHERE LOWER(p.location) LIKE LOWER($1) OR LOWER(p.country) LIKE LOWER($1)';
+          query +=
+            " WHERE LOWER(p.location) LIKE LOWER($1) OR LOWER(p.country) LIKE LOWER($1)";
           params.push(`%${location}%`);
         }
-        
-        query += ' ORDER BY pr.created_at DESC LIMIT $' + (params.length + 1);
+
+        query += " ORDER BY pr.created_at DESC LIMIT $" + (params.length + 1);
         params.push(parseInt(limit as string));
-        
+
         const reviewsResult = await client.query(query, params);
         const reviews = reviewsResult.rows;
-        
-        console.log(`Retrieved ${reviews.length} place reviews with place info`);
+
+        console.log(
+          `Retrieved ${reviews.length} place reviews with place info`
+        );
         res.json({ total: reviews.length, items: reviews });
-        
       } catch (dbError) {
-        console.error('Database query error:', dbError);
-        res.json({ 
-          message: 'Reviews are being loaded. Database connected but tables may be syncing.',
+        console.error("Database query error:", dbError);
+        res.json({
+          message:
+            "Reviews are being loaded. Database connected but tables may be syncing.",
           total: 0,
-          items: []
+          items: [],
         });
       } finally {
         client.release();
@@ -5140,7 +7072,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/place-reviews', async (req: any, res) => {
+  app.post("/api/place-reviews", async (req: any, res) => {
     try {
       const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id;
       const reviewData = { ...req.body, userId };
@@ -5152,7 +7084,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get('/api/place-reviews/user', noAuth, async (req: any, res) => {
+  app.get("/api/place-reviews/user", noAuth, async (req: any, res) => {
     try {
       const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id;
       const reviews = await storage.getUserPlaceReviews(userId);
@@ -5163,7 +7095,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.put('/api/place-reviews/:id', async (req: any, res) => {
+  app.put("/api/place-reviews/:id", async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id;
@@ -5176,7 +7108,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.delete('/api/place-reviews/:id', async (req: any, res) => {
+  app.delete("/api/place-reviews/:id", async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id;
@@ -5193,7 +7125,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Review voting endpoints
-  app.post('/api/review-votes', noAuth, async (req: any, res) => {
+  app.post("/api/review-votes", noAuth, async (req: any, res) => {
     try {
       const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id;
       const voteData = { ...req.body, userId };
@@ -5206,18 +7138,18 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Enhanced Chat Rooms API
-  app.get('/api/chat-rooms', async (req, res) => {
+  app.get("/api/chat-rooms", async (req, res) => {
     try {
       const { search, type, destination } = req.query;
-      
+
       if (search) {
         const rooms = await storage.searchChatRooms(search as string, {
           type: type as string,
-          destination: destination as string
+          destination: destination as string,
         });
         return res.json(rooms);
       }
-      
+
       const rooms = await storage.getChatRooms();
       res.json(rooms);
     } catch (error) {
@@ -5226,7 +7158,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/chat-rooms', noAuth, async (req: any, res) => {
+  app.post("/api/chat-rooms", noAuth, async (req: any, res) => {
     try {
       const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id;
       const roomData = { ...req.body, createdBy: userId };
@@ -5238,7 +7170,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get('/api/chat-rooms/:id', async (req, res) => {
+  app.get("/api/chat-rooms/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const room = await storage.getChatRoomById(id);
@@ -5253,7 +7185,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/chat-rooms/:id/join', noAuth, async (req: any, res) => {
+  app.post("/api/chat-rooms/:id/join", noAuth, async (req: any, res) => {
     try {
       const roomId = parseInt(req.params.id);
       const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id;
@@ -5265,7 +7197,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/chat-rooms/:id/leave', noAuth, async (req: any, res) => {
+  app.post("/api/chat-rooms/:id/leave", noAuth, async (req: any, res) => {
     try {
       const roomId = parseInt(req.params.id);
       const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id;
@@ -5281,7 +7213,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get('/api/chat-rooms/:id/members', async (req, res) => {
+  app.get("/api/chat-rooms/:id/members", async (req, res) => {
     try {
       const roomId = parseInt(req.params.id);
       const members = await storage.getChatRoomMembers(roomId);
@@ -5293,15 +7225,15 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Travel Buddy System API
-  app.get('/api/travel-buddy-posts', async (req, res) => {
+  app.get("/api/travel-buddy-posts", async (req, res) => {
     try {
       const { destination, startDate, endDate } = req.query;
       const filters: any = {};
-      
+
       if (destination) filters.destination = destination as string;
       if (startDate) filters.startDate = new Date(startDate as string);
       if (endDate) filters.endDate = new Date(endDate as string);
-      
+
       const posts = await storage.getTravelBuddyPosts(filters);
       res.json(posts);
     } catch (error) {
@@ -5310,9 +7242,10 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/travel-buddy-posts', noAuth, async (req: any, res) => {
+  app.post("/api/travel-buddy-posts", noAuth, async (req: any, res) => {
     try {
-      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id || 'guest';
+      const userId =
+        (req.user as any)?.claims?.sub || (req.user as any)?.id || "guest";
       const postData = { ...req.body, userId };
       const post = await storage.createTravelBuddyPost(postData);
       res.status(201).json(post);
@@ -5322,7 +7255,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get('/api/travel-buddy-posts/user', noAuth, async (req: any, res) => {
+  app.get("/api/travel-buddy-posts/user", noAuth, async (req: any, res) => {
     try {
       const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id;
       const posts = await storage.getUserTravelBuddyPosts(userId);
@@ -5333,12 +7266,12 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post('/api/travel-buddy-applications', noAuth, async (req: any, res) => {
+  app.post("/api/travel-buddy-applications", noAuth, async (req: any, res) => {
     try {
       const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id;
-      const applicationData = { 
-        ...req.body, 
-        applicantId: userId 
+      const applicationData = {
+        ...req.body,
+        applicantId: userId,
       };
       const application = await storage.applyForTravelBuddy(applicationData);
       res.status(201).json(application);
@@ -5348,75 +7281,104 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get('/api/travel-buddy-posts/:id/applications', noAuth, async (req: any, res) => {
-    try {
-      const postId = parseInt(req.params.id);
-      const applications = await storage.getTravelBuddyApplications(postId);
-      res.json(applications);
-    } catch (error) {
-      console.error("Error fetching travel buddy applications:", error);
-      res.status(500).json({ message: "Failed to fetch applications" });
+  app.get(
+    "/api/travel-buddy-posts/:id/applications",
+    noAuth,
+    async (req: any, res) => {
+      try {
+        const postId = parseInt(req.params.id);
+        const applications = await storage.getTravelBuddyApplications(postId);
+        res.json(applications);
+      } catch (error) {
+        console.error("Error fetching travel buddy applications:", error);
+        res.status(500).json({ message: "Failed to fetch applications" });
+      }
     }
-  });
+  );
 
-  app.patch('/api/travel-buddy-applications/:id', noAuth, async (req: any, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const { status } = req.body;
-      const application = await storage.updateTravelBuddyApplication(id, status);
-      res.json(application);
-    } catch (error) {
-      console.error("Error updating travel buddy application:", error);
-      res.status(400).json({ message: "Failed to update application" });
+  app.patch(
+    "/api/travel-buddy-applications/:id",
+    noAuth,
+    async (req: any, res) => {
+      try {
+        const id = parseInt(req.params.id);
+        const { status } = req.body;
+        const application = await storage.updateTravelBuddyApplication(
+          id,
+          status
+        );
+        res.json(application);
+      } catch (error) {
+        console.error("Error updating travel buddy application:", error);
+        res.status(400).json({ message: "Failed to update application" });
+      }
     }
-  });
+  );
 
   // Database dashboard endpoint
-  app.get('/api/dashboard/tables', async (_req, res) => {
+  app.get("/api/dashboard/tables", async (_req, res) => {
     try {
       const tablesData = [];
-      
+
       // List of all tables to check
       const tablesToCheck = [
-        'destinations', 'accommodations', 'attractions', 'restaurants', 
-        'places', 'place_reviews', 'location_photos', 'location_ancestors',
-        'users', 'sessions', 'trips', 'expenses', 'achievements',
-        'chat_rooms', 'messages', 'user_connections', 'travel_buddy_posts',
-        'raw_responses', 'ingestion_runs', 'ingestion_jobs', 'ingestion_dead_letters'
+        "destinations",
+        "accommodations",
+        "attractions",
+        "restaurants",
+        "places",
+        "place_reviews",
+        "location_photos",
+        "location_ancestors",
+        "users",
+        "sessions",
+        "trips",
+        "expenses",
+        "achievements",
+        "chat_rooms",
+        "messages",
+        "user_connections",
+        "travel_buddy_posts",
+        "raw_responses",
+        "ingestion_runs",
+        "ingestion_jobs",
+        "ingestion_dead_letters",
       ];
-      
+
       for (const tableName of tablesToCheck) {
         try {
-          const result = await pool.query(`SELECT COUNT(*) as count FROM ${tableName}`);
+          const result = await pool.query(
+            `SELECT COUNT(*) as count FROM ${tableName}`
+          );
           tablesData.push({
             table_name: tableName,
-            approx_row_count: parseInt(result.rows[0].count)
+            approx_row_count: parseInt(result.rows[0].count),
           });
         } catch (error) {
           // Table might not exist, add with 0 count
           tablesData.push({
             table_name: tableName,
             approx_row_count: 0,
-            error: 'Table not found or inaccessible'
+            error: "Table not found or inaccessible",
           });
         }
       }
-      
+
       // Sort by row count descending
       tablesData.sort((a, b) => b.approx_row_count - a.approx_row_count);
-      
+
       res.json({
         success: true,
         timestamp: new Date().toISOString(),
         total_tables: tablesData.length,
-        tables: tablesData
+        tables: tablesData,
       });
     } catch (error) {
       console.error("Error fetching database dashboard:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         success: false,
         message: "Failed to fetch database dashboard data",
-        error: error instanceof Error ? error.message : 'Unknown error' 
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
@@ -5424,10 +7386,10 @@ export async function registerRoutes(app: Express): Promise<void> {
   // ====== REWARDS & ACHIEVEMENTS API ROUTES ======
 
   // Initialize achievements
-  app.post('/api/rewards/init', noAuth, async (_req, res) => {
+  app.post("/api/rewards/init", noAuth, async (_req, res) => {
     try {
       // TODO: Implement rewardsService.initializeDefaultAchievements() when service is fixed
-      res.json({ success: true, message: 'Achievements initialized (mock)' });
+      res.json({ success: true, message: "Achievements initialized (mock)" });
     } catch (error) {
       console.error("Error initializing achievements:", error);
       res.status(500).json({ message: "Failed to initialize achievements" });
@@ -5435,15 +7397,16 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Get user's rewards summary
-  app.get('/api/rewards/summary', noAuth, async (req: any, res) => {
+  app.get("/api/rewards/summary", noAuth, async (req: any, res) => {
     try {
-      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id || 'anonymous';
+      const userId =
+        (req.user as any)?.claims?.sub || (req.user as any)?.id || "anonymous";
       const totalPoints = Math.floor(Math.random() * 1000) + 500; // Mock total points
-      
+
       res.json({
         userId,
         totalPoints,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
       console.error("Error getting rewards summary:", error);
@@ -5452,17 +7415,18 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Award points to user
-  app.post('/api/rewards/award', noAuth, async (req: any, res) => {
+  app.post("/api/rewards/award", noAuth, async (req: any, res) => {
     try {
-      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id || 'anonymous';
+      const userId =
+        (req.user as any)?.claims?.sub || (req.user as any)?.id || "anonymous";
       const { action, description } = req.body;
-      
+
       const points = Math.floor(Math.random() * 100) + 10; // Mock points award
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         pointsAwarded: points,
-        message: `Awarded ${points} points for ${action}` 
+        message: `Awarded ${points} points for ${action}`,
       });
     } catch (error) {
       console.error("Error awarding points:", error);
@@ -5471,50 +7435,51 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Get achievements
-  app.get('/api/achievements', noAuth, async (req: any, res) => {
+  app.get("/api/achievements", noAuth, async (req: any, res) => {
     try {
-      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id || 'anonymous';
-      
+      const userId =
+        (req.user as any)?.claims?.sub || (req.user as any)?.id || "anonymous";
+
       // For now, return mock achievements with progress
       const mockAchievements = [
         {
-          id: '1',
-          name: 'First Review',
-          nameHe: 'הביקורת הראשונה',
-          description: 'Write your first travel review',
-          descriptionHe: 'כתוב את הביקורת הראשונה שלך',
+          id: "1",
+          name: "First Review",
+          nameHe: "הביקורת הראשונה",
+          description: "Write your first travel review",
+          descriptionHe: "כתוב את הביקורת הראשונה שלך",
           points: 100,
-          rarity: 'common',
+          rarity: "common",
           isCompleted: false,
           progress: 0,
-          progressMax: 1
+          progressMax: 1,
         },
         {
-          id: '2',
-          name: 'Photo Enthusiast',
-          nameHe: 'חובב צילום',
-          description: 'Upload 20 travel photos',
-          descriptionHe: 'העלה 20 תמונות נסיעה',
+          id: "2",
+          name: "Photo Enthusiast",
+          nameHe: "חובב צילום",
+          description: "Upload 20 travel photos",
+          descriptionHe: "העלה 20 תמונות נסיעה",
           points: 200,
-          rarity: 'common',
+          rarity: "common",
           isCompleted: false,
           progress: 3,
-          progressMax: 20
+          progressMax: 20,
         },
         {
-          id: '3',
-          name: 'Trip Planner',
-          nameHe: 'מתכנן מסלולים',
-          description: 'Create and share 5 itineraries',
-          descriptionHe: 'צור ושתף 5 מסלולים',
+          id: "3",
+          name: "Trip Planner",
+          nameHe: "מתכנן מסלולים",
+          description: "Create and share 5 itineraries",
+          descriptionHe: "צור ושתף 5 מסלולים",
           points: 1000,
-          rarity: 'epic',
+          rarity: "epic",
           isCompleted: true,
           progress: 5,
-          progressMax: 5
-        }
+          progressMax: 5,
+        },
       ];
-      
+
       res.json(mockAchievements);
     } catch (error) {
       console.error("Error getting achievements:", error);
@@ -5523,50 +7488,50 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Get missions
-  app.get('/api/missions', noAuth, async (req: any, res) => {
+  app.get("/api/missions", noAuth, async (req: any, res) => {
     try {
       const mockMissions = [
         {
-          id: '1',
-          type: 'daily',
-          name: 'Write a Review',
-          nameHe: 'כתוב ביקורת',
-          description: 'Share your experience about a place',
-          descriptionHe: 'שתף את החוויה שלך על מקום',
+          id: "1",
+          type: "daily",
+          name: "Write a Review",
+          nameHe: "כתוב ביקורת",
+          description: "Share your experience about a place",
+          descriptionHe: "שתף את החוויה שלך על מקום",
           pointsReward: 50,
           targetCount: 1,
           currentCount: 0,
           isCompleted: false,
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         },
         {
-          id: '2',
-          type: 'daily',
-          name: 'Upload Photo',
-          nameHe: 'העלה תמונה',
-          description: 'Add a photo to your travel collection',
-          descriptionHe: 'הוסף תמונה לאוסף הנסיעות שלך',
+          id: "2",
+          type: "daily",
+          name: "Upload Photo",
+          nameHe: "העלה תמונה",
+          description: "Add a photo to your travel collection",
+          descriptionHe: "הוסף תמונה לאוסף הנסיעות שלך",
           pointsReward: 10,
           targetCount: 1,
           currentCount: 0,
           isCompleted: false,
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         },
         {
-          id: '3',
-          type: 'weekly',
-          name: 'Create Itinerary',
-          nameHe: 'צור מסלול',
-          description: 'Plan a new travel itinerary',
-          descriptionHe: 'תכנן מסלול נסיעה חדש',
+          id: "3",
+          type: "weekly",
+          name: "Create Itinerary",
+          nameHe: "צור מסלול",
+          description: "Plan a new travel itinerary",
+          descriptionHe: "תכנן מסלול נסיעה חדש",
           pointsReward: 200,
           targetCount: 1,
           currentCount: 0,
           isCompleted: false,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-        }
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
       ];
-      
+
       res.json(mockMissions);
     } catch (error) {
       console.error("Error getting missions:", error);
@@ -5575,7 +7540,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Get leaderboard
-  app.get('/api/rewards/leaderboard', noAuth, async (req: any, res) => {
+  app.get("/api/rewards/leaderboard", noAuth, async (req: any, res) => {
     try {
       // const leaderboard = await rewardsService.getLeaderboard(10);
       // res.json(leaderboard);
@@ -5585,64 +7550,65 @@ export async function registerRoutes(app: Express): Promise<void> {
       // Return mock data if service fails
       const mockLeaderboard = [
         {
-          id: '1',
-          firstName: 'Sarah',
-          lastName: 'Cohen',
+          id: "1",
+          firstName: "Sarah",
+          lastName: "Cohen",
           totalPoints: 2450,
-          profileImageUrl: null
+          profileImageUrl: null,
         },
         {
-          id: '2', 
-          firstName: 'David',
-          lastName: 'Levi',
+          id: "2",
+          firstName: "David",
+          lastName: "Levi",
           totalPoints: 1890,
-          profileImageUrl: null
+          profileImageUrl: null,
         },
         {
-          id: '3',
-          firstName: 'Maya',
-          lastName: 'Goldberg',
+          id: "3",
+          firstName: "Maya",
+          lastName: "Goldberg",
           totalPoints: 1654,
-          profileImageUrl: null
-        }
+          profileImageUrl: null,
+        },
       ];
       res.json(mockLeaderboard);
     }
   });
 
   // Get user's points history
-  app.get('/api/rewards/history', noAuth, async (req: any, res) => {
+  app.get("/api/rewards/history", noAuth, async (req: any, res) => {
     try {
-      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id || 'anonymous';
+      const userId =
+        (req.user as any)?.claims?.sub || (req.user as any)?.id || "anonymous";
       // const history = await rewardsService.getUserPointsHistory(userId, 50);
       // Using mock data for now
       const history: any[] = [];
-      
+
       // If no history, return mock data
       if (history.length === 0) {
         const mockHistory = [
           {
-            id: '1',
+            id: "1",
             points: 50,
-            description: 'ביקורת נכתבה על Machu Picchu',
-            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000)
+            description: "ביקורת נכתבה על Machu Picchu",
+            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
           },
           {
-            id: '2',
+            id: "2",
             points: 10,
-            description: 'תמונה הועלתה',
-            createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000)
+            description: "תמונה הועלתה",
+            createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
           },
           {
-            id: '3',
+            id: "3",
             points: 100,
-            description: 'הישג נפתח: הביקורת הראשונה',
-            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
-          }
+            description: "הישג נפתח: הביקורת הראשונה",
+            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+          },
         ];
         return res.json(mockHistory);
       }
-      
+
       res.json(history);
     } catch (error) {
       console.error("Error getting points history:", error);
@@ -5653,29 +7619,40 @@ export async function registerRoutes(app: Express): Promise<void> {
   // Media Proxy API - moved to server/index.ts to be registered before Vite middleware
 
   // Media proxy status
-  app.get('/api/media/status', async (req, res) => {
+  app.get("/api/media/status", async (req, res) => {
     try {
-      const { mediaProxyService } = await import('./integrations/media/mediaProxyService.js');
-      const { mediaCache } = await import('./integrations/media/cache/mediaCache.js');
-      
+      const { mediaProxyService } = await import(
+        "./integrations/media/mediaProxyService.js"
+      );
+      const { mediaCache } = await import(
+        "./integrations/media/cache/mediaCache.js"
+      );
+
       res.json({
         enabledProviders: mediaProxyService.getEnabledProviders(),
         cacheStats: mediaCache.getStats(),
       });
     } catch (error: any) {
-      console.error('Media status error:', error);
-      res.status(500).json({ error: 'Failed to get status' });
+      console.error("Media status error:", error);
+      res.status(500).json({ error: "Failed to get status" });
     }
   });
 
   // Location photo with intelligent fallback
-  app.get('/api/media/location-photo', async (req, res) => {
+  app.get("/api/media/location-photo", async (req, res) => {
     try {
-      const { entityType, entityId, entityName, country, photoReference, forceRefresh } = req.query;
+      const {
+        entityType,
+        entityId,
+        entityName,
+        country,
+        photoReference,
+        forceRefresh,
+      } = req.query;
 
       if (!entityType || !entityId || !entityName) {
-        return res.status(400).json({ 
-          error: 'entityType, entityId, and entityName are required' 
+        return res.status(400).json({
+          error: "entityType, entityId, and entityName are required",
         });
       }
 
@@ -5686,68 +7663,75 @@ export async function registerRoutes(app: Express): Promise<void> {
         entityName: entityName as string,
         country: country as string | undefined,
         photoReference: photoReference as string | undefined,
-        forceRefresh: forceRefresh === 'true',
+        forceRefresh: forceRefresh === "true",
       });
 
       // Redirect to the actual photo URL instead of returning JSON
       if (result.url) {
         res.redirect(result.url);
       } else {
-        res.status(404).json({ error: 'Photo not found' });
+        res.status(404).json({ error: "Photo not found" });
       }
     } catch (error: any) {
-      console.error('Location photo error:', error);
-      res.status(500).json({ 
-        error: 'Failed to fetch location photo', 
-        message: error.message 
+      console.error("Location photo error:", error);
+      res.status(500).json({
+        error: "Failed to fetch location photo",
+        message: error.message,
       });
     }
   });
-  
+
   // Unsplash rate limit status
-  app.get('/api/media/unsplash-rate-limit', async (req, res) => {
+  app.get("/api/media/unsplash-rate-limit", async (req, res) => {
     try {
       // Use singleton orchestrator
       const status = mediaOrchestrator.getUnsplashRateLimit();
-      
+
       res.json(status);
     } catch (error: any) {
-      console.error('Unsplash rate limit error:', error);
-      res.status(500).json({ error: 'Failed to get rate limit status' });
+      console.error("Unsplash rate limit error:", error);
+      res.status(500).json({ error: "Failed to get rate limit status" });
     }
   });
 
   // Admin: Populate images for all destinations and attractions
-  app.post('/api/admin/populate-images', requireAdmin, async (req, res) => {
+  app.post("/api/admin/populate-images", requireAdmin, async (req, res) => {
     try {
       const results: any = {
         destinations: { total: 0, success: 0, failed: 0, errors: [] },
-        attractions: { total: 0, success: 0, failed: 0, errors: [] }
+        attractions: { total: 0, success: 0, failed: 0, errors: [] },
       };
 
       // Get all destinations
       const destinations = await storage.getAllDestinations();
       results.destinations.total = destinations.length;
 
-      console.log(`🖼️ Populating images for ${destinations.length} destinations...`);
+      console.log(
+        `🖼️ Populating images for ${destinations.length} destinations...`
+      );
 
       // Populate destination images
       for (const dest of destinations) {
         try {
           // Check if already has cached photo
-          const existing = await storage.getPrimaryLocationPhoto('destination', dest.id);
-          
+          const existing = await storage.getPrimaryLocationPhoto(
+            "destination",
+            dest.id
+          );
+
           if (!existing) {
             // Fetch and cache image
             await mediaOrchestrator.getLocationPhoto({
-              entityType: 'destination',
+              entityType: "destination",
               entityId: dest.id,
               entityName: dest.name,
               country: dest.country,
-              forceRefresh: false
+              forceRefresh: false,
             });
             results.destinations.success++;
-            console.log(`✅ Image cached for destination: ${dest.name}, ${dest.country}`);
+            console.log(
+              `✅ Image cached for destination: ${dest.name}, ${dest.country}`
+            );
           } else {
             results.destinations.success++;
             console.log(`⏭️ Destination already has image: ${dest.name}`);
@@ -5756,7 +7740,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           results.destinations.failed++;
           results.destinations.errors.push({
             destination: dest.name,
-            error: error.message
+            error: error.message,
           });
           console.error(`❌ Failed for ${dest.name}:`, error.message);
         }
@@ -5766,22 +7750,27 @@ export async function registerRoutes(app: Express): Promise<void> {
       const attractions = await storage.getAllAttractions();
       results.attractions.total = attractions.length;
 
-      console.log(`🖼️ Populating images for ${attractions.length} attractions...`);
+      console.log(
+        `🖼️ Populating images for ${attractions.length} attractions...`
+      );
 
       // Populate attraction images
       for (const attr of attractions) {
         try {
           // Check if already has cached photo
-          const existing = await storage.getPrimaryLocationPhoto('attraction', attr.id);
-          
+          const existing = await storage.getPrimaryLocationPhoto(
+            "attraction",
+            attr.id
+          );
+
           if (!existing) {
             // Fetch and cache image
             await mediaOrchestrator.getLocationPhoto({
-              entityType: 'attraction',
+              entityType: "attraction",
               entityId: attr.id,
               entityName: attr.name,
               country: attr.country,
-              forceRefresh: false
+              forceRefresh: false,
             });
             results.attractions.success++;
             console.log(`✅ Image cached for attraction: ${attr.name}`);
@@ -5793,118 +7782,132 @@ export async function registerRoutes(app: Express): Promise<void> {
           results.attractions.failed++;
           results.attractions.errors.push({
             attraction: attr.name,
-            error: error.message
+            error: error.message,
           });
           console.error(`❌ Failed for ${attr.name}:`, error.message);
         }
       }
 
-      console.log('🎉 Image population completed!');
+      console.log("🎉 Image population completed!");
       res.json({
         success: true,
-        message: 'Image population completed',
-        results
+        message: "Image population completed",
+        results,
       });
     } catch (error: any) {
-      console.error('Populate images error:', error);
-      res.status(500).json({ error: 'Failed to populate images', details: error.message });
+      console.error("Populate images error:", error);
+      res
+        .status(500)
+        .json({ error: "Failed to populate images", details: error.message });
     }
   });
 
   // Geo API middleware - require x-globemate-key header
   const requireGlobeMateKey = (req: any, res: any, next: any) => {
-    const apiKey = req.headers['x-globemate-key'];
-    
+    const apiKey = req.headers["x-globemate-key"];
+
     if (!apiKey || apiKey !== config.globemate.apiKey) {
-      return res.status(401).json({ error: 'Unauthorized: Invalid or missing x-globemate-key' });
+      return res
+        .status(401)
+        .json({ error: "Unauthorized: Invalid or missing x-globemate-key" });
     }
-    
+
     next();
   };
 
   // Internal Geo API endpoints (require x-globemate-key for direct access)
-  app.get('/api/geo/country', requireGlobeMateKey, async (req, res) => {
+  app.get("/api/geo/country", requireGlobeMateKey, async (req, res) => {
     try {
-      const { getBasics } = await import('./services/destinations/geoService.js');
-      const { code, name, lang = 'en' } = req.query;
+      const { getBasics } = await import(
+        "./services/destinations/geoService.js"
+      );
+      const { code, name, lang = "en" } = req.query;
 
       if (!code && !name) {
-        return res.status(400).json({ error: 'Either code or name parameter is required' });
+        return res
+          .status(400)
+          .json({ error: "Either code or name parameter is required" });
       }
 
       const result = await getBasics({
         countryCode: code as string,
         countryName: name as string,
-        lang: lang as 'en' | 'he',
+        lang: lang as "en" | "he",
       });
 
       if (!result) {
-        return res.status(404).json({ error: 'Country not found' });
+        return res.status(404).json({ error: "Country not found" });
       }
 
       res.json(result);
     } catch (error) {
-      console.error('Geo country error:', error);
-      res.status(500).json({ error: 'Failed to fetch country data' });
+      console.error("Geo country error:", error);
+      res.status(500).json({ error: "Failed to fetch country data" });
     }
   });
 
-  app.get('/api/geo/city/search', requireGlobeMateKey, async (req, res) => {
+  app.get("/api/geo/city/search", requireGlobeMateKey, async (req, res) => {
     try {
-      const { getBasics } = await import('./services/destinations/geoService.js');
-      const { q, country, lang = 'en' } = req.query;
+      const { getBasics } = await import(
+        "./services/destinations/geoService.js"
+      );
+      const { q, country, lang = "en" } = req.query;
 
       if (!q) {
-        return res.status(400).json({ error: 'Query parameter q is required' });
+        return res.status(400).json({ error: "Query parameter q is required" });
       }
 
       const result = await getBasics({
         cityName: q as string,
         countryCode: country as string,
-        lang: lang as 'en' | 'he',
+        lang: lang as "en" | "he",
       });
 
       if (!result) {
-        return res.status(404).json({ error: 'City not found' });
+        return res.status(404).json({ error: "City not found" });
       }
 
       res.json(result);
     } catch (error) {
-      console.error('Geo city search error:', error);
-      res.status(500).json({ error: 'Failed to search city' });
+      console.error("Geo city search error:", error);
+      res.status(500).json({ error: "Failed to search city" });
     }
   });
 
-  app.get('/api/geo/city/by-coords', requireGlobeMateKey, async (req, res) => {
+  app.get("/api/geo/city/by-coords", requireGlobeMateKey, async (req, res) => {
     try {
-      const { getBasics } = await import('./services/destinations/geoService.js');
-      const { lat, lng, country, lang = 'en' } = req.query;
+      const { getBasics } = await import(
+        "./services/destinations/geoService.js"
+      );
+      const { lat, lng, country, lang = "en" } = req.query;
 
       if (!lat || !lng) {
-        return res.status(400).json({ error: 'Both lat and lng parameters are required' });
+        return res
+          .status(400)
+          .json({ error: "Both lat and lng parameters are required" });
       }
 
       const result = await getBasics({
         lat: parseFloat(lat as string),
         lng: parseFloat(lng as string),
         countryCode: country as string,
-        lang: lang as 'en' | 'he',
+        lang: lang as "en" | "he",
       });
 
       if (!result) {
-        return res.status(404).json({ error: 'Location not found' });
+        return res.status(404).json({ error: "Location not found" });
       }
 
       res.json(result);
     } catch (error) {
-      console.error('Geo coords error:', error);
-      res.status(500).json({ error: 'Failed to fetch location data' });
+      console.error("Geo coords error:", error);
+      res.status(500).json({ error: "Failed to fetch location data" });
     }
   });
 
   // Seed journeys (development only)
   // Create journeys table if not exists
-  app.post('/api/create-journeys-table', async (req, res) => {
+  app.post("/api/create-journeys-table", async (req, res) => {
     try {
       await db.execute(sql`
         CREATE TABLE IF NOT EXISTS journeys (
@@ -5928,181 +7931,234 @@ export async function registerRoutes(app: Express): Promise<void> {
           updated_at TIMESTAMP DEFAULT NOW()
         )
       `);
-      const result = await db.execute(sql`SELECT COUNT(*) as count FROM journeys`);
+      const result = await db.execute(
+        sql`SELECT COUNT(*) as count FROM journeys`
+      );
       const count = result.rows?.[0] || { count: 0 };
-      res.json({ success: true, message: 'Table created/verified', count });
+      res.json({ success: true, message: "Table created/verified", count });
     } catch (error) {
-      console.error('Error creating journeys table:', error);
-      res.status(500).json({ message: 'Failed to create table', error: String(error) });
+      console.error("Error creating journeys table:", error);
+      res
+        .status(500)
+        .json({ message: "Failed to create table", error: String(error) });
     }
   });
 
-  app.post('/api/seed/journeys', async (req, res) => {
+  app.post("/api/seed/journeys", async (req, res) => {
     try {
-      const { seedJourneys } = await import('./journeysSeeder.js');
+      const { seedJourneys } = await import("./journeysSeeder.js");
       const result = await seedJourneys();
       res.json(result);
     } catch (error) {
-      console.error('Error seeding journeys:', error);
-      res.status(500).json({ message: 'Failed to seed journeys', error: String(error) });
+      console.error("Error seeding journeys:", error);
+      res
+        .status(500)
+        .json({ message: "Failed to seed journeys", error: String(error) });
     }
   });
 
   // ==================== AI Chat Sessions API ====================
-  
+
   // Save a new chat session
-  app.post('/api/chat-sessions', noAuth, async (req: any, res) => {
+  app.post("/api/chat-sessions", noAuth, async (req: any, res) => {
     try {
-      const { chatSessions, insertChatSessionSchema } = await import('@shared/schema');
-      const userId = req.user?.claims?.sub || 'anonymous';
-      
+      const { chatSessions, insertChatSessionSchema } = await import(
+        "@shared/schema"
+      );
+      const userId = req.user?.claims?.sub || "anonymous";
+
       const sessionData = insertChatSessionSchema.parse({
         ...req.body,
-        userId
+        userId,
       });
 
-      const [newSession] = await db.insert(chatSessions).values(sessionData).returning();
+      const [newSession] = await db
+        .insert(chatSessions)
+        .values(sessionData)
+        .returning();
       res.json(newSession);
     } catch (error) {
-      console.error('Error saving chat session:', error);
-      res.status(500).json({ message: 'Failed to save chat session', error: String(error) });
+      console.error("Error saving chat session:", error);
+      res
+        .status(500)
+        .json({ message: "Failed to save chat session", error: String(error) });
     }
   });
 
   // Get all chat sessions for a user
-  app.get('/api/chat-sessions', noAuth, async (req: any, res) => {
+  app.get("/api/chat-sessions", noAuth, async (req: any, res) => {
     try {
-      const { chatSessions } = await import('@shared/schema');
-      const userId = req.user?.claims?.sub || 'anonymous';
-      
+      const { chatSessions } = await import("@shared/schema");
+      const userId = req.user?.claims?.sub || "anonymous";
+
       const sessions = await db
         .select()
         .from(chatSessions)
         .where(eq(chatSessions.userId, userId))
         .orderBy(sql`${chatSessions.lastMessageAt} DESC`)
         .limit(50);
-      
+
       res.json(sessions);
     } catch (error) {
-      console.error('Error fetching chat sessions:', error);
-      res.status(500).json({ message: 'Failed to fetch chat sessions', error: String(error) });
+      console.error("Error fetching chat sessions:", error);
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch chat sessions",
+          error: String(error),
+        });
     }
   });
 
   // Get a specific chat session
-  app.get('/api/chat-sessions/:id', noAuth, async (req: any, res) => {
+  app.get("/api/chat-sessions/:id", noAuth, async (req: any, res) => {
     try {
-      const { chatSessions } = await import('@shared/schema');
+      const { chatSessions } = await import("@shared/schema");
       const sessionId = parseInt(req.params.id);
-      const userId = req.user?.claims?.sub || 'anonymous';
-      
+      const userId = req.user?.claims?.sub || "anonymous";
+
       const [session] = await db
         .select()
         .from(chatSessions)
-        .where(sql`${chatSessions.id} = ${sessionId} AND ${chatSessions.userId} = ${userId}`)
+        .where(
+          sql`${chatSessions.id} = ${sessionId} AND ${chatSessions.userId} = ${userId}`
+        )
         .limit(1);
-      
+
       if (!session) {
-        return res.status(404).json({ message: 'Chat session not found' });
+        return res.status(404).json({ message: "Chat session not found" });
       }
-      
+
       res.json(session);
     } catch (error) {
-      console.error('Error fetching chat session:', error);
-      res.status(500).json({ message: 'Failed to fetch chat session', error: String(error) });
+      console.error("Error fetching chat session:", error);
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch chat session",
+          error: String(error),
+        });
     }
   });
 
   // Update a chat session
-  app.put('/api/chat-sessions/:id', noAuth, async (req: any, res) => {
+  app.put("/api/chat-sessions/:id", noAuth, async (req: any, res) => {
     try {
-      const { chatSessions } = await import('@shared/schema');
+      const { chatSessions } = await import("@shared/schema");
       const sessionId = parseInt(req.params.id);
-      const userId = req.user?.claims?.sub || 'anonymous';
-      
+      const userId = req.user?.claims?.sub || "anonymous";
+
       const [updatedSession] = await db
         .update(chatSessions)
         .set({
           ...req.body,
           lastMessageAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
-        .where(sql`${chatSessions.id} = ${sessionId} AND ${chatSessions.userId} = ${userId}`)
+        .where(
+          sql`${chatSessions.id} = ${sessionId} AND ${chatSessions.userId} = ${userId}`
+        )
         .returning();
-      
+
       if (!updatedSession) {
-        return res.status(404).json({ message: 'Chat session not found' });
+        return res.status(404).json({ message: "Chat session not found" });
       }
-      
+
       res.json(updatedSession);
     } catch (error) {
-      console.error('Error updating chat session:', error);
-      res.status(500).json({ message: 'Failed to update chat session', error: String(error) });
+      console.error("Error updating chat session:", error);
+      res
+        .status(500)
+        .json({
+          message: "Failed to update chat session",
+          error: String(error),
+        });
     }
   });
 
   // Delete a chat session
-  app.delete('/api/chat-sessions/:id', noAuth, async (req: any, res) => {
+  app.delete("/api/chat-sessions/:id", noAuth, async (req: any, res) => {
     try {
-      const { chatSessions } = await import('@shared/schema');
+      const { chatSessions } = await import("@shared/schema");
       const sessionId = parseInt(req.params.id);
-      const userId = req.user?.claims?.sub || 'anonymous';
-      
+      const userId = req.user?.claims?.sub || "anonymous";
+
       const [deletedSession] = await db
         .delete(chatSessions)
-        .where(sql`${chatSessions.id} = ${sessionId} AND ${chatSessions.userId} = ${userId}`)
+        .where(
+          sql`${chatSessions.id} = ${sessionId} AND ${chatSessions.userId} = ${userId}`
+        )
         .returning();
-      
+
       if (!deletedSession) {
-        return res.status(404).json({ message: 'Chat session not found' });
+        return res.status(404).json({ message: "Chat session not found" });
       }
-      
-      res.json({ message: 'Chat session deleted successfully' });
+
+      res.json({ message: "Chat session deleted successfully" });
     } catch (error) {
-      console.error('Error deleting chat session:', error);
-      res.status(500).json({ message: 'Failed to delete chat session', error: String(error) });
+      console.error("Error deleting chat session:", error);
+      res
+        .status(500)
+        .json({
+          message: "Failed to delete chat session",
+          error: String(error),
+        });
     }
   });
 
   // Emergency Information routes
-  app.get('/api/emergency-info', noAuth, async (req: any, res) => {
+  app.get("/api/emergency-info", noAuth, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub || 'anonymous';
+      const userId = req.user?.claims?.sub || "anonymous";
       const info = await storage.getEmergencyInfo(userId);
       res.json(info || null);
     } catch (error) {
-      console.error('Error fetching emergency info:', error);
-      res.status(500).json({ message: 'Failed to fetch emergency info', error: String(error) });
+      console.error("Error fetching emergency info:", error);
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch emergency info",
+          error: String(error),
+        });
     }
   });
 
-  app.post('/api/emergency-info', noAuth, async (req: any, res) => {
+  app.post("/api/emergency-info", noAuth, async (req: any, res) => {
     try {
-      const { insertEmergencyInfoSchema } = await import('@shared/schema');
-      const userId = req.user?.claims?.sub || 'anonymous';
-      
+      const { insertEmergencyInfoSchema } = await import("@shared/schema");
+      const userId = req.user?.claims?.sub || "anonymous";
+
       const validatedData = insertEmergencyInfoSchema.parse({
         ...req.body,
-        userId
+        userId,
       });
-      
+
       const info = await storage.upsertEmergencyInfo(validatedData);
       res.json(info);
     } catch (error) {
-      console.error('Error saving emergency info:', error);
-      res.status(500).json({ message: 'Failed to save emergency info', error: String(error) });
+      console.error("Error saving emergency info:", error);
+      res
+        .status(500)
+        .json({
+          message: "Failed to save emergency info",
+          error: String(error),
+        });
     }
   });
 
-  app.delete('/api/emergency-info', noAuth, async (req: any, res) => {
+  app.delete("/api/emergency-info", noAuth, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub || 'anonymous';
+      const userId = req.user?.claims?.sub || "anonymous";
       await storage.deleteEmergencyInfo(userId);
-      res.json({ message: 'Emergency info deleted successfully' });
+      res.json({ message: "Emergency info deleted successfully" });
     } catch (error) {
-      console.error('Error deleting emergency info:', error);
-      res.status(500).json({ message: 'Failed to delete emergency info', error: String(error) });
+      console.error("Error deleting emergency info:", error);
+      res
+        .status(500)
+        .json({
+          message: "Failed to delete emergency info",
+          error: String(error),
+        });
     }
   });
-
 }

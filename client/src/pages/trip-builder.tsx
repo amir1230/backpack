@@ -40,8 +40,7 @@ import {
 } from "lucide-react";
 import { WORLD_COUNTRIES } from "@/lib/constants";
 
-// Currency conversion rate (USD to ILS)
-const USD_TO_ILS = 3.7;
+// Currency conversion utilities imported from centralized file
 
 // Remove problematic Unicode control characters that OpenAI injects into Hebrew text
 const normalizeRtlText = (text: string, isHebrew: boolean) => {
@@ -198,9 +197,7 @@ function TripItineraryView({ itinerary, isGenerating, onGenerateItinerary }: Tri
                 <span className="font-semibold text-green-800 text-sm">{t("trips.estimated_cost")}</span>
               </div>
               <p className="text-green-700 text-lg font-bold">
-                {i18n.language === 'he' 
-                  ? `₪${Math.round(day.estimatedCost * USD_TO_ILS).toLocaleString('he-IL')}` 
-                  : `$${day.estimatedCost.toLocaleString('en-US')}`}
+                {formatCurrency(day.estimatedCost, i18n.language as 'en' | 'he')}
               </p>
             </div>
 
@@ -596,9 +593,7 @@ export default function TripBuilder() {
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>{i18n.language === 'he' ? '₪1,850' : '$500'}</span>
                     <span className="text-orange-500 font-bold text-xl">
-                      {i18n.language === 'he' 
-                        ? `₪${Math.round(budget[0] * USD_TO_ILS).toLocaleString('he-IL')}` 
-                        : `$${budget[0].toLocaleString('en-US')}`}
+                      {formatCurrency(budget[0], i18n.language as 'en' | 'he')}
                     </span>
                     <span>{i18n.language === 'he' ? '₪18,500' : '$5,000'}</span>
                   </div>
@@ -755,9 +750,7 @@ export default function TripBuilder() {
                             <span className="font-semibold text-green-800 text-sm">Budget</span>
                           </div>
                           <p className={`text-green-700 text-sm font-bold ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                            {i18n.language === 'he' 
-                              ? `₪${Math.round(suggestion.estimatedBudget.low * USD_TO_ILS).toLocaleString('he-IL')} - ₪${Math.round(suggestion.estimatedBudget.high * USD_TO_ILS).toLocaleString('he-IL')}`
-                              : `$${suggestion.estimatedBudget.low.toLocaleString('en-US')} - $${suggestion.estimatedBudget.high.toLocaleString('en-US')}`}
+                            {formatCurrencyRange(suggestion.estimatedBudget.low, suggestion.estimatedBudget.high, i18n.language as 'en' | 'he')}
                           </p>
                         </div>
                       </div>
@@ -923,9 +916,7 @@ export default function TripBuilder() {
                               <span className="font-semibold text-green-800 text-sm">{t("trips.budget")}</span>
                             </div>
                             <p className={`text-green-700 text-sm font-bold ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                              {i18n.language === 'he' 
-                                ? `₪${Math.round(suggestion.estimatedBudget.low * USD_TO_ILS).toLocaleString('he-IL')} - ₪${Math.round(suggestion.estimatedBudget.high * USD_TO_ILS).toLocaleString('he-IL')}`
-                                : `$${suggestion.estimatedBudget.low.toLocaleString('en-US')} - $${suggestion.estimatedBudget.high.toLocaleString('en-US')}`}
+                              {formatCurrencyRange(suggestion.estimatedBudget.low, suggestion.estimatedBudget.high, i18n.language as 'en' | 'he')}
                             </p>
                           </div>
                         </div>

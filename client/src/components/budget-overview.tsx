@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { EXPENSE_CATEGORIES } from "@/lib/expense-categories";
 import { useIntlFormatters } from "@/lib/intlFormatters";
 import { useTranslation } from "react-i18next";
+import { formatCurrency as formatCurrencyUtil } from '@/utils/currency';
 import { 
   DollarSign, 
   TrendingUp, 
@@ -30,8 +31,6 @@ interface BudgetOverviewProps {
   onDeleteExpense?: (id: number) => void;
 }
 
-const USD_TO_ILS = 3.7;
-
 export default function BudgetOverview({ 
   totalBudget = 0, 
   totalSpent = 0, 
@@ -45,10 +44,7 @@ export default function BudgetOverview({
   
   // Format currency based on language
   const formatAmount = (amount: number) => {
-    if (i18n.language === 'he') {
-      return `₪${Math.round(amount * USD_TO_ILS).toLocaleString('he-IL')}`;
-    }
-    return `$${amount.toFixed(2)}`;
+    return formatCurrencyUtil(amount, i18n.language as 'en' | 'he', { decimals: 2 });
   };
 
   // Calculate category totals

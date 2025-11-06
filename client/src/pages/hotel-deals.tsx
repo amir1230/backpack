@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { 
   Calendar, 
   Users, 
@@ -27,6 +28,8 @@ import {
 
 export default function HotelDeals() {
   const { toast } = useToast();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
   const [formData, setFormData] = useState({
     destination: "",
     checkIn: "",
@@ -53,8 +56,8 @@ export default function HotelDeals() {
     },
     onSuccess: () => {
       toast({
-        title: "תודה רבה! ✅",
-        description: "קיבלנו את הבקשה שלך. נחזור אליך בהקדם עם הצעות מחיר מעולות!",
+        title: t('hotel_deals.success_title'),
+        description: t('hotel_deals.success_description'),
       });
       setFormData({
         destination: "",
@@ -72,8 +75,8 @@ export default function HotelDeals() {
     onError: (error: any) => {
       console.error("Submission error:", error);
       toast({
-        title: "אופס...",
-        description: error?.message || "משהו השתבש. אנא נסה שוב או צור קשר ישירות.",
+        title: t('hotel_deals.error_title'),
+        description: error?.message || t('hotel_deals.error_description'),
         variant: "destructive"
       });
     }
@@ -85,8 +88,8 @@ export default function HotelDeals() {
     // Validate required fields
     if (!formData.destination || !formData.checkIn || !formData.checkOut || !formData.phone || !formData.email || !formData.budget) {
       toast({
-        title: "שדות חסרים ⚠️",
-        description: "אנא מלא את כל השדות הנדרשים (יעד, תאריכים, תקציב, טלפון, אימייל)",
+        title: t('hotel_deals.validation_missing_title'),
+        description: t('hotel_deals.validation_missing_description'),
         variant: "destructive"
       });
       return;
@@ -100,8 +103,8 @@ export default function HotelDeals() {
     
     if (checkInDate < today) {
       toast({
-        title: "תאריך שגוי ⚠️",
-        description: "תאריך כניסה חייב להיות בעתיד",
+        title: t('hotel_deals.validation_date_title'),
+        description: t('hotel_deals.validation_checkin_future'),
         variant: "destructive"
       });
       return;
@@ -109,8 +112,8 @@ export default function HotelDeals() {
     
     if (checkOutDate <= checkInDate) {
       toast({
-        title: "תאריך שגוי ⚠️",
-        description: "תאריך יציאה חייב להיות אחרי תאריך הכניסה",
+        title: t('hotel_deals.validation_date_title'),
+        description: t('hotel_deals.validation_checkout_after'),
         variant: "destructive"
       });
       return;
@@ -124,7 +127,7 @@ export default function HotelDeals() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50" dir="rtl">
+    <div className="min-h-screen bg-gray-50" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Hero Section */}
       <div 
         className="relative h-[70vh] bg-cover bg-center"
@@ -135,11 +138,11 @@ export default function HotelDeals() {
       >
         <div className="absolute inset-0 flex items-center justify-center text-center px-4">
           <div className="max-w-4xl">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6" dir="rtl">
-              חופשה חכמה מתחילה כאן ✈️
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+              {t('hotel_deals.hero_title')} ✈️
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed" dir="rtl">
-              גלו מחירים סיטונאיים למלונות בארץ ובעולם – תוך שעה נחזור עם 2–3 הצעות שמתאימות לתקציב שלכם.
+            <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
+              {t('hotel_deals.hero_description')}
             </p>
             <Button 
               onClick={scrollToForm}
@@ -147,8 +150,8 @@ export default function HotelDeals() {
               className="bg-orange-500 hover:bg-orange-600 text-white text-xl px-8 py-6 h-auto"
               data-testid="button-scroll-to-form"
             >
-              <Search className="ml-2 h-6 w-6" />
-              בדיקת זמינות מהירה
+              <Search className={`${isRTL ? 'ml-2' : 'mr-2'} h-6 w-6`} />
+              {t('hotel_deals.quick_check_button')}
             </Button>
           </div>
         </div>
@@ -162,32 +165,32 @@ export default function HotelDeals() {
               <div className="bg-orange-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <TrendingDown className="h-10 w-10 text-orange-600" />
               </div>
-              <h3 className="font-bold text-lg mb-2" dir="rtl">מחירים סיטונאיים</h3>
-              <p className="text-gray-600 text-sm" dir="rtl">מחירים שלא תמצאו באונליין</p>
+              <h3 className="font-bold text-lg mb-2">{t('hotel_deals.trust_wholesale_title')}</h3>
+              <p className="text-gray-600 text-sm">{t('hotel_deals.trust_wholesale_desc')}</p>
             </div>
 
             <div className="text-center" data-testid="trust-boutique">
               <div className="bg-teal-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Building2 className="h-10 w-10 text-teal-600" />
               </div>
-              <h3 className="font-bold text-lg mb-2" dir="rtl">בוטיק ישראלי</h3>
-              <p className="text-gray-600 text-sm" dir="rtl">שירות אישי ומקצועי</p>
+              <h3 className="font-bold text-lg mb-2">{t('hotel_deals.trust_boutique_title')}</h3>
+              <p className="text-gray-600 text-sm">{t('hotel_deals.trust_boutique_desc')}</p>
             </div>
 
             <div className="text-center" data-testid="trust-secure">
               <div className="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="h-10 w-10 text-blue-600" />
               </div>
-              <h3 className="font-bold text-lg mb-2" dir="rtl">תשלום מאובטח</h3>
-              <p className="text-gray-600 text-sm" dir="rtl">רק דרך קישור מוצפן</p>
+              <h3 className="font-bold text-lg mb-2">{t('hotel_deals.trust_secure_title')}</h3>
+              <p className="text-gray-600 text-sm">{t('hotel_deals.trust_secure_desc')}</p>
             </div>
 
             <div className="text-center" data-testid="trust-cancellation">
               <div className="bg-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FileCheck className="h-10 w-10 text-purple-600" />
               </div>
-              <h3 className="font-bold text-lg mb-2" dir="rtl">ביטול גמיש</h3>
-              <p className="text-gray-600 text-sm" dir="rtl">לפי תנאי הספק</p>
+              <h3 className="font-bold text-lg mb-2">{t('hotel_deals.trust_cancellation_title')}</h3>
+              <p className="text-gray-600 text-sm">{t('hotel_deals.trust_cancellation_desc')}</p>
             </div>
           </div>
         </div>
@@ -196,40 +199,40 @@ export default function HotelDeals() {
       {/* How It Works Section */}
       <div className="bg-gradient-to-b from-orange-50 to-white py-16">
         <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12 text-orange-600" dir="rtl">
-            איך זה עובד?
+          <h2 className="text-4xl font-bold text-center mb-12 text-orange-600">
+            {t('hotel_deals.how_it_works_title')}
           </h2>
           
           <div className="space-y-8">
             {[
               { 
                 icon: <Send className="h-8 w-8" />, 
-                title: "משאירים פרטים", 
-                desc: "מלאו את הטופס למטה עם היעד והתאריכים שלכם",
+                title: t('hotel_deals.step1_title'), 
+                desc: t('hotel_deals.step1_desc'),
                 testId: "step-submit"
               },
               { 
                 icon: <Search className="h-8 w-8" />, 
-                title: "אנחנו בודקים זמינות", 
-                desc: "הצוות שלנו מחפש את המלונות הטובים ביותר במחירים הסיטונאיים",
+                title: t('hotel_deals.step2_title'), 
+                desc: t('hotel_deals.step2_desc'),
                 testId: "step-search"
               },
               { 
                 icon: <Star className="h-8 w-8" />, 
-                title: "מקבלים 2-3 הצעות", 
-                desc: "תוך שעה אתם מקבלים הצעות מפורטות למייל או לוואטסאפ",
+                title: t('hotel_deals.step3_title'), 
+                desc: t('hotel_deals.step3_desc'),
                 testId: "step-receive"
               },
               { 
                 icon: <CreditCard className="h-8 w-8" />, 
-                title: "משלמים בקישור מאובטח", 
-                desc: "אם ההצעה מתאימה - תשלום דרך קישור מוצפן ובטוח",
+                title: t('hotel_deals.step4_title'), 
+                desc: t('hotel_deals.step4_desc'),
                 testId: "step-payment"
               },
               { 
                 icon: <CheckCircle className="h-8 w-8" />, 
-                title: "מקבלים שוברים ונהנים", 
-                desc: "מקבלים אישור הזמנה ושוברים למלון - וסגורים לחופשה!",
+                title: t('hotel_deals.step5_title'), 
+                desc: t('hotel_deals.step5_desc'),
                 testId: "step-confirmed"
               }
             ].map((step, idx) => (
@@ -245,8 +248,8 @@ export default function HotelDeals() {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold mb-2" dir="rtl">{step.title}</h3>
-                  <p className="text-gray-600" dir="rtl">{step.desc}</p>
+                  <h3 className="text-xl font-bold mb-2">{step.title}</h3>
+                  <p className="text-gray-600">{step.desc}</p>
                 </div>
               </div>
             ))}
@@ -259,27 +262,26 @@ export default function HotelDeals() {
         <div className="max-w-3xl mx-auto px-4">
           <Card className="border-2 border-orange-200">
             <CardContent className="p-8">
-              <h2 className="text-3xl font-bold mb-2 text-orange-600 text-center" dir="rtl">
-                קבלו הצעת מחיר חכמה
+              <h2 className="text-3xl font-bold mb-2 text-orange-600 text-center">
+                {t('hotel_deals.form_title')}
               </h2>
-              <p className="text-gray-600 text-center mb-8" dir="rtl">
-                מלאו את הפרטים ונחזור אליכם תוך שעה עם הצעות מותאמות אישית
+              <p className="text-gray-600 text-center mb-8">
+                {t('hotel_deals.form_subtitle')}
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Destination */}
                 <div>
-                  <Label htmlFor="destination" className="text-left block mb-2" dir="rtl">
-                    לאן אתם רוצים לטוס? *
+                  <Label htmlFor="destination" className={`block mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('hotel_deals.form_destination_label')}
                   </Label>
                   <Input
                     id="destination"
-                    placeholder="לדוגמה: אילת, דובאי, פריז, ניו יורק..."
+                    placeholder={t('hotel_deals.form_destination_placeholder')}
                     value={formData.destination}
                     onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
                     required
-                    className="text-left"
-                    dir="rtl"
+                    className={isRTL ? 'text-right' : 'text-left'}
                     data-testid="input-destination"
                   />
                 </div>
@@ -287,8 +289,8 @@ export default function HotelDeals() {
                 {/* Check-in and Check-out */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="checkIn" className="text-left block mb-2" dir="rtl">
-                      תאריך כניסה *
+                    <Label htmlFor="checkIn" className={`block mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('hotel_deals.form_checkin_label')}
                     </Label>
                     <Input
                       id="checkIn"
@@ -296,14 +298,13 @@ export default function HotelDeals() {
                       value={formData.checkIn}
                       onChange={(e) => setFormData({ ...formData, checkIn: e.target.value })}
                       required
-                      className="text-left"
-                      dir="rtl"
+                      className={isRTL ? 'text-right' : 'text-left'}
                       data-testid="input-check-in"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="checkOut" className="text-left block mb-2" dir="rtl">
-                      תאריך יציאה *
+                    <Label htmlFor="checkOut" className={`block mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('hotel_deals.form_checkout_label')}
                     </Label>
                     <Input
                       id="checkOut"
@@ -311,8 +312,7 @@ export default function HotelDeals() {
                       value={formData.checkOut}
                       onChange={(e) => setFormData({ ...formData, checkOut: e.target.value })}
                       required
-                      className="text-left"
-                      dir="rtl"
+                      className={isRTL ? 'text-right' : 'text-left'}
                       data-testid="input-check-out"
                     />
                   </div>
@@ -321,8 +321,8 @@ export default function HotelDeals() {
                 {/* Adults and Children */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="adults" className="text-left block mb-2" dir="rtl">
-                      מספר מבוגרים
+                    <Label htmlFor="adults" className={`block mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('hotel_deals.form_adults_label')}
                     </Label>
                     <Input
                       id="adults"
@@ -331,14 +331,13 @@ export default function HotelDeals() {
                       max="10"
                       value={formData.adults}
                       onChange={(e) => setFormData({ ...formData, adults: e.target.value })}
-                      className="text-left"
-                      dir="rtl"
+                      className={isRTL ? 'text-right' : 'text-left'}
                       data-testid="input-adults"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="children" className="text-left block mb-2" dir="rtl">
-                      מספר ילדים
+                    <Label htmlFor="children" className={`block mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('hotel_deals.form_children_label')}
                     </Label>
                     <Input
                       id="children"
@@ -347,8 +346,7 @@ export default function HotelDeals() {
                       max="10"
                       value={formData.children}
                       onChange={(e) => setFormData({ ...formData, children: e.target.value })}
-                      className="text-left"
-                      dir="rtl"
+                      className={isRTL ? 'text-right' : 'text-left'}
                       data-testid="input-children"
                     />
                   </div>
@@ -356,17 +354,16 @@ export default function HotelDeals() {
 
                 {/* Budget */}
                 <div>
-                  <Label htmlFor="budget" className="text-left block mb-2" dir="rtl">
-                    תקציב משוער ללילה (₪) *
+                  <Label htmlFor="budget" className={`block mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('hotel_deals.form_budget_label')}
                   </Label>
                   <Input
                     id="budget"
-                    placeholder="לדוגמה: 500-800 ₪"
+                    placeholder={t('hotel_deals.form_budget_placeholder')}
                     value={formData.budget}
                     onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
                     required
-                    className="text-left"
-                    dir="rtl"
+                    className={isRTL ? 'text-right' : 'text-left'}
                     data-testid="input-budget"
                   />
                 </div>
@@ -374,29 +371,28 @@ export default function HotelDeals() {
                 {/* Contact Details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="phone" className="text-left block mb-2" dir="rtl">
-                      טלפון *
+                    <Label htmlFor="phone" className={`block mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('hotel_deals.form_phone_label')}
                     </Label>
                     <Input
                       id="phone"
                       type="tel"
-                      placeholder="050-1234567"
+                      placeholder={t('hotel_deals.form_phone_placeholder')}
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       required
-                      className="text-left"
-                      dir="rtl"
+                      className={isRTL ? 'text-right' : 'text-left'}
                       data-testid="input-phone"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="email" className="text-left block mb-2" dir="rtl">
-                      אימייל *
+                    <Label htmlFor="email" className={`block mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('hotel_deals.form_email_label')}
                     </Label>
                     <Input
                       id="email"
                       type="email"
-                      placeholder="example@email.com"
+                      placeholder={t('hotel_deals.form_email_placeholder')}
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       required
@@ -409,23 +405,22 @@ export default function HotelDeals() {
 
                 {/* Notes */}
                 <div>
-                  <Label htmlFor="notes" className="text-left block mb-2" dir="rtl">
-                    מה חשוב לכם? (אופציונלי)
+                  <Label htmlFor="notes" className={`block mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('hotel_deals.form_notes_label')}
                   </Label>
                   <Textarea
                     id="notes"
-                    placeholder="למשל: חדר עם נוף לים, קרוב לחוף, בריכה מחוממת..."
+                    placeholder={t('hotel_deals.form_notes_placeholder')}
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     rows={4}
-                    className="text-left"
-                    dir="rtl"
+                    className={isRTL ? 'text-right' : 'text-left'}
                     data-testid="textarea-notes"
                   />
                 </div>
 
                 {/* WhatsApp Consent */}
-                <div className="flex items-start gap-3">
+                <div className={`flex items-start gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <Checkbox
                     id="whatsapp"
                     checked={formData.whatsappConsent}
@@ -436,11 +431,10 @@ export default function HotelDeals() {
                   />
                   <label 
                     htmlFor="whatsapp" 
-                    className="text-sm text-gray-700 cursor-pointer flex items-center gap-2" 
-                    dir="rtl"
+                    className="text-sm text-gray-700 cursor-pointer flex items-center gap-2"
                   >
                     <MessageCircle className="h-4 w-4 text-green-600" />
-                    אפשר לפנות אליי גם בוואטסאפ
+                    {t('hotel_deals.form_whatsapp_consent')}
                   </label>
                 </div>
 
@@ -453,25 +447,25 @@ export default function HotelDeals() {
                 >
                   {submitInquiry.isPending ? (
                     <>
-                      <Clock className="ml-2 h-5 w-5 animate-spin" />
-                      שולח...
+                      <Clock className={`${isRTL ? 'ml-2' : 'mr-2'} h-5 w-5 animate-spin`} />
+                      {t('hotel_deals.form_submitting')}
                     </>
                   ) : (
                     <>
-                      <Send className="ml-2 h-5 w-5" />
-                      שלחו לי הצעות מחיר
+                      <Send className={`${isRTL ? 'ml-2' : 'mr-2'} h-5 w-5`} />
+                      {t('hotel_deals.form_submit_button')}
                     </>
                   )}
                 </Button>
 
-                <p className="text-xs text-gray-500 text-center" dir="rtl">
-                  בשליחת הטופס אני מאשר/ת את{" "}
+                <p className="text-xs text-gray-500 text-center">
+                  {t('hotel_deals.form_privacy_text')}{" "}
                   <a href="/privacy" className="text-orange-600 underline">
-                    מדיניות הפרטיות
+                    {t('hotel_deals.form_privacy_link')}
                   </a>
-                  {" "}ואת{" "}
+                  {" "}{t('hotel_deals.form_and')}{" "}
                   <a href="/terms" className="text-orange-600 underline">
-                    תנאי השימוש
+                    {t('hotel_deals.form_terms_link')}
                   </a>
                 </p>
               </form>
@@ -483,50 +477,50 @@ export default function HotelDeals() {
       {/* Testimonials Section */}
       <div className="bg-gradient-to-b from-teal-50 to-white py-16">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12 text-teal-600" dir="rtl">
-            מה הלקוחות שלנו אומרים
+          <h2 className="text-4xl font-bold text-center mb-12 text-teal-600">
+            {t('hotel_deals.testimonials_title')}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card data-testid="testimonial-1">
               <CardContent className="p-6">
-                <div className="flex gap-1 mb-4">
+                <div className={`flex gap-1 mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
-                <p className="text-gray-700 mb-4" dir="rtl">
-                  "חזרו אליי תוך 40 דקות עם 3 הצעות מעולות. בחרתי מלון 5 כוכבים בדובאי במחיר של 4 כוכבים!"
+                <p className="text-gray-700 mb-4">
+                  "{t('hotel_deals.testimonial1_text')}"
                 </p>
-                <p className="font-bold text-sm" dir="rtl">דנה כהן, תל אביב</p>
+                <p className="font-bold text-sm">{t('hotel_deals.testimonial1_name')}</p>
               </CardContent>
             </Card>
 
             <Card data-testid="testimonial-2">
               <CardContent className="p-6">
-                <div className="flex gap-1 mb-4">
+                <div className={`flex gap-1 mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
-                <p className="text-gray-700 mb-4" dir="rtl">
-                  "שירות אישי ומקצועי. חסכתי מאות שקלים על חופשה משפחתית באילת. ממליצה בחום!"
+                <p className="text-gray-700 mb-4">
+                  "{t('hotel_deals.testimonial2_text')}"
                 </p>
-                <p className="font-bold text-sm" dir="rtl">רונית לוי, חיפה</p>
+                <p className="font-bold text-sm">{t('hotel_deals.testimonial2_name')}</p>
               </CardContent>
             </Card>
 
             <Card data-testid="testimonial-3">
               <CardContent className="p-6">
-                <div className="flex gap-1 mb-4">
+                <div className={`flex gap-1 mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
-                <p className="text-gray-700 mb-4" dir="rtl">
-                  "לא מאמינה שקיבלתי מלון כזה במחיר כזה. תודה GlobeMate על החוויה המעולה!"
+                <p className="text-gray-700 mb-4">
+                  "{t('hotel_deals.testimonial3_text')}"
                 </p>
-                <p className="font-bold text-sm" dir="rtl">מיכל אברהם, ירושלים</p>
+                <p className="font-bold text-sm">{t('hotel_deals.testimonial3_name')}</p>
               </CardContent>
             </Card>
           </div>

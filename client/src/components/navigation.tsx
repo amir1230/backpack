@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "../context/AuthContext.js";
 import { useTranslation } from "react-i18next";
@@ -67,7 +67,17 @@ export default function Navigation() {
   const { isVisible } = useScrollDirection();
   
   const navigationItems = getNavigationItems(t);
-  const isHebrew = i18n.language === 'he';
+  const isHebrew = i18n.language.startsWith('he');
+  
+  // Force re-render when language changes
+  const [, forceUpdate] = useState({});
+  
+  useEffect(() => {
+    // Force component to re-render when language changes
+    forceUpdate({});
+    console.log('🔄 Navigation re-rendered - Language:', i18n.language, '| isHebrew:', isHebrew);
+    console.log('📍 Sidebar should be on:', isHebrew ? 'RIGHT' : 'LEFT');
+  }, [i18n.language, isHebrew]);
 
   const handleLogout = async () => {
     try {
@@ -271,8 +281,16 @@ export default function Navigation() {
   // Desktop Right Sidebar
   return (
     <>
-      {/* Desktop Right Sidebar */}
-      <aside className="fixed top-0 right-0 h-full w-64 bg-white shadow-2xl border-l border-gray-200 z-[60] hidden md:flex flex-col">
+      {/* Desktop Sidebar - Position changes based on language direction */}
+      <aside 
+        className={`fixed top-0 h-full w-64 bg-white shadow-2xl border-gray-200 z-[60] hidden md:flex flex-col ${
+          isHebrew ? 'right-0 border-l' : 'left-0 border-r'
+        }`}
+        style={{
+          [isHebrew ? 'right' : 'left']: 0,
+          [isHebrew ? 'left' : 'right']: 'auto'
+        }}
+      >
         {/* Sidebar Header with Logo and Language Toggle */}
         <div className="p-6 border-b border-gray-200">
           <Link href="/" className="flex items-center justify-center mb-6">

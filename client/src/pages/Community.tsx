@@ -39,7 +39,8 @@ const StarRating = ({ rating }: { rating: number }) => {
 };
 
 export default function Community() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('all');
   
@@ -84,7 +85,7 @@ export default function Community() {
   const displayReviews = placeReviews;
 
   return (
-    <div className="container mx-auto py-4 sm:py-6 px-4 sm:px-6 max-w-7xl">
+    <div className="container mx-auto py-4 sm:py-6 px-4 sm:px-6 max-w-7xl" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
           {t('community.title')}

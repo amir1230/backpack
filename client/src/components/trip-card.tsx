@@ -24,6 +24,7 @@ import {
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "wouter";
+import { formatCurrency } from "@/utils/currency";
 
 interface TripCardProps {
   trip: {
@@ -75,9 +76,7 @@ export default function TripCard({ trip, showUser = false, onEdit, onView, onDel
   };
 
   const formatPrice = (amount: number) => {
-    const currency = isRTL ? '₪' : '$';
-    const price = isRTL ? Math.round(amount * 3.5) : amount;
-    return `${currency}${price.toLocaleString('he-IL')}`;
+    return formatCurrency(amount, i18n.language as 'en' | 'he');
   };
 
   const getDuration = () => {

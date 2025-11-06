@@ -5,7 +5,9 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./components/ui/toaster.js";
 import { TooltipProvider } from "./components/ui/tooltip.js";
 import { AuthProvider } from "./context/AuthContext.js";
+import { useTranslation } from "react-i18next";
 import "./i18n";
+import "./i18n/rtl.css";
 import NotFound from "./pages/not-found.js";
 import Home from "./pages/home.js";
 import Callback from "./pages/auth/Callback.js";
@@ -135,13 +137,16 @@ function ScrollToTop() {
 }
 
 function Router() {
+  const { i18n } = useTranslation();
+  const isHebrew = i18n.language.startsWith('he');
+  
   return (
     <div className="min-h-screen flex flex-col">
       <EnableScrolling />
       <ScrollToTop />
       <Navigation />
-      {/* Main content area adjusted for right sidebar on desktop, bottom padding for mobile nav */}
-      <main className="flex-1 pb-20 md:pb-0 md:pr-64">
+      {/* Main content area adjusted for sidebar on desktop (left for LTR, right for RTL), bottom padding for mobile nav */}
+      <main className={`flex-1 pb-20 md:pb-0 ${isHebrew ? 'md:pr-64' : 'md:pl-64'}`}>
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/my-trips" component={MyTripsNew} />

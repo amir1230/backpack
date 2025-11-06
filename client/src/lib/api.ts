@@ -1,5 +1,6 @@
 // API client for GlobeMate application
-import { queryClient } from './queryClient';
+import { queryClient } from "./queryClient.js";
+import { supabase } from "./supabase.js";
 
 export interface TableData {
   table_name: string;
@@ -15,7 +16,24 @@ export interface DashboardResponse {
 }
 
 // Base API URL
-const API_BASE = import.meta.env.VITE_API_BASE || '';
+const API_BASE = import.meta.env.VITE_API_BASE || "";
+
+// Helper function to get auth headers
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      return {
+        Authorization: `Bearer ${session.access_token}`,
+      };
+    }
+  } catch (error) {
+    console.error("Error getting auth headers:", error);
+  }
+  return {};
+}
 
 // Generic API request function
 export async function apiRequest<T>(
@@ -23,18 +41,20 @@ export async function apiRequest<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
-  
+  const authHeaders = await getAuthHeaders();
+
   const response = await fetch(url, {
-    credentials: 'include',
+    credentials: "include",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
+      ...authHeaders,
       ...options.headers,
     },
     ...options,
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => '');
+    const text = await response.text().catch(() => "");
     throw new Error(`${response.status} ${response.statusText}: ${text}`);
   }
 
@@ -45,17 +65,17 @@ export async function apiRequest<T>(
 export const dashboardApi = {
   // Get database table statistics
   getTables: (): Promise<DashboardResponse> =>
-    apiRequest<DashboardResponse>('/api/dashboard/tables'),
+    apiRequest<DashboardResponse>("/api/dashboard/tables"),
 };
 
 // Places API
 export const placesApi = {
   // Get all places
-  getAll: () => apiRequest('/api/places'),
-  
+  getAll: () => apiRequest("/api/places"),
+
   // Get place by ID
   getById: (id: string) => apiRequest(`/api/places/${id}`),
-  
+
   // Get place reviews
   getReviews: (placeId: string) => apiRequest(`/api/places/${placeId}/reviews`),
 };
@@ -63,31 +83,31 @@ export const placesApi = {
 // Community API
 export const communityApi = {
   // Get community data
-  getData: () => apiRequest('/api/community'),
-  
+  getData: () => apiRequest("/api/community"),
+
   // Get chat rooms
-  getChatRooms: () => apiRequest('/api/chat-rooms'),
-  
+  getChatRooms: () => apiRequest("/api/chat-rooms"),
+
   // Get travel buddy posts
-  getTravelBuddyPosts: () => apiRequest('/api/travel-buddy-posts'),
+  getTravelBuddyPosts: () => apiRequest("/api/travel-buddy-posts"),
 };
 
 // Trips API
 export const tripsApi = {
   // Get user trips
-  getUserTrips: () => apiRequest('/api/trips'),
-  
+  getUserTrips: () => apiRequest("/api/trips"),
+
   // Create new trip
   create: (tripData: any) =>
-    apiRequest('/api/trips', {
-      method: 'POST',
+    apiRequest("/api/trips", {
+      method: "POST",
       body: JSON.stringify(tripData),
     }),
-    
+
   // Update trip
   update: (id: string, tripData: any) =>
     apiRequest(`/api/trips/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(tripData),
     }),
 };
@@ -95,22 +115,22 @@ export const tripsApi = {
 // Expenses API
 export const expensesApi = {
   // Get expenses
-  getAll: () => apiRequest('/api/expenses'),
-  
+  getAll: () => apiRequest("/api/expenses"),
+
   // Get expenses by trip
   getByTrip: (tripId: string) => apiRequest(`/api/expenses?tripId=${tripId}`),
-  
+
   // Create expense
   create: (expenseData: any) =>
-    apiRequest('/api/expenses', {
-      method: 'POST',
+    apiRequest("/api/expenses", {
+      method: "POST",
       body: JSON.stringify(expenseData),
     }),
 };
 
 // Destinations API
 export async function getDestinations() {
-  const r = await fetch('/api/destinations', { method: 'GET' });
+  const r = await fetch("/api/destinations", { method: "GET" });
   if (!r.ok) {
     const msg = await r.text().catch(() => r.statusText);
     throw new Error(`Failed to fetch destinations: ${r.status} ${msg}`);

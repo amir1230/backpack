@@ -57,7 +57,8 @@ const accommodationKeys = ["hostels", "hotels", "guesthouses", "airbnb", "campin
 
 export default function Onboarding() {
   const [, setLocation] = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
   const [currentStep, setCurrentStep] = useState(1);
   const [preferences, setPreferences] = useState<UserPreferences>({
     interests: [],
@@ -414,7 +415,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex flex-col items-center justify-center p-4" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="w-full max-w-2xl mb-8">
         <div className="text-center mb-4">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">

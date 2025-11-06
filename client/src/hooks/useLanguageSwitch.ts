@@ -11,9 +11,12 @@ export function useLanguageSwitch() {
 
   // Set RTL direction on document when language changes
   useEffect(() => {
-    const isRTL = i18n.language === 'he';
+    // Normalize language to handle cases like 'en-US', 'he-IL'
+    const normalizedLang = i18n.language.startsWith('he') ? 'he' : 'en';
+    const isRTL = normalizedLang === 'he';
+    
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
-    document.documentElement.lang = i18n.language;
+    document.documentElement.lang = normalizedLang;
     
     // Update document title if page has specific title
     if (document.title && !document.title.includes('GlobeMate')) {
@@ -22,10 +25,15 @@ export function useLanguageSwitch() {
   }, [i18n.language]);
 
   const switchLanguage = async (newLanguage: 'en' | 'he') => {
-    if (newLanguage === i18n.language) return;
+    // Normalize current language to compare properly
+    const currentLang = i18n.language.startsWith('he') ? 'he' : 'en';
+    if (newLanguage === currentLang) return;
 
     // Change language
     await i18n.changeLanguage(newLanguage);
+    
+    // Explicitly save to localStorage to ensure persistence
+    localStorage.setItem('i18nextLng', newLanguage);
 
     // Invalidate all queries that depend on locale/language
     queryClient.invalidateQueries({
@@ -52,10 +60,13 @@ export function useLanguageSwitch() {
     console.log(`Language switched to ${newLanguage}, queries invalidated`);
   };
 
+  // Normalize language for return values
+  const normalizedLang = i18n.language.startsWith('he') ? 'he' : 'en';
+  
   return {
-    currentLanguage: i18n.language as 'en' | 'he',
+    currentLanguage: normalizedLang as 'en' | 'he',
     switchLanguage,
-    isRTL: i18n.language === 'he'
+    isRTL: normalizedLang === 'he'
   };
 }
 
@@ -65,9 +76,20 @@ export function useLanguageSwitch() {
 export function useLocalizedFormatting() {
   const { i18n } = useTranslation();
   
+  // Normalize language for Intl API - needs locale codes like 'en-US', 'he-IL'
+  const getIntlLocale = (lang: string): string => {
+    if (lang.startsWith('he')) return 'he-IL';
+    if (lang.startsWith('en')) return 'en-US';
+    return 'en-US'; // fallback
+  };
+  
+  // Get normalized language code for currency logic
+  const normalizedLang = i18n.language.startsWith('he') ? 'he' : 'en';
+  const intlLocale = getIntlLocale(i18n.language);
+  
   const formatDate = (date: Date | string, options?: Intl.DateTimeFormatOptions) => {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return new Intl.DateTimeFormat(i18n.language, {
+    return new Intl.DateTimeFormat(intlLocale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -76,20 +98,25 @@ export function useLocalizedFormatting() {
   };
 
   const formatNumber = (number: number, options?: Intl.NumberFormatOptions) => {
-    return new Intl.NumberFormat(i18n.language, options).format(number);
+    return new Intl.NumberFormat(intlLocale, options).format(number);
   };
 
-  const formatCurrency = (amount: number, currency = 'USD') => {
-    return new Intl.NumberFormat(i18n.language, {
+  const formatCurrency = (amount: number, inputCurrency?: string) => {
+    // Use centralized currency logic: English = USD, Hebrew = ILS with conversion
+    const isHebrew = normalizedLang === 'he';
+    const currency = isHebrew ? 'ILS' : 'USD';
+    const convertedAmount = isHebrew ? amount * 3.7 : amount;
+    
+    return new Intl.NumberFormat(intlLocale, {
       style: 'currency',
-      currency,
+      currency: currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 2
-    }).format(amount);
+    }).format(convertedAmount);
   };
 
   const formatPercent = (value: number) => {
-    return new Intl.NumberFormat(i18n.language, {
+    return new Intl.NumberFormat(intlLocale, {
       style: 'percent',
       minimumFractionDigits: 0,
       maximumFractionDigits: 1
@@ -101,6 +128,6 @@ export function useLocalizedFormatting() {
     formatNumber,
     formatCurrency,
     formatPercent,
-    locale: i18n.language
+    locale: intlLocale
   };
 }
