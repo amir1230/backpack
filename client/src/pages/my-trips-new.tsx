@@ -2144,10 +2144,10 @@ export default function MyTripsNew() {
     <div className="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto pb-20 md:pb-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4 text-center">
             {t("trips.my_trip_planner")}
           </h1>
-          <p className="text-lg text-gray-600">{t("trips.planner_subtitle")}</p>
+          <p className="text-lg text-gray-600 text-center">{t("trips.planner_subtitle")}</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
