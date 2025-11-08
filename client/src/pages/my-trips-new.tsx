@@ -2151,7 +2151,7 @@ export default function MyTripsNew() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 flex justify-center items-center">
             <TabsList className="inline-flex w-auto min-w-full sm:w-full justify-evenly h-auto sm:h-10 gap-0.5 sm:gap-2 p-1">
               <TabsTrigger
                 value="preferences"
