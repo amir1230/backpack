@@ -55,16 +55,16 @@
   text-align: left;
 }
 
-/* Default text alignment for RTL */
-[dir="rtl"] p,
-[dir="rtl"] div,
-[dir="rtl"] span,
-[dir="rtl"] h1,
-[dir="rtl"] h2,
-[dir="rtl"] h3,
-[dir="rtl"] h4,
-[dir="rtl"] h5,
-[dir="rtl"] h6 {
+/* Default text alignment for RTL - but NOT for elements with explicit text-center */
+[dir="rtl"] p:not(.text-center),
+[dir="rtl"] div:not(.text-center),
+[dir="rtl"] span:not(.text-center),
+[dir="rtl"] h1:not(.text-center),
+[dir="rtl"] h2:not(.text-center),
+[dir="rtl"] h3:not(.text-center),
+[dir="rtl"] h4:not(.text-center),
+[dir="rtl"] h5:not(.text-center),
+[dir="rtl"] h6:not(.text-center) {
   text-align: right;
 }
 
@@ -74,12 +74,12 @@
   justify-content: flex-end;
 }
 
-/* Keep centered elements centered */
+/* Keep centered elements centered - with !important to override other rules */
 [dir="rtl"] .text-center,
 [dir="rtl"] .flex.justify-center,
 [dir="rtl"] .flex.items-center.justify-center {
-  text-align: center;
-  justify-content: center;
+  text-align: center !important;
+  justify-content: center !important;
 }
 
 /* Specific adjustments for card content */
@@ -95,8 +95,13 @@
   text-align: right;
 }
 
-/* FORCE ALL HEADINGS TO ALIGN RIGHT */
-[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4, [dir="rtl"] h5, [dir="rtl"] h6 {
+/* FORCE ALL HEADINGS TO ALIGN RIGHT - except explicitly centered ones */
+[dir="rtl"] h1:not(.text-center), 
+[dir="rtl"] h2:not(.text-center), 
+[dir="rtl"] h3:not(.text-center), 
+[dir="rtl"] h4:not(.text-center), 
+[dir="rtl"] h5:not(.text-center), 
+[dir="rtl"] h6:not(.text-center) {
   text-align: right !important;
   justify-content: flex-end !important;
   direction: rtl !important;
@@ -138,9 +143,11 @@
 }
 
 /* Keep centered elements centered */
-[dir="rtl"] .text-center,
-[dir="rtl"] .flex.justify-center,
-[dir="rtl"] .flex.justify-between {
+[dir="rtl"] .text-center {
+  text-align: center !important;
+}
+
+[dir="rtl"] .flex.justify-center {
   justify-content: center !important;
 }
 
