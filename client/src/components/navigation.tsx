@@ -315,7 +315,7 @@ export default function Navigation() {
                     : "text-slate-700 hover:bg-gray-100 hover:text-slate-900"
                 }`}
               >
-                <Link href={item.href} className="flex items-center gap-3">
+                <Link href={item.href} className={`flex items-center gap-3 ${isHebrew ? 'flex-row-reverse' : ''}`}>
                   {item.icon && (
                     <item.icon className="w-5 h-5 flex-shrink-0" />
                   )}
@@ -345,9 +345,9 @@ export default function Navigation() {
                 onClick={handleLogout}
                 variant="outline"
                 disabled={isLoading}
-                className="w-full justify-start px-4 py-3 text-slate-700 border-gray-300 hover:bg-red-50 hover:text-red-700 hover:border-red-300"
+                className={`w-full justify-start px-4 py-3 text-slate-700 border-gray-300 hover:bg-red-50 hover:text-red-700 hover:border-red-300 ${isHebrew ? 'flex-row-reverse' : ''}`}
               >
-                <LogOut className="w-5 h-5 mr-3" />
+                <LogOut className={`w-5 h-5 ${isHebrew ? 'ml-3' : 'mr-3'}`} />
                 {isLoading ? t('common.loading') : t('auth.sign_out')}
               </Button>
             </>
@@ -355,10 +355,10 @@ export default function Navigation() {
             <div className="space-y-2">
               <Button
                 onClick={() => setAuthModalOpen(true)}
-                className="w-full"
+                className={`w-full ${isHebrew ? 'flex-row-reverse' : ''}`}
                 disabled={isLoading}
               >
-                <User className="w-5 h-5 mr-2" />
+                <User className={`w-5 h-5 ${isHebrew ? 'ml-2' : 'mr-2'}`} />
                 {t('auth.sign_in')}
               </Button>
               <Button
