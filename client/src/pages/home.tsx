@@ -288,6 +288,7 @@ function SavedJourneyCard({
 
 export default function Home() {
   const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'he';
   const { toast } = useToast();
   const user = null as any; // Demo mode - no auth
 
@@ -459,9 +460,9 @@ export default function Home() {
   const welcomeMessage = t("home.welcome_title");
 
   return (
-    <div className="bg-gray-50 pb-20 md:pb-0">
+    <div className="bg-gray-50 pb-20 md:pb-0" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Enhanced Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-orange-400 to-teal-500 text-white py-20 px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-orange-400 to-teal-500 text-white py-20 px-4 sm:px-6 lg:px-8" dir={isRTL ? 'rtl' : 'ltr'}>
         {/* Animated Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl animate-pulse"></div>
