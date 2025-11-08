@@ -2141,7 +2141,7 @@ export default function MyTripsNew() {
   });
 
   return (
-    <div className="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-8" dir={i18n.language === "he" ? "rtl" : "ltr"}>
       <div className="max-w-6xl mx-auto pb-20 md:pb-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4 text-center">
