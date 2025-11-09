@@ -4,15 +4,38 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { AlertCircle, Shield, Plus, X, Save, Heart, Phone, User, Edit, Mail } from "lucide-react";
+import {
+  AlertCircle,
+  Shield,
+  Plus,
+  X,
+  Save,
+  Heart,
+  Phone,
+  User,
+  Edit,
+  Mail,
+} from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
@@ -100,7 +123,9 @@ export default function EmergencyInfo() {
         policyNumber: emergencyInfo.policyNumber || "",
         insuranceEmergencyPhone: emergencyInfo.insuranceEmergencyPhone || "",
         passportNumber: emergencyInfo.passportNumber || "",
-        passportExpiry: emergencyInfo.passportExpiry ? new Date(emergencyInfo.passportExpiry).toISOString().split('T')[0] : "",
+        passportExpiry: emergencyInfo.passportExpiry
+          ? new Date(emergencyInfo.passportExpiry).toISOString().split("T")[0]
+          : "",
         passportCountry: emergencyInfo.passportCountry || "",
         additionalNotes: emergencyInfo.additionalNotes || "",
       });
@@ -143,14 +168,21 @@ export default function EmergencyInfo() {
   });
 
   const addContact = () => {
-    setContacts([...contacts, { name: "", relationship: "", phone: "", email: "" }]);
+    setContacts([
+      ...contacts,
+      { name: "", relationship: "", phone: "", email: "" },
+    ]);
   };
 
   const removeContact = (index: number) => {
     setContacts(contacts.filter((_, i) => i !== index));
   };
 
-  const updateContact = (index: number, field: keyof EmergencyContact, value: string) => {
+  const updateContact = (
+    index: number,
+    field: keyof EmergencyContact,
+    value: string
+  ) => {
     const newContacts = [...contacts];
     newContacts[index][field] = value;
     setContacts(newContacts);
@@ -174,12 +206,16 @@ export default function EmergencyInfo() {
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-teal-50 to-blue-50 p-6">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="mb-8 text-center">
+          <div className="mb-8 text-center w-full flex flex-col items-center justify-center">
             <div className="flex items-center justify-center gap-3 mb-3">
               <Shield className="w-10 h-10 text-orange-500" />
-              <h1 className="text-4xl font-bold text-gray-900">{t("emergency.title")}</h1>
+              <h1 className="text-4xl font-bold text-gray-900">
+                {t("emergency.title")}
+              </h1>
             </div>
-            <p className="text-gray-600 text-lg">{t("emergency.subtitle")}</p>
+            <p className="text-gray-600 text-lg text-center">
+              {t("emergency.subtitle")}
+            </p>
           </div>
 
           {/* Emergency Info Summary Card */}
@@ -189,7 +225,9 @@ export default function EmergencyInfo() {
                 <div className="flex items-center gap-3">
                   <Shield className="w-8 h-8 text-orange-600" />
                   <div>
-                    <CardTitle className="text-2xl text-gray-900">{t("emergency.title")}</CardTitle>
+                    <CardTitle className="text-2xl text-gray-900">
+                      {t("emergency.title")}
+                    </CardTitle>
                     <CardDescription className="text-gray-700 mt-1">
                       {t("emergency.saved_description")}
                     </CardDescription>
@@ -212,16 +250,23 @@ export default function EmergencyInfo() {
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <Phone className="w-5 h-5 text-red-500" />
-                    <h3 className="text-xl font-bold text-gray-800">{t("emergency.emergency_contacts")}</h3>
+                    <h3 className="text-xl font-bold text-gray-800">
+                      {t("emergency.emergency_contacts")}
+                    </h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {contacts.map((contact, index) => (
-                      <Card key={index} className="border-2 border-red-100 bg-gradient-to-br from-white to-red-50">
+                      <Card
+                        key={index}
+                        className="border-2 border-red-100 bg-gradient-to-br from-white to-red-50"
+                      >
                         <CardContent className="pt-4">
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">
                               <User className="w-4 h-4 text-gray-500" />
-                              <span className="font-semibold text-gray-900">{contact.name}</span>
+                              <span className="font-semibold text-gray-900">
+                                {contact.name}
+                              </span>
                             </div>
                             {contact.relationship && (
                               <Badge variant="outline" className="text-xs">
@@ -231,13 +276,17 @@ export default function EmergencyInfo() {
                             {contact.phone && (
                               <div className="flex items-center gap-2 text-gray-700">
                                 <Phone className="w-3 h-3" />
-                                <span className="text-sm" dir="ltr">{contact.phone}</span>
+                                <span className="text-sm" dir="ltr">
+                                  {contact.phone}
+                                </span>
                               </div>
                             )}
                             {contact.email && (
                               <div className="flex items-center gap-2 text-gray-700">
                                 <Mail className="w-3 h-3" />
-                                <span className="text-sm break-all">{contact.email}</span>
+                                <span className="text-sm break-all">
+                                  {contact.email}
+                                </span>
                               </div>
                             )}
                           </div>
@@ -254,47 +303,76 @@ export default function EmergencyInfo() {
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <Heart className="w-5 h-5 text-blue-500" />
-                  <h3 className="text-xl font-bold text-gray-800">{t("emergency.medical_information")}</h3>
+                  <h3 className="text-xl font-bold text-gray-800">
+                    {t("emergency.medical_information")}
+                  </h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {emergencyInfo.bloodType && (
                     <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200">
-                      <p className="text-sm text-gray-600 mb-1">{t("emergency.blood_type")}</p>
-                      <p className="text-lg font-bold text-blue-900">{emergencyInfo.bloodType}</p>
+                      <p className="text-sm text-gray-600 mb-1">
+                        {t("emergency.blood_type")}
+                      </p>
+                      <p className="text-lg font-bold text-blue-900">
+                        {emergencyInfo.bloodType}
+                      </p>
                     </div>
                   )}
                   {emergencyInfo.allergies && (
                     <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200">
-                      <p className="text-sm text-gray-600 mb-1">{t("emergency.allergies")}</p>
+                      <p className="text-sm text-gray-600 mb-1">
+                        {t("emergency.allergies")}
+                      </p>
                       <p className="text-gray-800">{emergencyInfo.allergies}</p>
                     </div>
                   )}
                   {emergencyInfo.medications && (
                     <div className="md:col-span-2 bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200">
-                      <p className="text-sm text-gray-600 mb-1">{t("emergency.medications")}</p>
-                      <p className="text-gray-800 whitespace-pre-wrap">{emergencyInfo.medications}</p>
+                      <p className="text-sm text-gray-600 mb-1">
+                        {t("emergency.medications")}
+                      </p>
+                      <p className="text-gray-800 whitespace-pre-wrap">
+                        {emergencyInfo.medications}
+                      </p>
                     </div>
                   )}
                   {emergencyInfo.medicalConditions && (
                     <div className="md:col-span-2 bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200">
-                      <p className="text-sm text-gray-600 mb-1">{t("emergency.medical_conditions")}</p>
-                      <p className="text-gray-800 whitespace-pre-wrap">{emergencyInfo.medicalConditions}</p>
+                      <p className="text-sm text-gray-600 mb-1">
+                        {t("emergency.medical_conditions")}
+                      </p>
+                      <p className="text-gray-800 whitespace-pre-wrap">
+                        {emergencyInfo.medicalConditions}
+                      </p>
                     </div>
                   )}
                   {(emergencyInfo.doctorName || emergencyInfo.doctorPhone) && (
                     <div className="md:col-span-2 bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200">
-                      <p className="text-sm text-gray-600 mb-3">{t("emergency.doctor_info")}</p>
+                      <p className="text-sm text-gray-600 mb-3">
+                        {t("emergency.doctor_info")}
+                      </p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {emergencyInfo.doctorName && (
                           <div className="bg-white/50 p-3 rounded-md">
-                            <p className="text-xs text-gray-500 mb-1">{t("emergency.doctor_name")}</p>
-                            <p className="text-gray-800 font-semibold text-left">{emergencyInfo.doctorName}</p>
+                            <p className="text-xs text-gray-500 mb-1">
+                              {t("emergency.doctor_name")}
+                            </p>
+                            <p className="text-gray-800 font-semibold text-left">
+                              {emergencyInfo.doctorName}
+                            </p>
                           </div>
                         )}
                         {emergencyInfo.doctorPhone && (
                           <div className="bg-white/50 p-3 rounded-md">
-                            <p className="text-xs text-gray-500 mb-1">{t("emergency.doctor_phone")}</p>
-                            <p className="text-gray-800 font-semibold font-mono text-left" dir="ltr">{emergencyInfo.doctorPhone}</p>
+                            <p className="text-xs text-gray-500 mb-1">
+                              {t("emergency.doctor_phone")}
+                            </p>
+                            <p
+                              className="text-gray-800 font-semibold font-mono text-left"
+                              dir="ltr"
+                            >
+                              {emergencyInfo.doctorPhone}
+                            </p>
                           </div>
                         )}
                       </div>
@@ -306,29 +384,48 @@ export default function EmergencyInfo() {
               <Separator />
 
               {/* Insurance Information Section */}
-              {(emergencyInfo.insuranceProvider || emergencyInfo.policyNumber || emergencyInfo.insuranceEmergencyPhone) && (
+              {(emergencyInfo.insuranceProvider ||
+                emergencyInfo.policyNumber ||
+                emergencyInfo.insuranceEmergencyPhone) && (
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <AlertCircle className="w-5 h-5 text-green-500" />
-                    <h3 className="text-xl font-bold text-gray-800">{t("emergency.insurance_information")}</h3>
+                    <h3 className="text-xl font-bold text-gray-800">
+                      {t("emergency.insurance_information")}
+                    </h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {emergencyInfo.insuranceProvider && (
                       <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
-                        <p className="text-sm text-gray-600 mb-1">{t("emergency.insurance_provider")}</p>
-                        <p className="text-lg font-bold text-green-900">{emergencyInfo.insuranceProvider}</p>
+                        <p className="text-sm text-gray-600 mb-1">
+                          {t("emergency.insurance_provider")}
+                        </p>
+                        <p className="text-lg font-bold text-green-900">
+                          {emergencyInfo.insuranceProvider}
+                        </p>
                       </div>
                     )}
                     {emergencyInfo.policyNumber && (
                       <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
-                        <p className="text-sm text-gray-600 mb-1">{t("emergency.policy_number")}</p>
-                        <p className="text-gray-800 font-mono">{emergencyInfo.policyNumber}</p>
+                        <p className="text-sm text-gray-600 mb-1">
+                          {t("emergency.policy_number")}
+                        </p>
+                        <p className="text-gray-800 font-mono">
+                          {emergencyInfo.policyNumber}
+                        </p>
                       </div>
                     )}
                     {emergencyInfo.insuranceEmergencyPhone && (
                       <div className="md:col-span-2 bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
-                        <p className="text-sm text-gray-600 mb-1">{t("emergency.emergency_phone")}</p>
-                        <p className="text-lg font-bold text-green-900 text-left" dir="ltr">{emergencyInfo.insuranceEmergencyPhone}</p>
+                        <p className="text-sm text-gray-600 mb-1">
+                          {t("emergency.emergency_phone")}
+                        </p>
+                        <p
+                          className="text-lg font-bold text-green-900 text-left"
+                          dir="ltr"
+                        >
+                          {emergencyInfo.insuranceEmergencyPhone}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -336,31 +433,49 @@ export default function EmergencyInfo() {
               )}
 
               {/* Passport Information Section */}
-              {(emergencyInfo.passportNumber || emergencyInfo.passportExpiry || emergencyInfo.passportCountry) && (
+              {(emergencyInfo.passportNumber ||
+                emergencyInfo.passportExpiry ||
+                emergencyInfo.passportCountry) && (
                 <>
                   <Separator />
                   <div>
                     <div className="flex items-center gap-2 mb-4">
                       <User className="w-5 h-5 text-purple-500" />
-                      <h3 className="text-xl font-bold text-gray-800">{t("emergency.passport_information")}</h3>
+                      <h3 className="text-xl font-bold text-gray-800">
+                        {t("emergency.passport_information")}
+                      </h3>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       {emergencyInfo.passportNumber && (
                         <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-4 rounded-lg border border-purple-200">
-                          <p className="text-sm text-gray-600 mb-1">{t("emergency.passport_number")}</p>
-                          <p className="text-lg font-bold text-purple-900 font-mono">{emergencyInfo.passportNumber}</p>
+                          <p className="text-sm text-gray-600 mb-1">
+                            {t("emergency.passport_number")}
+                          </p>
+                          <p className="text-lg font-bold text-purple-900 font-mono">
+                            {emergencyInfo.passportNumber}
+                          </p>
                         </div>
                       )}
                       {emergencyInfo.passportExpiry && (
                         <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-4 rounded-lg border border-purple-200">
-                          <p className="text-sm text-gray-600 mb-1">{t("emergency.passport_expiry")}</p>
-                          <p className="text-gray-800 font-semibold">{new Date(emergencyInfo.passportExpiry).toLocaleDateString()}</p>
+                          <p className="text-sm text-gray-600 mb-1">
+                            {t("emergency.passport_expiry")}
+                          </p>
+                          <p className="text-gray-800 font-semibold">
+                            {new Date(
+                              emergencyInfo.passportExpiry
+                            ).toLocaleDateString()}
+                          </p>
                         </div>
                       )}
                       {emergencyInfo.passportCountry && (
                         <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-4 rounded-lg border border-purple-200">
-                          <p className="text-sm text-gray-600 mb-1">{t("emergency.passport_country")}</p>
-                          <p className="text-gray-800 font-semibold">{emergencyInfo.passportCountry}</p>
+                          <p className="text-sm text-gray-600 mb-1">
+                            {t("emergency.passport_country")}
+                          </p>
+                          <p className="text-gray-800 font-semibold">
+                            {emergencyInfo.passportCountry}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -375,10 +490,14 @@ export default function EmergencyInfo() {
                   <div>
                     <div className="flex items-center gap-2 mb-4">
                       <AlertCircle className="w-5 h-5 text-gray-500" />
-                      <h3 className="text-xl font-bold text-gray-800">{t("emergency.additional_notes")}</h3>
+                      <h3 className="text-xl font-bold text-gray-800">
+                        {t("emergency.additional_notes")}
+                      </h3>
                     </div>
                     <div className="bg-gradient-to-br from-gray-50 to-slate-50 p-4 rounded-lg border border-gray-200">
-                      <p className="text-gray-800 whitespace-pre-wrap">{emergencyInfo.additionalNotes}</p>
+                      <p className="text-gray-800 whitespace-pre-wrap">
+                        {emergencyInfo.additionalNotes}
+                      </p>
                     </div>
                   </div>
                 </>
@@ -397,9 +516,13 @@ export default function EmergencyInfo() {
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center gap-3 mb-3">
             <Shield className="w-10 h-10 text-orange-500" />
-            <h1 className="text-4xl font-bold text-gray-900">{t("emergency.title")}</h1>
+            <h1 className="text-4xl font-bold text-gray-900">
+              {t("emergency.title")}
+            </h1>
           </div>
-          <p className="text-gray-600 text-lg">{t("emergency.subtitle")}</p>
+          <p className="text-gray-600 text-center text-lg">
+            {t("emergency.subtitle")}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -425,7 +548,9 @@ export default function EmergencyInfo() {
             </CardHeader>
             <CardContent className="pt-6">
               {contacts.length === 0 ? (
-                <p className="text-gray-500 text-center py-6">{t("emergency.no_info")}</p>
+                <p className="text-gray-500 text-center py-6">
+                  {t("emergency.no_info")}
+                </p>
               ) : (
                 <div className="space-y-4">
                   {contacts.map((contact, index) => (
@@ -450,11 +575,15 @@ export default function EmergencyInfo() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <Label htmlFor={`contact-name-${index}`}>{t("emergency.contact_name")}</Label>
+                            <Label htmlFor={`contact-name-${index}`}>
+                              {t("emergency.contact_name")}
+                            </Label>
                             <Input
                               id={`contact-name-${index}`}
                               value={contact.name}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateContact(index, "name", e.target.value)}
+                              onChange={(
+                                e: React.ChangeEvent<HTMLInputElement>
+                              ) => updateContact(index, "name", e.target.value)}
                               placeholder={t("emergency.enter_contact_name")}
                               data-testid={`input-contact-name-${index}`}
                             />
@@ -466,27 +595,47 @@ export default function EmergencyInfo() {
                             <Input
                               id={`contact-relationship-${index}`}
                               value={contact.relationship}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateContact(index, "relationship", e.target.value)}
+                              onChange={(
+                                e: React.ChangeEvent<HTMLInputElement>
+                              ) =>
+                                updateContact(
+                                  index,
+                                  "relationship",
+                                  e.target.value
+                                )
+                              }
                               placeholder={t("emergency.enter_relationship")}
                               data-testid={`input-contact-relationship-${index}`}
                             />
                           </div>
                           <div>
-                            <Label htmlFor={`contact-phone-${index}`}>{t("emergency.contact_phone")}</Label>
+                            <Label htmlFor={`contact-phone-${index}`}>
+                              {t("emergency.contact_phone")}
+                            </Label>
                             <Input
                               id={`contact-phone-${index}`}
                               value={contact.phone}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateContact(index, "phone", e.target.value)}
+                              onChange={(
+                                e: React.ChangeEvent<HTMLInputElement>
+                              ) =>
+                                updateContact(index, "phone", e.target.value)
+                              }
                               placeholder={t("emergency.enter_phone")}
                               data-testid={`input-contact-phone-${index}`}
                             />
                           </div>
                           <div>
-                            <Label htmlFor={`contact-email-${index}`}>{t("emergency.contact_email")}</Label>
+                            <Label htmlFor={`contact-email-${index}`}>
+                              {t("emergency.contact_email")}
+                            </Label>
                             <Input
                               id={`contact-email-${index}`}
                               value={contact.email}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateContact(index, "email", e.target.value)}
+                              onChange={(
+                                e: React.ChangeEvent<HTMLInputElement>
+                              ) =>
+                                updateContact(index, "email", e.target.value)
+                              }
                               placeholder={t("emergency.enter_email")}
                               data-testid={`input-contact-email-${index}`}
                             />
@@ -514,10 +663,17 @@ export default function EmergencyInfo() {
                   <Label htmlFor="bloodType">{t("emergency.blood_type")}</Label>
                   <Select
                     value={form.watch("bloodType")}
-                    onValueChange={(value: string) => form.setValue("bloodType", value)}
+                    onValueChange={(value: string) =>
+                      form.setValue("bloodType", value)
+                    }
                   >
-                    <SelectTrigger id="bloodType" data-testid="select-blood-type">
-                      <SelectValue placeholder={t("emergency.select_blood_type")} />
+                    <SelectTrigger
+                      id="bloodType"
+                      data-testid="select-blood-type"
+                    >
+                      <SelectValue
+                        placeholder={t("emergency.select_blood_type")}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {BLOOD_TYPES.map((type) => (
@@ -538,7 +694,9 @@ export default function EmergencyInfo() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <Label htmlFor="medications">{t("emergency.medications")}</Label>
+                  <Label htmlFor="medications">
+                    {t("emergency.medications")}
+                  </Label>
                   <Textarea
                     id="medications"
                     {...form.register("medications")}
@@ -548,7 +706,9 @@ export default function EmergencyInfo() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <Label htmlFor="medicalConditions">{t("emergency.medical_conditions")}</Label>
+                  <Label htmlFor="medicalConditions">
+                    {t("emergency.medical_conditions")}
+                  </Label>
                   <Textarea
                     id="medicalConditions"
                     {...form.register("medicalConditions")}
@@ -562,10 +722,14 @@ export default function EmergencyInfo() {
               <Separator className="my-6" />
 
               <div className="space-y-4">
-                <h3 className="font-semibold text-gray-700">{t("emergency.doctor_info")}</h3>
+                <h3 className="font-semibold text-gray-700">
+                  {t("emergency.doctor_info")}
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="doctorName">{t("emergency.doctor_name")}</Label>
+                    <Label htmlFor="doctorName">
+                      {t("emergency.doctor_name")}
+                    </Label>
                     <Input
                       id="doctorName"
                       {...form.register("doctorName")}
@@ -574,7 +738,9 @@ export default function EmergencyInfo() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="doctorPhone">{t("emergency.doctor_phone")}</Label>
+                    <Label htmlFor="doctorPhone">
+                      {t("emergency.doctor_phone")}
+                    </Label>
                     <Input
                       id="doctorPhone"
                       {...form.register("doctorPhone")}
@@ -598,7 +764,9 @@ export default function EmergencyInfo() {
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label htmlFor="insuranceProvider">{t("emergency.insurance_provider")}</Label>
+                  <Label htmlFor="insuranceProvider">
+                    {t("emergency.insurance_provider")}
+                  </Label>
                   <Input
                     id="insuranceProvider"
                     {...form.register("insuranceProvider")}
@@ -607,7 +775,9 @@ export default function EmergencyInfo() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="policyNumber">{t("emergency.policy_number")}</Label>
+                  <Label htmlFor="policyNumber">
+                    {t("emergency.policy_number")}
+                  </Label>
                   <Input
                     id="policyNumber"
                     {...form.register("policyNumber")}
@@ -616,7 +786,9 @@ export default function EmergencyInfo() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <Label htmlFor="insuranceEmergencyPhone">{t("emergency.emergency_phone")}</Label>
+                  <Label htmlFor="insuranceEmergencyPhone">
+                    {t("emergency.emergency_phone")}
+                  </Label>
                   <Input
                     id="insuranceEmergencyPhone"
                     {...form.register("insuranceEmergencyPhone")}
@@ -639,7 +811,9 @@ export default function EmergencyInfo() {
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <Label htmlFor="passportNumber">{t("emergency.passport_number")}</Label>
+                  <Label htmlFor="passportNumber">
+                    {t("emergency.passport_number")}
+                  </Label>
                   <Input
                     id="passportNumber"
                     {...form.register("passportNumber")}
@@ -648,7 +822,9 @@ export default function EmergencyInfo() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="passportExpiry">{t("emergency.passport_expiry")}</Label>
+                  <Label htmlFor="passportExpiry">
+                    {t("emergency.passport_expiry")}
+                  </Label>
                   <Input
                     id="passportExpiry"
                     type="date"
@@ -658,7 +834,9 @@ export default function EmergencyInfo() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="passportCountry">{t("emergency.passport_country")}</Label>
+                  <Label htmlFor="passportCountry">
+                    {t("emergency.passport_country")}
+                  </Label>
                   <Input
                     id="passportCountry"
                     {...form.register("passportCountry")}

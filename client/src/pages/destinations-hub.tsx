@@ -1,14 +1,39 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "wouter";
-import { Search, MapPin, Calendar, Thermometer, Filter, X, Loader2 } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  Calendar,
+  Thermometer,
+  Filter,
+  X,
+  Loader2,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CONTINENTS, CONTINENT_COUNTRY_MAP, type Continent } from "@/lib/constants";
+import {
+  CONTINENTS,
+  CONTINENT_COUNTRY_MAP,
+  type Continent,
+} from "@/lib/constants";
 import { useQuery } from "@tanstack/react-query";
 
 interface Destination {
@@ -40,11 +65,15 @@ export default function DestinationsHub() {
   const [sortBy, setSortBy] = useState<string>("trending");
 
   // Fetch destinations from database (with fallback to Google Places for live data)
-  const { data: destinations = [], isLoading, error} = useQuery<Destination[]>({
-    queryKey: ['/api/destinations', i18n.language],
+  const {
+    data: destinations = [],
+    isLoading,
+    error,
+  } = useQuery<Destination[]>({
+    queryKey: ["/api/destinations", i18n.language],
     queryFn: async () => {
       const response = await fetch(`/api/destinations?lang=${i18n.language}`);
-      if (!response.ok) throw new Error('Failed to fetch destinations');
+      if (!response.ok) throw new Error("Failed to fetch destinations");
       return response.json();
     },
   });
@@ -82,7 +111,9 @@ export default function DestinationsHub() {
     // Sort
     switch (sortBy) {
       case "trending":
-        results = [...results].sort((a, b) => (b.trending ? 1 : 0) - (a.trending ? 1 : 0));
+        results = [...results].sort(
+          (a, b) => (b.trending ? 1 : 0) - (a.trending ? 1 : 0)
+        );
         break;
       case "rating":
         results = [...results].sort((a, b) => b.rating - a.rating);
@@ -96,7 +127,14 @@ export default function DestinationsHub() {
     }
 
     return results;
-  }, [destinations, searchQuery, selectedContinent, selectedCountry, selectedType, sortBy]);
+  }, [
+    destinations,
+    searchQuery,
+    selectedContinent,
+    selectedCountry,
+    selectedType,
+    sortBy,
+  ]);
 
   const availableCountries = useMemo(() => {
     if (selectedContinent === "all") return [];
@@ -111,7 +149,10 @@ export default function DestinationsHub() {
   };
 
   const hasActiveFilters =
-    searchQuery || selectedContinent !== "all" || selectedCountry !== "all" || selectedType !== "all";
+    searchQuery ||
+    selectedContinent !== "all" ||
+    selectedCountry !== "all" ||
+    selectedType !== "all";
 
   // Get destination image URL - intelligent fallback for DB entities, Google Places for live data
   const getDestinationImageUrl = (destination: Destination) => {
@@ -119,46 +160,60 @@ export default function DestinationsHub() {
     if (destination.photoUrl) {
       return destination.photoUrl;
     }
-    
+
     // Check if this is a database entity (UUID format) vs Google Places entity (ChIJ... format)
     // UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (36 chars with dashes at positions 8, 13, 18, 23)
-    const isDbEntity = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(destination.id);
-    
+    const isDbEntity =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        destination.id
+      );
+
     if (isDbEntity) {
       // Use intelligent fallback system for database destinations
       const params = new URLSearchParams({
-        entityType: 'destination',
+        entityType: "destination",
         entityId: destination.id,
         entityName: destination.name,
       });
       if (destination.country) {
-        params.set('country', destination.country);
+        params.set("country", destination.country);
       }
       return `/api/media/location-photo?${params}`;
     } else {
       // Use Google Places proxy for live destinations
       const params = new URLSearchParams({
-        source: 'googleplaces',
+        source: "googleplaces",
         query: destination.name,
-        maxwidth: '600',
+        maxwidth: "600",
       });
       return `/api/media/proxy?${params}`;
     }
   };
 
   return (
-    <div className={`min-h-screen bg-gray-50 ${isRTL ? "rtl" : "ltr"}`} dir={isRTL ? "rtl" : "ltr"}>
+    <div
+      className={`min-h-screen bg-gray-50 ${isRTL ? "rtl" : "ltr"}`}
+      dir={isRTL ? "rtl" : "ltr"}
+    >
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-800 mb-3">{t("destinations.hub_title")}</h1>
-          <p className="text-lg text-gray-600">{t("destinations.hub_subtitle")}</p>
+          <h1 className="text-4xl text-center font-bold text-slate-800 mb-3">
+            {t("destinations.hub_title")}
+          </h1>
+          <p className="text-lg text-center text-gray-600">
+            {t("destinations.hub_subtitle")}
+          </p>
         </div>
 
         {/* Search Bar */}
         <div className="max-w-2xl mx-auto mb-8">
           <div className="relative">
-            <Search className={`absolute ${isRTL ? "right-3" : "left-3"} top-3 h-5 w-5 text-gray-400`} />
+            <Search
+              className={`absolute ${
+                isRTL ? "right-3" : "left-3"
+              } top-3 h-5 w-5 text-gray-400`}
+            />
             <Input
               type="text"
               placeholder={t("destinations.search_placeholder")}
@@ -174,7 +229,12 @@ export default function DestinationsHub() {
           <div className="max-w-2xl mx-auto mb-8">
             <Card className="border-red-200 bg-red-50">
               <CardContent className="p-4">
-                <p className="text-red-600">{t("destinations.error_loading", "Error loading destinations. Please try again.")}</p>
+                <p className="text-red-600">
+                  {t(
+                    "destinations.error_loading",
+                    "Error loading destinations. Please try again."
+                  )}
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -191,7 +251,12 @@ export default function DestinationsHub() {
                     {t("destinations.filters.title")}
                   </span>
                   {hasActiveFilters && (
-                    <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearFilters}
+                      className="h-8"
+                    >
                       <X className="h-4 w-4" />
                     </Button>
                   )}
@@ -200,13 +265,20 @@ export default function DestinationsHub() {
               <CardContent className="space-y-4">
                 {/* Continent Filter */}
                 <div>
-                  <label className="text-sm font-medium mb-2 block">{t("destinations.filters.region")}</label>
-                  <Select value={selectedContinent} onValueChange={setSelectedContinent}>
+                  <label className="text-sm font-medium mb-2 block">
+                    {t("destinations.filters.region")}
+                  </label>
+                  <Select
+                    value={selectedContinent}
+                    onValueChange={setSelectedContinent}
+                  >
                     <SelectTrigger data-testid="select-continent-filter">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">{t("destinations.all_continents")}</SelectItem>
+                      <SelectItem value="all">
+                        {t("destinations.all_continents")}
+                      </SelectItem>
                       {CONTINENTS.map((continent) => (
                         <SelectItem key={continent} value={continent}>
                           {t(`trips.continents.${continent}`)}
@@ -218,13 +290,23 @@ export default function DestinationsHub() {
 
                 {/* Country Filter */}
                 <div>
-                  <label className="text-sm font-medium mb-2 block">{t("destinations.filters.country")}</label>
-                  <Select value={selectedCountry} onValueChange={setSelectedCountry} disabled={selectedContinent === "all"}>
+                  <label className="text-sm font-medium mb-2 block">
+                    {t("destinations.filters.country")}
+                  </label>
+                  <Select
+                    value={selectedCountry}
+                    onValueChange={setSelectedCountry}
+                    disabled={selectedContinent === "all"}
+                  >
                     <SelectTrigger data-testid="select-country-filter">
-                      <SelectValue placeholder={t("destinations.select_country")} />
+                      <SelectValue
+                        placeholder={t("destinations.select_country")}
+                      />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">{t("destinations.all_countries")}</SelectItem>
+                      <SelectItem value="all">
+                        {t("destinations.all_countries")}
+                      </SelectItem>
                       {availableCountries.map((country) => (
                         <SelectItem key={country} value={country}>
                           {t(`trips.countries.${country}`) || country}
@@ -238,18 +320,32 @@ export default function DestinationsHub() {
 
                 {/* Type Filter */}
                 <div>
-                  <label className="text-sm font-medium mb-2 block">{t("destinations.filters.type")}</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    {t("destinations.filters.type")}
+                  </label>
                   <Select value={selectedType} onValueChange={setSelectedType}>
                     <SelectTrigger data-testid="select-type-filter">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">{t("destinations.all_types")}</SelectItem>
-                      <SelectItem value="city">{t("destinations.types.city")}</SelectItem>
-                      <SelectItem value="beach">{t("destinations.types.beach")}</SelectItem>
-                      <SelectItem value="nature">{t("destinations.types.nature")}</SelectItem>
-                      <SelectItem value="culture">{t("destinations.types.culture")}</SelectItem>
-                      <SelectItem value="adventure">{t("destinations.types.adventure")}</SelectItem>
+                      <SelectItem value="all">
+                        {t("destinations.all_types")}
+                      </SelectItem>
+                      <SelectItem value="city">
+                        {t("destinations.types.city")}
+                      </SelectItem>
+                      <SelectItem value="beach">
+                        {t("destinations.types.beach")}
+                      </SelectItem>
+                      <SelectItem value="nature">
+                        {t("destinations.types.nature")}
+                      </SelectItem>
+                      <SelectItem value="culture">
+                        {t("destinations.types.culture")}
+                      </SelectItem>
+                      <SelectItem value="adventure">
+                        {t("destinations.types.adventure")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -269,21 +365,37 @@ export default function DestinationsHub() {
                   </span>
                 ) : (
                   <>
-                    {filteredDestinations.length} {filteredDestinations.length === 1 ? t("destinations.destination") : t("destinations.destinations_count")}
+                    {filteredDestinations.length}{" "}
+                    {filteredDestinations.length === 1
+                      ? t("destinations.destination")
+                      : t("destinations.destinations_count")}
                   </>
                 )}
               </p>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">{t("destinations.sort.label")}:</span>
+                <span className="text-sm text-gray-600">
+                  {t("destinations.sort.label")}:
+                </span>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-[180px]" data-testid="select-sort">
+                  <SelectTrigger
+                    className="w-[180px]"
+                    data-testid="select-sort"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="trending">{t("destinations.sort.trending")}</SelectItem>
-                    <SelectItem value="rating">{t("destinations.sort.rating")}</SelectItem>
-                    <SelectItem value="a_z">{t("destinations.sort.a_z")}</SelectItem>
-                    <SelectItem value="z_a">{t("destinations.sort.z_a")}</SelectItem>
+                    <SelectItem value="trending">
+                      {t("destinations.sort.trending")}
+                    </SelectItem>
+                    <SelectItem value="rating">
+                      {t("destinations.sort.rating")}
+                    </SelectItem>
+                    <SelectItem value="a_z">
+                      {t("destinations.sort.a_z")}
+                    </SelectItem>
+                    <SelectItem value="z_a">
+                      {t("destinations.sort.z_a")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -311,15 +423,23 @@ export default function DestinationsHub() {
             {!isLoading && filteredDestinations.length === 0 ? (
               <Card className="p-12 text-center">
                 <MapPin className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">{t("destinations.states.no_results")}</h3>
-                <p className="text-gray-500">{t("destinations.states.no_results_desc")}</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {t("destinations.states.no_results")}
+                </h3>
+                <p className="text-gray-500">
+                  {t("destinations.states.no_results_desc")}
+                </p>
               </Card>
             ) : !isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredDestinations.map((destination) => (
-                  <Card key={destination.id} className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow" data-testid={`card-destination-${destination.id}`}>
+                  <Card
+                    key={destination.id}
+                    className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow"
+                    data-testid={`card-destination-${destination.id}`}
+                  >
                     <div className="h-48 relative overflow-hidden flex-shrink-0">
-                      <img 
+                      <img
                         src={getDestinationImageUrl(destination)}
                         alt={destination.name}
                         className="absolute inset-0 w-full h-full object-cover"
@@ -333,7 +453,10 @@ export default function DestinationsHub() {
                           </Badge>
                         )}
                         <Badge className="bg-white/90 text-gray-800">
-                          {t(`trips.continents.${destination.continent}`, destination.continent)}
+                          {t(
+                            `trips.continents.${destination.continent}`,
+                            destination.continent
+                          )}
                         </Badge>
                       </div>
                       <div className="absolute top-4 left-4 text-3xl">
@@ -343,15 +466,28 @@ export default function DestinationsHub() {
                     <CardHeader className="flex-shrink-0">
                       <CardTitle className="flex items-center justify-between">
                         <span>{destination.name}</span>
-                        <span className="text-sm font-normal text-gray-500">⭐ {destination.rating.toFixed(1)}</span>
+                        <span className="text-sm font-normal text-gray-500">
+                          ⭐ {destination.rating.toFixed(1)}
+                        </span>
                       </CardTitle>
-                      <CardDescription>{t(`trips.countries.${destination.country}`, destination.country)}</CardDescription>
+                      <CardDescription>
+                        {t(
+                          `trips.countries.${destination.country}`,
+                          destination.country
+                        )}
+                      </CardDescription>
                     </CardHeader>
                     <CardContent className="flex-1 flex flex-col">
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-3">{destination.description}</p>
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                        {destination.description}
+                      </p>
                       <div className="flex flex-wrap gap-2 mb-3">
                         {destination.types.map((type) => (
-                          <Badge key={type} variant="outline" className="text-xs">
+                          <Badge
+                            key={type}
+                            variant="outline"
+                            className="text-xs"
+                          >
                             {t(`destinations.types.${type}`)}
                           </Badge>
                         ))}
@@ -359,13 +495,22 @@ export default function DestinationsHub() {
                       {destination.userRatingsTotal > 0 && (
                         <div className="flex items-center gap-2 text-sm text-gray-500 mt-auto">
                           <Thermometer className="h-4 w-4" />
-                          <span>{destination.userRatingsTotal.toLocaleString()} {t("destinations.reviews", "reviews")}</span>
+                          <span>
+                            {destination.userRatingsTotal.toLocaleString()}{" "}
+                            {t("destinations.reviews", "reviews")}
+                          </span>
                         </div>
                       )}
                     </CardContent>
                     <CardFooter className="flex gap-2 flex-shrink-0">
-                      <Link href={`/destinations/${destination.id}`} className="flex-1">
-                        <Button className="w-full" data-testid={`button-view-${destination.id}`}>
+                      <Link
+                        href={`/destinations/${destination.id}`}
+                        className="flex-1"
+                      >
+                        <Button
+                          className="w-full"
+                          data-testid={`button-view-${destination.id}`}
+                        >
                           {t("destinations.card.view_details")}
                         </Button>
                       </Link>
