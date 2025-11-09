@@ -2217,21 +2217,22 @@ export default function MyTripsNew() {
             {/* Trip Type & Travelers Header */}
             <div className="mb-6">
               <div className="text-center mb-4">
-                <h2
-                  className={`text-2xl font-bold text-orange-500 mb-2 flex items-center gap-2 ${
-                    i18n.language === "he"
-                      ? "justify-center flex-row-reverse"
-                      : "justify-center"
-                  }`}
-                >
-                  <Users className="w-6 h-6" />
-                  {t("trips.travelers_and_trip_type")}
-                </h2>
-                <p
-                  className={`text-sm text-gray-600 ${
-                    i18n.language === "he" ? "text-center" : "text-center"
-                  }`}
-                >
+                {i18n.language === "he" ? (
+                  <div
+                    className="
+                  text-2xl font-bold text-orange-500 mb-2 flex items-center gap-2 justify-center
+                  "
+                  >
+                    {t("trips.travelers_and_trip_type")}
+                    <Users className="w-6 h-6" />
+                  </div>
+                ) : (
+                  <div className="text-2xl font-bold text-orange-500 mb-2 flex items-center gap-2 justify-center">
+                    <Users className="w-6 h-6" />
+                    {t("trips.travelers_and_trip_type")}
+                  </div>
+                )}
+                <p className="text-sm text-center text-gray-600">
                   {t("trips.travelers_and_trip_type_desc")}
                 </p>
               </div>
@@ -3084,17 +3085,11 @@ export default function MyTripsNew() {
           {/* Tab 2: Suggestions */}
           <TabsContent value="suggestions" className="mt-6">
             <div className="text-center mb-4">
-              <h2
-                className={`text-2xl font-bold text-orange-500 mb-2 flex items-center gap-2 ${
-                  i18n.language === "he"
-                    ? "justify-center flex-row-reverse"
-                    : "justify-center"
-                }`}
-              >
+              <h2 className="text-2xl font-bold text-orange-500 mb-2 flex items-center gap-2 justify-center">
                 <Sparkles className="w-6 h-6" />
                 {t("trips.ai_trip_suggestions")}
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-center text-gray-600">
                 {t("trips.personalized_recommendations")}
               </p>
             </div>
@@ -3626,17 +3621,11 @@ export default function MyTripsNew() {
           {/* Tab 3: Itinerary */}
           <TabsContent value="itinerary" className="mt-6">
             <div className="text-center mb-4">
-              <h2
-                className={`text-2xl font-bold text-orange-500 mb-2 flex items-center gap-2 ${
-                  i18n.language === "he"
-                    ? "justify-center flex-row-reverse"
-                    : "justify-center"
-                }`}
-              >
+              <h2 className="text-2xl font-bold text-orange-500 mb-2 flex items-center gap-2 justify-center">
                 <Route className="w-6 h-6" />
                 {t("trips.daily_itinerary")}
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-center text-gray-600">
                 {t("trips.detailed_day_by_day_plan")}
               </p>
             </div>
@@ -4096,15 +4085,13 @@ export default function MyTripsNew() {
             <div className="text-center mb-4">
               <h2
                 className={`text-2xl font-bold text-orange-500 mb-2 flex items-center gap-2 ${
-                  i18n.language === "he"
-                    ? "justify-center flex-row-reverse"
-                    : "justify-center"
+                  i18n.language === "he" ? "justify-center" : "justify-center"
                 }`}
               >
                 <Save className="w-6 h-6" />
                 {t("trips.my_saved_itineraries")}
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-center text-gray-600">
                 {t("trips.view_manage_itineraries")}
               </p>
             </div>
@@ -4244,16 +4231,12 @@ export default function MyTripsNew() {
                               {/* Header with title and delete button */}
                               <div
                                 className={`flex items-start justify-between gap-8 ${
-                                  i18n.language === "he"
-                                    ? "flex-row-reverse"
-                                    : ""
+                                  i18n.language === "he" ? "" : ""
                                 }`}
                               >
                                 <div
                                   className={`flex-1 min-w-0 flex flex-col gap-2 ${
-                                    i18n.language === "he"
-                                      ? "items-end"
-                                      : "items-start"
+                                    i18n.language === "he" ? "" : "items-start"
                                   }`}
                                 >
                                   <Link
@@ -4307,15 +4290,13 @@ export default function MyTripsNew() {
                                   <div
                                     className={`flex flex-col gap-2 ${
                                       i18n.language === "he"
-                                        ? "items-end"
+                                        ? ""
                                         : "items-start"
                                     }`}
                                   >
                                     <div
                                       className={`flex items-center gap-2 ${
-                                        i18n.language === "he"
-                                          ? "flex-row-reverse"
-                                          : ""
+                                        i18n.language === "he" ? "" : ""
                                       }`}
                                     >
                                       <MapPin className="w-5 h-5 text-purple-600" />
@@ -4346,15 +4327,13 @@ export default function MyTripsNew() {
                                   <div
                                     className={`flex flex-col gap-2 ${
                                       i18n.language === "he"
-                                        ? "items-end"
+                                        ? ""
                                         : "items-start"
                                     }`}
                                   >
                                     <div
                                       className={`flex items-center gap-2 ${
-                                        i18n.language === "he"
-                                          ? "flex-row-reverse"
-                                          : ""
+                                        i18n.language === "he" ? "" : ""
                                       }`}
                                     >
                                       <Calendar className="w-5 h-5 text-blue-600" />
@@ -4395,15 +4374,13 @@ export default function MyTripsNew() {
                                     <div
                                       className={`flex flex-col gap-2 ${
                                         i18n.language === "he"
-                                          ? "items-end"
+                                          ? ""
                                           : "items-start"
                                       }`}
                                     >
                                       <div
                                         className={`flex items-center gap-2 ${
-                                          i18n.language === "he"
-                                            ? "flex-row-reverse"
-                                            : ""
+                                          i18n.language === "he" ? "" : ""
                                         }`}
                                       >
                                         {i18n.language === "he" ? (
@@ -4447,28 +4424,24 @@ export default function MyTripsNew() {
                                     <div
                                       className={`flex flex-col gap-2 ${
                                         i18n.language === "he"
-                                          ? "items-end"
+                                          ? ""
                                           : "items-start"
                                       }`}
                                     >
                                       <div
                                         className={`flex items-center gap-2 ${
-                                          i18n.language === "he"
-                                            ? "flex-row-reverse"
-                                            : ""
+                                          i18n.language === "he" ? "" : ""
                                         }`}
                                       >
                                         <Route className="w-4 h-4 text-gray-600" />
                                         <span
                                           className={`font-semibold text-gray-800 ${
                                             i18n.language === "he"
-                                              ? "text-right"
+                                              ? ""
                                               : "text-left"
                                           }`}
                                           dir={
-                                            i18n.language === "he"
-                                              ? "rtl"
-                                              : "ltr"
+                                            i18n.language === "he" ? "" : "ltr"
                                           }
                                         >
                                           {t("trips.activity_days_count", {
@@ -4490,9 +4463,7 @@ export default function MyTripsNew() {
                                           <div
                                             key={idx}
                                             className={`flex items-center gap-2 text-sm text-gray-700 ${
-                                              i18n.language === "he"
-                                                ? "flex-row-reverse"
-                                                : ""
+                                              i18n.language === "he" ? "" : ""
                                             }`}
                                           >
                                             <span className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></span>
@@ -4513,9 +4484,7 @@ export default function MyTripsNew() {
                                       {planData.itinerary.length > 2 && (
                                         <div
                                           className={`flex items-center gap-2 text-xs text-gray-500 ${
-                                            i18n.language === "he"
-                                              ? "flex-row-reverse"
-                                              : ""
+                                            i18n.language === "he" ? "" : ""
                                           }`}
                                         >
                                           <span className="w-2 h-2 bg-purple-400 rounded-full flex-shrink-0"></span>
