@@ -288,7 +288,7 @@ function SavedJourneyCard({
 
 export default function Home() {
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.language === 'he';
+  const isRTL = i18n.language === "he";
   const { toast } = useToast();
   const user = null as any; // Demo mode - no auth
 
@@ -460,9 +460,12 @@ export default function Home() {
   const welcomeMessage = t("home.welcome_title");
 
   return (
-    <div className="bg-gray-50 pb-20 md:pb-0" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="bg-gray-50 pb-20 md:pb-0" dir={isRTL ? "rtl" : "ltr"}>
       {/* Enhanced Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-orange-400 to-teal-500 text-white py-20 px-4 sm:px-6 lg:px-8" dir={isRTL ? 'rtl' : 'ltr'}>
+      <section
+        className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-orange-400 to-teal-500 text-white py-20 px-4 sm:px-6 lg:px-8"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
         {/* Animated Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl animate-pulse"></div>
@@ -562,10 +565,10 @@ export default function Home() {
       {/* Features Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4 text-center">
             {t("home.why_choose_us") || "Why Choose GlobeMate?"}
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto text-center">
             {t("home.features_subtitle") ||
               "Everything you need for the perfect trip, all in one place"}
           </p>
@@ -759,10 +762,10 @@ export default function Home() {
                     <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 shadow-md">
                       <Compass className="w-10 h-10 text-purple-600" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2 text-center">
                       {t("my_journeys.no_saved")}
                     </h3>
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-gray-600 mb-4 text-center">
                       {t("my_journeys.start_exploring")}
                     </p>
                     <Button
@@ -825,7 +828,7 @@ export default function Home() {
             <Card className="border-t-4 border-t-blue-500 shadow-lg hover:shadow-xl transition-all">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Zap className="w-5 h-5 mr-2 text-blue-600" />
+                  <Zap className="w-5 h-5 mx-2 text-blue-600" />
                   {t("home.quick_actions")}
                 </CardTitle>
               </CardHeader>
@@ -895,7 +898,7 @@ export default function Home() {
             <Card className="border-t-4 border-t-orange-500 shadow-lg hover:shadow-xl transition-all">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <TrendingUp className="w-5 h-5 mr-2 text-orange-600" />
+                  <TrendingUp className="w-5 h-5 mx-2 text-orange-600" />
                   {t("home.your_stats")}
                 </CardTitle>
               </CardHeader>
@@ -942,7 +945,7 @@ export default function Home() {
             <Card className="border-t-4 border-t-teal-500 shadow-lg hover:shadow-xl transition-all">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <MessageCircle className="w-5 h-5 mr-2 text-teal-600" />
+                  <MessageCircle className="w-5 h-5 mx-2 text-teal-600" />
                   {t("home.community_activity")}
                 </CardTitle>
               </CardHeader>

@@ -18,12 +18,12 @@ import { useIsMobile } from "../hooks/use-mobile.js";
 import { useScrollDirection } from "../hooks/useScrollDirection.js";
 import globeMateLogo from "../assets/globemate-logo.png";
 import { ScrollArea } from "./ui/scroll-area.js";
-import { 
-  Compass, 
-  Home, 
-  Search, 
-  Calendar, 
-  Users, 
+import {
+  Compass,
+  Home,
+  Search,
+  Calendar,
+  Users,
   DollarSign,
   Trophy,
   MessageCircle,
@@ -42,20 +42,73 @@ import {
 
 // Navigation items will be translated dynamically
 const getNavigationItems = (t: any) => [
-  { href: "/", label: t('navigation.home'), icon: Home },
-  { href: "/my-trips", label: t('navigation.my_trips'), icon: Calendar },
-  { href: "/journeys", label: t('navigation.journeys'), icon: MapPin },
-  { href: "/flights", label: t('navigation.flights'), icon: Plane },
-  { href: "/hotel-deals", label: t('navigation.hotel_deals'), icon: Hotel },
-  { href: "/emergency-info", label: t('navigation.emergency_info'), icon: Shield },
-  { href: "/ai-assistant", label: t('navigation.chat_history'), icon: MessageCircle },
-  { href: "/destinations", label: t('destinations.hub_title'), icon: Globe },
-  { href: "/weather", label: t('navigation.weather'), icon: Cloud },
-  { href: "/community", label: t('navigation.community'), icon: Users },
-  { href: "/achievements", label: t('navigation.achievements'), icon: Trophy },
-  { href: "/budget-tracker", label: t('navigation.budget_tracker'), icon: DollarSign },
-  { href: "/dashboard", label: t('navigation.dashboard'), icon: Database },
+  { href: "/", label: t("navigation.home"), icon: Home },
+  { href: "/my-trips", label: t("navigation.my_trips"), icon: Calendar },
+  { href: "/journeys", label: t("navigation.journeys"), icon: MapPin },
+  { href: "/flights", label: t("navigation.flights"), icon: Plane },
+  { href: "/hotel-deals", label: t("navigation.hotel_deals"), icon: Hotel },
+  {
+    href: "/emergency-info",
+    label: t("navigation.emergency_info"),
+    icon: Shield,
+  },
+  {
+    href: "/ai-assistant",
+    label: t("navigation.chat_history"),
+    icon: MessageCircle,
+  },
+  { href: "/destinations", label: t("destinations.hub_title"), icon: Globe },
+  { href: "/weather", label: t("navigation.weather"), icon: Cloud },
+  { href: "/community", label: t("navigation.community"), icon: Users },
+  { href: "/achievements", label: t("navigation.achievements"), icon: Trophy },
+  {
+    href: "/budget-tracker",
+    label: t("navigation.budget_tracker"),
+    icon: DollarSign,
+  },
+  { href: "/dashboard", label: t("navigation.dashboard"), icon: Database },
 ];
+
+// Helper component for navigation items with icons
+interface NavItemProps {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  isRTL: boolean;
+}
+
+const NavItemContent: React.FC<NavItemProps> = ({
+  icon: Icon,
+  label,
+  isRTL,
+}) => (
+  <>
+    <Icon className="w-5 h-5 flex-shrink-0" />
+    <span>{label}</span>
+  </>
+);
+
+// Helper component for button with icon and text
+interface IconButtonProps {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  isRTL: boolean;
+  size?: "sm" | "md";
+}
+
+const IconButtonContent: React.FC<IconButtonProps> = ({
+  icon: Icon,
+  label,
+  isRTL,
+  size = "md",
+}) => {
+  const iconSize = size === "sm" ? "w-5 h-5" : "w-6 h-6";
+  return (
+    <>
+      <Icon className={iconSize} />
+      <span>{label}</span>
+    </>
+  );
+};
 
 export default function Navigation() {
   const [location] = useLocation();
@@ -65,28 +118,33 @@ export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const { isVisible } = useScrollDirection();
-  
+
   const navigationItems = getNavigationItems(t);
-  const isHebrew = i18n.language.startsWith('he');
-  
+  const isHebrew = i18n.language.startsWith("he");
+
   // Force re-render when language changes
   const [, forceUpdate] = useState({});
-  
+
   useEffect(() => {
     // Force component to re-render when language changes
     forceUpdate({});
-    console.log('🔄 Navigation re-rendered - Language:', i18n.language, '| isHebrew:', isHebrew);
-    console.log('📍 Sidebar should be on:', isHebrew ? 'RIGHT' : 'LEFT');
+    console.log(
+      "🔄 Navigation re-rendered - Language:",
+      i18n.language,
+      "| isHebrew:",
+      isHebrew
+    );
+    console.log("📍 Sidebar should be on:", isHebrew ? "RIGHT" : "LEFT");
   }, [i18n.language, isHebrew]);
 
   const handleLogout = async () => {
     try {
       // Clear all React Query cache
       queryClient.clear();
-      
+
       // Sign out using Supabase Auth
       await signOut();
-      
+
       setMobileMenuOpen(false);
     } catch (error) {
       console.error("Logout error:", error);
@@ -94,9 +152,14 @@ export default function Navigation() {
   };
 
   const userInitials = user?.user_metadata?.full_name
-    ? user.user_metadata.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase()
+    ? user.user_metadata.full_name
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .toUpperCase()
     : user?.email?.charAt(0).toUpperCase() || "U";
-  const userName = user?.user_metadata?.full_name || user?.email || "Guest User";
+  const userName =
+    user?.user_metadata?.full_name || user?.email || "Guest User";
 
   if (isMobile) {
     return (
@@ -106,31 +169,39 @@ export default function Navigation() {
           <div className="px-4">
             <div className="flex justify-between items-center h-16">
               <Link href="/" className="flex items-center justify-center">
-                <img src={globeMateLogo} alt="GlobeMate" className="h-14 w-14 object-contain" />
+                <img
+                  src={globeMateLogo}
+                  alt="GlobeMate"
+                  className="h-14 w-14 object-contain"
+                />
               </Link>
-              
+
               <div className="flex items-center gap-2">
                 {user ? (
                   <Button
                     onClick={handleLogout}
                     variant="outline"
-                    className={`border-red-500 text-red-500 hover:bg-red-500 hover:text-white whitespace-nowrap min-h-[44px] min-w-[44px] h-auto px-3 py-2 ${isHebrew ? 'flex-row-reverse' : ''}`}
+                    className={`border-red-500 text-red-500 hover:bg-red-500 hover:text-white whitespace-nowrap min-h-[44px] min-w-[44px] h-auto px-3 py-2 flex items-center gap-1 ${
+                      isHebrew ? "flex-row-reverse" : ""
+                    }`}
                     disabled={isLoading}
                     data-testid="button-sign-out-top"
                   >
-                    <LogOut className={`w-6 h-6 ${isHebrew ? 'ml-1' : 'mr-1'}`} />
-                    <span className="text-sm">{t('auth.sign_out')}</span>
+                    <LogOut className="w-6 h-6" />
+                    <span className="text-sm">{t("auth.sign_out")}</span>
                   </Button>
                 ) : (
                   <Button
                     onClick={() => setAuthModalOpen(true)}
-                    variant="outline" 
-                    className={`border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white whitespace-nowrap min-h-[44px] min-w-[44px] h-auto px-3 py-2 ${isHebrew ? 'flex-row-reverse' : ''}`}
+                    variant="outline"
+                    className={`border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white whitespace-nowrap min-h-[44px] min-w-[44px] h-auto px-3 py-2 flex items-center gap-1 ${
+                      isHebrew ? "flex-row-reverse" : ""
+                    }`}
                     disabled={isLoading}
                     data-testid="button-sign-in-top"
                   >
-                    <User className={`w-6 h-6 ${isHebrew ? 'ml-1' : 'mr-1'}`} />
-                    <span className="text-sm">{t('auth.sign_in')}</span>
+                    <User className="w-6 h-6" />
+                    <span className="text-sm">{t("auth.sign_in")}</span>
                   </Button>
                 )}
                 <Button
@@ -139,7 +210,11 @@ export default function Navigation() {
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   data-testid="button-mobile-menu"
                 >
-                  {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                  {mobileMenuOpen ? (
+                    <X className="w-6 h-6" />
+                  ) : (
+                    <Menu className="w-6 h-6" />
+                  )}
                 </Button>
               </div>
             </div>
@@ -151,54 +226,81 @@ export default function Navigation() {
               <div className="px-4 py-4 space-y-4">
                 {/* Language Toggle in Mobile Menu */}
                 <div className="flex items-center justify-between pb-3 border-b border-gray-200">
-                  <span className="text-sm font-medium text-gray-700">{t('common.language')}</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    {t("common.language")}
+                  </span>
                   <LanguageToggle />
                 </div>
-                
+
                 {navigationItems.map((item) => (
                   <Button
                     key={item.href}
                     asChild
                     variant="ghost"
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`w-full flex items-center px-3 py-3 min-h-[48px] rounded-lg ${isHebrew ? 'text-right justify-end' : 'text-left justify-start'} ${
+                    className={`w-full flex items-center px-3 py-3 min-h-[48px] rounded-lg ${
+                      isHebrew
+                        ? "text-right justify-end"
+                        : "text-left justify-start"
+                    } ${
                       location === item.href
                         ? "bg-primary text-white"
                         : "text-slate-600 hover:bg-gray-100"
                     }`}
                   >
-                    <Link href={item.href} className={isHebrew ? 'flex flex-row-reverse items-center w-full' : 'flex items-center w-full'}>
+                    <Link
+                      href={item.href}
+                      className={`flex items-center gap-3 w-full ${
+                        isHebrew ? "flex-row-reverse" : ""
+                      }`}
+                    >
                       {item.icon ? (
                         <>
-                          <span className={isHebrew ? 'ml-3' : 'mr-3'}><item.icon className="w-6 h-6" /></span>
-                          <span className="text-base font-medium">{item.label}</span>
+                          <item.icon className="w-6 h-6" />
+                          <span className="text-base font-medium">
+                            {item.label}
+                          </span>
                         </>
-                      ) : item.label}
+                      ) : (
+                        item.label
+                      )}
                     </Link>
                   </Button>
                 ))}
-                
+
                 <div className="border-t border-gray-200 pt-4">
                   {user ? (
                     <>
-                      <div className={`flex items-center px-3 py-2 mb-4 ${isHebrew ? 'flex-row-reverse' : ''}`}>
-                        <Avatar className={`w-8 h-8 ${isHebrew ? 'ml-3' : 'mr-3'}`}>
+                      <div
+                        className={`flex items-center px-3 py-2 mb-4 ${
+                          isHebrew ? "flex-row-reverse" : ""
+                        }`}
+                      >
+                        <Avatar
+                          className={`w-8 h-8 ${isHebrew ? "ml-3" : "mr-3"}`}
+                        >
                           <AvatarImage src={user.user_metadata?.avatar_url} />
                           <AvatarFallback>{userInitials}</AvatarFallback>
                         </Avatar>
-                        <div className={isHebrew ? 'text-right' : 'text-left'}>
-                          <p className="text-sm font-medium text-slate-700">{userName}</p>
+                        <div className={isHebrew ? "text-right" : "text-left"}>
+                          <p className="text-sm font-medium text-slate-700">
+                            {userName}
+                          </p>
                           <p className="text-xs text-gray-500">{user.email}</p>
                         </div>
                       </div>
-                      
+
                       <button
                         onClick={handleLogout}
                         disabled={isLoading}
-                        className={`w-full flex items-center px-3 py-3 min-h-[48px] text-slate-600 hover:bg-gray-100 rounded-lg disabled:opacity-50 ${isHebrew ? 'flex-row-reverse justify-end' : 'justify-start'}`}
+                        className={`w-full flex items-center justify-center gap-3 px-3 py-3 min-h-[48px] text-slate-600 hover:bg-gray-100 rounded-lg disabled:opacity-50 ${
+                          isHebrew ? "flex-row-reverse" : ""
+                        }`}
                       >
-                        <LogOut className={`w-6 h-6 ${isHebrew ? 'ml-3' : 'mr-3'}`} />
-                        <span className="text-base">{isLoading ? t('common.loading') : t('auth.sign_out')}</span>
+                        <LogOut className="w-6 h-6" />
+                        <span className="text-base">
+                          {isLoading ? t("common.loading") : t("auth.sign_out")}
+                        </span>
                       </button>
                     </>
                   ) : (
@@ -208,12 +310,14 @@ export default function Navigation() {
                           setAuthModalOpen(true);
                           setMobileMenuOpen(false);
                         }}
-                        className={`w-full min-h-[48px] h-auto py-3 ${isHebrew ? 'flex-row-reverse' : ''}`}
+                        className={`w-full min-h-[48px] h-auto py-3 flex items-center justify-center gap-2 ${
+                          isHebrew ? "flex-row-reverse" : ""
+                        }`}
                         disabled={isLoading}
                         data-testid="button-sign-in"
                       >
-                        <User className={`w-6 h-6 ${isHebrew ? 'ml-2' : 'mr-2'}`} />
-                        <span className="text-base">{t('auth.sign_in')}</span>
+                        <User className="w-6 h-6" />
+                        <span className="text-base">{t("auth.sign_in")}</span>
                       </Button>
                       <Button
                         onClick={() => {
@@ -221,11 +325,15 @@ export default function Navigation() {
                           setMobileMenuOpen(false);
                         }}
                         variant="outline"
-                        className={`w-full min-h-[48px] h-auto py-3 ${isHebrew ? 'text-right' : 'text-left'}`}
+                        className={`w-full min-h-[48px] h-auto py-3 ${
+                          isHebrew ? "text-right" : "text-left"
+                        }`}
                         disabled={isLoading}
                         data-testid="button-create-account"
                       >
-                        <span className="text-base">{t('auth.create_account')}</span>
+                        <span className="text-base">
+                          {t("auth.create_account")}
+                        </span>
                       </Button>
                     </div>
                   )}
@@ -236,12 +344,12 @@ export default function Navigation() {
         </nav>
 
         {/* Mobile Bottom Navigation - Sliding */}
-        <div 
+        <div
           className={`fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 md:hidden z-[60] transition-transform duration-300 ease-in-out ${
-            isVisible ? 'translate-y-0' : 'translate-y-full'
+            isVisible ? "translate-y-0" : "translate-y-full"
           }`}
           style={{
-            paddingBottom: 'env(safe-area-inset-bottom, 8px)'
+            paddingBottom: "env(safe-area-inset-bottom, 8px)",
           }}
         >
           <div className="flex justify-around items-center py-2 px-2">
@@ -259,21 +367,24 @@ export default function Navigation() {
                 <Link href={item.href}>
                   {item.icon ? (
                     <>
-                      <span className="mb-1"><item.icon className="w-6 h-6" /></span>
-                      <span className="text-[10px] font-medium text-center leading-tight w-full break-words hyphens-auto max-w-[70px]">{item.label}</span>
+                      <span className="mb-1">
+                        <item.icon className="w-6 h-6" />
+                      </span>
+                      <span className="text-[10px] font-medium text-center leading-tight w-full break-words hyphens-auto max-w-[70px]">
+                        {item.label}
+                      </span>
                     </>
-                  ) : item.label}
+                  ) : (
+                    item.label
+                  )}
                 </Link>
               </Button>
             ))}
           </div>
         </div>
-        
+
         {/* Auth Modal for Mobile */}
-        <AuthModal 
-          open={authModalOpen} 
-          onOpenChange={setAuthModalOpen}
-        />
+        <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
       </>
     );
   }
@@ -282,103 +393,119 @@ export default function Navigation() {
   return (
     <>
       {/* Desktop Sidebar - Position changes based on language direction */}
-      <aside 
+      <aside
         className={`fixed top-0 h-full w-64 bg-white shadow-2xl border-gray-200 z-[60] hidden md:flex flex-col ${
-          isHebrew ? 'right-0 border-l' : 'left-0 border-r'
+          isHebrew ? "right-0 border-l" : "left-0 border-r"
         }`}
         style={{
-          [isHebrew ? 'right' : 'left']: 0,
-          [isHebrew ? 'left' : 'right']: 'auto'
+          [isHebrew ? "right" : "left"]: 0,
+          [isHebrew ? "left" : "right"]: "auto",
         }}
       >
         {/* Sidebar Header with Logo and Language Toggle */}
         <div className="p-6 border-b border-gray-200">
           <Link href="/" className="flex items-center justify-center mb-6">
-            <img src={globeMateLogo} alt="GlobeMate" className="h-24 w-24 object-contain" />
+            <img
+              src={globeMateLogo}
+              alt="GlobeMate"
+              className="h-24 w-24 object-contain"
+            />
           </Link>
           <div className="flex justify-center">
             <LanguageToggle />
           </div>
         </div>
-        
+
         {/* Navigation Items */}
         <ScrollArea className="flex-1">
-          <nav className="p-4 space-y-2" dir={isHebrew ? 'rtl' : 'ltr'}>
+          <nav className="p-4 space-y-2" dir={isHebrew ? "rtl" : "ltr"}>
             {navigationItems.map((item) => (
-              <Button
+              <Link
                 key={item.href}
-                asChild
-                variant="ghost"
-                className={`w-full ${isHebrew ? 'justify-end' : 'justify-start'} px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                href={item.href}
+                className={`flex items-center gap-3 w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                   location === item.href
                     ? "bg-orange-100 text-orange-800 hover:bg-orange-200"
                     : "text-slate-700 hover:bg-gray-100 hover:text-slate-900"
                 }`}
               >
-                <Link href={item.href} className={`flex items-center gap-3 ${isHebrew ? 'flex-row-reverse text-right' : 'text-left'}`}>
-                  {item.icon && (
-                    <item.icon className="w-5 h-5 flex-shrink-0" />
-                  )}
-                  <span>{item.label}</span>
-                </Link>
-              </Button>
+                <NavItemContent
+                  icon={item.icon}
+                  label={item.label}
+                  isRTL={isHebrew}
+                />
+              </Link>
             ))}
           </nav>
         </ScrollArea>
-        
+
         {/* User Profile and Auth Section at Bottom */}
-        <div className="p-4 border-t border-gray-200" dir={isHebrew ? 'rtl' : 'ltr'}>
+        <div
+          className="p-4 border-t border-gray-200"
+          dir={isHebrew ? "rtl" : "ltr"}
+        >
           {user ? (
             <>
-              <div className={`flex items-center mb-4 p-3 bg-gray-50 rounded-lg ${isHebrew ? 'flex-row-reverse' : ''}`}>
-                <Avatar className={`w-10 h-10 ${isHebrew ? 'ml-3' : 'mr-3'}`}>
+              <div
+                className={`flex items-center mb-4 p-3 bg-gray-50 rounded-lg ${
+                  isHebrew ? "flex-row-reverse" : ""
+                }`}
+              >
+                <Avatar className={`w-10 h-10 ${isHebrew ? "ml-3" : "mr-3"}`}>
                   <AvatarImage src={user.user_metadata?.avatar_url} />
-                  <AvatarFallback className="bg-orange-200 text-orange-800">{userInitials}</AvatarFallback>
+                  <AvatarFallback className="bg-orange-200 text-orange-800">
+                    {userInitials}
+                  </AvatarFallback>
                 </Avatar>
-                <div className={`flex-1 min-w-0 ${isHebrew ? 'text-right' : 'text-left'}`}>
-                  <p className="text-sm font-medium text-slate-900 truncate">{userName}</p>
+                <div
+                  className={`flex-1 min-w-0 ${
+                    isHebrew ? "text-right" : "text-left"
+                  }`}
+                >
+                  <p className="text-sm font-medium text-slate-900 truncate">
+                    {userName}
+                  </p>
                   <p className="text-xs text-gray-500 truncate">{user.email}</p>
                 </div>
               </div>
-              
+
               <Button
                 onClick={handleLogout}
                 variant="outline"
                 disabled={isLoading}
-                className={`w-full ${isHebrew ? 'justify-end' : 'justify-start'} px-4 py-3 text-slate-700 border-gray-300 hover:bg-red-50 hover:text-red-700 hover:border-red-300 ${isHebrew ? 'flex-row-reverse' : ''}`}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 text-slate-700 border-gray-300 hover:bg-red-50 hover:text-red-700 hover:border-red-300"
               >
-                <LogOut className={`w-5 h-5 ${isHebrew ? 'ml-3' : 'mr-3'}`} />
-                {isLoading ? t('common.loading') : t('auth.sign_out')}
+                <LogOut className="w-5 h-5" />
+                <span>
+                  {isLoading ? t("common.loading") : t("auth.sign_out")}
+                </span>
               </Button>
             </>
           ) : (
             <div className="space-y-2">
               <Button
                 onClick={() => setAuthModalOpen(true)}
-                className={`w-full ${isHebrew ? 'flex-row-reverse justify-end' : 'justify-start'}`}
+                className="w-full flex items-center justify-center gap-2"
                 disabled={isLoading}
               >
-                <User className={`w-5 h-5 ${isHebrew ? 'ml-2' : 'mr-2'}`} />
-                {t('auth.sign_in')}
+                <User className="w-5 h-5" />
+                <span>{t("auth.sign_in")}</span>
               </Button>
               <Button
                 onClick={() => setAuthModalOpen(true)}
                 variant="outline"
-                className={`w-full ${isHebrew ? 'text-right' : 'text-left'}`}
+                className="w-full text-center"
                 disabled={isLoading}
               >
-                {t('auth.create_account')}
+                {t("auth.create_account")}
               </Button>
             </div>
           )}
         </div>
       </aside>
-      
+
       {/* Auth Modal */}
-      <AuthModal 
-        open={authModalOpen} 
-        onOpenChange={setAuthModalOpen}
-      />
+      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </>
   );
 }

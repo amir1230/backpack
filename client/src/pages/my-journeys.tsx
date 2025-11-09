@@ -208,10 +208,10 @@ export default function MyJourneysPage() {
               <div className="w-24 h-24 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <BookmarkCheck className="w-12 h-12 text-orange-500" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3" dir={isRTL ? 'rtl' : 'ltr'}>
+              <h2 className="text-2xl font-bold text-gray-900 mb-3 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
                 {isRTL ? 'אין מסעות שמורים עדיין' : 'No Saved Journeys Yet'}
               </h2>
-              <p className="text-gray-600 mb-8 max-w-md mx-auto" dir={isRTL ? 'rtl' : 'ltr'}>
+              <p className="text-gray-600 mb-8 max-w-md mx-auto text-center" dir={isRTL ? 'rtl' : 'ltr'}>
                 {isRTL 
                   ? 'התחל לחקור מסעות מתוכננים ושמור את האהובים עליך לעיון עתידי' 
                   : 'Start exploring our curated journeys and save your favorites for future reference'}

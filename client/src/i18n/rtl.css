@@ -115,10 +115,11 @@
 }
 
 /* FORCE ALL FLEX CONTAINERS TO ALIGN RIGHT */
-[dir="rtl"] .flex.items-center:not(.justify-center):not(.justify-between) {
+/* DISABLED: Too aggressive, conflicts with explicit justify-start/justify-end classes */
+/* [dir="rtl"] .flex.items-center:not(.justify-center):not(.justify-between) {
   justify-content: flex-end !important;
   direction: rtl !important;
-}
+} */
 
 /* SUPER SPECIFIC FOR CARD TITLES */
 [dir="rtl"] h3.flex.items-center {
@@ -135,10 +136,11 @@
 }
 
 /* CATCH-ALL FOR ANY REMAINING FLEX TITLES - BUT NOT CENTERED ONES */
-[dir="rtl"] [class*="flex"][class*="items-center"]:not(.justify-center):not([class*="justify-center"]) {
+/* DISABLED: Too aggressive, conflicts with explicit justify-start/justify-end classes */
+/* [dir="rtl"] [class*="flex"][class*="items-center"]:not(.justify-center):not([class*="justify-center"]) {
   justify-content: flex-end !important;
   direction: rtl !important;
-}
+} */
 
 /* TEXT ALIGNMENT OVERRIDES */
 [dir="rtl"] .text-left {
